@@ -41,8 +41,22 @@ echo  Log:   %LOG_FILE%
 echo ===========================================================
 echo.
 
-REM --- Run build script, capture stdout+stderr to log ---
-"%PYTHON%" "%BUILD_SCRIPT%" > "%LOG_FILE%" 2>&1
+REM --- Step 1/2: Refresh company rich data (basic/business/revenue/financials/dividends/director) ---
+echo === [Step 1/2] Refresh company rich data === > "%LOG_FILE%"
+echo Start: %date% %time% >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
+"%PYTHON%" "site\fetch_company_rich.py" >> "%LOG_FILE%" 2>&1
+set "RICH_RC=%errorlevel%"
+if not "%RICH_RC%"=="0" (
+    echo [WARN] rich refresh exit %RICH_RC%, continue to build step anyway >> "%LOG_FILE%"
+)
+
+REM --- Step 2/2: Build site (price / institutional / render 2700+ pages) ---
+echo. >> "%LOG_FILE%"
+echo === [Step 2/2] Build site === >> "%LOG_FILE%"
+echo Start: %date% %time% >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
+"%PYTHON%" "%BUILD_SCRIPT%" >> "%LOG_FILE%" 2>&1
 set "BUILD_RC=%errorlevel%"
 
 type "%LOG_FILE%"
