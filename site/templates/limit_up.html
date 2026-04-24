@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% set page = "limit_up" %}
+{% block title %}今日漲停分析 · 台股產業寶{% endblock %}
+
+{% macro fmt_int(n) -%}
+  {%- if n is none -%}—{%- else -%}{{ "{:,}".format(n|int) }}{%- endif -%}
+{%- endmacro %}
+
+{% macro inst_cell(v) -%}
+  {%- if v is none or v == 0 -%}
+    <span class="muted">—</span>
+  {%- elif v > 0 -%}
+    <span class="positive">+{{ "{:,}".format(v|int) }}</span>
+  {%- else -%}
+    <span class="negative">{{ "{:,}".format(v|int) }}</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro stock_link(s) -%}
+  <a href="company/{{ s.code }}.html">{{ s.name }} <span class="muted">({{ s.code }})</span></a>
+{%- endmacro %}
+
+{% block content %}
+<section class="hero">
+  <h1>今日漲停分析 <small>{{ lu_date }}</small></h1>
+  <p>
+    當日共 <strong class="positive">{{ lu_total }}</strong> 檔漲停、橫跨 <strong>{{ lu_n_groups }}</strong> 個精細族群。
+    點族群標籤可跳產業寶題材頁、點個股名稱可進個股詳情。
+  </p>
+</section>
+
+{# ─────── 族群概覽與籌碼觀察 ─────── #}
+<section class="section-block">
+  <header class="section-head">
+    <h2 class="section-title">族群主力與籌碼觀察</h2>
+    <p class="section-sub">今日漲停的主力族群分析與三大法人籌碼動向</p>
+  </header>
+
+  <div class="grid-2col">
+    {# 左：族群分析（文字卡） #}
+    <div class="panel">
+      <div class="panel-header">
+        <h2>主力族群分析</h2>
+        <span class="muted">3 檔以上族群</span>
+      </div>
+      <div class="lu-analysis-list">
+        {% for ga in lu_group_analysis %}
+        <article class="lu-analysis-item">
+          <h3 class="lu-analysis-title">{{ ga.name }}</h3>
+          <p class="lu-analysis-text">{{ ga.text }}</p>
+        </article>
+        {% else %}
+        <p class="muted" style="padding:16px 4px;">無族群分析資料。</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# 右：籌碼觀察（三組 bar-list） #}
+    <div class="panel">
+      <div class="panel-header">
+        <h2>三大法人籌碼</h2>
+        <span class="muted">漲停個股買賣超</span>
+      </div>
+
+      {% set fb = lu_chip.get("foreignBuy", []) %}
+      {% if fb %}
+      <h3 class="lu-chip-subtitle">外資大買超</h3>
+      <div class="bar-list">
+        {% set fb_max = fb[0].amount if fb[0].amount > 0 else 1 %}
+        {% for x in fb[:8] %}
+        <div class="bar-row">
+          <span class="bar-label">{{ x.name }}</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:{{ (x.amount/fb_max*100)|round(1) }}%; background:#dc2626;"></span>
+          </span>
+          <span class="bar-value positive">+{{ "{:,}".format(x.amount) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% set tb = lu_chip.get("trustBuy", []) %}
+      {% if tb %}
+      <h3 class="lu-chip-subtitle">投信買超</h3>
+      <div class="bar-list">
+        {% set tb_max = tb[0].amount if tb[0].amount > 0 else 1 %}
+        {% for x in tb[:8] %}
+        <div class="bar-row">
+          <span class="bar-label">{{ x.name }}</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:{{ (x.amount/tb_max*100)|round(1) }}%; background:#0891b2;"></span>
+          </span>
+          <span class="bar-value positive">+{{ "{:,}".format(x.amount) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% set fs = lu_chip.get("foreignSellButLimitUp", []) %}
+      {% if fs %}
+      <h3 class="lu-chip-subtitle">外資賣超但鎖漲停 <span class="muted">（主力強拉）</span></h3>
+      <div class="bar-list">
+        {% set fs_max = -fs[0].amount if fs[0].amount < 0 else 1 %}
+        {% for x in fs[:8] %}
+        <div class="bar-row">
+          <span class="bar-label">{{ x.name }}</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:{{ (-x.amount/fs_max*100)|round(1) }}%; background:#64748b;"></span>
+          </span>
+          <span class="bar-value negative">{{ "{:,}".format(x.amount) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{# ─────── 分族群個股列表 ─────── #}
+<section class="section-block">
+  <header class="section-head">
+    <h2 class="section-title">漲停個股（按族群排序）</h2>
+    <p class="section-sub">依 AI 精細族群分類分組，展示法人籌碼與漲停驅動力摘要</p>
+  </header>
+
+  <div class="lu-groups">
+    {% for group_name, items in lu_ordered_groups %}
+    {% set meta = get_meta(group_name) %}
+    {% set is_known = group_name in lu_known_groups %}
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          {% if is_known %}
+            <a href="topic/{{ group_name|slugify }}.html" class="topic-chip"
+               style="border-color:{{ meta.color }}; color:{{ meta.color }};">{{ group_name }}</a>
+          {% else %}
+            <span class="topic-chip" style="border-color:{{ meta.color }}; color:{{ meta.color }};">{{ group_name }}</span>
+          {% endif %}
+          <span class="muted">· {{ items|length }} 檔</span>
+          {% if items[0].section %}
+          <span class="tag tag-industry">{{ items[0].section }}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in items %}
+            <tr>
+              <td>{{ stock_link(s) }}</td>
+              <td><span class="muted">{{ s.market }}</span></td>
+              <td style="text-align:right;">{{ "%.2f"|format(s.close) }}</td>
+              <td style="text-align:right;">{{ fmt_int(s.volume) }}</td>
+              <td style="text-align:right;">{{ inst_cell(s.foreign) }}</td>
+              <td style="text-align:right;">{{ inst_cell(s.trust) }}</td>
+              <td style="text-align:right;">{{ inst_cell(s.dealer) }}</td>
+              <td class="lu-reason">{{ s.reason }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<style>
+/* ─ 今日漲停分析：頁面專屬輕量裝飾（復用產業寶原生 .panel/.table/.bar-list/.topic-chip） ─ */
+.lu-analysis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 4px;
+}
+.lu-analysis-item {
+  border-left: 3px solid var(--accent, #2563eb);
+  padding: 4px 0 4px 14px;
+}
+.lu-analysis-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+.lu-analysis-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-mute, #475569);
+  margin: 0;
+}
+.lu-chip-subtitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 14px 0 4px;
+  padding: 0 4px;
+}
+.lu-chip-subtitle:first-child {
+  margin-top: 4px;
+}
+.lu-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.lu-group-panel {
+  padding: 0;
+}
+.lu-group-header {
+  align-items: center;
+}
+.lu-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.lu-reason {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-mute, #475569);
+  max-width: 520px;
+}
+@media (max-width: 820px) {
+  .lu-reason { max-width: none; }
+}
+</style>
+{% endblock %}

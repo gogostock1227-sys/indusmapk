@@ -26,6 +26,7 @@
     <nav class="primary-nav">
       <a href="../index.html" class="">首頁</a>
       <a href="../today.html" class="">今日焦點</a>
+      <a href="../limit-up.html" class="">今日漲停分析</a>
       <a href="../topics.html" class="">題材列表</a>
       <a href="../heatmap.html" class="">產業地圖</a>
       <a href="../database.html" class="active">公司資料庫</a>
@@ -47,18 +48,34 @@
   <span>聯友金屬-創 (7610)</span>
 </nav>
 
-<section class="topic-hero" style="--accent:#ff7847;">
+<section class="topic-hero has-disposal" style="--accent:#ff7847;">
   <div class="topic-hero-inner">
-    <div class="category-tag">綠能環保 · 上市</div>
-    <h1>聯友金屬-創 <small class="muted">7610</small></h1>
-    <p class="topic-en">LIANYOU METALS</p>
-    <div class="topic-kpis">
-      <span class="kpi"><em>收盤</em><strong>587.00</strong></span>
-      <span class="kpi"><em>今日</em><strong class="negative">-7.99%</strong></span>
-      <span class="kpi"><em>5日</em><strong class="negative">-7.99%</strong></span>
-      <span class="kpi"><em>20日</em><strong class="positive">+54.47%</strong></span>
-      <span class="kpi"><em>成交金額</em><strong>3.2 億</strong></span>
+    <div class="hero-main">
+      <div class="category-tag">綠能環保 · 上市</div>
+      <h1>聯友金屬-創 <small class="muted">7610</small></h1>
+      <p class="topic-en">LIANYOU METALS</p>
+      <div class="topic-kpis">
+        <span class="kpi"><em>收盤</em><strong>587.00</strong></span>
+        <span class="kpi"><em>今日</em><strong class="negative">-7.99%</strong></span>
+        <span class="kpi"><em>5日</em><strong class="negative">-7.99%</strong></span>
+        <span class="kpi"><em>20日</em><strong class="positive">+54.47%</strong></span>
+        <span class="kpi"><em>成交金額</em><strong>3.2 億</strong></span>
+      </div>
     </div>
+    
+    <aside class="disposal-card" role="alert">
+      <div class="disposal-card-head">
+        <span class="disposal-warn-icon" aria-hidden="true">⚠</span>
+        <span class="disposal-warn-title">處置股警示</span>
+        <span class="disposal-card-badge">處置中</span>
+      </div>
+      <div class="disposal-card-body">
+        <div class="dc-row"><em>處置原因</em><span>連續三次</span></div>
+        <div class="dc-row"><em>處置措施</em><span>第一次處置</span></div>
+        <div class="dc-row"><em>處置期間</em><span class="dc-period">2026-04-15 ~ 2026-04-28</span></div>
+      </div>
+    </aside>
+    
   </div>
 </section>
 
@@ -90,88 +107,241 @@
 </section>
 
 
+<div class="analytics-tabs" id="analytics_7610">
+  <div class="analytics-tab-bar">
+    <button class="analytics-tab active" data-view="tech">技術分析</button>
+    <button class="analytics-tab" data-view="finance">營收資料</button>
+    <button class="analytics-tab" data-view="chip">籌碼分析</button>
+  </div>
+  <div class="analytics-view active" data-view="tech">
+
+
 <section class="panel">
   <div class="panel-header">
-    <h2>60 日走勢</h2>
-    <span class="muted">日K + 成交量 + MA20/MA60</span>
+    <h2>技術分析</h2>
+    <span class="muted">
+      日 K · MA5/10/20/60 · Bollinger · KD
+      · <a href="https://www.tradingview.com/symbols/TWSE-7610/" target="_blank" rel="noopener" style="color:var(--accent);">TradingView 完整圖 →</a>
+    </span>
   </div>
-  <div id="price_chart_7610" style="height:460px; width:100%; padding:8px;"></div>
+  <div class="tech-toolbar" id="tech_toolbar_7610">
+    <button data-days="20"  class="tf-btn">1M</button>
+    <button data-days="60"  class="tf-btn active">3M</button>
+    <button data-days="120" class="tf-btn">6M</button>
+    <button data-days="240" class="tf-btn">1Y</button>
+  </div>
+  <div id="tech_chart_7610" style="height:680px; width:100%; padding:4px 4px 12px;"></div>
   <script>
   (function(){
-    const raw = {"dates": ["2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24"], "ohlc": [[193.0, 195.0, 188.0, 197.5], [192.5, 204.0, 191.0, 210.0], [204.0, 191.0, 188.0, 206.0], [195.0, 189.5, 189.5, 197.5], [189.5, 189.0, 181.5, 194.0], [189.0, 193.5, 187.0, 197.0], [193.5, 192.5, 189.0, 194.5], [196.0, 202.0, 195.0, 206.5], [205.0, 219.0, 204.0, 221.5], [216.5, 206.0, 201.5, 219.0], [195.5, 191.0, 189.5, 200.0], [192.0, 195.5, 191.0, 198.0], [195.0, 207.0, 189.0, 207.5], [202.5, 205.0, 202.5, 212.5], [203.0, 219.5, 193.0, 223.0], [234.0, 241.0, 227.5, 241.0], [251.0, 265.0, 235.0, 265.0], [264.0, 274.0, 257.5, 277.0], [280.0, 285.5, 270.0, 290.0], [282.0, 285.0, 277.0, 289.0], [291.0, 303.0, 288.5, 303.0], [300.0, 327.0, 300.0, 329.5], [320.5, 327.0, 320.5, 350.0], [328.0, 300.0, 294.5, 331.0], [282.0, 270.0, 270.0, 282.0], [286.5, 288.5, 262.0, 291.0], [270.0, 288.5, 270.0, 289.0], [263.5, 285.5, 263.5, 285.5], [314.0, 310.0, 305.0, 314.0], [326.0, 341.0, 326.0, 341.0], [330.0, 332.0, 330.0, 343.5], [337.0, 321.0, 310.0, 337.0], [332.5, 310.0, 299.0, 339.5], [309.5, 314.0, 299.0, 337.5], [327.5, 321.0, 313.0, 328.0], [315.0, 320.0, 305.0, 324.0], [317.0, 320.0, 311.0, 337.0], [309.5, 324.5, 307.0, 326.0], [335.0, 356.5, 329.5, 356.5], [365.0, 380.0, 351.0, 392.0], [378.0, 368.0, 364.0, 386.0], [361.0, 368.0, 348.5, 369.5], [361.0, 364.0, 351.5, 369.5], [364.5, 351.0, 344.0, 367.5], [356.5, 366.5, 355.0, 370.0], [375.0, 378.0, 369.5, 391.0], [385.0, 415.5, 385.0, 415.5], [436.5, 443.0, 426.0, 456.5], [443.0, 452.5, 430.5, 456.0], [456.0, 497.5, 455.0, 497.5], [513.0, 547.0, 500.0, 547.0], [601.0, 601.0, 601.0, 601.0], [601.0, 655.0, 572.0, 655.0], [643.0, 647.0, 630.0, 681.0], [634.0, 638.0, 615.0, 645.0], [621.0, 640.0, 621.0, 648.0], [650.0, 628.0, 620.0, 650.0], [632.0, 670.0, 632.0, 690.0], [686.0, 638.0, 605.0, 686.0], [641.0, 587.0, 575.0, 649.0]], "volume": [1085.0, 1195.0, 1690.0, 802.0, 815.0, 731.0, 578.0, 1785.0, 1792.0, 1478.0, 1332.0, 732.0, 1231.0, 893.0, 1582.0, 2036.0, 2347.0, 1453.0, 1369.0, 590.0, 740.0, 748.0, 401.0, 639.0, 745.0, 446.0, 239.0, 254.0, 322.0, 311.0, 444.0, 633.0, 1936.0, 1593.0, 1087.0, 1259.0, 1111.0, 919.0, 2036.0, 1835.0, 1528.0, 1129.0, 941.0, 979.0, 939.0, 1131.0, 1289.0, 1010.0, 1072.0, 1470.0, 1679.0, 774.0, 1243.0, 947.0, 783.0, 300.0, 379.0, 411.0, 385.0, 533.0], "ma20": [155.82, 160.45, 164.2, 167.3, 170.53, 173.62, 176.03, 178.43, 182.22, 185.18, 187.68, 190.15, 192.9, 195.5, 198.12, 201.0, 204.57, 208.53, 213.0, 217.5, 222.9, 229.05, 235.85, 241.38, 245.43, 250.18, 254.97, 259.15, 263.7, 270.45, 277.5, 283.77, 288.93, 294.38, 299.45, 303.4, 306.15, 308.68, 312.23, 316.98, 320.23, 322.27, 324.12, 326.68, 331.5, 335.98, 342.32, 350.2, 357.32, 365.15, 375.9, 389.9, 407.15, 423.8, 439.65, 455.65, 471.05, 488.32, 502.4, 512.75], "ma60": [123.01, 124.47, 125.71, 127.02, 128.36, 129.69, 131.1, 132.67, 134.6, 136.33, 137.77, 139.28, 140.99, 142.66, 144.55, 146.85, 149.56, 152.43, 155.55, 158.69, 162.09, 165.92, 169.75, 173.09, 175.93, 179.01, 182.12, 185.18, 188.66, 192.62, 196.37, 199.94, 203.27, 206.59, 210.0, 213.4, 216.74, 220.2, 224.25, 228.71, 232.98, 237.26, 241.39, 245.12, 249.15, 253.26, 257.77, 262.59, 267.75, 273.59, 280.36, 287.94, 296.32, 304.56, 312.41, 320.02, 327.26, 335.18, 342.54, 349.07]};
-    if (!raw) {
-      document.getElementById('price_chart_7610').innerHTML =
-        '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+    const chartData = {"dates": ["2025-09-09", "2025-09-10", "2025-09-11", "2025-09-12", "2025-09-15", "2025-09-16", "2025-09-17", "2025-09-18", "2025-09-19", "2025-09-22", "2025-09-23", "2025-09-24", "2025-09-25", "2025-09-26", "2025-09-30", "2025-10-01", "2025-10-02", "2025-10-03", "2025-10-07", "2025-10-08", "2025-10-09", "2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24"], "ohlc": [[109.0, 117.0, 108.0, 124.5], [115.0, 111.5, 110.0, 117.0], [113.0, 111.0, 110.0, 116.0], [112.0, 107.5, 103.0, 112.0], [106.0, 104.0, 101.0, 106.0], [104.0, 104.5, 102.5, 107.5], [105.0, 107.0, 105.0, 111.0], [109.0, 102.0, 100.5, 109.5], [102.0, 96.0, 96.0, 102.0], [96.0, 105.5, 88.8, 105.5], [108.5, 105.5, 104.0, 109.0], [104.5, 102.5, 101.0, 106.0], [105.0, 106.0, 103.5, 108.0], [104.0, 100.0, 100.0, 104.0], [103.0, 101.0, 100.5, 103.0], [101.5, 101.5, 100.0, 103.0], [103.0, 99.0, 98.0, 103.5], [99.5, 99.0, 98.8, 100.0], [98.9, 97.4, 95.0, 99.7], [97.5, 95.8, 95.2, 97.5], [96.2, 97.3, 93.5, 98.7], [107.0, 107.0, 107.0, 107.0], [109.5, 117.5, 109.0, 117.5], [120.5, 114.0, 110.5, 122.5], [109.5, 106.0, 103.0, 112.0], [104.0, 106.0, 102.5, 109.0], [106.0, 103.5, 103.0, 109.0], [103.5, 113.5, 102.0, 113.5], [110.5, 110.0, 106.0, 112.0], [108.5, 116.5, 108.0, 118.0], [124.0, 116.5, 116.0, 124.0], [110.5, 111.0, 109.0, 114.0], [110.0, 108.5, 108.5, 112.0], [108.5, 114.0, 105.5, 116.0], [110.0, 107.5, 107.0, 110.0], [108.5, 108.0, 106.0, 109.0], [108.5, 103.0, 103.0, 108.5], [103.5, 102.5, 101.0, 104.5], [104.0, 104.5, 102.0, 105.0], [101.0, 105.0, 101.0, 106.0], [105.0, 104.5, 103.0, 106.0], [106.0, 105.0, 104.5, 109.5], [108.0, 105.5, 105.0, 108.0], [105.5, 103.5, 103.5, 106.0], [102.0, 102.0, 102.0, 105.0], [103.0, 102.0, 102.0, 104.0], [102.5, 98.3, 97.8, 102.5], [98.3, 96.7, 96.0, 98.9], [98.3, 99.0, 97.0, 99.7], [97.2, 96.9, 96.8, 98.5], [98.3, 97.5, 97.0, 99.5], [99.5, 99.7, 98.2, 102.0], [100.0, 99.7, 99.6, 101.5], [100.0, 103.5, 99.8, 103.5], [105.0, 102.0, 101.5, 105.0], [102.0, 102.0, 102.0, 105.5], [105.0, 101.0, 100.5, 105.0], [101.0, 103.0, 101.0, 105.5], [104.5, 107.5, 103.5, 109.0], [110.0, 106.5, 105.5, 112.0], [109.0, 110.5, 105.5, 113.5], [110.0, 114.5, 109.5, 115.0], [116.0, 116.5, 112.5, 122.0], [118.0, 116.0, 115.0, 119.5], [118.5, 119.5, 118.0, 123.5], [117.0, 117.0, 113.5, 118.0], [117.0, 113.5, 111.5, 117.0], [114.0, 112.5, 111.5, 114.5], [111.0, 111.5, 110.5, 112.5], [113.0, 111.5, 111.5, 114.0], [113.0, 116.0, 113.0, 117.5], [116.5, 127.5, 116.5, 127.5], [125.0, 124.5, 123.0, 127.5], [126.0, 131.5, 126.0, 135.0], [138.5, 144.5, 138.0, 144.5], [147.5, 154.0, 144.5, 158.0], [159.5, 143.0, 139.5, 159.5], [147.0, 147.0, 143.5, 152.5], [150.0, 141.0, 139.0, 150.0], [140.0, 146.0, 137.0, 146.0], [146.5, 152.0, 142.0, 152.0], [153.0, 153.0, 147.0, 153.5], [154.5, 167.0, 150.0, 168.0], [171.0, 183.5, 161.0, 183.5], [186.0, 193.5, 181.5, 197.0], [190.5, 195.0, 184.5, 199.0], [197.5, 196.0, 188.5, 198.0], [198.0, 195.0, 188.5, 199.0], [193.0, 195.0, 188.0, 197.5], [192.5, 204.0, 191.0, 210.0], [204.0, 191.0, 188.0, 206.0], [195.0, 189.5, 189.5, 197.5], [189.5, 189.0, 181.5, 194.0], [189.0, 193.5, 187.0, 197.0], [193.5, 192.5, 189.0, 194.5], [196.0, 202.0, 195.0, 206.5], [205.0, 219.0, 204.0, 221.5], [216.5, 206.0, 201.5, 219.0], [195.5, 191.0, 189.5, 200.0], [192.0, 195.5, 191.0, 198.0], [195.0, 207.0, 189.0, 207.5], [202.5, 205.0, 202.5, 212.5], [203.0, 219.5, 193.0, 223.0], [234.0, 241.0, 227.5, 241.0], [251.0, 265.0, 235.0, 265.0], [264.0, 274.0, 257.5, 277.0], [280.0, 285.5, 270.0, 290.0], [282.0, 285.0, 277.0, 289.0], [291.0, 303.0, 288.5, 303.0], [300.0, 327.0, 300.0, 329.5], [320.5, 327.0, 320.5, 350.0], [328.0, 300.0, 294.5, 331.0], [282.0, 270.0, 270.0, 282.0], [286.5, 288.5, 262.0, 291.0], [270.0, 288.5, 270.0, 289.0], [263.5, 285.5, 263.5, 285.5], [314.0, 310.0, 305.0, 314.0], [326.0, 341.0, 326.0, 341.0], [330.0, 332.0, 330.0, 343.5], [337.0, 321.0, 310.0, 337.0], [332.5, 310.0, 299.0, 339.5], [309.5, 314.0, 299.0, 337.5], [327.5, 321.0, 313.0, 328.0], [315.0, 320.0, 305.0, 324.0], [317.0, 320.0, 311.0, 337.0], [309.5, 324.5, 307.0, 326.0], [335.0, 356.5, 329.5, 356.5], [365.0, 380.0, 351.0, 392.0], [378.0, 368.0, 364.0, 386.0], [361.0, 368.0, 348.5, 369.5], [361.0, 364.0, 351.5, 369.5], [364.5, 351.0, 344.0, 367.5], [356.5, 366.5, 355.0, 370.0], [375.0, 378.0, 369.5, 391.0], [385.0, 415.5, 385.0, 415.5], [436.5, 443.0, 426.0, 456.5], [443.0, 452.5, 430.5, 456.0], [456.0, 497.5, 455.0, 497.5], [513.0, 547.0, 500.0, 547.0], [601.0, 601.0, 601.0, 601.0], [601.0, 655.0, 572.0, 655.0], [643.0, 647.0, 630.0, 681.0], [634.0, 638.0, 615.0, 645.0], [621.0, 640.0, 621.0, 648.0], [650.0, 628.0, 620.0, 650.0], [632.0, 670.0, 632.0, 690.0], [686.0, 638.0, 605.0, 686.0], [641.0, 587.0, 575.0, 649.0]], "volume": [2444.0, 1093.0, 583.0, 818.0, 554.0, 302.0, 496.0, 614.0, 1026.0, 1224.0, 853.0, 423.0, 370.0, 284.0, 144.0, 158.0, 332.0, 174.0, 389.0, 231.0, 337.0, 713.0, 1987.0, 1628.0, 884.0, 348.0, 345.0, 705.0, 572.0, 943.0, 1248.0, 533.0, 392.0, 658.0, 598.0, 232.0, 495.0, 225.0, 157.0, 100.0, 175.0, 245.0, 119.0, 163.0, 177.0, 89.0, 328.0, 234.0, 162.0, 189.0, 91.0, 117.0, 109.0, 159.0, 129.0, 155.0, 167.0, 264.0, 516.0, 386.0, 765.0, 504.0, 1087.0, 595.0, 933.0, 391.0, 383.0, 190.0, 136.0, 146.0, 405.0, 1442.0, 754.0, 1327.0, 1045.0, 2748.0, 2398.0, 1104.0, 1036.0, 632.0, 891.0, 642.0, 1771.0, 2166.0, 2555.0, 1733.0, 975.0, 1046.0, 1085.0, 1195.0, 1690.0, 802.0, 815.0, 731.0, 578.0, 1785.0, 1792.0, 1478.0, 1332.0, 732.0, 1231.0, 893.0, 1582.0, 2036.0, 2347.0, 1453.0, 1369.0, 590.0, 740.0, 748.0, 401.0, 639.0, 745.0, 446.0, 239.0, 254.0, 322.0, 311.0, 444.0, 633.0, 1936.0, 1593.0, 1087.0, 1259.0, 1111.0, 919.0, 2036.0, 1835.0, 1528.0, 1129.0, 941.0, 979.0, 939.0, 1131.0, 1289.0, 1010.0, 1072.0, 1470.0, 1679.0, 774.0, 1243.0, 947.0, 783.0, 300.0, 379.0, 411.0, 385.0, 533.0], "ma5": [null, null, null, null, 110.2, 107.7, 106.8, 105.0, 102.7, 103.0, 103.2, 102.3, 103.1, 103.9, 103.0, 102.2, 101.5, 100.1, 99.58, 98.54, 97.7, 99.3, 103.0, 106.32, 108.36, 110.1, 109.4, 108.6, 107.8, 109.9, 112.0, 113.5, 112.5, 113.3, 111.5, 109.8, 108.2, 107.0, 105.1, 104.6, 103.9, 104.3, 104.9, 104.7, 104.1, 103.6, 102.26, 100.5, 99.6, 98.58, 97.68, 97.96, 98.56, 99.46, 100.48, 101.38, 101.64, 102.3, 103.1, 104.0, 105.7, 108.4, 111.1, 112.8, 115.4, 116.7, 116.5, 115.7, 114.8, 113.2, 113.0, 115.8, 118.2, 122.2, 128.8, 136.4, 139.5, 144.0, 145.9, 146.2, 145.8, 147.8, 151.8, 160.3, 169.8, 178.4, 187.0, 192.6, 194.9, 197.0, 196.2, 194.9, 193.7, 193.4, 191.1, 193.3, 199.2, 202.6, 202.1, 202.7, 203.7, 200.9, 203.6, 213.6, 227.5, 240.9, 257.0, 270.1, 282.5, 294.9, 305.5, 308.4, 305.4, 302.5, 294.8, 286.5, 288.5, 302.7, 311.4, 317.9, 322.8, 323.6, 319.6, 317.2, 317.0, 319.9, 328.4, 340.2, 349.8, 359.4, 367.3, 366.2, 363.5, 365.5, 375.0, 390.8, 411.1, 437.3, 471.1, 508.2, 550.6, 589.5, 617.6, 636.2, 641.6, 644.6, 642.8, 632.6], "ma10": [null, null, null, null, null, null, null, null, null, 106.6, 105.45, 104.55, 104.05, 103.3, 103.0, 102.7, 101.9, 101.6, 101.74, 100.77, 99.95, 100.4, 101.55, 102.95, 103.45, 103.9, 104.35, 105.8, 107.06, 109.13, 111.05, 111.45, 110.55, 110.55, 110.7, 110.9, 110.85, 109.75, 109.2, 108.05, 106.85, 106.25, 105.95, 104.9, 104.35, 103.75, 103.28, 102.7, 102.15, 101.34, 100.64, 100.11, 99.53, 99.53, 99.53, 99.53, 99.8, 100.43, 101.28, 102.24, 103.54, 105.02, 106.7, 107.95, 109.7, 111.2, 112.45, 113.4, 113.8, 114.3, 114.85, 116.15, 116.95, 118.5, 121.0, 124.7, 127.65, 131.1, 134.05, 137.5, 141.1, 143.65, 147.9, 153.1, 158.0, 162.1, 167.4, 172.2, 177.6, 183.4, 187.3, 190.95, 193.15, 194.15, 194.05, 194.75, 197.05, 198.15, 197.75, 196.9, 198.5, 200.05, 203.1, 207.85, 215.1, 222.3, 228.95, 236.85, 248.05, 261.2, 273.2, 282.7, 287.75, 292.5, 294.85, 296.0, 298.45, 304.05, 306.95, 306.35, 304.65, 306.05, 311.15, 314.3, 317.45, 321.35, 326.0, 329.9, 333.5, 338.2, 343.6, 347.3, 351.85, 357.65, 367.2, 379.05, 388.65, 400.4, 418.3, 441.6, 470.7, 500.3, 527.45, 553.65, 574.9, 597.6, 616.15, 625.1], "ma20": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 103.68, 102.7, 102.47, 102.8, 103.12, 103.22, 103.3, 103.12, 103.7, 104.4, 104.95, 105.5, 105.92, 106.05, 106.75, 107.08, 107.4, 107.6, 107.78, 108.13, 108.59, 108.95, 108.85, 108.25, 107.72, 107.53, 107.33, 107.07, 106.22, 105.67, 104.7, 103.75, 103.18, 102.74, 102.22, 101.94, 101.64, 101.54, 101.56, 101.72, 101.79, 102.09, 102.57, 103.12, 103.74, 104.62, 105.37, 106.12, 106.92, 107.54, 108.27, 109.2, 110.59, 111.83, 113.22, 115.35, 117.95, 120.05, 122.25, 123.92, 125.9, 127.97, 129.9, 132.43, 135.8, 139.5, 143.4, 147.53, 151.65, 155.82, 160.45, 164.2, 167.3, 170.53, 173.62, 176.03, 178.43, 182.22, 185.18, 187.68, 190.15, 192.9, 195.5, 198.12, 201.0, 204.57, 208.53, 213.0, 217.5, 222.9, 229.05, 235.85, 241.38, 245.43, 250.18, 254.97, 259.15, 263.7, 270.45, 277.5, 283.77, 288.93, 294.38, 299.45, 303.4, 306.15, 308.68, 312.23, 316.98, 320.23, 322.27, 324.12, 326.68, 331.5, 335.98, 342.32, 350.2, 357.32, 365.15, 375.9, 389.9, 407.15, 423.8, 439.65, 455.65, 471.05, 488.32, 502.4, 512.75], "ma60": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 104.69, 104.58, 104.63, 104.72, 104.86, 105.12, 105.33, 105.44, 105.61, 105.87, 105.97, 106.15, 106.56, 106.87, 107.4, 108.12, 109.0, 109.73, 110.53, 111.26, 112.09, 113.01, 113.77, 114.6, 115.76, 117.21, 118.7, 120.24, 121.6, 123.01, 124.47, 125.71, 127.02, 128.36, 129.69, 131.1, 132.67, 134.6, 136.33, 137.77, 139.28, 140.99, 142.66, 144.55, 146.85, 149.56, 152.43, 155.55, 158.69, 162.09, 165.92, 169.75, 173.09, 175.93, 179.01, 182.12, 185.18, 188.66, 192.62, 196.37, 199.94, 203.27, 206.59, 210.0, 213.4, 216.74, 220.2, 224.25, 228.71, 232.98, 237.26, 241.39, 245.12, 249.15, 253.26, 257.77, 262.59, 267.75, 273.59, 280.36, 287.94, 296.32, 304.56, 312.41, 320.02, 327.26, 335.18, 342.54, 349.07], "bb_up": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 114.59, 111.98, 111.04, 113.06, 114.37, 114.54, 114.67, 114.36, 115.84, 116.28, 118.0, 119.54, 120.1, 120.27, 121.09, 121.16, 121.24, 121.04, 120.83, 120.36, 119.48, 118.69, 118.71, 117.33, 116.61, 116.75, 116.86, 117.3, 116.98, 116.73, 115.17, 113.1, 112.04, 111.36, 109.04, 108.3, 107.33, 107.19, 107.24, 107.86, 108.14, 109.46, 111.73, 114.15, 116.19, 118.88, 120.6, 121.39, 121.75, 122.02, 121.95, 122.29, 125.25, 126.8, 130.05, 136.41, 144.25, 147.34, 150.82, 152.78, 155.14, 158.48, 161.65, 167.54, 176.76, 187.09, 195.77, 202.89, 208.31, 212.33, 216.82, 218.05, 219.36, 219.31, 219.77, 220.77, 223.34, 227.38, 228.31, 225.49, 222.58, 220.71, 216.49, 217.15, 226.86, 242.86, 257.47, 272.37, 284.31, 298.88, 317.48, 332.49, 339.49, 341.09, 344.41, 346.58, 348.16, 353.37, 362.14, 365.06, 364.29, 361.56, 356.02, 351.03, 347.72, 347.14, 347.49, 354.91, 367.35, 375.0, 381.04, 385.78, 388.34, 389.49, 393.8, 405.82, 422.48, 440.23, 468.57, 506.05, 551.6, 602.97, 641.66, 671.68, 696.89, 715.14, 737.59, 752.12, 758.23], "bb_lo": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 92.78, 93.42, 93.91, 92.54, 91.88, 91.91, 91.93, 91.89, 91.56, 92.52, 91.9, 91.46, 91.75, 91.83, 92.41, 92.99, 93.56, 94.16, 94.72, 95.9, 97.7, 99.21, 98.99, 99.17, 98.84, 98.3, 97.79, 96.83, 95.47, 94.62, 94.22, 94.39, 94.32, 94.12, 95.39, 95.58, 95.95, 95.89, 95.89, 95.57, 95.44, 94.72, 93.4, 92.08, 91.29, 90.35, 90.13, 90.86, 92.08, 93.06, 94.59, 96.1, 95.92, 96.85, 96.4, 94.29, 91.65, 92.76, 93.68, 95.07, 96.66, 97.47, 98.15, 97.31, 94.84, 91.91, 91.03, 92.16, 94.99, 99.32, 104.08, 110.35, 115.24, 121.74, 127.48, 131.28, 133.51, 137.07, 142.04, 149.86, 157.72, 165.09, 174.51, 179.1, 175.14, 166.29, 159.58, 153.63, 150.69, 146.92, 140.62, 139.21, 143.26, 149.76, 155.94, 163.37, 170.14, 174.03, 178.76, 189.94, 203.26, 216.29, 232.73, 247.87, 259.08, 265.16, 269.86, 269.54, 266.6, 265.45, 263.51, 262.47, 265.01, 273.51, 278.15, 278.83, 277.92, 274.42, 261.73, 245.75, 228.2, 211.33, 205.94, 207.62, 214.41, 226.96, 239.06, 252.68, 267.27], "k": [null, null, null, null, null, null, null, null, 33.33, 41.96, 48.44, 51.98, 60.48, 57.14, 56.41, 58.06, 55.54, 53.86, 41.62, 29.8, 28.6, 52.4, 68.27, 69.07, 60.42, 54.65, 47.92, 54.94, 55.59, 60.64, 62.4, 55.23, 46.67, 49.3, 41.2, 36.56, 24.37, 18.42, 17.35, 20.46, 21.42, 23.17, 32.11, 31.21, 24.73, 20.41, 15.03, 11.75, 15.24, 12.38, 12.42, 20.61, 27.45, 49.55, 55.25, 57.89, 54.68, 60.21, 69.31, 66.25, 70.31, 79.11, 77.55, 75.73, 78.02, 75.72, 67.15, 57.73, 49.6, 37.83, 39.32, 59.55, 67.15, 73.34, 82.22, 85.34, 79.0, 77.32, 71.62, 70.61, 73.56, 75.91, 82.86, 88.57, 90.44, 91.48, 92.7, 92.99, 92.98, 92.15, 84.21, 75.53, 59.12, 53.45, 48.5, 56.31, 68.79, 66.28, 52.1, 46.4, 52.18, 52.18, 64.69, 76.46, 84.31, 88.4, 90.78, 92.2, 94.8, 95.92, 92.4, 81.33, 64.36, 54.08, 46.09, 39.63, 44.6, 59.66, 66.29, 68.32, 65.18, 64.72, 67.11, 68.28, 61.25, 59.93, 73.29, 77.89, 76.66, 75.84, 73.16, 66.4, 67.6, 72.91, 81.94, 83.96, 88.12, 92.08, 94.72, 96.48, 97.65, 94.8, 91.69, 89.1, 85.68, 87.62, 82.62, 59.32], "d": [null, null, null, null, null, null, null, null, 44.44, 43.62, 45.22, 47.48, 51.81, 53.58, 54.53, 55.7, 55.65, 55.05, 50.57, 43.65, 38.63, 43.22, 51.57, 57.4, 58.41, 57.15, 54.08, 54.36, 54.77, 56.73, 58.62, 57.49, 53.88, 52.35, 48.63, 44.61, 37.86, 31.38, 26.71, 24.62, 23.55, 23.42, 26.32, 27.95, 26.88, 24.72, 21.49, 18.24, 17.24, 15.62, 14.55, 16.57, 20.2, 29.98, 38.41, 44.9, 48.16, 52.18, 57.89, 60.68, 63.89, 68.96, 71.82, 73.12, 74.76, 75.08, 72.43, 67.53, 61.55, 53.64, 48.87, 52.43, 57.33, 62.67, 69.19, 74.57, 76.05, 76.47, 74.86, 73.44, 73.48, 74.29, 77.15, 80.96, 84.12, 86.57, 88.61, 90.07, 91.04, 91.41, 89.01, 84.52, 76.05, 68.52, 61.85, 60.0, 62.93, 64.05, 60.06, 55.51, 54.4, 53.66, 57.34, 63.71, 70.58, 76.52, 81.27, 84.92, 88.21, 90.78, 91.32, 87.99, 80.11, 71.44, 62.99, 55.2, 51.67, 54.33, 58.32, 61.65, 62.83, 63.46, 64.67, 65.88, 64.33, 62.87, 66.34, 70.19, 72.35, 73.51, 73.39, 71.06, 69.91, 70.91, 74.59, 77.71, 81.18, 84.81, 88.12, 90.9, 93.15, 93.7, 93.03, 91.72, 89.71, 89.01, 86.88, 77.69]};
+    if (!chartData) {
+      const el = document.getElementById('tech_chart_7610');
+      if (el) el.innerHTML = '<div style="text-align:center; padding:80px 20px; color:var(--text-mute);">暫無 K 棒資料</div>';
       return;
     }
-    function start() {
-      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
-      const el = document.getElementById('price_chart_7610');
-      const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
-      const upColor = '#ef4444';
-      const downColor = '#10b981';
+    function start(){
+      if (typeof echarts === 'undefined') return setTimeout(start, 120);
+      const el = document.getElementById('tech_chart_7610');
+      const chart = echarts.init(el, null, { renderer: 'canvas' });
+      const UP = '#dc2626', DOWN = '#059669';     /* 台股：紅漲綠跌 */
+      const TOTAL = chartData.dates.length;
+      const pctFromDays = (days) => Math.max(0, 100 * (1 - days / TOTAL));
+
+      const volData = chartData.volume.map((v, i) => {
+        const o = chartData.ohlc[i][0], c = chartData.ohlc[i][1];
+        return { value: v, itemStyle: { color: (c >= o ? UP : DOWN), opacity: 0.55 } };
+      });
+
+      const fmtNum = (v, d=2) => (v == null || isNaN(v)) ? '—' : Number(v).toFixed(d);
+      const fmtVol = (v) => (v == null) ? '—' : (v >= 10000 ? (v/10000).toFixed(1)+'萬張' : v.toLocaleString()+'張');
+
       chart.setOption({
-        backgroundColor: 'transparent',
         animation: false,
-        legend: { data: ['K線','MA20','MA60'], top: 0, textStyle: { color: '#9ca3af' } },
         tooltip: {
           trigger: 'axis',
-          axisPointer: { type: 'cross' },
-          backgroundColor: '#1f2937',
-          borderColor: '#374151',
-          textStyle: { color: '#e5e7eb' },
-          formatter: (p) => {
-            const d = p[0].axisValue;
-            const k = p.find(x => x.seriesName === 'K線');
-            const v = p.find(x => x.seriesName === '成交量');
-            const m20 = p.find(x => x.seriesName === 'MA20');
-            const m60 = p.find(x => x.seriesName === 'MA60');
-            let s = `<b>${d}</b><br>`;
-            if (k) {
-              const [o, c, l, h] = k.value.slice(1);
-              s += `開 <b>${o}</b> · 高 <b style="color:${upColor}">${h}</b> · 低 <b style="color:${downColor}">${l}</b> · 收 <b>${c}</b><br>`;
-            }
-            if (v) s += `量 ${Math.round(v.value[1]).toLocaleString()} 張<br>`;
-            if (m20 && m20.value != null) s += `MA20 ${m20.value}<br>`;
-            if (m60 && m60.value != null) s += `MA60 ${m60.value}`;
-            return s;
+          axisPointer: { type: 'cross', crossStyle: { color: '#9ca3af', width: 1, type: 'dashed' }, label: { backgroundColor: '#111827' } },
+          backgroundColor: 'rgba(255,255,255,0.96)',
+          borderColor: '#d1d5db',
+          borderWidth: 1,
+          padding: [8, 12],
+          textStyle: { color: '#111827', fontSize: 12 },
+          formatter: function(params) {
+            if (!params || !params.length) return '';
+            const date = params[0].axisValueLabel;
+            const idx = params[0].dataIndex;
+            const o = chartData.ohlc[idx][0], c = chartData.ohlc[idx][1];
+            const l = chartData.ohlc[idx][2], h = chartData.ohlc[idx][3];
+            const pct = (o && c) ? ((c-o)/o*100) : null;
+            const color = (c >= o) ? UP : DOWN;
+            let html = '<div style="font-weight:600;margin-bottom:6px;color:#111827;">'+ date +'</div>';
+            html += '<div style="display:grid;grid-template-columns:auto auto;gap:2px 16px;font-size:11px;">';
+            html += '<span style="color:#6b7280;">開盤</span><span style="text-align:right;font-weight:600;">'+ fmtNum(o) +'</span>';
+            html += '<span style="color:#6b7280;">最高</span><span style="text-align:right;font-weight:600;color:'+UP+';">'+ fmtNum(h) +'</span>';
+            html += '<span style="color:#6b7280;">最低</span><span style="text-align:right;font-weight:600;color:'+DOWN+';">'+ fmtNum(l) +'</span>';
+            html += '<span style="color:#6b7280;">收盤</span><span style="text-align:right;font-weight:700;color:'+color+';">'+ fmtNum(c) +' ('+ (pct==null?'—':(pct>=0?'+':'')+pct.toFixed(2)+'%') +')</span>';
+            html += '<span style="color:#6b7280;">量</span><span style="text-align:right;">'+ fmtVol(chartData.volume[idx]) +'</span>';
+            html += '</div>';
+            html += '<div style="height:1px;background:#e5e7eb;margin:6px 0;"></div>';
+            html += '<div style="display:grid;grid-template-columns:auto auto;gap:2px 16px;font-size:11px;">';
+            html += '<span style="color:#6b7280;">MA5</span><span style="text-align:right;color:#db2777;">'+ fmtNum(chartData.ma5[idx]) +'</span>';
+            html += '<span style="color:#6b7280;">MA10</span><span style="text-align:right;color:#eab308;">'+ fmtNum(chartData.ma10[idx]) +'</span>';
+            html += '<span style="color:#6b7280;">MA20</span><span style="text-align:right;color:#c2410c;">'+ fmtNum(chartData.ma20[idx]) +'</span>';
+            html += '<span style="color:#6b7280;">MA60</span><span style="text-align:right;color:#1e40af;">'+ fmtNum(chartData.ma60[idx]) +'</span>';
+            html += '<span style="color:#6b7280;">BB上軌</span><span style="text-align:right;color:#64748b;">'+ fmtNum(chartData.bb_up[idx]) +'</span>';
+            html += '<span style="color:#6b7280;">BB下軌</span><span style="text-align:right;color:#64748b;">'+ fmtNum(chartData.bb_lo[idx]) +'</span>';
+            html += '<span style="color:#6b7280;">K</span><span style="text-align:right;color:#0ea5e9;">'+ fmtNum(chartData.k[idx]) +'</span>';
+            html += '<span style="color:#6b7280;">D</span><span style="text-align:right;color:#f59e0b;">'+ fmtNum(chartData.d[idx]) +'</span>';
+            html += '</div>';
+            return html;
           }
         },
-        axisPointer: { link: [{ xAxisIndex: 'all' }] },
+        axisPointer: {
+          link: [{ xAxisIndex: 'all' }],
+          label: { backgroundColor: '#111827', color: '#ffffff' }
+        },
+        legend: {
+          data: [
+            { name: 'MA5',  itemStyle: { color: '#db2777' } },
+            { name: 'MA10', itemStyle: { color: '#eab308' } },
+            { name: 'MA20', itemStyle: { color: '#c2410c' } },
+            { name: 'MA60', itemStyle: { color: '#1e40af' } },
+            { name: 'Bollinger', itemStyle: { color: '#64748b' } }
+          ],
+          top: 4, left: 'center',
+          textStyle: { color: '#374151', fontSize: 12 },
+          itemWidth: 14, itemHeight: 2
+        },
         grid: [
-          { left: 50, right: 16, top: 36, height: '62%' },
-          { left: 50, right: 16, top: '75%', height: '18%' }
+          { left: 52, right: 18, top: 32,    height: '52%' },
+          { left: 52, right: 18, top: '64%', height: '13%' },
+          { left: 52, right: 18, top: '80%', height: '14%' }
         ],
         xAxis: [
-          { type: 'category', data: raw.dates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af' }, splitLine: { show: false }, boundaryGap: true },
-          { type: 'category', gridIndex: 1, data: raw.dates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { show: false }, axisTick: { show: false } }
+          {
+            type: 'category', data: chartData.dates,
+            boundaryGap: true,
+            axisLine: { lineStyle: { color: '#d1d5db' } },
+            axisTick: { show: false },
+            axisLabel: { color: '#6b7280', fontSize: 11 },
+            splitLine: { show: false },
+            min: 'dataMin', max: 'dataMax',
+            axisPointer: { z: 100 }
+          },
+          {
+            type: 'category', gridIndex: 1, data: chartData.dates,
+            boundaryGap: true,
+            axisLine: { lineStyle: { color: '#d1d5db' } },
+            axisLabel: { show: false }, axisTick: { show: false },
+            splitLine: { show: false }
+          },
+          {
+            type: 'category', gridIndex: 2, data: chartData.dates,
+            boundaryGap: true,
+            axisLine: { lineStyle: { color: '#d1d5db' } },
+            axisLabel: { show: false }, axisTick: { show: false },
+            splitLine: { show: false }
+          }
         ],
         yAxis: [
-          { scale: true, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }, axisLabel: { color: '#9ca3af' } },
-          { gridIndex: 1, scale: true, splitNumber: 2, splitLine: { show: false }, axisLabel: { color: '#9ca3af', formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v } }
+          {
+            scale: true,
+            axisLine: { show: false }, axisTick: { show: false },
+            splitLine: { lineStyle: { color: '#f1f3f5' } },
+            axisLabel: { color: '#6b7280', fontSize: 11, formatter: v => v }
+          },
+          {
+            scale: true, gridIndex: 1, splitNumber: 2,
+            axisLine: { show: false }, axisTick: { show: false },
+            splitLine: { show: false },
+            axisLabel: { color: '#9ca3af', fontSize: 10, formatter: v => v >= 10000 ? (v/10000).toFixed(0)+'萬' : v }
+          },
+          {
+            gridIndex: 2, min: 0, max: 100, splitNumber: 2,
+            axisLine: { show: false }, axisTick: { show: false },
+            splitLine: { lineStyle: { color: '#f1f3f5' } },
+            axisLabel: { color: '#9ca3af', fontSize: 10 }
+          }
         ],
         dataZoom: [
-          { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
-          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18, borderColor: '#374151', handleStyle: { color: '#ff7847' }, dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } }, fillerColor: 'rgba(255,120,71,0.15)', textStyle: { color: '#9ca3af' } }
+          { type: 'inside',  xAxisIndex: [0,1,2], start: pctFromDays(60), end: 100, zoomLock: false },
+          { type: 'slider',  xAxisIndex: [0,1,2], bottom: 4, height: 16,
+            start: pctFromDays(60), end: 100,
+            backgroundColor: '#fafbfc', borderColor: '#d1d5db',
+            fillerColor: 'rgba(194,65,12,0.15)',
+            handleStyle: { color: '#c2410c' },
+            textStyle: { color: '#6b7280' } }
         ],
         series: [
-          { name: 'K線', type: 'candlestick', data: raw.ohlc, itemStyle: { color: upColor, color0: downColor, borderColor: upColor, borderColor0: downColor } },
-          { name: 'MA20', type: 'line', data: raw.ma20, smooth: true, lineStyle: { color: '#ff7847', width: 1 }, symbol: 'none' },
-          { name: 'MA60', type: 'line', data: raw.ma60, smooth: true, lineStyle: { color: '#3b82f6', width: 1 }, symbol: 'none' },
-          { name: '成交量', type: 'bar', xAxisIndex: 1, yAxisIndex: 1,
-            data: raw.volume.map((v, i) => {
-              const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
-              return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
-            })
+          {
+            name: 'K 棒', type: 'candlestick',
+            data: chartData.ohlc,
+            itemStyle: {
+              color: UP, color0: DOWN,
+              borderColor: UP, borderColor0: DOWN, borderWidth: 1
+            },
+            barMaxWidth: 10
+          },
+          { name: 'MA5',  type: 'line', data: chartData.ma5,  smooth: false, symbol: 'none', lineStyle: { width: 1,   color: '#db2777', opacity: 0.85 } },
+          { name: 'MA10', type: 'line', data: chartData.ma10, smooth: false, symbol: 'none', lineStyle: { width: 1,   color: '#eab308', opacity: 0.85 } },
+          { name: 'MA20', type: 'line', data: chartData.ma20, smooth: false, symbol: 'none', lineStyle: { width: 1.5, color: '#c2410c', opacity: 0.95 } },
+          { name: 'MA60', type: 'line', data: chartData.ma60, smooth: false, symbol: 'none', lineStyle: { width: 1.5, color: '#1e40af', opacity: 0.95 } },
+          { name: 'Bollinger', type: 'line', data: chartData.bb_up, smooth: false, symbol: 'none',
+            lineStyle: { width: 0.8, color: '#64748b', opacity: 0.55, type: 'dashed' },
+            areaStyle: { color: 'rgba(100,116,139,0.06)', origin: 'start' },
+            stack: null, z: 1 },
+          { name: 'Bollinger', type: 'line', data: chartData.bb_lo, smooth: false, symbol: 'none',
+            lineStyle: { width: 0.8, color: '#64748b', opacity: 0.55, type: 'dashed' },
+            z: 1 },
+          {
+            name: '成交量', type: 'bar',
+            xAxisIndex: 1, yAxisIndex: 1,
+            data: volData, barMaxWidth: 10
+          },
+          {
+            name: 'K', type: 'line', xAxisIndex: 2, yAxisIndex: 2,
+            data: chartData.k, smooth: false, symbol: 'none',
+            lineStyle: { width: 1.2, color: '#0ea5e9' },
+            markLine: {
+              silent: true, symbol: 'none',
+              lineStyle: { color: '#d1d5db', type: 'dashed', width: 0.8 },
+              data: [{ yAxis: 20 }, { yAxis: 80 }],
+              label: { show: false }
+            }
+          },
+          {
+            name: 'D', type: 'line', xAxisIndex: 2, yAxisIndex: 2,
+            data: chartData.d, smooth: false, symbol: 'none',
+            lineStyle: { width: 1.2, color: '#f59e0b' }
           }
         ]
       });
+
+      // 時間快速切換
+      const tb = document.getElementById('tech_toolbar_7610');
+      if (tb) {
+        tb.addEventListener('click', (e) => {
+          const btn = e.target.closest('.tf-btn');
+          if (!btn) return;
+          const days = parseInt(btn.dataset.days, 10);
+          tb.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          chart.dispatchAction({
+            type: 'dataZoom',
+            start: pctFromDays(days),
+            end: 100
+          });
+        });
+      }
+
       window.addEventListener('resize', () => chart.resize());
     }
     start();
   })();
   </script>
 </section>
+
+  </div><!-- /analytics-view tech -->
+  <div class="analytics-view" data-view="finance">
 
 
 <section class="panel">
@@ -345,6 +515,343 @@
 </section>
 
 
+  </div><!-- /analytics-view finance -->
+  <div class="analytics-view" data-view="chip">
+
+<section class="panel chip-panel">
+  <div class="panel-header">
+    <h2>籌碼分析</h2>
+    <span class="muted">三大法人 / 融資融券 · 近 30 日</span>
+  </div>
+  <div class="chip-snapshot">
+    <div><em>外資今日</em><strong class="negative">-16 張</strong></div>
+    <div><em>外資 5 日</em><strong class="positive">+95 張</strong></div>
+    <div><em>投信今日</em><strong class="">+0 張</strong></div>
+    <div><em>投信 5 日</em><strong class="">+0 張</strong></div>
+  </div>
+
+  <div class="tab-bar" data-sym="7610">
+    <button class="tab-btn active" data-tab="inst">三大法人</button>
+    <button class="tab-btn" data-tab="margin">融資融券</button>
+    <button class="tab-btn" data-tab="holder">大戶資訊</button>
+  </div>
+
+  <div class="tab-panel active" data-panel="inst-7610">
+    <div id="chip_inst_chart_7610" style="height:380px; width:100%; padding:8px;"></div>
+    <div class="scroll-table chip-table-wrap">
+      <table class="table compact chip-inst-table"><thead>
+        <tr>
+          <th rowspan="2">日期</th>
+          <th colspan="3" class="th-group">外資 (張)</th>
+          <th colspan="3" class="th-group">投信 (張)</th>
+          <th colspan="3" class="th-group">自營商 (張)</th>
+        </tr>
+        <tr><th>買進</th><th>賣出</th><th>買賣超</th><th>買進</th><th>賣出</th><th>買賣超</th><th>買進</th><th>賣出</th><th>買賣超</th></tr>
+      </thead><tbody id="chip_inst_tbody_7610"></tbody></table>
+    </div>
+  </div>
+
+  <div class="tab-panel" data-panel="margin-7610">
+    <div id="chip_margin_chart_7610" style="height:380px; width:100%; padding:8px;"></div>
+    <div class="scroll-table chip-table-wrap">
+      <table class="table compact chip-margin-table"><thead>
+        <tr><th>日期</th><th>融資餘額</th><th>融資買進</th><th>融資賣出</th><th>融券餘額</th><th>融券買進</th><th>融券賣出</th></tr>
+      </thead><tbody id="chip_margin_tbody_7610"></tbody></table>
+    </div>
+  </div>
+
+  <div class="tab-panel" data-panel="holder-7610">
+    
+    <div class="holder-thresholds">
+      <div class="th-col"><em>散戶</em><small>持股 ≤</small><span class="pill">40-50 張</span></div>
+      <div class="th-col"><em>中實戶</em><small>持股 ≤</small><span class="pill">200-400 張</span></div>
+      <div class="th-col"><em>大戶</em><small>持股 &gt;</small><span class="pill">200-400 張</span></div>
+    </div>
+
+    <div class="holder-section">
+      <div class="holder-section-title">📈 持股佔比趨勢</div>
+      <div id="holder_trend_7610" style="height:280px; width:100%; padding:6px;"></div>
+    </div>
+
+    <div class="holder-section">
+      <div class="holder-section-title">👥 股東人數數據</div>
+      <div class="holder-snapshots" id="holder_snap_7610"></div>
+    </div>
+
+    <div class="holder-section">
+      <div class="holder-section-title">
+        📊 詳細數據比較
+        <span class="holder-toggle">
+          <button class="hm-btn active" data-mode="holders">人數</button>
+          <button class="hm-btn" data-mode="pcts">佔比</button>
+        </span>
+      </div>
+      <div class="holder-matrix-wrap">
+        <table class="table compact holder-matrix">
+          <thead id="holder_matrix_head_7610"></thead>
+          <tbody id="holder_matrix_body_7610"></tbody>
+        </table>
+      </div>
+      <p class="muted" style="padding:4px 14px 14px; font-size:12px;">
+        ▲/▼ 為相較於前一週的變動。資料來源：TDCC 集保戶股權分散週報。
+      </p>
+    </div>
+    
+  </div>
+
+  <script>
+  (function(){
+    const chip = {"foreign_net": [-22.0, -38.0, -468.0, -12.0, 1.0, 133.0, 3.0, 86.0, 86.0, -225.0, -315.0, -69.0, -125.0, -149.0, 195.0, 93.0, 352.0, -168.0, 123.0, 136.0, -155.0, -75.0, -93.0, -53.0, 18.0, 31.0, 6.0, 51.0, 23.0, -16.0], "trust_net": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_net": [0.0, -1.0, 0.0, -1.0, 1.0, 0.0, -1.0, 1.0, 12.0, -4.0, -9.0, 0.0, 0.0, 0.0, 2.0, 1.0, 11.0, -11.0, -2.0, 7.0, 13.0, -11.0, -3.0, 2.0, 1.0, -1.0, -0.0, 0.0, 0.0, -0.0], "foreign_buy": [31.0, 4.0, 145.0, 371.0, 320.0, 413.0, 208.0, 259.0, 300.0, 234.0, 101.0, 166.0, 158.0, 86.0, 323.0, 300.0, 420.0, 153.0, 339.0, 289.0, 187.0, 0.0, 80.0, 53.0, 56.0, 51.0, 57.0, 76.0, 27.0, 27.0], "foreign_sell": [53.0, 42.0, 613.0, 383.0, 319.0, 280.0, 205.0, 173.0, 214.0, 459.0, 416.0, 235.0, 283.0, 235.0, 128.0, 207.0, 68.0, 321.0, 216.0, 153.0, 342.0, 75.0, 173.0, 106.0, 38.0, 20.0, 51.0, 25.0, 4.0, 43.0], "trust_buy": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "trust_sell": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_buy": [0.0, 0.0, 55.0, 31.0, 25.0, 40.0, 21.0, 7.0, 24.0, 50.0, 20.0, 10.0, 14.0, 26.0, 12.0, 15.0, 28.0, 18.0, 4.0, 32.0, 41.0, 50.0, 1.0, 10.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_sell": [0.0, 1.0, 55.0, 32.0, 24.0, 40.0, 22.0, 7.0, 11.0, 54.0, 29.0, 10.0, 14.0, 25.0, 10.0, 14.0, 17.0, 29.0, 6.0, 25.0, 29.0, 61.0, 4.0, 8.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0], "dates": ["2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24"]};
+    const sym = "7610";
+    const root = document.querySelector('.tab-bar[data-sym="'+sym+'"]').closest('.chip-panel');
+    // Tab switching
+    root.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        root.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        root.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        root.querySelector('[data-panel="'+btn.dataset.tab+'-'+sym+'"]').classList.add('active');
+        window.dispatchEvent(new Event('resize'));
+      });
+    });
+
+    if (!chip) {
+      root.querySelectorAll('[id^="chip_"]').forEach(el => {
+        el.innerHTML = '<div style="padding:32px;text-align:center;color:#64748b;">查無籌碼資料</div>';
+      });
+      return;
+    }
+
+    const fmt = (n) => {
+      if (n === null || n === undefined || isNaN(n)) return '—';
+      const abs = Math.abs(n);
+      return (n >= 0 ? '' : '-') + abs.toLocaleString();
+    };
+    const cls = (n) => (n > 0 ? 'positive' : (n < 0 ? 'negative' : ''));
+
+    // ── 三大法人 chart ──
+    function renderInstChart(){
+      if (typeof echarts === 'undefined') return setTimeout(renderInstChart, 150);
+      const el = document.getElementById('chip_inst_chart_'+sym);
+      const ch = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const series = [];
+      if (chip.foreign_net) series.push({ name:'外資', type:'line', data: chip.foreign_net, smooth:true, lineStyle:{color:'#10b981',width:2}, itemStyle:{color:'#10b981'}, symbol:'circle', symbolSize:5 });
+      if (chip.trust_net)   series.push({ name:'投信', type:'line', data: chip.trust_net,   smooth:true, lineStyle:{color:'#ff7847',width:2}, itemStyle:{color:'#ff7847'}, symbol:'circle', symbolSize:5 });
+      if (chip.dealer_net)  series.push({ name:'自營商', type:'line', data: chip.dealer_net,smooth:true, lineStyle:{color:'#f472b6',width:2}, itemStyle:{color:'#f472b6'}, symbol:'circle', symbolSize:5 });
+      ch.setOption({
+        backgroundColor:'transparent', animation:false,
+        legend:{ data:['外資','投信','自營商'], top:0, textStyle:{color:'#9ca3af'} },
+        grid:{ left:60, right:20, top:36, bottom:40 },
+        tooltip:{ trigger:'axis', backgroundColor:'#1f2937', borderColor:'#374151', textStyle:{color:'#e5e7eb'}, valueFormatter:(v)=>Number(v).toLocaleString()+' 張' },
+        xAxis:{ type:'category', data: chip.dates, axisLabel:{color:'#9ca3af', rotate:45}, axisLine:{lineStyle:{color:'#374151'}} },
+        yAxis:{ type:'value', name:'張', nameTextStyle:{color:'#9ca3af'}, axisLabel:{color:'#9ca3af', formatter:(v)=>v>=1000||v<=-1000?(v/1000).toFixed(0)+'K':v}, splitLine:{lineStyle:{color:'rgba(255,255,255,0.04)'}} },
+        series: series
+      });
+      window.addEventListener('resize', () => ch.resize());
+    }
+    renderInstChart();
+
+    // ── 三大法人 table ──
+    const tbodyInst = document.getElementById('chip_inst_tbody_'+sym);
+    const n = chip.dates.length;
+    const tail = Math.min(20, n);
+    let htmlInst = '';
+    for (let i = n - 1; i >= n - tail; i--) {
+      const fb = chip.foreign_buy ? chip.foreign_buy[i] : null;
+      const fs = chip.foreign_sell ? chip.foreign_sell[i] : null;
+      const fn = chip.foreign_net ? chip.foreign_net[i] : null;
+      const tb = chip.trust_buy  ? chip.trust_buy[i]  : null;
+      const ts = chip.trust_sell ? chip.trust_sell[i] : null;
+      const tn = chip.trust_net  ? chip.trust_net[i]  : null;
+      const db = chip.dealer_buy ? chip.dealer_buy[i] : null;
+      const ds = chip.dealer_sell? chip.dealer_sell[i]: null;
+      const dn = chip.dealer_net ? chip.dealer_net[i] : null;
+      htmlInst += `<tr>
+        <td>${chip.dates[i].slice(5)}</td>
+        <td>${fmt(fb)}</td><td>${fmt(fs)}</td><td class="${cls(fn)}">${fmt(fn)}</td>
+        <td>${fmt(tb)}</td><td>${fmt(ts)}</td><td class="${cls(tn)}">${fmt(tn)}</td>
+        <td>${fmt(db)}</td><td>${fmt(ds)}</td><td class="${cls(dn)}">${fmt(dn)}</td>
+      </tr>`;
+    }
+    tbodyInst.innerHTML = htmlInst || '<tr><td colspan="10" class="muted">查無資料</td></tr>';
+
+    // ── 融資融券 chart ──
+    function renderMarginChart(){
+      if (typeof echarts === 'undefined') return setTimeout(renderMarginChart, 150);
+      const el = document.getElementById('chip_margin_chart_'+sym);
+      const ch = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const series = [];
+      if (chip.margin_long_bal)  series.push({ name:'融資餘額', type:'line', yAxisIndex:0, data: chip.margin_long_bal,  smooth:true, lineStyle:{color:'#ef4444',width:2}, itemStyle:{color:'#ef4444'}, areaStyle:{color:'rgba(239,68,68,0.08)'}, symbol:'none' });
+      if (chip.margin_short_bal) series.push({ name:'融券餘額', type:'line', yAxisIndex:1, data: chip.margin_short_bal, smooth:true, lineStyle:{color:'#10b981',width:2}, itemStyle:{color:'#10b981'}, symbol:'none' });
+      ch.setOption({
+        backgroundColor:'transparent', animation:false,
+        legend:{ data:['融資餘額','融券餘額'], top:0, textStyle:{color:'#9ca3af'} },
+        grid:{ left:60, right:60, top:36, bottom:40 },
+        tooltip:{ trigger:'axis', backgroundColor:'#1f2937', borderColor:'#374151', textStyle:{color:'#e5e7eb'}, valueFormatter:(v)=>Number(v).toLocaleString()+' 張' },
+        xAxis:{ type:'category', data: chip.dates, axisLabel:{color:'#9ca3af', rotate:45}, axisLine:{lineStyle:{color:'#374151'}} },
+        yAxis:[
+          { type:'value', name:'融資(張)', nameTextStyle:{color:'#ef4444'}, axisLabel:{color:'#9ca3af'}, splitLine:{lineStyle:{color:'rgba(255,255,255,0.04)'}} },
+          { type:'value', name:'融券(張)', nameTextStyle:{color:'#10b981'}, axisLabel:{color:'#9ca3af'}, splitLine:{show:false} }
+        ],
+        series: series
+      });
+      window.addEventListener('resize', () => ch.resize());
+    }
+    renderMarginChart();
+
+    // ── 融資融券 table ──
+    const tbodyMg = document.getElementById('chip_margin_tbody_'+sym);
+    let htmlMg = '';
+    for (let i = n - 1; i >= n - tail; i--) {
+      const lb = chip.margin_long_bal  ? chip.margin_long_bal[i]  : null;
+      const lB = chip.margin_long_buy  ? chip.margin_long_buy[i]  : null;
+      const lS = chip.margin_long_sell ? chip.margin_long_sell[i] : null;
+      const sb = chip.margin_short_bal ? chip.margin_short_bal[i] : null;
+      const sB = chip.margin_short_buy ? chip.margin_short_buy[i] : null;
+      const sS = chip.margin_short_sell? chip.margin_short_sell[i]: null;
+      htmlMg += `<tr>
+        <td>${chip.dates[i].slice(5)}</td>
+        <td>${fmt(lb)}</td><td>${fmt(lB)}</td><td>${fmt(lS)}</td>
+        <td>${fmt(sb)}</td><td>${fmt(sB)}</td><td>${fmt(sS)}</td>
+      </tr>`;
+    }
+    tbodyMg.innerHTML = htmlMg || '<tr><td colspan="7" class="muted">查無資料</td></tr>';
+
+    // ── 大戶資訊：趨勢線 + 人數卡 + 15 級 × N 週矩陣表 ──
+    const holder = {"dates": ["2026-04-17"], "levels": ["1-999", "1,000-5,000", "5,001-10,000", "10,001-15,000", "15,001-20,000", "20,001-30,000", "30,001-40,000", "40,001-50,000", "50,001-100,000", "100,001-200,000", "200,001-400,000", "400,001-600,000", "600,001-800,000", "800,001-1,000,000", "1,000,001 以上"], "holders": [[4134, 3398, 369, 144, 74, 67, 31, 23, 44, 20, 13, 9, 4, 2, 4]], "shares": [[559387, 6196842, 2862917, 1857998, 1352656, 1715654, 1092963, 1060693, 3066895, 2707286, 3619971, 4516621, 2773395, 1756891, 13445418]], "pcts": [[1.15, 12.75, 5.89, 3.82, 2.78, 3.53, 2.24, 2.18, 6.31, 5.57, 7.45, 9.29, 5.7, 3.61, 27.67]], "retail_holders": [8240], "mid_holders": [77], "big_holders": [19], "retail_pct": [34.34], "mid_pct": [19.33], "big_pct": [46.27], "delta_retail": [null], "delta_mid": [null], "delta_big": [null]};
+    if (holder) {
+      const COLORS = { retail:'#dc2626', mid:'#b45309', big:'#059669' };
+      const mdDate = (d) => (d || '').replace(/-/g,'').slice(0,8) || d;
+      const shortDate = (d) => (d || '').slice(5);   // 04-17
+      const fmtNum = (n) => (n == null || isNaN(n)) ? '—' : Math.abs(n).toLocaleString();
+      const fmtSignedNum = (n) => {
+        if (n == null || isNaN(n)) return '';
+        if (n === 0) return '<span class="muted">—</span>';
+        const abs = Math.abs(n).toLocaleString();
+        return n > 0 ? `<span class="arrow-up">▲ ${abs}</span>` : `<span class="arrow-down">▼ ${abs}</span>`;
+      };
+
+      // ── 持股佔比趨勢（line）──
+      function renderTrend(){
+        if (typeof echarts === 'undefined') return setTimeout(renderTrend, 150);
+        const el = document.getElementById('holder_trend_'+sym);
+        if (!el) return;
+        const chart = echarts.init(el, null, { renderer:'canvas' });
+        chart.setOption({
+          backgroundColor:'transparent', animation:false,
+          legend:{ data:['散戶佔比','中實戶佔比','大戶佔比'], top:4,
+                   textStyle:{color:'#1f2937'}, icon:'circle' },
+          tooltip:{ trigger:'axis', valueFormatter:(v)=> Number(v).toFixed(2)+'%',
+                    backgroundColor:'rgba(255,255,255,0.96)', borderColor:'#d1d5db', textStyle:{color:'#111827'} },
+          grid:{ left:58, right:16, top:40, bottom:40 },
+          xAxis:{ type:'category', data: holder.dates.map(shortDate),
+                  axisLine:{lineStyle:{color:'#9ca3af'}}, axisLabel:{color:'#475569'} },
+          yAxis:{ type:'value', axisLabel:{color:'#475569', formatter:'{value}%'},
+                  splitLine:{lineStyle:{color:'rgba(0,0,0,0.06)'}} },
+          series:[
+            { name:'散戶佔比', type:'line', data:holder.retail_pct, smooth:true, symbol:'circle', symbolSize:7,
+              lineStyle:{color:COLORS.retail, width:2}, itemStyle:{color:COLORS.retail} },
+            { name:'中實戶佔比', type:'line', data:holder.mid_pct, smooth:true, symbol:'circle', symbolSize:7,
+              lineStyle:{color:COLORS.mid, width:2}, itemStyle:{color:COLORS.mid} },
+            { name:'大戶佔比', type:'line', data:holder.big_pct, smooth:true, symbol:'circle', symbolSize:7,
+              lineStyle:{color:COLORS.big, width:2}, itemStyle:{color:COLORS.big} },
+          ]
+        });
+        window.addEventListener('resize', ()=>chart.resize());
+      }
+      renderTrend();
+
+      // ── 股東人數卡（最近 3 週）──
+      const snapEl = document.getElementById('holder_snap_'+sym);
+      const N = holder.dates.length;
+      const show = Math.min(3, N);
+      let htmlSnap = '';
+      for (let i = N - show; i < N; i++) {
+        htmlSnap += `<div class="snap-card">
+          <div class="snap-date">${mdDate(holder.dates[i])}</div>
+          <div class="snap-row"><em>大戶人數：</em><strong>${fmtNum(holder.big_holders[i])}</strong>${fmtSignedNum(holder.delta_big[i])}</div>
+          <div class="snap-row"><em>中實戶人數：</em><strong>${fmtNum(holder.mid_holders[i])}</strong>${fmtSignedNum(holder.delta_mid[i])}</div>
+          <div class="snap-row"><em>散戶人數：</em><strong>${fmtNum(holder.retail_holders[i])}</strong>${fmtSignedNum(holder.delta_retail[i])}</div>
+        </div>`;
+      }
+      if (show < 3) {
+        htmlSnap += `<div class="snap-card snap-card-empty">
+          <div class="snap-date muted">—</div>
+          <div class="muted" style="font-size:12px; line-height:1.6;">
+            每週 fetch 一次後累積歷史<br>
+            目前僅 ${N} 週資料<br>
+            跑 <code>fetch_extras.py --only holders</code>
+          </div>
+        </div>`.repeat(3 - show);
+      }
+      snapEl.innerHTML = htmlSnap;
+
+      // ── 詳細數據比較：15 級 × N 週 矩陣表 ──
+      function renderMatrix(mode){
+        const thead = document.getElementById('holder_matrix_head_'+sym);
+        const tbody = document.getElementById('holder_matrix_body_'+sym);
+        const mat = (mode === 'pcts') ? holder.pcts : holder.holders;
+
+        let head = '<tr><th class="sticky-col">持股分級</th>';
+        holder.dates.forEach(d => { head += `<th>${mdDate(d)}</th>`; });
+        head += '</tr>';
+        thead.innerHTML = head;
+
+        let body = '';
+        for (let lv = 0; lv < holder.levels.length; lv++) {
+          body += `<tr><td class="sticky-col lvl-label">${holder.levels[lv]}</td>`;
+          for (let wk = 0; wk < holder.dates.length; wk++) {
+            const cur  = mat[wk][lv];
+            const prev = (wk > 0) ? mat[wk-1][lv] : null;
+            const delta = (prev == null) ? null : (cur - prev);
+            let cell;
+            if (mode === 'pcts') {
+              cell = (cur == null) ? '—' : (Number(cur).toFixed(2) + '%');
+              cell += '<br>' + fmtSignedNum(delta == null ? null : Math.round(delta * 100) / 100);
+            } else {
+              cell = fmtNum(cur);
+              cell += '<br>' + fmtSignedNum(delta);
+            }
+            body += `<td>${cell}</td>`;
+          }
+          body += '</tr>';
+        }
+        tbody.innerHTML = body;
+      }
+      renderMatrix('holders');
+
+      // mode 切换
+      root.querySelectorAll('.hm-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          root.querySelectorAll('.hm-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderMatrix(btn.dataset.mode);
+        });
+      });
+    }
+  })();
+  </script>
+</section>
+
+  </div><!-- /analytics-view chip -->
+</div><!-- /analytics-tabs -->
+
+<script>
+(function(){
+  const root = document.getElementById('analytics_7610');
+  if (!root) return;
+  root.querySelectorAll('.analytics-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.dataset.view;
+      root.querySelectorAll('.analytics-tab').forEach(b => b.classList.toggle('active', b === btn));
+      root.querySelectorAll('.analytics-view').forEach(v => v.classList.toggle('active', v.dataset.view === view));
+      // 切換時觸發 resize，讓隱藏時 init 的 ECharts 重新量尺
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 30);
+    });
+  });
+})();
+</script>
+
 
 
 
@@ -355,16 +862,6 @@
   
   <p class="muted" style="padding:16px 22px;">此股票尚未被任何題材收錄。</p>
   
-</section>
-
-<section class="panel">
-  <div class="panel-header"><h2>法人動向</h2></div>
-  <div class="snapshot">
-    <div><em>外資今日</em><strong class="positive">+23 張</strong></div>
-    <div><em>外資 5 日</em><strong class="positive">+129 張</strong></div>
-    <div><em>投信今日</em><strong class="">+0 張</strong></div>
-    <div><em>投信 5 日</em><strong class="">+0 張</strong></div>
-  </div>
 </section>
 
 </main>

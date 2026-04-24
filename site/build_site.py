@@ -56,6 +56,78 @@ except ImportError:
     STOCK_HIGHLIGHTS = {}
 
 RICH_PKL = SITE_DIR / ".company_rich.pkl"
+EXTRAS_JSON = SITE_DIR / ".cache_extras.json"
+
+
+def load_extras() -> dict:
+    """載入 fetch_extras.py 產的處置股 + 集保分級（15 級歷史）。"""
+    empty = {"disposal": {}, "holders_history": {}, "holder_levels": []}
+    if not EXTRAS_JSON.exists():
+        print(f"[警告] 找不到 {EXTRAS_JSON.name}，個股頁將無處置警示/大戶資訊。")
+        print(f"       先跑：python site/fetch_extras.py")
+        return empty
+    try:
+        d = json.loads(EXTRAS_JSON.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[警告] 讀 {EXTRAS_JSON.name} 失敗：{e}")
+        return empty
+    disposal = d.get("disposal") or {}
+    hist     = d.get("holders_history") or {}
+    levels   = d.get("holder_levels") or []
+    n_weeks = len({date for by_date in hist.values() for date in by_date.keys()})
+    print(f"[extras] 處置股 {len(disposal)} 檔 / 集保分級 {len(hist)} 檔 / 歷史 {n_weeks} 週 / 抓取時間 {d.get('fetched_at','?')}")
+    return {"disposal": disposal, "holders_history": hist, "holder_levels": levels}
+
+
+# 三類歸屬：level index（0-based）
+_RETAIL_IDX = list(range(0, 8))    # level 1-8 (≤50 張)
+_MID_IDX    = list(range(8, 11))   # level 9-11 (50~400 張)
+_BIG_IDX    = list(range(11, 15))  # level 12-15 (>400 張)
+
+
+def build_holder_view(hist_by_date: dict, levels: list) -> dict | None:
+    """把 {date: {h, s, p}} 轉成前端易用的結構：
+      dates, levels,
+      holders[N週][15級], pcts[N週][15級],
+      retail_holders/mid_holders/big_holders: 每週人數,
+      retail_pct/mid_pct/big_pct: 每週佔比,
+      delta_retail/delta_mid/delta_big: 每週相對前週 delta 人數。"""
+    if not hist_by_date:
+        return None
+    dates = sorted(hist_by_date.keys())
+    holders_mat = [hist_by_date[d]["h"] for d in dates]
+    shares_mat  = [hist_by_date[d]["s"] for d in dates]
+    pct_mat     = [hist_by_date[d]["p"] for d in dates]
+
+    def agg_h(idxs):
+        return [sum(row[i] for i in idxs) for row in holders_mat]
+
+    def agg_p(idxs):
+        return [round(sum(row[i] for i in idxs), 2) for row in pct_mat]
+
+    retail_h = agg_h(_RETAIL_IDX)
+    mid_h    = agg_h(_MID_IDX)
+    big_h    = agg_h(_BIG_IDX)
+
+    def deltas(arr):
+        return [None] + [arr[i] - arr[i-1] for i in range(1, len(arr))]
+
+    return {
+        "dates":   dates,
+        "levels":  levels[:15] if levels else [str(i+1) for i in range(15)],
+        "holders": holders_mat,
+        "shares":  shares_mat,
+        "pcts":    pct_mat,
+        "retail_holders": retail_h,
+        "mid_holders":    mid_h,
+        "big_holders":    big_h,
+        "retail_pct":     agg_p(_RETAIL_IDX),
+        "mid_pct":        agg_p(_MID_IDX),
+        "big_pct":        agg_p(_BIG_IDX),
+        "delta_retail":   deltas(retail_h),
+        "delta_mid":      deltas(mid_h),
+        "delta_big":      deltas(big_h),
+    }
 
 
 def load_company_rich() -> dict:
@@ -74,6 +146,28 @@ def load_company_rich() -> dict:
 #   資料層
 # ═══════════════════════════════════════════
 
+# DataFrame 快取鍵。新增資料時只需加到這個 list。
+CACHE_KEYS = [
+    "close", "open", "high", "low", "volume", "amount",
+    "foreign", "trust", "dealer",
+    "foreign_buy", "foreign_sell",
+    "trust_buy", "trust_sell",
+    "dealer_buy", "dealer_sell",
+    "margin_long_bal", "margin_long_buy", "margin_long_sell",
+    "margin_short_bal", "margin_short_buy", "margin_short_sell",
+    "disposal",
+]
+
+
+def _safe_get(data_mod, key: str):
+    """包裝 data.get()，找不到回 None 而不是炸掉。"""
+    try:
+        return data_mod.get(key)
+    except Exception as e:
+        print(f"    [略過] {key}  ({type(e).__name__})")
+        return None
+
+
 def _load_finlab_data():
     """從 FinLab 載入必要資料"""
     from finlab import data
@@ -85,19 +179,49 @@ def _load_finlab_data():
     d["low"]    = data.get("price:最低價")
     d["volume"] = data.get("price:成交股數")
     d["amount"] = data.get("price:成交金額")
-    print("  [FinLab] 下載法人資料...")
-    try:
-        d["foreign"] = data.get(
-            "institutional_investors_trading_summary:外陸資買賣超股數(不含外資自營商)"
-        )
-    except Exception:
-        d["foreign"] = None
-    try:
-        d["trust"] = data.get(
-            "institutional_investors_trading_summary:投信買賣超股數"
-        )
-    except Exception:
-        d["trust"] = None
+
+    print("  [FinLab] 下載三大法人買賣超...")
+    d["foreign"] = _safe_get(data, "institutional_investors_trading_summary:外陸資買賣超股數(不含外資自營商)")
+    d["trust"]   = _safe_get(data, "institutional_investors_trading_summary:投信買賣超股數")
+    # 自營商 = 自行買賣 + 避險（合併後為完整自營商買賣超）
+    dealer_self  = _safe_get(data, "institutional_investors_trading_summary:自營商買賣超股數(自行買賣)")
+    dealer_hedge = _safe_get(data, "institutional_investors_trading_summary:自營商買賣超股數(避險)")
+    if dealer_self is not None and dealer_hedge is not None:
+        d["dealer"] = dealer_self.add(dealer_hedge, fill_value=0)
+    else:
+        d["dealer"] = dealer_self if dealer_self is not None else dealer_hedge
+
+    print("  [FinLab] 下載三大法人買進/賣出明細...")
+    d["foreign_buy"]  = _safe_get(data, "institutional_investors_trading_summary:外陸資買進股數(不含外資自營商)")
+    d["foreign_sell"] = _safe_get(data, "institutional_investors_trading_summary:外陸資賣出股數(不含外資自營商)")
+    d["trust_buy"]    = _safe_get(data, "institutional_investors_trading_summary:投信買進股數")
+    d["trust_sell"]   = _safe_get(data, "institutional_investors_trading_summary:投信賣出股數")
+    # 自營商 買進/賣出 同樣合併 自行買賣+避險
+    db_self = _safe_get(data, "institutional_investors_trading_summary:自營商買進股數(自行買賣)")
+    db_hedge= _safe_get(data, "institutional_investors_trading_summary:自營商買進股數(避險)")
+    ds_self = _safe_get(data, "institutional_investors_trading_summary:自營商賣出股數(自行買賣)")
+    ds_hedge= _safe_get(data, "institutional_investors_trading_summary:自營商賣出股數(避險)")
+    d["dealer_buy"]  = (db_self.add(db_hedge, fill_value=0) if db_self is not None and db_hedge is not None else (db_self or db_hedge))
+    d["dealer_sell"] = (ds_self.add(ds_hedge, fill_value=0) if ds_self is not None and ds_hedge is not None else (ds_self or ds_hedge))
+
+    print("  [FinLab] 下載融資融券買賣...")
+    d["margin_long_buy"]   = _safe_get(data, "margin_transactions:融資買進")
+    d["margin_long_sell"]  = _safe_get(data, "margin_transactions:融資賣出")
+    d["margin_short_buy"]  = _safe_get(data, "margin_transactions:融券買進")
+    d["margin_short_sell"] = _safe_get(data, "margin_transactions:融券賣出")
+    # 餘額直接抓不到時，以 rolling cumsum(買−賣) 近似（250 個交易日 ≈ 1 年信用週期）
+    d["margin_long_bal"]  = _safe_get(data, "margin_transactions:融資餘額")
+    d["margin_short_bal"] = _safe_get(data, "margin_transactions:融券餘額")
+    if d["margin_long_bal"] is None and d["margin_long_buy"] is not None and d["margin_long_sell"] is not None:
+        print("    [融資餘額] 用 買−賣 rolling 250 日 cumsum 近似")
+        d["margin_long_bal"] = (d["margin_long_buy"] - d["margin_long_sell"]).rolling(250, min_periods=20).sum()
+    if d["margin_short_bal"] is None and d["margin_short_buy"] is not None and d["margin_short_sell"] is not None:
+        print("    [融券餘額] 用 買−賣 rolling 250 日 cumsum 近似")
+        d["margin_short_bal"] = (d["margin_short_buy"] - d["margin_short_sell"]).rolling(250, min_periods=20).sum()
+
+    # 處置股：FinLab 此帳號無該資料集，跳過（前端會自動不顯示警告 banner）
+    d["disposal"] = None
+
     print("  [FinLab] 下載公司基本資料...")
     info = data.get("company_basic_info")
     d["name_map"]     = info.set_index("symbol")["公司簡稱"].to_dict()
@@ -113,7 +237,7 @@ def load_data(use_cache=False) -> dict:
         meta = json.loads(CACHE_META.read_text(encoding="utf-8"))
         combo = pd.read_parquet(CACHE_FILE)
         d = {}
-        for key in ["close", "open", "high", "low", "volume", "amount", "foreign", "trust"]:
+        for key in CACHE_KEYS:
             cols = [c for c in combo.columns if c.startswith(f"{key}|")]
             if not cols:
                 d[key] = None
@@ -131,9 +255,9 @@ def load_data(use_cache=False) -> dict:
     # 寫快取
     try:
         frames = []
-        for key in ["close", "open", "high", "low", "volume", "amount", "foreign", "trust"]:
+        for key in CACHE_KEYS:
             df = d.get(key)
-            if df is None or df.empty:
+            if df is None or (hasattr(df, "empty") and df.empty):
                 continue
             df2 = df.copy()
             df2.columns = [f"{key}|{c}" for c in df2.columns]
@@ -349,61 +473,161 @@ def compute_topic_return_series(d: dict, members: list, days=125) -> dict | None
     }
 
 
-def compute_company_chart(d: dict, sym: str, days=60) -> dict | None:
-    """計算個股 K 棒資料：最近 N 日 OHLCV + MA20 + MA60。沒資料回 None"""
+def compute_company_chart(d: dict, sym: str, days=240) -> dict | None:
+    """技術分析：240 日 OHLCV + MA5/10/20/60 + Bollinger(20,2σ) + KD(9)。無資料回 None"""
     close = d["close"]
     if sym not in close.columns:
         return None
     try:
-        # 取需要的視窗 + 多抓 60 日算 MA60
         c = close[sym].dropna()
         if len(c) < 5:
             return None
+        # 暖機：多抓 60 日算指標，顯示只給 days 天
         lookback = min(len(c), days + 60)
         end_idx = len(c)
         start_idx = max(0, end_idx - lookback)
         idx = c.index[start_idx:end_idx]
-        o = d["open"][sym].reindex(idx)
-        h = d["high"][sym].reindex(idx)
-        l = d["low"][sym].reindex(idx)
+        o  = d["open"][sym].reindex(idx)
+        h  = d["high"][sym].reindex(idx)
+        l  = d["low"][sym].reindex(idx)
         cc = d["close"][sym].reindex(idx)
-        v = d["volume"][sym].reindex(idx)
+        v  = d["volume"][sym].reindex(idx)
+
+        # 均線
+        ma5  = cc.rolling(5).mean()
+        ma10 = cc.rolling(10).mean()
         ma20 = cc.rolling(20).mean()
         ma60 = cc.rolling(60).mean()
 
-        # 只回顯示區間（後 days 天）
+        # Bollinger Bands (20, 2σ)
+        std20 = cc.rolling(20).std()
+        bb_up = ma20 + 2 * std20
+        bb_lo = ma20 - 2 * std20
+
+        # KD 指標 (9)
+        low9  = l.rolling(9).min()
+        high9 = h.rolling(9).max()
+        rng   = (high9 - low9).replace(0, np.nan)
+        rsv   = (cc - low9) / rng * 100
+        k_list, d_list = [], []
+        prev_k, prev_d = 50.0, 50.0
+        for i in range(len(rsv)):
+            r = rsv.iloc[i]
+            if pd.isna(r):
+                k_list.append(None)
+                d_list.append(None)
+                continue
+            prev_k = (2/3) * prev_k + (1/3) * float(r)
+            prev_d = (2/3) * prev_d + (1/3) * prev_k
+            k_list.append(round(prev_k, 2))
+            d_list.append(round(prev_d, 2))
+
+        def r2(s, i):
+            val = s.iloc[i]
+            return round(float(val), 2) if pd.notna(val) else None
+
         show_from = max(0, len(idx) - days)
-        dates = [t.strftime("%Y-%m-%d") for t in idx[show_from:]]
-        ohlc = [
-            [
-                round(float(o.iloc[i]), 2) if pd.notna(o.iloc[i]) else None,
-                round(float(cc.iloc[i]), 2) if pd.notna(cc.iloc[i]) else None,
-                round(float(l.iloc[i]), 2) if pd.notna(l.iloc[i]) else None,
-                round(float(h.iloc[i]), 2) if pd.notna(h.iloc[i]) else None,
-            ]
-            for i in range(show_from, len(idx))
-        ]
-        volumes = [
-            round(float(v.iloc[i]) / 1000, 0) if pd.notna(v.iloc[i]) else 0
-            for i in range(show_from, len(idx))
-        ]
-        ma20_arr = [
-            round(float(ma20.iloc[i]), 2) if pd.notna(ma20.iloc[i]) else None
-            for i in range(show_from, len(idx))
-        ]
-        ma60_arr = [
-            round(float(ma60.iloc[i]), 2) if pd.notna(ma60.iloc[i]) else None
-            for i in range(show_from, len(idx))
-        ]
+        rng_slice = range(show_from, len(idx))
+
         return {
-            "dates":   dates,
-            "ohlc":    ohlc,      # ECharts candlestick 順序：[open, close, low, high]
-            "volume":  volumes,   # 千股
-            "ma20":    ma20_arr,
-            "ma60":    ma60_arr,
+            "dates":   [t.strftime("%Y-%m-%d") for t in idx[show_from:]],
+            "ohlc":    [[r2(o,i), r2(cc,i), r2(l,i), r2(h,i)] for i in rng_slice],
+            "volume":  [round(float(v.iloc[i]) / 1000, 0) if pd.notna(v.iloc[i]) else 0 for i in rng_slice],
+            "ma5":     [r2(ma5,  i) for i in rng_slice],
+            "ma10":    [r2(ma10, i) for i in rng_slice],
+            "ma20":    [r2(ma20, i) for i in rng_slice],
+            "ma60":    [r2(ma60, i) for i in rng_slice],
+            "bb_up":   [r2(bb_up, i) for i in rng_slice],
+            "bb_lo":   [r2(bb_lo, i) for i in rng_slice],
+            "k":       [k_list[i] for i in rng_slice],
+            "d":       [d_list[i] for i in rng_slice],
         }
     except Exception:
         return None
+
+
+def compute_company_chip_data(d: dict, sym: str, days: int = 30) -> dict | None:
+    """個股籌碼資料：三大法人買賣超 + 融資融券。
+    單位：張（整張）。回傳 None 表示無任何資料。"""
+    def series_tail(key, to_lots=True):
+        df = d.get(key)
+        if df is None or sym not in df.columns:
+            return None
+        s = df[sym].dropna().iloc[-days:]
+        if s.empty:
+            return None
+        if to_lots:
+            s = s / 1000
+        return s
+
+    dates_ref = None
+    out: dict = {}
+
+    # 三大法人：買賣超（net）
+    for k in ["foreign", "trust", "dealer"]:
+        s = series_tail(k)
+        if s is not None:
+            out[k + "_net"] = [round(float(x), 0) for x in s.values]
+            dates_ref = s.index if dates_ref is None else dates_ref.union(s.index)
+
+    # 買進/賣出明細
+    for k in [
+        "foreign_buy", "foreign_sell",
+        "trust_buy",   "trust_sell",
+        "dealer_buy",  "dealer_sell",
+    ]:
+        s = series_tail(k)
+        if s is not None:
+            out[k] = [round(float(x), 0) for x in s.values]
+            dates_ref = s.index if dates_ref is None else dates_ref.union(s.index)
+
+    # 融資融券（資料單位是「張」或「股」看 FinLab，一律再除 1 保原值；餘額這欄本來就是張）
+    for k in [
+        "margin_long_bal", "margin_long_buy", "margin_long_sell",
+        "margin_short_bal", "margin_short_buy", "margin_short_sell",
+    ]:
+        s = series_tail(k, to_lots=False)
+        if s is not None:
+            out[k] = [round(float(x), 0) for x in s.values]
+            dates_ref = s.index if dates_ref is None else dates_ref.union(s.index)
+
+    if not out or dates_ref is None:
+        return None
+
+    dates_ref = dates_ref.sort_values()
+    out["dates"] = [t.strftime("%Y-%m-%d") for t in dates_ref[-days:]]
+    return out
+
+
+def get_disposal_info(disposal_map: dict, sym: str) -> dict | None:
+    """從 fetch_extras 的處置股字典查該檔。也嘗試 .lstrip('0') 容錯。"""
+    if not disposal_map:
+        return None
+    info = disposal_map.get(sym)
+    if info is None:
+        info = disposal_map.get(sym.lstrip("0"))
+    if info is None:
+        # 字母後綴（例：1522A）主代號 fallback
+        base = "".join(c for c in sym if c.isdigit())
+        if base and base != sym:
+            info = disposal_map.get(base)
+    return info
+
+
+def get_holder_info(holder_history: dict, levels: list, sym: str) -> dict | None:
+    """從 holders_history 查該檔所有週的 15 級資料，轉成前端用的 view。"""
+    if not holder_history:
+        return None
+    hist_by_date = holder_history.get(sym)
+    if hist_by_date is None:
+        hist_by_date = holder_history.get(sym.lstrip("0"))
+    if hist_by_date is None:
+        base = "".join(c for c in sym if c.isdigit())
+        if base and base != sym:
+            hist_by_date = holder_history.get(base)
+    if not hist_by_date:
+        return None
+    return build_holder_view(hist_by_date, levels)
 
 
 # ═══════════════════════════════════════════
@@ -566,6 +790,11 @@ def fmt_amount(v) -> str:
     return f"{int(round(v*100))} 萬"    # < 1 億 → XXXX 萬
 
 
+def tv_symbol_digits(sym: str) -> str:
+    """抽出數字部份給 TradingView 用（例：00631L → 00631）"""
+    return "".join(c for c in (sym or "") if c.isdigit())
+
+
 def build_env():
     env = Environment(
         loader=FileSystemLoader(str(TEMPLATE_DIR)),
@@ -574,17 +803,22 @@ def build_env():
     env.filters["pct"] = pct
     env.filters["fmt_amount"] = fmt_amount
     env.filters["slugify"] = slugify
+    env.filters["tv_symbol"] = tv_symbol_digits
     env.globals["CATEGORY_COLORS"] = CATEGORY_COLORS
     env.globals["get_meta"] = get_meta
     env.globals["STOCK_HIGHLIGHTS"] = STOCK_HIGHLIGHTS
     return env
 
 
-def render_all(data, stock_metrics, group_metrics, related, company_topics, rich=None):
+def render_all(data, stock_metrics, group_metrics, related, company_topics, rich=None, extras=None):
     env = build_env()
     rich = rich or {"basic": {}, "business": {}, "revenue": {}, "financials": {}, "dividends": {}, "director": {}}
+    extras = extras or {"disposal": {}, "holders": {}}
     name_map = data["name_map"]
     last_date = data["close"].index[-1].strftime("%Y-%m-%d")
+
+    limit_up_data = load_limit_up_data()
+    has_limit_up = limit_up_data is not None
 
     # 共用資料
     base_ctx = {
@@ -594,6 +828,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             CONCEPT_GROUPS.keys(),
             key=lambda g: -group_metrics.get(g, {}).get("amount_sum_mn", 0)
         )[:8],
+        "has_limit_up": has_limit_up,
     }
 
     # Index（每日焦點）
@@ -640,6 +875,50 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         category_aggs=category_aggs,
     )
     (DIST_DIR / "index.html").write_text(index_html, encoding="utf-8")
+
+    # 今日漲停分析（用產業寶原生樣式渲染 enriched JSON）
+    if has_limit_up:
+        # 分族群分組：依 groupOrder 排序（不在 groupOrder 的放最後）
+        stocks = limit_up_data.get("stocks", [])
+        group_order = limit_up_data.get("groupOrder", [])
+        groups_by_name = defaultdict(list)
+        for s in stocks:
+            groups_by_name[s.get("group", "其他")].append(s)
+        ordered_groups = []
+        for g in group_order:
+            if g in groups_by_name:
+                ordered_groups.append((g, groups_by_name[g]))
+        for g, lst in groups_by_name.items():
+            if g not in group_order:
+                ordered_groups.append((g, lst))
+        # section 合併分組（2+ 檔族群視需求聚合；此處直接提供給模板，讓模板決定是否用）
+        sections_by_name = defaultdict(list)
+        for s in stocks:
+            sec = s.get("section")
+            if sec:
+                sections_by_name[sec].append(s)
+        # 已知 CONCEPT_GROUPS key set，用來判斷是否要把族群連到 topic 頁
+        known_groups = set(CONCEPT_GROUPS.keys())
+
+        limit_up_html = env.get_template("limit_up.html").render(
+            **base_ctx,
+            lu_date=limit_up_data.get("tradingDate", last_date),
+            lu_stocks=stocks,
+            lu_ordered_groups=ordered_groups,
+            lu_group_analysis=limit_up_data.get("groupAnalysis", []),
+            lu_chip=limit_up_data.get("chipObservation", {}),
+            lu_known_groups=known_groups,
+            lu_total=len(stocks),
+            lu_n_groups=len(groups_by_name),
+            name_map=name_map,
+            get_meta=get_meta,
+        )
+        (DIST_DIR / "limit-up.html").write_text(limit_up_html, encoding="utf-8")
+        # 清掉前次實驗遺留的 iframe 檔（最大入侵重寫後已不需要）
+        for stale in ("limit-up-inner.html",):
+            p = DIST_DIR / stale
+            if p.exists():
+                p.unlink()
 
     # Today（今日焦點：原 index 的動態內容搬移過來）
     today_html = env.get_template("today.html").render(
@@ -781,7 +1060,14 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         name = name_raw if isinstance(name_raw, str) and name_raw.strip() else sym
         market = data["market_map"].get(sym, "")
         market_disp = {"sii": "上市", "otc": "上櫃", "rotc": "興櫃"}.get(market, market)
-        chart_data = compute_company_chart(data, sym, days=60)
+        chart_data = compute_company_chart(data, sym, days=240)
+        chip_data  = compute_company_chip_data(data, sym, days=30)
+        disposal   = get_disposal_info(extras.get("disposal", {}), sym)
+        holder     = get_holder_info(
+            extras.get("holders_history", {}),
+            extras.get("holder_levels", []),
+            sym,
+        )
         topics = company_topics.get(sym, [])
         basic = rich["basic"].get(sym)
         business = rich["business"].get(sym)
@@ -798,6 +1084,10 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             row=row,
             topics=[(t, get_meta(t)) for t in topics],
             chart_json=json.dumps(chart_data, ensure_ascii=False) if chart_data else "null",
+            chip_json=json.dumps(chip_data, ensure_ascii=False) if chip_data else "null",
+            holder=holder,
+            holder_json=json.dumps(holder, ensure_ascii=False) if holder else "null",
+            disposal=disposal,
             basic=basic,
             business=business,
             revenue=revenue,
@@ -817,6 +1107,32 @@ def copy_static():
     if dst.exists():
         shutil.rmtree(dst)
     shutil.copytree(STATIC_SRC, dst)
+
+
+LIMIT_UP_REPORT_DIR = Path(r"C:/Users/user/Desktop/程式雜/AI股票網頁建構/reports")
+
+
+def load_limit_up_data():
+    """從漲停專案抓最新 `enriched-YYYY-MM-DD.json` 讀進 dict。
+
+    回傳 dict（含 tradingDate / stocks / groupOrder / sectionOrder / groupAnalysis /
+    chipObservation）；找不到來源資料夾或 JSON 時回傳 None。
+    """
+    if not LIMIT_UP_REPORT_DIR.exists():
+        print(f"       ⚠ 漲停報告來源不存在：{LIMIT_UP_REPORT_DIR}")
+        return None
+    candidates = sorted(LIMIT_UP_REPORT_DIR.glob("enriched-*.json"))
+    if not candidates:
+        print(f"       ⚠ 找不到 enriched-*.json：{LIMIT_UP_REPORT_DIR}")
+        return None
+    src = candidates[-1]
+    try:
+        data = json.loads(src.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"       ⚠ 讀 {src.name} 失敗：{e}")
+        return None
+    print(f"       ✓ 今日漲停分析：{src.name} · {len(data.get('stocks', []))} 檔")
+    return data
 
 
 def write_json_data(heatmap_data, search_data):
@@ -870,7 +1186,8 @@ def main():
     print("[5/5] 渲染 HTML...")
     copy_static()
     rich = load_company_rich()
-    render_all(data, stock_metrics, group_metrics, related, company_topics, rich=rich)
+    extras = load_extras()
+    render_all(data, stock_metrics, group_metrics, related, company_topics, rich=rich, extras=extras)
 
     idx = DIST_DIR / "index.html"
     print(f"\n✓ 建置完成！打開：{idx}")
