@@ -75,42 +75,56 @@ class TDCCSession:
             ("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"),
         ]
 
-    def _get_token(self) -> str:
-        with self.opener.open(PORTAL, timeout=30) as r:
-            html = r.read().decode("utf-8", "replace")
-        m = re.search(r'name="SYNCHRONIZER_TOKEN"\s+value="([^"]+)"', html)
-        if not m:
-            raise RuntimeError("無法取得 SYNCHRONIZER_TOKEN")
-        return m.group(1)
+    def _get_token(self, retries: int = 5) -> str | None:
+        """GET portal 拿 CSRF token，遇 network 錯誤自動重試。"""
+        for attempt in range(retries):
+            try:
+                with self.opener.open(PORTAL, timeout=30) as r:
+                    html = r.read().decode("utf-8", "replace")
+                m = re.search(r'name="SYNCHRONIZER_TOKEN"\s+value="([^"]+)"', html)
+                if m:
+                    return m.group(1)
+                # 拿不到 token 但也沒 exception，短暫等再試
+                time.sleep(1.0 * (attempt + 1))
+            except Exception as e:
+                wait = 2.0 * (attempt + 1)
+                print(f"    [token retry {attempt+1}/{retries}] {type(e).__name__} → 等 {wait}s")
+                time.sleep(wait)
+        return None
 
-    def query(self, stock_no: str, sca_date: str) -> str | None:
-        """回傳指定股票/日期的 response HTML，若 session 失效回 None。"""
-        token = self._get_token()
-        form = urllib.parse.urlencode({
-            "SYNCHRONIZER_TOKEN": token,
-            "SYNCHRONIZER_URI": "/portal/zh/smWeb/qryStock",
-            "method": "submit",
-            "firDate": "20260417",
-            "scaDate": sca_date,
-            "SqlMethod": "StockNo",
-            "StockNameChk": "",
-            "stockNo": stock_no,
-            "radioStockNo": "on",
-            "REQ_OPR": "SELECT",
-        }).encode("utf-8")
-        req = urllib.request.Request(
-            PORTAL, data=form, method="POST",
-            headers={
-                "Content-Type": "application/x-www-form-urlencoded",
-                "Referer": PORTAL,
-            },
-        )
-        try:
-            with self.opener.open(req, timeout=30) as r:
-                return r.read().decode("utf-8", "replace")
-        except Exception as e:
-            print(f"    [query error] {stock_no}@{sca_date} {type(e).__name__}")
-            return None
+    def query(self, stock_no: str, sca_date: str, retries: int = 3) -> str | None:
+        """回傳指定股票/日期的 response HTML；網路錯誤自動重試。"""
+        for attempt in range(retries):
+            token = self._get_token()
+            if token is None:
+                return None
+            form = urllib.parse.urlencode({
+                "SYNCHRONIZER_TOKEN": token,
+                "SYNCHRONIZER_URI": "/portal/zh/smWeb/qryStock",
+                "method": "submit",
+                "firDate": "20260417",
+                "scaDate": sca_date,
+                "SqlMethod": "StockNo",
+                "StockNameChk": "",
+                "stockNo": stock_no,
+                "radioStockNo": "on",
+                "REQ_OPR": "SELECT",
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                PORTAL, data=form, method="POST",
+                headers={
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Referer": PORTAL,
+                },
+            )
+            try:
+                with self.opener.open(req, timeout=30) as r:
+                    return r.read().decode("utf-8", "replace")
+            except Exception as e:
+                wait = 1.5 * (attempt + 1)
+                print(f"    [POST retry {attempt+1}/{retries}] {stock_no}@{sca_date} {type(e).__name__} → 等 {wait}s")
+                time.sleep(wait)
+        return None
 
 
 def parse_response(html: str) -> tuple[str, dict] | None:

@@ -3,13 +3,18 @@ chcp 65001 > nul
 REM ===========================================================
 REM  Taiwan Industry Map - Daily Auto Rebuild
 REM
-REM  What it does:
-REM    1) Pull latest price/volume/institutional data from FinLab
-REM    2) Recompute group metrics, heatmap, stock pages, highlights
-REM    3) Rebuild all HTML under site/dist/
-REM    4) Log to logs/build_YYYYMMDD_HHMM.log
+REM  Pipeline (3 steps):
+REM    Step 1/3: fetch_extras.py       -> 處置股 + 集保分級週報
+REM    Step 2/3: fetch_company_rich.py -> 公司基本 + 月營收 + 季報 + 股利
+REM    Step 3/3: build_site.py         -> 股價 / 法人 / 融資融券 / render 2700+ pages
 REM
-REM  Suggested cron: daily 14:30 (30min after market close)
+REM  漲停分析:
+REM    由外部專案產出 enriched-*.json 到
+REM    C:/Users/user/Desktop/程式雜/AI股票網頁建構/reports/
+REM    build_site.py 會自動抓最新一個 render 到 limit-up.html
+REM
+REM  Log: logs/build_YYYYMMDD_HHMM.log
+REM  Cron: daily 14:30 (30min after market close)
 REM ===========================================================
 setlocal enabledelayedexpansion
 
@@ -41,8 +46,19 @@ echo  Log:   %LOG_FILE%
 echo ===========================================================
 echo.
 
-REM --- Step 1/2: Refresh company rich data (basic/business/revenue/financials/dividends/director) ---
-echo === [Step 1/2] Refresh company rich data === > "%LOG_FILE%"
+REM --- Step 1/3: fetch extras (disposal + TDCC holders weekly) ---
+echo === [Step 1/3] Fetch extras (處置股 + 集保分級) === > "%LOG_FILE%"
+echo Start: %date% %time% >> "%LOG_FILE%"
+echo. >> "%LOG_FILE%"
+"%PYTHON%" "site\fetch_extras.py" >> "%LOG_FILE%" 2>&1
+set "EXTRAS_RC=%errorlevel%"
+if not "%EXTRAS_RC%"=="0" (
+    echo [WARN] fetch_extras exit %EXTRAS_RC%, continue anyway >> "%LOG_FILE%"
+)
+
+REM --- Step 2/3: Refresh company rich data (basic/business/revenue/financials/dividends/director) ---
+echo. >> "%LOG_FILE%"
+echo === [Step 2/3] Refresh company rich data === >> "%LOG_FILE%"
 echo Start: %date% %time% >> "%LOG_FILE%"
 echo. >> "%LOG_FILE%"
 "%PYTHON%" "site\fetch_company_rich.py" >> "%LOG_FILE%" 2>&1
@@ -51,9 +67,9 @@ if not "%RICH_RC%"=="0" (
     echo [WARN] rich refresh exit %RICH_RC%, continue to build step anyway >> "%LOG_FILE%"
 )
 
-REM --- Step 2/2: Build site (price / institutional / render 2700+ pages) ---
+REM --- Step 3/3: Build site (price / institutional / render 2700+ pages + limit-up from enriched-*.json) ---
 echo. >> "%LOG_FILE%"
-echo === [Step 2/2] Build site === >> "%LOG_FILE%"
+echo === [Step 3/3] Build site === >> "%LOG_FILE%"
 echo Start: %date% %time% >> "%LOG_FILE%"
 echo. >> "%LOG_FILE%"
 "%PYTHON%" "%BUILD_SCRIPT%" >> "%LOG_FILE%" 2>&1
