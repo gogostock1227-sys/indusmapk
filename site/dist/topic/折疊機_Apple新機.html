@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>折疊機/Apple 新機 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#6b21a8;">折疊機/Apple 新機</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#6b21a8;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#6b21a822; color:#6b21a8;">消費電子</div>
+    <h1>折疊機/Apple 新機</h1>
+    <p class="topic-en">Foldable / Apple New Device</p>
+    <p class="topic-desc">蘋果 2026 H2 推摺疊 iPhone 與新款 iPad，台廠鉸鏈、OLED、鏡頭模組吃 big bite。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>25%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>—</strong></span>
+      <span class="kpi"><em>成分股</em><strong>10</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-4.67%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>發表時程</small>
+    <strong>2026 H2</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>關鍵零件</small>
+    <strong>鉸鏈 / OLED</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>台廠</small>
+    <strong>新日興 / 大立光 / 群光</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>ASP 提升</small>
+    <strong>高於現有機型</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_折疊機_Apple新機"></div>
+  <div id="topic_chart_折疊機_Apple新機" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -3.52, -1.89, -0.83, -0.02, 2.17, 5.18, 4.78, 4.43, 6.9, 6.26, 6.12, 5.44, 5.19, 5.26, 2.08, 1.01, 1.3, -0.6, -0.38, -0.48, -0.01, 1.47, -0.6, -2.55, -5.47, -5.91, -3.17, -6.24, -5.41, -4.29, -3.02, -1.4, -1.01, -0.35, -1.74, -0.1, 0.38, 0.14, -0.23, -0.73, 0.17, -0.97, -0.78, -1.79, -3.42, -2.67, -3.52, -2.28, -0.28, -0.66, -1.01, -0.33, 0.41, 0.53, 0.55, 1.92, 1.86, 5.63, 7.34, 4.71, 4.54, 7.35, 7.08, 10.06, 9.52, 9.16, 11.11, 11.63, 9.67, 11.45, 12.42, 13.26, 12.85, 12.06, 9.83, 8.7, 5.17, 6.59, 8.25, 5.34, 4.1, 5.57, 7.03, 6.39, 7.52, 9.56, 10.46, 12.27, 10.69, 7.34, 2.12, 4.64, 5.23, 0.0, 2.88, 5.15, 5.16, 5.32, 7.15, 9.66, 11.89, 11.73, 11.23, 5.78, 5.28, 7.12, 8.8, 8.05, 5.09, 0.4, 2.74, 0.59, 1.44, 6.78, 8.07, 11.23, 13.87, 16.46, 18.94, 19.72, 18.95, 22.06, 25.0, 25.53, 19.66], "ret_1d": -4.67, "ret_1w": -0.05, "ret_1m": 13.66};
+    const kpiEl = document.getElementById('topic_chart_kpis_折疊機_Apple新機');
+    const chartEl = document.getElementById('topic_chart_折疊機_Apple新機');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-4.67%</strong></div>
+      <div><em>5日平均</em><strong class="negative">-0.01%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+13.21%</strong></div>
+      <div><em>族群成交額</em><strong>640.9 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>2</strong></div>
+      <div><em>投信買超家數</em><strong>5</strong></div>
+      <div><em>今日最強</em><strong>鴻海</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="穿戴_智慧眼鏡.html" style="border-color:#9333ea; color:#9333ea;">
+        穿戴/智慧眼鏡
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="AI眼鏡_MetaRay-Ban.html" style="border-color:#c026d3; color:#c026d3;">
+        AI 眼鏡 / Meta Ray-Ban
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="印度產能_印度概念.html" style="border-color:#fb923c; color:#fb923c;">
+        印度產能/印度概念
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="蘋果概念股.html" style="border-color:#71717a; color:#71717a;">
+        蘋果概念股
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="AI伺服器.html" style="border-color:#ff7847; color:#ff7847;">
+        AI伺服器
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2317.html">2317</a></td>
+        <td>
+          <a href="../company/2317.html">鴻海</a>
+          <span class="hl-star" data-tip="全球最大 EMS（電子代工）｜蘋果 iPhone 組裝 70%+、AI 伺服器新 B200 GB200" title="全球最大 EMS（電子代工）｜蘋果 iPhone 組裝 70%+、AI 伺服器新 B200 GB200">★</span>
+          
+          
+        </td>
+        <td>225.00</td>
+        <td class="positive">+1.81%</td>
+        <td class="positive">+8.70%</td>
+        <td class="positive">+15.38%</td>
+        <td class="positive">
+          +27796
+        </td>
+        <td class="positive">
+          +210
+        </td>
+        <td>389.8 億</td>
+        <td>
+          
+          
+            <span class="tag">AI伺服器</span><span class="tag">輝達概念股</span><span class="tag">電動車</span>
+            
+              <span class="tag tag-more" data-tip="機器人、蘋果概念股、固態電池、新南向/東南亞產能、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、美國製造回流/晶片法案、印度產能/印度概念、伺服器準系統、川普概念/關稅戰" title="機器人、蘋果概念股、固態電池、新南向/東南亞產能、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、美國製造回流/晶片法案、印度產能/印度概念、伺服器準系統、川普概念/關稅戰">+10</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3008.html">3008</a></td>
+        <td>
+          <a href="../company/3008.html">大立光</a>
+          <span class="hl-star" data-tip="手機鏡頭 全球 #1｜七片鏡頭、玻塑混合鏡頭、AR 鏡頭" title="手機鏡頭 全球 #1｜七片鏡頭、玻塑混合鏡頭、AR 鏡頭">★</span>
+          
+          
+        </td>
+        <td>2485.00</td>
+        <td class="negative">-3.87%</td>
+        <td class="negative">-11.88%</td>
+        <td class="positive">+10.94%</td>
+        <td class="negative">
+          -121
+        </td>
+        <td class="negative">
+          -131
+        </td>
+        <td>56.7 億</td>
+        <td>
+          
+          
+            <span class="tag">穿戴/智慧眼鏡</span><span class="tag">AI 眼鏡 / Meta Ray-Ban</span><span class="tag">光學鏡片/鏡頭</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5439.html">5439</a></td>
+        <td>
+          <a href="../company/5439.html">高技</a>
+          <span class="hl-star" data-tip="PCB 鑽孔 前三｜高技 HDI 鑽孔加工" title="PCB 鑽孔 前三｜高技 HDI 鑽孔加工">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>376.50</td>
+        <td class="negative">-9.93%</td>
+        <td class="negative">-4.08%</td>
+        <td class="positive">+36.66%</td>
+        <td class="negative">
+          -1372
+        </td>
+        <td class="negative">
+          -1107
+        </td>
+        <td>50.5 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6182.html">6182</a></td>
+        <td>
+          <a href="../company/6182.html">合晶</a>
+          <span class="hl-star" data-tip="矽晶圓 台灣 #3 / GaN 基板卡位｜8 吋 / 12 吋矽晶圓、GaN-on-Si" title="矽晶圓 台灣 #3 / GaN 基板卡位｜8 吋 / 12 吋矽晶圓、GaN-on-Si">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>40.70</td>
+        <td class="negative">-9.56%</td>
+        <td class="positive">+10.00%</td>
+        <td class="positive">+20.77%</td>
+        <td class="negative">
+          -492
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>37.1 億</td>
+        <td>
+          
+          
+            <span class="tag">被動元件</span><span class="tag">碳化矽/SiC</span><span class="tag">矽晶圓</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3376.html">3376</a></td>
+        <td>
+          <a href="../company/3376.html">新日興</a>
+          <span class="hl-star" data-tip="鉸鏈 全球 #1｜新日興筆電 / 摺疊手機鉸鏈" title="鉸鏈 全球 #1｜新日興筆電 / 摺疊手機鉸鏈">★</span>
+          
+          
+        </td>
+        <td>215.00</td>
+        <td class="negative">-3.37%</td>
+        <td class="positive">+10.26%</td>
+        <td class="positive">+0.23%</td>
+        <td class="positive">
+          +1358
+        </td>
+        <td class="positive">
+          +320
+        </td>
+        <td>29.3 億</td>
+        <td>
+          
+          
+            <span class="tag">穿戴/智慧眼鏡</span><span class="tag">AI 眼鏡 / Meta Ray-Ban</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2324.html">2324</a></td>
+        <td>
+          <a href="../company/2324.html">仁寶</a>
+          <span class="hl-star" data-tip="筆電 ODM 全球前三｜仁寶 Chromebook + AI PC" title="筆電 ODM 全球前三｜仁寶 Chromebook + AI PC">★</span>
+          
+          
+        </td>
+        <td>31.20</td>
+        <td class="negative">-4.73%</td>
+        <td class="positive">+6.12%</td>
+        <td class="negative">-1.58%</td>
+        <td class="negative">
+          -7305
+        </td>
+        <td class="negative">
+          -1816
+        </td>
+        <td>24.2 億</td>
+        <td>
+          
+          
+            <span class="tag">AI伺服器</span><span class="tag">AI PC/邊緣AI</span><span class="tag">蘋果概念股</span>
+            
+              <span class="tag tag-more" data-tip="穿戴/智慧眼鏡、印度產能/印度概念、PC/電競品牌" title="穿戴/智慧眼鏡、印度產能/印度概念、PC/電競品牌">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4938.html">4938</a></td>
+        <td>
+          <a href="../company/4938.html">和碩</a>
+          <span class="hl-star" data-tip="筆電 ODM 全球前五｜和碩 iPhone + AI 伺服器" title="筆電 ODM 全球前五｜和碩 iPhone + AI 伺服器">★</span>
+          
+          
+        </td>
+        <td>84.00</td>
+        <td class="negative">-0.83%</td>
+        <td class="positive">+4.87%</td>
+        <td class="positive">+9.95%</td>
+        <td class="negative">
+          -4411
+        </td>
+        <td class="positive">
+          +2479
+        </td>
+        <td>22.2 億</td>
+        <td>
+          
+          
+            <span class="tag">AI伺服器</span><span class="tag">AI PC/邊緣AI</span><span class="tag">蘋果概念股</span>
+            
+              <span class="tag tag-more" data-tip="印度產能/印度概念、PC/電競品牌" title="印度產能/印度概念、PC/電競品牌">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2492.html">2492</a></td>
+        <td>
+          <a href="../company/2492.html">華新科</a>
+          <span class="hl-star" data-tip="MLCC 全球 #5｜AI 伺服器高頻高壓電容" title="MLCC 全球 #5｜AI 伺服器高頻高壓電容">★</span>
+          
+          
+        </td>
+        <td>130.00</td>
+        <td class="negative">-8.77%</td>
+        <td class="negative">-12.46%</td>
+        <td class="positive">+4.84%</td>
+        <td class="negative">
+          -3376
+        </td>
+        <td class="positive">
+          +4
+        </td>
+        <td>17.9 億</td>
+        <td>
+          
+          
+            <span class="tag">被動元件</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2385.html">2385</a></td>
+        <td>
+          <a href="../company/2385.html">群光</a>
+          <span class="hl-star" data-tip="電腦周邊 前三｜群光鍵盤 + 鏡頭 + 電源" title="電腦周邊 前三｜群光鍵盤 + 鏡頭 + 電源">★</span>
+          
+          
+        </td>
+        <td>126.00</td>
+        <td class="positive">+0.80%</td>
+        <td class="negative">+0.00%</td>
+        <td class="positive">+5.00%</td>
+        <td class="negative">
+          -129
+        </td>
+        <td class="positive">
+          +837
+        </td>
+        <td>9.2 億</td>
+        <td>
+          
+          
+            <span class="tag">穿戴/智慧眼鏡</span><span class="tag">AI 眼鏡 / Meta Ray-Ban</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3532.html">3532</a></td>
+        <td>
+          <a href="../company/3532.html">台勝科</a>
+          <span class="hl-star" data-tip="玻璃基板 GCS 先行者｜半導體玻璃基板、手機面板玻璃" title="玻璃基板 GCS 先行者｜半導體玻璃基板、手機面板玻璃">★</span>
+          
+          
+        </td>
+        <td>171.50</td>
+        <td class="negative">-8.29%</td>
+        <td class="negative">-11.60%</td>
+        <td class="positive">+29.92%</td>
+        <td class="negative">
+          -46
+        </td>
+        <td class="negative">
+          -411
+        </td>
+        <td>4.0 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,1835 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>網通 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../database.html" class="">公司資料庫</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#0d9488;">網通</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#0d9488;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#0d948822; color:#0d9488;">光通訊 / 網通</div>
+    <h1>網通</h1>
+    <p class="topic-en">Networking</p>
+    <p class="topic-desc">WiFi 7、Switch、企業網通設備。AI 資料中心帶動高階 Switch 需求。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>15%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>50B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>58</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-3.55%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>世代</small>
+    <strong>WiFi 7 / 800G Switch</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>應用</small>
+    <strong>CSP / 企業 / 家用</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>客戶</small>
+    <strong>Arista / Cisco</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>台廠</small>
+    <strong>智邦 / 啟碁</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_網通"></div>
+  <div id="topic_chart_網通" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -2.24, -1.76, -0.94, -1.34, -0.75, 0.1, 0.19, -0.38, -0.15, -1.0, 0.45, 1.68, 0.08, 0.04, -1.95, -2.15, -2.11, -2.7, -3.27, -3.64, -2.29, -2.09, -3.14, -4.09, -6.12, -7.03, -5.3, -7.06, -5.79, -4.11, -1.82, -0.98, 0.07, 0.36, 0.3, 1.31, 0.81, 0.62, 1.21, 2.02, 2.14, 1.57, 2.75, 3.82, 3.45, 3.99, 2.33, 3.0, 4.95, 5.83, 5.81, 5.95, 5.29, 5.1, 4.36, 4.6, 3.06, 3.44, 4.71, 4.18, 4.23, 6.63, 5.65, 9.04, 9.4, 8.52, 9.35, 9.49, 8.97, 10.45, 10.69, 10.9, 10.63, 11.53, 10.48, 8.38, 6.67, 7.76, 9.5, 8.76, 6.76, 7.18, 7.05, 7.44, 10.05, 11.07, 11.37, 13.27, 14.28, 13.54, 8.09, 10.3, 10.63, 5.62, 6.86, 9.38, 8.95, 9.38, 9.55, 11.88, 13.46, 13.64, 14.29, 11.25, 9.96, 12.76, 11.63, 13.05, 10.79, 7.83, 10.67, 9.65, 10.43, 13.39, 13.98, 15.14, 16.89, 16.1, 17.18, 19.3, 20.63, 21.99, 23.85, 23.78, 19.39], "ret_1d": -3.55, "ret_1w": 0.08, "ret_1m": 8.58};
+    const kpiEl = document.getElementById('topic_chart_kpis_網通');
+    const chartEl = document.getElementById('topic_chart_網通');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-3.55%</strong></div>
+      <div><em>5日平均</em><strong class="positive">+0.08%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+8.76%</strong></div>
+      <div><em>族群成交額</em><strong>1109.0 億</strong></div>
+      <div><em>漲停家數</em><strong>1</strong></div>
+      <div><em>外資買超家數</em><strong>19</strong></div>
+      <div><em>投信買超家數</em><strong>4</strong></div>
+      <div><em>今日最強</em><strong>台林</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="5G_6G基地台.html" style="border-color:#0d9488; color:#0d9488;">
+        5G/6G 基地台
+        <small>共用 6 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="智慧家庭_Matter.html" style="border-color:#6366f1; color:#6366f1;">
+        智慧家庭/Matter
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="低軌衛星.html" style="border-color:#22d3ee; color:#22d3ee;">
+        低軌衛星
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="高速傳輸.html" style="border-color:#34d399; color:#34d399;">
+        高速傳輸
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="智慧城市_V2X.html" style="border-color:#0891b2; color:#0891b2;">
+        智慧城市/V2X
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2454.html">2454</a></td>
+        <td>
+          <a href="../company/2454.html">聯發科</a>
+          <span class="hl-star" data-tip="IC 設計 全球 #4 / 台灣 #1｜Dimensity 9400 旗艦 SoC、5G 數據晶片全球 #1" title="IC 設計 全球 #4 / 台灣 #1｜Dimensity 9400 旗艦 SoC、5G 數據晶片全球 #1">★</span>
+          
+          
+        </td>
+        <td>2215.00</td>
+        <td class="negative">-3.49%</td>
+        <td class="positive">+16.89%</td>
+        <td class="positive">+36.73%</td>
+        <td class="positive">
+          +747
+        </td>
+        <td class="positive">
+          +595
+        </td>
+        <td>672.2 億</td>
+        <td>
+          
+          
+            <span class="tag">Google TPU</span><span class="tag">ASIC/IP矽智財</span><span class="tag">IC設計</span>
+            
+              <span class="tag tag-more" data-tip="AI PC/邊緣AI、2奈米先進製程、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、射頻 RF/PA" title="AI PC/邊緣AI、2奈米先進製程、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、射頻 RF/PA">+5</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2345.html">2345</a></td>
+        <td>
+          <a href="../company/2345.html">智邦</a>
+          <span class="hl-star" data-tip="企業網通交換器 全球 #1｜800G / 1.6T Switch、白牌交換器獨家" title="企業網通交換器 全球 #1｜800G / 1.6T Switch、白牌交換器獨家">★</span>
+          
+          
+        </td>
+        <td>2080.00</td>
+        <td class="negative">-5.45%</td>
+        <td class="positive">+2.21%</td>
+        <td class="positive">+35.50%</td>
+        <td class="negative">
+          -318
+        </td>
+        <td class="negative">
+          -13
+        </td>
+        <td>139.0 億</td>
+        <td>
+          
+          
+            <span class="tag">AI伺服器</span><span class="tag">高速傳輸</span><span class="tag">低軌衛星</span>
+            
+              <span class="tag tag-more" data-tip="5G/6G 基地台、智慧城市/V2X、AI基礎設施/資料中心" title="5G/6G 基地台、智慧城市/V2X、AI基礎設施/資料中心">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6285.html">6285</a></td>
+        <td>
+          <a href="../company/6285.html">啟碁</a>
+          <span class="hl-star" data-tip="網通 ODM 全球 #2｜WiFi 7 路由器、衛星 Gateway" title="網通 ODM 全球 #2｜WiFi 7 路由器、衛星 Gateway">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>217.50</td>
+        <td class="negative">-9.94%</td>
+        <td class="negative">-18.54%</td>
+        <td class="positive">+30.24%</td>
+        <td class="positive">
+          +2988
+        </td>
+        <td class="negative">
+          -1617
+        </td>
+        <td>92.0 億</td>
+        <td>
+          
+          
+            <span class="tag">矽光子</span><span class="tag">高速傳輸</span><span class="tag">低軌衛星</span>
+            
+              <span class="tag tag-more" data-tip="電動車、車用電子、碳化矽/SiC、5G/6G 基地台、智慧家庭/Matter、智慧城市/V2X" title="電動車、車用電子、碳化矽/SiC、5G/6G 基地台、智慧家庭/Matter、智慧城市/V2X">+6</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4966.html">4966</a></td>
+        <td>
+          <a href="../company/4966.html">譜瑞-KY</a>
+          <span class="hl-star" data-tip="Display Port / USB IC 全球 #1｜DP / eDP Timing Controller 主流供應" title="Display Port / USB IC 全球 #1｜DP / eDP Timing Controller 主流供應">★</span>
+          
+          
+        </td>
+        <td>600.00</td>
+        <td class="positive">+1.69%</td>
+        <td class="positive">+8.11%</td>
+        <td class="positive">+21.33%</td>
+        <td class="negative">
+          -149
+        </td>
+        <td class="positive">
+          +355
+        </td>
+        <td>45.6 億</td>
+        <td>
+          
+          
+            <span class="tag">IC設計</span><span class="tag">矽光子</span><span class="tag">晶圓代工成熟製程</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2379.html">2379</a></td>
+        <td>
+          <a href="../company/2379.html">瑞昱</a>
+          <span class="hl-star" data-tip="網通 IC 全球 #1｜乙太網、WiFi 7、PCIe Switch 全系列" title="網通 IC 全球 #1｜乙太網、WiFi 7、PCIe Switch 全系列">★</span>
+          
+          
+        </td>
+        <td>542.00</td>
+        <td class="negative">-4.41%</td>
+        <td class="positive">+0.37%</td>
+        <td class="positive">+12.80%</td>
+        <td class="positive">
+          +683
+        </td>
+        <td class="negative">
+          -831
+        </td>
+        <td>36.3 億</td>
+        <td>
+          
+          
+            <span class="tag">ASIC/IP矽智財</span><span class="tag">IC設計</span><span class="tag">CoWoS先進封裝</span>
+            
+              <span class="tag tag-more" data-tip="矽光子、射頻 RF/PA" title="矽光子、射頻 RF/PA">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2316.html">2316</a></td>
+        <td>
+          <a href="../company/2316.html">楠梓電</a>
+          <span class="hl-star" data-tip="PCB 前十｜楠梓電 IC 載板 + HDI" title="PCB 前十｜楠梓電 IC 載板 + HDI">★</span>
+          
+          
+        </td>
+        <td>114.50</td>
+        <td class="positive">+0.88%</td>
+        <td class="negative">+0.00%</td>
+        <td class="positive">+14.50%</td>
+        <td class="positive">
+          +1020
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>19.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3045.html">3045</a></td>
+        <td>
+          <a href="../company/3045.html">台灣大</a>
+          
+          
+          
+        </td>
+        <td>112.00</td>
+        <td class="negative">-0.88%</td>
+        <td class="positive">+1.82%</td>
+        <td class="positive">+2.28%</td>
+        <td class="negative">
+          -1661
+        </td>
+        <td class="positive">
+          +482
+        </td>
+        <td>12.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6530.html">6530</a></td>
+        <td>
+          <a href="../company/6530.html">創威</a>
+          
+          
+          
+        </td>
+        <td>117.50</td>
+        <td class="negative">-5.62%</td>
+        <td class="positive">+2.62%</td>
+        <td class="positive">+29.83%</td>
+        <td class="positive">
+          +399
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6163.html">6163</a></td>
+        <td>
+          <a href="../company/6163.html">華電網</a>
+          
+          
+          
+        </td>
+        <td>64.40</td>
+        <td class="negative">-8.65%</td>
+        <td class="negative">-4.17%</td>
+        <td class="positive">+8.24%</td>
+        <td class="negative">
+          -2763
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7.9 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2412.html">2412</a></td>
+        <td>
+          <a href="../company/2412.html">中華電</a>
+          
+          
+          
+        </td>
+        <td>136.00</td>
+        <td class="negative">-0.37%</td>
+        <td class="negative">-0.37%</td>
+        <td class="positive">+1.49%</td>
+        <td class="negative">
+          -454
+        </td>
+        <td class="negative">
+          -539
+        </td>
+        <td>7.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6588.html">6588</a></td>
+        <td>
+          <a href="../company/6588.html">東典光電</a>
+          <span class="hl-star" data-tip="光通訊 前十｜東典光電光纖通訊" title="光通訊 前十｜東典光電光纖通訊">★</span>
+          
+          
+        </td>
+        <td>135.50</td>
+        <td class="negative">-9.06%</td>
+        <td class="negative">-10.86%</td>
+        <td class="positive">+40.71%</td>
+        <td class="positive">
+          +47
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7.1 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3062.html">3062</a></td>
+        <td>
+          <a href="../company/3062.html">建漢</a>
+          
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>27.85</td>
+        <td class="negative">-9.87%</td>
+        <td class="negative">-9.43%</td>
+        <td class="positive">+19.27%</td>
+        <td class="negative">
+          -4568
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6.7 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4904.html">4904</a></td>
+        <td>
+          <a href="../company/4904.html">遠傳</a>
+          
+          
+          
+        </td>
+        <td>95.90</td>
+        <td class="positive">+0.52%</td>
+        <td class="positive">+0.10%</td>
+        <td class="positive">+2.35%</td>
+        <td class="negative">
+          -819
+        </td>
+        <td class="positive">
+          +857
+        </td>
+        <td>6.7 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4903.html">4903</a></td>
+        <td>
+          <a href="../company/4903.html">聯光通</a>
+          
+          
+          
+        </td>
+        <td>48.15</td>
+        <td class="negative">-8.11%</td>
+        <td class="negative">-1.83%</td>
+        <td class="positive">+0.31%</td>
+        <td class="negative">
+          -482
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.9 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5388.html">5388</a></td>
+        <td>
+          <a href="../company/5388.html">中磊</a>
+          <span class="hl-star" data-tip="企業網通 台灣 #3｜中磊 Cisco 代工 + 衛星" title="企業網通 台灣 #3｜中磊 Cisco 代工 + 衛星">★</span>
+          
+          
+        </td>
+        <td>81.40</td>
+        <td class="negative">-3.44%</td>
+        <td class="negative">-2.51%</td>
+        <td class="positive">+6.96%</td>
+        <td class="negative">
+          -1172
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.7 億</td>
+        <td>
+          
+          
+            <span class="tag">高速傳輸</span><span class="tag">低軌衛星</span><span class="tag">5G/6G 基地台</span>
+            
+              <span class="tag tag-more" data-tip="智慧家庭/Matter、智慧城市/V2X" title="智慧家庭/Matter、智慧城市/V2X">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3152.html">3152</a></td>
+        <td>
+          <a href="../company/3152.html">璟德</a>
+          
+          
+          
+        </td>
+        <td>155.00</td>
+        <td class="negative">-9.36%</td>
+        <td class="negative">-8.01%</td>
+        <td class="positive">+13.14%</td>
+        <td class="negative">
+          -138
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3.9 億</td>
+        <td>
+          
+          
+            <span class="tag">光通訊細分</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3596.html">3596</a></td>
+        <td>
+          <a href="../company/3596.html">智易</a>
+          <span class="hl-star" data-tip="網通代工 前五｜智易寬頻 + Router 代工" title="網通代工 前五｜智易寬頻 + Router 代工">★</span>
+          
+          
+        </td>
+        <td>168.00</td>
+        <td class="negative">-3.17%</td>
+        <td class="negative">-4.82%</td>
+        <td class="negative">-6.15%</td>
+        <td class="negative">
+          -515
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3.4 億</td>
+        <td>
+          
+          
+            <span class="tag">5G/6G 基地台</span><span class="tag">智慧家庭/Matter</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4908.html">4908</a></td>
+        <td>
+          <a href="../company/4908.html">前鼎</a>
+          <span class="hl-star" data-tip="光通訊 前十｜前鼎高速光收發模組" title="光通訊 前十｜前鼎高速光收發模組">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>176.00</td>
+        <td class="negative">-9.97%</td>
+        <td class="positive">+13.55%</td>
+        <td class="positive">+61.47%</td>
+        <td class="positive">
+          +148
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3380.html">3380</a></td>
+        <td>
+          <a href="../company/3380.html">明泰</a>
+          <span class="hl-star" data-tip="企業網通 前五｜明泰 Switch + ONU 代工" title="企業網通 前五｜明泰 Switch + ONU 代工">★</span>
+          
+          
+        </td>
+        <td>36.80</td>
+        <td class="negative">-8.00%</td>
+        <td class="negative">-10.24%</td>
+        <td class="positive">+9.04%</td>
+        <td class="negative">
+          -746
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3.2 億</td>
+        <td>
+          
+          
+            <span class="tag">5G/6G 基地台</span><span class="tag">智慧家庭/Matter</span><span class="tag">智慧電錶/AMI</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3234.html">3234</a></td>
+        <td>
+          <a href="../company/3234.html">光環</a>
+          
+          
+          
+        </td>
+        <td>109.00</td>
+        <td class="negative">-5.22%</td>
+        <td class="negative">-3.11%</td>
+        <td class="positive">+24.57%</td>
+        <td class="positive">
+          +92
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3.0 億</td>
+        <td>
+          
+          
+            <span class="tag">光通訊細分</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6245.html">6245</a></td>
+        <td>
+          <a href="../company/6245.html">立端</a>
+          
+          
+          
+        </td>
+        <td>82.70</td>
+        <td class="negative">-4.94%</td>
+        <td class="positive">+4.82%</td>
+        <td class="positive">+21.80%</td>
+        <td class="positive">
+          +690
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2.6 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2439.html">2439</a></td>
+        <td>
+          <a href="../company/2439.html">美律</a>
+          
+          
+          
+        </td>
+        <td>86.70</td>
+        <td class="negative">-2.58%</td>
+        <td class="negative">-2.47%</td>
+        <td class="positive">+2.48%</td>
+        <td class="negative">
+          -739
+        </td>
+        <td class="negative">
+          -385
+        </td>
+        <td>2.6 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3704.html">3704</a></td>
+        <td>
+          <a href="../company/3704.html">合勤控</a>
+          <span class="hl-star" data-tip="網通 Gateway 前五｜合勤控企業網通 + 資安" title="網通 Gateway 前五｜合勤控企業網通 + 資安">★</span>
+          
+          
+        </td>
+        <td>35.75</td>
+        <td class="negative">-6.66%</td>
+        <td class="negative">-3.38%</td>
+        <td class="positive">+10.68%</td>
+        <td class="negative">
+          -493
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.6 億</td>
+        <td>
+          
+          
+            <span class="tag">高速傳輸</span><span class="tag">低軌衛星</span><span class="tag">軍工/國防</span>
+            
+              <span class="tag tag-more" data-tip="資安" title="資安">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6136.html">6136</a></td>
+        <td>
+          <a href="../company/6136.html">富爾特</a>
+          
+          
+          
+        </td>
+        <td>28.00</td>
+        <td class="positive">+1.27%</td>
+        <td class="positive">+16.67%</td>
+        <td class="positive">+16.67%</td>
+        <td class="negative">
+          -325
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6546.html">6546</a></td>
+        <td>
+          <a href="../company/6546.html">正基</a>
+          
+          
+          
+        </td>
+        <td>65.60</td>
+        <td class="negative">-9.02%</td>
+        <td class="negative">-7.61%</td>
+        <td class="negative">-8.38%</td>
+        <td class="negative">
+          -480
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8048.html">8048</a></td>
+        <td>
+          <a href="../company/8048.html">德勝</a>
+          
+          
+          
+        </td>
+        <td>67.00</td>
+        <td class="negative">-2.90%</td>
+        <td class="positive">+7.37%</td>
+        <td class="positive">+16.52%</td>
+        <td class="positive">
+          +372
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2332.html">2332</a></td>
+        <td>
+          <a href="../company/2332.html">友訊</a>
+          <span class="hl-star" data-tip="家用路由器 全球 #3｜友訊 D-Link 品牌" title="家用路由器 全球 #3｜友訊 D-Link 品牌">★</span>
+          
+          
+        </td>
+        <td>14.60</td>
+        <td class="negative">-4.26%</td>
+        <td class="negative">-5.50%</td>
+        <td class="negative">-0.68%</td>
+        <td class="negative">
+          -5209
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.2 億</td>
+        <td>
+          
+          
+            <span class="tag">5G/6G 基地台</span><span class="tag">智慧家庭/Matter</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3694.html">3694</a></td>
+        <td>
+          <a href="../company/3694.html">海華</a>
+          
+          
+          
+        </td>
+        <td>60.10</td>
+        <td class="negative">-3.38%</td>
+        <td class="negative">-1.96%</td>
+        <td class="positive">+10.07%</td>
+        <td class="negative">
+          -103
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3025.html">3025</a></td>
+        <td>
+          <a href="../company/3025.html">星通</a>
+          
+          
+          
+        </td>
+        <td>60.70</td>
+        <td class="negative">-5.60%</td>
+        <td class="negative">-3.96%</td>
+        <td class="positive">+0.83%</td>
+        <td class="negative">
+          -369
+        </td>
+        <td class="negative">
+          -28
+        </td>
+        <td>9414 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6263.html">6263</a></td>
+        <td>
+          <a href="../company/6263.html">普萊德</a>
+          
+          
+          
+        </td>
+        <td>143.00</td>
+        <td class="negative">-4.67%</td>
+        <td class="positive">+8.75%</td>
+        <td class="positive">+16.26%</td>
+        <td class="negative">
+          -50
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7944 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6152.html">6152</a></td>
+        <td>
+          <a href="../company/6152.html">百一</a>
+          
+          
+          
+        </td>
+        <td>14.85</td>
+        <td class="negative">-5.71%</td>
+        <td class="negative">-16.10%</td>
+        <td class="negative">-18.41%</td>
+        <td class="positive">
+          +662
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7895 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8059.html">8059</a></td>
+        <td>
+          <a href="../company/8059.html">凱碩</a>
+          
+          
+          
+        </td>
+        <td>23.25</td>
+        <td class="positive">+3.33%</td>
+        <td class="positive">+19.54%</td>
+        <td class="positive">+23.67%</td>
+        <td class="negative">
+          -232
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7417 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8011.html">8011</a></td>
+        <td>
+          <a href="../company/8011.html">台通</a>
+          
+          
+          
+        </td>
+        <td>20.45</td>
+        <td class="negative">-3.54%</td>
+        <td class="positive">+0.25%</td>
+        <td class="positive">+1.24%</td>
+        <td class="negative">
+          -762
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6240 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6465.html">6465</a></td>
+        <td>
+          <a href="../company/6465.html">威潤</a>
+          
+          
+          
+        </td>
+        <td>50.90</td>
+        <td class="negative">-4.86%</td>
+        <td class="positive">+14.13%</td>
+        <td class="positive">+24.15%</td>
+        <td class="positive">
+          +162
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5522 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6416.html">6416</a></td>
+        <td>
+          <a href="../company/6416.html">瑞祺電通</a>
+          
+          
+          
+        </td>
+        <td>80.80</td>
+        <td class="negative">-2.88%</td>
+        <td class="positive">+0.25%</td>
+        <td class="positive">+2.28%</td>
+        <td class="positive">
+          +3
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4333 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3047.html">3047</a></td>
+        <td>
+          <a href="../company/3047.html">訊舟</a>
+          
+          
+          
+        </td>
+        <td>15.15</td>
+        <td class="negative">-6.48%</td>
+        <td class="negative">-4.42%</td>
+        <td class="negative">-4.11%</td>
+        <td class="negative">
+          -558
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4218 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3558.html">3558</a></td>
+        <td>
+          <a href="../company/3558.html">神準</a>
+          
+          
+          
+        </td>
+        <td>113.00</td>
+        <td class="negative">-3.42%</td>
+        <td class="positive">+1.80%</td>
+        <td class="negative">-5.83%</td>
+        <td class="negative">
+          -86
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3915 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5353.html">5353</a></td>
+        <td>
+          <a href="../company/5353.html">台林</a>
+          
+           <span class="badge badge-red">漲停</span>
+          
+        </td>
+        <td>27.65</td>
+        <td class="positive">+9.94%</td>
+        <td class="positive">+10.82%</td>
+        <td class="positive">+12.17%</td>
+        <td class="positive">
+          +1
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3848 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3466.html">3466</a></td>
+        <td>
+          <a href="../company/3466.html">德晉</a>
+          
+          
+          
+        </td>
+        <td>40.00</td>
+        <td class="negative">-1.72%</td>
+        <td class="negative">-2.08%</td>
+        <td class="positive">+12.36%</td>
+        <td class="positive">
+          +97
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3461 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8034.html">8034</a></td>
+        <td>
+          <a href="../company/8034.html">榮群</a>
+          
+          
+          
+        </td>
+        <td>24.20</td>
+        <td class="negative">-5.10%</td>
+        <td class="negative">-5.65%</td>
+        <td class="positive">+3.20%</td>
+        <td class="negative">
+          -181
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2641 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6170.html">6170</a></td>
+        <td>
+          <a href="../company/6170.html">統振</a>
+          
+          
+          
+        </td>
+        <td>51.40</td>
+        <td class="negative">-0.96%</td>
+        <td class="positive">+0.19%</td>
+        <td class="negative">-0.58%</td>
+        <td class="negative">
+          -157
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2460 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6218.html">6218</a></td>
+        <td>
+          <a href="../company/6218.html">豪勉</a>
+          
+          
+          
+        </td>
+        <td>32.95</td>
+        <td class="negative">-4.49%</td>
+        <td class="negative">-13.74%</td>
+        <td class="positive">+29.98%</td>
+        <td class="positive">
+          +63
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2385 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3419.html">3419</a></td>
+        <td>
+          <a href="../company/3419.html">譁裕</a>
+          
+          
+          
+        </td>
+        <td>16.15</td>
+        <td class="negative">-3.87%</td>
+        <td class="positive">+11.38%</td>
+        <td class="negative">-1.52%</td>
+        <td class="positive">
+          +198
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2381 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2444.html">2444</a></td>
+        <td>
+          <a href="../company/2444.html">兆勁</a>
+          
+          
+          
+        </td>
+        <td>13.90</td>
+        <td class="negative">-1.77%</td>
+        <td class="positive">+9.88%</td>
+        <td class="positive">+6.92%</td>
+        <td class="positive">
+          +197
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2183 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2424.html">2424</a></td>
+        <td>
+          <a href="../company/2424.html">隴華</a>
+          
+          
+          
+        </td>
+        <td>24.50</td>
+        <td class="negative">-2.58%</td>
+        <td class="positive">+7.46%</td>
+        <td class="negative">-2.58%</td>
+        <td class="negative">
+          -298
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1467 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3447.html">3447</a></td>
+        <td>
+          <a href="../company/3447.html">展達</a>
+          
+          
+          
+        </td>
+        <td>37.95</td>
+        <td class="negative">-4.77%</td>
+        <td class="negative">-3.92%</td>
+        <td class="negative">-2.82%</td>
+        <td class="negative">
+          -105
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1432 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3311.html">3311</a></td>
+        <td>
+          <a href="../company/3311.html">閎暉</a>
+          
+          
+          
+        </td>
+        <td>32.25</td>
+        <td class="negative">-1.23%</td>
+        <td class="negative">-2.27%</td>
+        <td class="positive">+0.94%</td>
+        <td class="negative">
+          -170
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1304 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6142.html">6142</a></td>
+        <td>
+          <a href="../company/6142.html">友勁</a>
+          
+          
+          
+        </td>
+        <td>9.09</td>
+        <td class="negative">-2.78%</td>
+        <td class="negative">-2.88%</td>
+        <td class="negative">-9.01%</td>
+        <td class="negative">
+          -819
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1128 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3669.html">3669</a></td>
+        <td>
+          <a href="../company/3669.html">圓展</a>
+          
+          
+          
+        </td>
+        <td>37.75</td>
+        <td class="negative">-3.70%</td>
+        <td class="negative">-3.94%</td>
+        <td class="positive">+12.69%</td>
+        <td class="positive">
+          +20
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1092 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8089.html">8089</a></td>
+        <td>
+          <a href="../company/8089.html">康全電訊</a>
+          
+          
+          
+        </td>
+        <td>21.40</td>
+        <td class="negative">-6.35%</td>
+        <td class="negative">-1.61%</td>
+        <td class="negative">-8.15%</td>
+        <td class="negative">
+          -157
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1090 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6470.html">6470</a></td>
+        <td>
+          <a href="../company/6470.html">宇智</a>
+          
+          
+          
+        </td>
+        <td>46.85</td>
+        <td class="negative">-4.49%</td>
+        <td class="negative">-0.53%</td>
+        <td class="negative">-4.58%</td>
+        <td class="negative">
+          -68
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>737 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2314.html">2314</a></td>
+        <td>
+          <a href="../company/2314.html">台揚</a>
+          <span class="hl-star" data-tip="衛星通訊 台灣歷史 #1｜台揚科技 衛星地面站 + 5G" title="衛星通訊 台灣歷史 #1｜台揚科技 衛星地面站 + 5G">★</span>
+          
+          
+        </td>
+        <td>16.70</td>
+        <td class="positive">+5.03%</td>
+        <td class="positive">+18.86%</td>
+        <td class="negative">-4.57%</td>
+        <td class="negative">
+          -1
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>670 萬</td>
+        <td>
+          
+          
+            <span class="tag">低軌衛星</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6216.html">6216</a></td>
+        <td>
+          <a href="../company/6216.html">居易</a>
+          
+          
+          
+        </td>
+        <td>25.05</td>
+        <td class="negative">-2.15%</td>
+        <td class="negative">-3.09%</td>
+        <td class="negative">-0.20%</td>
+        <td class="negative">
+          -58
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>485 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3499.html">3499</a></td>
+        <td>
+          <a href="../company/3499.html">環天科</a>
+          
+          
+          
+        </td>
+        <td>16.55</td>
+        <td class="negative">-0.90%</td>
+        <td class="negative">-2.36%</td>
+        <td class="negative">-9.07%</td>
+        <td class="negative">
+          -38
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>377 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8176.html">8176</a></td>
+        <td>
+          <a href="../company/8176.html">智捷</a>
+          
+          
+          
+        </td>
+        <td>10.75</td>
+        <td class="negative">-1.38%</td>
+        <td class="positive">+1.42%</td>
+        <td class="negative">-9.28%</td>
+        <td class="negative">
+          -44
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>329 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6674.html">6674</a></td>
+        <td>
+          <a href="../company/6674.html">鋐寶科技</a>
+          
+          
+          
+        </td>
+        <td>18.45</td>
+        <td class="negative">-3.15%</td>
+        <td class="negative">-2.89%</td>
+        <td class="positive">+2.22%</td>
+        <td class="negative">
+          -17
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>152 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2321.html">2321</a></td>
+        <td>
+          <a href="../company/2321.html">東訊</a>
+          
+          
+          
+        </td>
+        <td>12.80</td>
+        <td class="negative">-0.78%</td>
+        <td class="negative">-4.12%</td>
+        <td class="">—</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>11 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8101.html">8101</a></td>
+        <td>
+          <a href="../company/8101.html">華冠</a>
+          
+          
+          
+        </td>
+        <td>13.45</td>
+        <td class="negative">-0.37%</td>
+        <td class="negative">-5.94%</td>
+        <td class="negative">-2.54%</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>1 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:54</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<sc

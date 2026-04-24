@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% set page = "index" %}
+{% block title %}台股產業寶 · 搜尋個股與題材{% endblock %}
+
+{% block content %}
+<section class="hero-search">
+  <div class="hero-search-inner">
+    <p class="eyebrow">Taiwan Industry Intelligence · {{ last_date }}</p>
+    <h1 class="hero-search-title">搜尋個股或題材<br>一鍵進入族群全貌</h1>
+    <p class="hero-search-sub">
+      輸入股票代號、公司名稱或題材關鍵字，即時定位所屬族群、法人動向與相關個股。
+      涵蓋 {{ total_stocks }} 檔上市櫃全股票、{{ total_groups }} 個題材族群。
+    </p>
+
+    <div class="hero-search-box">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="hero-search" placeholder="例如：2330、台積電、CoWoS、AI 伺服器" autocomplete="off" autofocus>
+      <div class="search-dropdown" id="hero-search-dropdown" hidden></div>
+    </div>
+
+    <div class="hero-search-quick">
+      <span class="quick-label">熱門題材：</span>
+      {% for g, m in top_flow[:6] %}
+      <a href="topic/{{ g|slugify }}.html" class="quick-chip">{{ g }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="hero-search-meta">
+      <div><strong>{{ total_stocks }}</strong><em>上市櫃個股</em></div>
+      <div><strong>{{ total_groups }}</strong><em>題材族群</em></div>
+      <div><strong class="positive">{{ total_limit_up }}</strong><em>今日漲停</em></div>
+      <div><strong class="negative">{{ total_limit_down }}</strong><em>今日跌停</em></div>
+    </div>
+  </div>
+</section>
+
+<section class="section-block">
+  <header class="section-head">
+    <h2 class="section-title">族群地圖</h2>
+    <p class="section-sub">點擊任一分類，深入查看該領域的題材族群與成分股</p>
+  </header>
+
+  <div class="category-map">
+    {% for cat in category_aggs %}
+    <a href="topics.html?cat={{ cat.name|urlencode }}" class="category-card"
+       data-category="{{ cat.name }}">
+      <span class="category-rule" style="background:{{ cat.color }};"></span>
+      <div class="category-card-body">
+        <div class="category-card-head">
+          <h3 class="category-name">{{ cat.name }}</h3>
+          <span class="category-count">{{ cat.n_groups }} 題材 · {{ cat.n_stocks }} 股</span>
+        </div>
+        <ul class="category-topics">
+          {% for g in cat.top_groups %}<li>{{ g }}</li>{% endfor %}
+        </ul>
+        <div class="category-stats">
+          <span class="{% if cat.ret_mean > 0 %}positive{% elif cat.ret_mean < 0 %}negative{% endif %}">
+            {{ cat.ret_mean|pct }}
+          </span>
+          <span class="amt">{{ cat.total_amt|fmt_amount }}</span>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

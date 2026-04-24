@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CDMO/生技製造服務 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#059669;">CDMO/生技製造服務</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#059669;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#05966922; color:#059669;">生技 / 醫療</div>
+    <h1>CDMO/生技製造服務</h1>
+    <p class="topic-en">CDMO</p>
+    <p class="topic-desc">合約開發製造 CDMO，承接全球藥廠委外生產訂單。保瑞積極併購擴張，台康生技切入抗體藥 CDMO。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>22%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>60B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>9</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-2.03%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>龍頭</small>
+    <strong>保瑞 / 台康</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>駐型</small>
+    <strong>小分子 / 大分子</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>訂單</small>
+    <strong>GLP-1 熱潮</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>毛利</small>
+    <strong>30-40%</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_CDMO_生技製造服務"></div>
+  <div id="topic_chart_CDMO_生技製造服務" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -1.1, -1.93, -0.92, -0.47, -2.3, -0.25, -0.48, -1.85, -2.53, -2.96, -4.3, -4.72, -3.49, -4.03, -3.71, -3.54, -3.4, -5.25, -6.37, -5.53, -3.95, -2.97, -2.94, -4.74, -7.05, -7.95, -7.23, -8.25, -6.47, -5.66, -3.6, -2.98, -3.35, -4.26, -4.16, -4.96, -5.01, -5.41, -6.19, -6.2, -7.16, -7.18, -8.68, -8.75, -9.22, -9.61, -9.57, -9.21, -9.07, -9.43, -9.99, -9.91, -9.95, -10.8, -10.62, -10.43, -11.92, -12.0, -10.72, -8.45, -9.4, -9.75, -9.14, -8.15, -6.89, -5.24, -6.7, -7.6, -9.57, -9.17, -6.35, -5.22, -2.53, -3.23, -2.24, -2.85, -4.22, -3.76, -3.3, -4.59, -6.69, -6.23, -7.01, -8.91, -9.29, -8.73, -9.16, -9.75, -10.84, -12.24, -14.46, -11.91, -12.17, -16.11, -15.21, -13.09, -14.9, -15.37, -15.06, -13.07, -11.99, -15.16, -15.91, -17.37, -16.39, -14.24, -15.09, -15.08, -15.99, -17.65, -14.47, -14.41, -15.72, -14.88, -16.46, -16.54, -15.96, -16.41, -15.78, -15.29, -16.09, -16.75, -16.78, -16.81, -18.5], "ret_1d": -2.03, "ret_1w": -3.78, "ret_1m": -2.52};
+    const kpiEl = document.getElementById('topic_chart_kpis_CDMO_生技製造服務');
+    const chartEl = document.getElementById('topic_chart_CDMO_生技製造服務');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-2.03%</strong></div>
+      <div><em>5日平均</em><strong class="negative">-3.80%</strong></div>
+      <div><em>20日平均</em><strong class="negative">-2.49%</strong></div>
+      <div><em>族群成交額</em><strong>28.4 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>0</strong></div>
+      <div><em>投信買超家數</em><strong>0</strong></div>
+      <div><em>今日最強</em><strong>杏一</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="生技CDMO.html" style="border-color:#0891b2; color:#0891b2;">
+        生技 CDMO
+        <small>共用 9 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="細胞治療.html" style="border-color:#be185d; color:#be185d;">
+        細胞治療
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="減重新藥_GLP-1.html" style="border-color:#0891b2; color:#0891b2;">
+        減重新藥/GLP-1
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="AI智慧醫療.html" style="border-color:#0f766e; color:#0f766e;">
+        AI 智慧醫療
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="疫苗_抗體新藥.html" style="border-color:#be123c; color:#be123c;">
+        疫苗/抗體新藥
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6446.html">6446</a></td>
+        <td>
+          <a href="../company/6446.html">藥華藥</a>
+          <span class="hl-star" data-tip="新藥授權收入 台灣 #1｜骨髓增殖性腫瘤 P3、ET 適應症通過 FDA" title="新藥授權收入 台灣 #1｜骨髓增殖性腫瘤 P3、ET 適應症通過 FDA">★</span>
+          
+          
+        </td>
+        <td>629.00</td>
+        <td class="negative">-2.78%</td>
+        <td class="negative">-4.70%</td>
+        <td class="positive">+1.45%</td>
+        <td class="negative">
+          -186
+        </td>
+        <td class="negative">
+          -1
+        </td>
+        <td>12.7 億</td>
+        <td>
+          
+          
+            <span class="tag">生技醫療</span><span class="tag">醫材</span><span class="tag">減重新藥/GLP-1</span>
+            
+              <span class="tag tag-more" data-tip="生技 CDMO、細胞治療、新藥研發" title="生技 CDMO、細胞治療、新藥研發">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1795.html">1795</a></td>
+        <td>
+          <a href="../company/1795.html">美時</a>
+          <span class="hl-star" data-tip="學名藥 台灣 #1｜美時製藥、台灣最大學名藥廠" title="學名藥 台灣 #1｜美時製藥、台灣最大學名藥廠">★</span>
+          
+          
+        </td>
+        <td>223.50</td>
+        <td class="negative">-1.32%</td>
+        <td class="negative">-5.30%</td>
+        <td class="positive">+9.83%</td>
+        <td class="negative">
+          -89
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8.5 億</td>
+        <td>
+          
+          
+            <span class="tag">減重新藥/GLP-1</span><span class="tag">生技 CDMO</span><span class="tag">疫苗/抗體新藥</span>
+            
+              <span class="tag tag-more" data-tip="植栽/有機/飼料" title="植栽/有機/飼料">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6472.html">6472</a></td>
+        <td>
+          <a href="../company/6472.html">保瑞</a>
+          <span class="hl-star" data-tip="CDMO 台灣 #1｜併購策略：Impax、Upsher-Smith、Promesa" title="CDMO 台灣 #1｜併購策略：Impax、Upsher-Smith、Promesa">★</span>
+          
+          
+        </td>
+        <td>411.00</td>
+        <td class="negative">-1.91%</td>
+        <td class="negative">-3.41%</td>
+        <td class="negative">-9.87%</td>
+        <td class="negative">
+          -2
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.5 億</td>
+        <td>
+          
+          
+            <span class="tag">生技醫療</span><span class="tag">生技 CDMO</span><span class="tag">細胞治療</span>
+            
+              <span class="tag tag-more" data-tip="新藥研發" title="新藥研發">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6589.html">6589</a></td>
+        <td>
+          <a href="../company/6589.html">台康生技</a>
+          <span class="hl-star" data-tip="疫苗 CDMO 台灣 #1｜mRNA + 蛋白疫苗 CDMO" title="疫苗 CDMO 台灣 #1｜mRNA + 蛋白疫苗 CDMO">★</span>
+          
+          
+        </td>
+        <td>47.00</td>
+        <td class="negative">-3.79%</td>
+        <td class="negative">-8.38%</td>
+        <td class="negative">-17.83%</td>
+        <td class="negative">
+          -173
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8176 萬</td>
+        <td>
+          
+          
+            <span class="tag">防疫/口罩</span><span class="tag">生技 CDMO</span><span class="tag">細胞治療</span>
+            
+              <span class="tag tag-more" data-tip="疫苗/抗體新藥、新藥研發" title="疫苗/抗體新藥、新藥研發">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4147.html">4147</a></td>
+        <td>
+          <a href="../company/4147.html">中裕</a>
+          <span class="hl-star" data-tip="愛滋新藥 全球上市｜TMB-355 單株抗體" title="愛滋新藥 全球上市｜TMB-355 單株抗體">★</span>
+          
+          
+        </td>
+        <td>50.00</td>
+        <td class="negative">-1.38%</td>
+        <td class="negative">-6.37%</td>
+        <td class="negative">-5.48%</td>
+        <td class="negative">
+          -386
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8075 萬</td>
+        <td>
+          
+          
+            <span class="tag">生技醫療</span><span class="tag">防疫/口罩</span><span class="tag">醫材</span>
+            
+              <span class="tag tag-more" data-tip="減重新藥/GLP-1、生技 CDMO、疫苗/抗體新藥、美容保健/個人護理、新藥研發" title="減重新藥/GLP-1、生技 CDMO、疫苗/抗體新藥、美容保健/個人護理、新藥研發">+5</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4164.html">4164</a></td>
+        <td>
+          <a href="../company/4164.html">承業醫</a>
+          <span class="hl-star" data-tip="放射治療設備 台灣 #1｜承業醫質子治療設備" title="放射治療設備 台灣 #1｜承業醫質子治療設備">★</span>
+          
+          
+        </td>
+        <td>30.70</td>
+        <td class="negative">-4.66%</td>
+        <td class="negative">-2.38%</td>
+        <td class="positive">+0.49%</td>
+        <td class="negative">
+          -675
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5693 萬</td>
+        <td>
+          
+          
+            <span class="tag">AI 智慧醫療</span><span class="tag">生技 CDMO</span><span class="tag">細胞治療</span>
+            
+              <span class="tag tag-more" data-tip="手術機器人/智慧醫療器材" title="手術機器人/智慧醫療器材">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4746.html">4746</a></td>
+        <td>
+          <a href="../company/4746.html">台耀</a>
+          <span class="hl-star" data-tip="活性藥物原料 全球前十｜API 原料藥代工" title="活性藥物原料 全球前十｜API 原料藥代工">★</span>
+          
+          
+        </td>
+        <td>51.80</td>
+        <td class="negative">-2.45%</td>
+        <td class="negative">-3.36%</td>
+        <td class="negative">-5.47%</td>
+        <td class="negative">
+          -440
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4974 萬</td>
+        <td>
+          
+          
+            <span class="tag">生技醫療</span><span class="tag">AI 智慧醫療</span><span class="tag">AI 智慧醫療</span>
+            
+              <span class="tag tag-more" data-tip="生技 CDMO" title="生技 CDMO">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4120.html">4120</a></td>
+        <td>
+          <a href="../company/4120.html">友華</a>
+          <span class="hl-star" data-tip="生技通路 前五｜友華生技醫材代理" title="生技通路 前五｜友華生技醫材代理">★</span>
+          
+          
+        </td>
+        <td>47.00</td>
+        <td class="negative">-0.53%</td>
+        <td class="negative">-1.05%</td>
+        <td class="positive">+2.62%</td>
+        <td class="negative">
+          -1
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>158 萬</td>
+        <td>
+          
+          
+            <span class="tag">生技醫療</span><span class="tag">減重新藥/GLP-1</span><span class="tag">生技 CDMO</span>
+            
+              <span class="tag tag-more" data-tip="保健食品/機能食品、動物保健/寵物醫療" title="保健食品/機能食品、動物保健/寵物醫療">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4175.html">4175</a></td>
+        <td>
+          <a href="../company/4175.html">杏一</a>
+          <span class="hl-star" data-tip="藥局連鎖 台灣 #1｜杏一藥局 500+ 店" title="藥局連鎖 台灣 #1｜杏一藥局 500+ 店">★</span>
+          
+          
+        </td>
+        <td>55.80</td>
+        <td class="positive">+0.54%</td>
+        <td class="positive">+0.72%</td>
+        <td class="positive">+1.82%</td>
+        <td class="negative">
+          -4
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>153 萬</td>
+        <td>
+          
+          
+            <span class="tag">銀髮/高齡經濟</span><span class="tag">AI 智慧醫療</span><span class="tag">生技 CDMO</span>
+            
+              <span class="tag tag-more" data-tip="精準診斷/體外診斷、手術機器人/智慧醫療器材、老年長照/銀髮醫療" title="精準診斷/體外診斷、手術機器人/智慧醫療器材、老年長照/銀髮醫療">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

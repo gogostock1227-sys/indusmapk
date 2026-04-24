@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>面板/顯示器 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../database.html" class="">公司資料庫</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#7c3aed;">面板/顯示器</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#7c3aed;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#7c3aed22; color:#7c3aed;">面板 / 光電</div>
+    <h1>面板/顯示器</h1>
+    <p class="topic-en">Display Panel</p>
+    <p class="topic-desc">OLED、Mini LED、車用面板。2026 年蘋果擴大 OLED 採用，友達、群創受惠。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>10%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>—</strong></span>
+      <span class="kpi"><em>成分股</em><strong>30</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-4.91%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>技術</small>
+    <strong>OLED / Mini LED</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>應用</small>
+    <strong>手機 / 車用 / 電競</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>整併</small>
+    <strong>持續中</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>台廠</small>
+    <strong>友達 / 群創</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_面板_顯示器"></div>
+  <div id="topic_chart_面板_顯示器" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -2.52, -2.88, -1.83, -2.21, -1.45, -0.62, 0.44, -0.79, -0.31, -1.7, -0.82, -1.68, -3.02, -2.96, -4.59, -5.05, -4.13, -4.64, -5.46, -6.05, -4.21, -3.66, -4.97, -5.99, -8.37, -9.46, -7.43, -9.74, -9.89, -8.52, -6.7, -6.09, -5.14, -5.75, -5.64, -4.02, -3.65, -4.14, -3.63, -4.35, -4.89, -4.84, -4.45, -3.71, -4.71, -4.28, -5.58, -4.64, -3.91, -3.84, -3.81, -4.1, -3.07, -3.42, -2.96, -0.94, -0.38, 3.65, 6.61, 4.17, 3.81, 5.86, 5.14, 7.26, 8.36, 8.73, 13.34, 14.3, 13.11, 14.41, 13.15, 14.18, 12.16, 12.05, 9.12, 8.56, 7.52, 8.52, 11.87, 10.65, 8.81, 9.64, 9.32, 11.04, 14.8, 17.57, 19.89, 21.68, 21.45, 18.31, 12.52, 17.15, 20.33, 14.95, 16.21, 21.21, 22.57, 24.39, 25.36, 28.63, 30.14, 30.34, 29.79, 23.9, 22.2, 25.11, 23.01, 22.74, 21.52, 17.25, 22.07, 21.39, 21.64, 27.18, 29.26, 30.4, 32.97, 35.99, 38.37, 40.21, 42.53, 44.55, 45.14, 46.46, 39.27], "ret_1d": -4.91, "ret_1w": -0.67, "ret_1m": 13.97};
+    const kpiEl = document.getElementById('topic_chart_kpis_面板_顯示器');
+    const chartEl = document.getElementById('topic_chart_面板_顯示器');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-4.91%</strong></div>
+      <div><em>5日平均</em><strong class="negative">-0.69%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+14.07%</strong></div>
+      <div><em>族群成交額</em><strong>306.0 億</strong></div>
+      <div><em>漲停家數</em><strong>1</strong></div>
+      <div><em>外資買超家數</em><strong>11</strong></div>
+      <div><em>投信買超家數</em><strong>0</strong></div>
+      <div><em>今日最強</em><strong>瑞儀</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="光學薄膜.html" style="border-color:#7e22ce; color:#7e22ce;">
+        光學薄膜
+        <small>共用 7 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="OLED_MicroLED.html" style="border-color:#9333ea; color:#9333ea;">
+        OLED/Micro LED
+        <small>共用 7 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="LED_光電.html" style="border-color:#ea580c; color:#ea580c;">
+        LED/光電
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="日圓貶值受惠_台日合作.html" style="border-color:#dc2626; color:#dc2626;">
+        日圓貶值受惠/台日合作
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="光學精密元件.html" style="border-color:#7c3aed; color:#7c3aed;">
+        光學精密元件
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3481.html">3481</a></td>
+        <td>
+          <a href="../company/3481.html">群創</a>
+          <span class="hl-star" data-tip="面板 台灣 #2 / OLED 卡位｜鴻海系面板 + OLED 切入" title="面板 台灣 #2 / OLED 卡位｜鴻海系面板 + OLED 切入">★</span>
+          
+          
+        </td>
+        <td>24.10</td>
+        <td class="negative">-5.86%</td>
+        <td class="negative">-11.56%</td>
+        <td class="negative">-1.63%</td>
+        <td class="negative">
+          -33446
+        </td>
+        <td class="negative">
+          -5326
+        </td>
+        <td>85.2 億</td>
+        <td>
+          
+          
+            <span class="tag">農業科技/植物工廠</span><span class="tag">日圓貶值受惠/台日合作</span><span class="tag">OLED/Micro LED</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2409.html">2409</a></td>
+        <td>
+          <a href="../company/2409.html">友達</a>
+          <span class="hl-star" data-tip="面板 台灣 #1 / Micro LED｜LCD + OLED + Micro LED" title="面板 台灣 #1 / Micro LED｜LCD + OLED + Micro LED">★</span>
+          
+          
+        </td>
+        <td>17.75</td>
+        <td class="negative">-4.31%</td>
+        <td class="negative">-14.25%</td>
+        <td class="positive">+21.16%</td>
+        <td class="negative">
+          -29434
+        </td>
+        <td class="negative">
+          -9
+        </td>
+        <td>56.5 億</td>
+        <td>
+          
+          
+            <span class="tag">日圓貶值受惠/台日合作</span><span class="tag">OLED/Micro LED</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6176.html">6176</a></td>
+        <td>
+          <a href="../company/6176.html">瑞儀</a>
+          
+           <span class="badge badge-red">漲停</span>
+          
+        </td>
+        <td>109.50</td>
+        <td class="positive">+9.94%</td>
+        <td class="positive">+20.73%</td>
+        <td class="positive">+19.41%</td>
+        <td class="negative">
+          -6953
+        </td>
+        <td class="negative">
+          -1463
+        </td>
+        <td>44.0 億</td>
+        <td>
+          
+          
+            <span class="tag">新藥研發</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8069.html">8069</a></td>
+        <td>
+          <a href="../company/8069.html">元太</a>
+          <span class="hl-star" data-tip="被動元件 前五｜元太電子紙" title="被動元件 前五｜元太電子紙">★</span>
+          
+          
+        </td>
+        <td>147.00</td>
+        <td class="negative">-7.55%</td>
+        <td class="negative">-5.16%</td>
+        <td class="positive">+3.52%</td>
+        <td class="negative">
+          -6326
+        </td>
+        <td class="negative">
+          -108
+        </td>
+        <td>23.9 億</td>
+        <td>
+          
+          
+            <span class="tag">OLED/Micro LED</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5386.html">5386</a></td>
+        <td>
+          <a href="../company/5386.html">青雲</a>
+          <span class="hl-star" data-tip="觸控 前十｜青雲國際 觸控面板" title="觸控 前十｜青雲國際 觸控面板">★</span>
+          
+          
+        </td>
+        <td>345.00</td>
+        <td class="negative">-9.21%</td>
+        <td class="negative">-2.82%</td>
+        <td class="positive">+6.48%</td>
+        <td class="negative">
+          -216
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>18.0 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3673.html">3673</a></td>
+        <td>
+          <a href="../company/3673.html">TPK-KY</a>
+          <span class="hl-star" data-tip="觸控面板 台灣 #1｜TPK-KY 宸鴻 觸控模組" title="觸控面板 台灣 #1｜TPK-KY 宸鴻 觸控模組">★</span>
+          
+          
+        </td>
+        <td>61.70</td>
+        <td class="negative">-6.52%</td>
+        <td class="negative">-9.80%</td>
+        <td class="positive">+36.81%</td>
+        <td class="positive">
+          +8808
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>16.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6278.html">6278</a></td>
+        <td>
+          <a href="../company/6278.html">台表科</a>
+          <span class="hl-star" data-tip="面板組件 前十｜台表科 SMT + 面板模組" title="面板組件 前十｜台表科 SMT + 面板模組">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>142.50</td>
+        <td class="negative">-9.81%</td>
+        <td class="negative">-0.35%</td>
+        <td class="positive">+47.82%</td>
+        <td class="positive">
+          +1369
+        </td>
+        <td class="negative">
+          -1458
+        </td>
+        <td>12.5 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3535.html">3535</a></td>
+        <td>
+          <a href="../company/3535.html">晶彩科</a>
+          <span class="hl-star" data-tip="LED 驅動 前十｜晶彩科 LED Driver" title="LED 驅動 前十｜晶彩科 LED Driver">★</span>
+          
+          
+        </td>
+        <td>117.50</td>
+        <td class="negative">-7.84%</td>
+        <td class="negative">-6.75%</td>
+        <td class="positive">+0.43%</td>
+        <td class="positive">
+          +380
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8.9 億</td>
+        <td>
+          
+          
+            <span class="tag">LED/光電</span><span class="tag">光學薄膜</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5243.html">5243</a></td>
+        <td>
+          <a href="../company/5243.html">乙盛-KY</a>
+          <span class="hl-star" data-tip="金屬鑄造 前五｜乙盛-KY 背光模組 + 鎂合金" title="金屬鑄造 前五｜乙盛-KY 背光模組 + 鎂合金">★</span>
+          
+          
+        </td>
+        <td>123.50</td>
+        <td class="positive">+2.92%</td>
+        <td class="positive">+1.23%</td>
+        <td class="positive">+77.19%</td>
+        <td class="negative">
+          -679
+        </td>
+        <td class="negative">
+          -1
+        </td>
+        <td>7.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4960.html">4960</a></td>
+        <td>
+          <a href="../company/4960.html">誠美材</a>
+          <span class="hl-star" data-tip="LCD 偏光板 前五｜誠美材偏光板" title="LCD 偏光板 前五｜誠美材偏光板">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>40.50</td>
+        <td class="negative">-9.90%</td>
+        <td class="positive">+31.28%</td>
+        <td class="positive">+65.98%</td>
+        <td class="positive">
+          +511
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5.5 億</td>
+        <td>
+          
+          
+            <span class="tag">OLED/Micro LED</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2489.html">2489</a></td>
+        <td>
+          <a href="../company/2489.html">瑞軒</a>
+          <span class="hl-star" data-tip="顯示器組裝 前五｜瑞軒 Vizio 美國市場" title="顯示器組裝 前五｜瑞軒 Vizio 美國市場">★</span>
+          
+          
+        </td>
+        <td>41.40</td>
+        <td class="negative">-6.12%</td>
+        <td class="negative">-5.91%</td>
+        <td class="positive">+31.43%</td>
+        <td class="positive">
+          +1592
+        </td>
+        <td class="negative">
+          -1876
+        </td>
+        <td>3.6 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3149.html">3149</a></td>
+        <td>
+          <a href="../company/3149.html">正達</a>
+          
+          
+          
+        </td>
+        <td>42.05</td>
+        <td class="negative">-6.56%</td>
+        <td class="negative">-0.12%</td>
+        <td class="negative">-1.87%</td>
+        <td class="negative">
+          -1074
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2.9 億</td>
+        <td>
+          
+          
+            <span class="tag">光學精密元件</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2426.html">2426</a></td>
+        <td>
+          <a href="../company/2426.html">鼎元</a>
+          <span class="hl-star" data-tip="LED 磊晶 前十｜鼎元 LED 晶粒" title="LED 磊晶 前十｜鼎元 LED 晶粒">★</span>
+          
+          
+        </td>
+        <td>48.70</td>
+        <td class="negative">-6.70%</td>
+        <td class="negative">-8.46%</td>
+        <td class="positive">+47.80%</td>
+        <td class="positive">
+          +664
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2.4 億</td>
+        <td>
+          
+          
+            <span class="tag">LED/光電</span><span class="tag">光學薄膜</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3504.html">3504</a></td>
+        <td>
+          <a href="../company/3504.html">揚明光</a>
+          
+          
+          
+        </td>
+        <td>67.30</td>
+        <td class="negative">-6.92%</td>
+        <td class="positive">+9.79%</td>
+        <td class="positive">+21.26%</td>
+        <td class="positive">
+          +476
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2.1 億</td>
+        <td>
+          
+          
+            <span class="tag">光學精密元件</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6116.html">6116</a></td>
+        <td>
+          <a href="../company/6116.html">彩晶</a>
+          <span class="hl-star" data-tip="面板 台灣 #3｜彩晶 DTV 驅動 + 車用面板" title="面板 台灣 #3｜彩晶 DTV 驅動 + 車用面板">★</span>
+          
+          
+        </td>
+        <td>8.44</td>
+        <td class="negative">-4.63%</td>
+        <td class="negative">-8.95%</td>
+        <td class="positive">+1.32%</td>
+        <td class="negative">
+          -6971
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2.0 億</td>
+        <td>
+          
+          
+            <span class="tag">OLED/Micro LED</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2352.html">2352</a></td>
+        <td>
+          <a href="../company/2352.html">佳世達</a>
+          <span class="hl-star" data-tip="顯示器 ODM 全球 #2｜佳世達 明碁 Monitor + 醫材" title="顯示器 ODM 全球 #2｜佳世達 明碁 Monitor + 醫材">★</span>
+          
+          
+        </td>
+        <td>25.05</td>
+        <td class="negative">-3.65%</td>
+        <td class="negative">-0.79%</td>
+        <td class="positive">+5.92%</td>
+        <td class="negative">
+          -1035
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.8 億</td>
+        <td>
+          
+          
+            <span class="tag">醫材</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6168.html">6168</a></td>
+        <td>
+          <a href="../company/6168.html">宏齊</a>
+          
+          
+          
+        </td>
+        <td>25.70</td>
+        <td class="negative">-7.39%</td>
+        <td class="negative">-8.87%</td>
+        <td class="negative">-1.15%</td>
+        <td class="positive">
+          +1583
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.8 億</td>
+        <td>
+          
+          
+            <span class="tag">LED/光電</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6150.html">6150</a></td>
+        <td>
+          <a href="../company/6150.html">撼訊</a>
+          <span class="hl-star" data-tip="顯卡品牌 前十｜撼訊科技 AMD 顯卡合作" title="顯卡品牌 前十｜撼訊科技 AMD 顯卡合作">★</span>
+          
+          
+        </td>
+        <td>59.10</td>
+        <td class="negative">-3.11%</td>
+        <td class="positive">+10.26%</td>
+        <td class="positive">+2.78%</td>
+        <td class="negative">
+          -144
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.7 億</td>
+        <td>
+          
+          
+            <span class="tag">光學薄膜</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3437.html">3437</a></td>
+        <td>
+          <a href="../company/3437.html">榮創</a>
+          <span class="hl-star" data-tip="LED 磊晶 前五｜榮創 Mini LED 背光、車用 LED" title="LED 磊晶 前五｜榮創 Mini LED 背光、車用 LED">★</span>
+          
+          
+        </td>
+        <td>24.45</td>
+        <td class="negative">-6.14%</td>
+        <td class="negative">-1.21%</td>
+        <td class="positive">+10.38%</td>
+        <td class="positive">
+          +1013
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.6 億</td>
+        <td>
+          
+          
+            <span class="tag">LED/光電</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3049.html">3049</a></td>
+        <td>
+          <a href="../company/3049.html">精金</a>
+          <span class="hl-star" data-tip="光電薄膜 前十｜和鑫光電玻璃 + 面板背板" title="光電薄膜 前十｜和鑫光電玻璃 + 面板背板">★</span>
+          
+          
+        </td>
+        <td>12.40</td>
+        <td class="negative">-4.98%</td>
+        <td class="negative">-3.88%</td>
+        <td class="negative">-15.07%</td>
+        <td class="positive">
+          +2379
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.5 億</td>
+        <td>
+          
+          
+            <span class="tag">光學薄膜</span><span class="tag">OLED/Micro LED</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8215.html">8215</a></td>
+        <td>
+          <a href="../company/8215.html">明基材</a>
+          <span class="hl-star" data-tip="面板材料 前十｜明基材偏光板 + PCB" title="面板材料 前十｜明基材偏光板 + PCB">★</span>
+          
+          
+        </td>
+        <td>26.35</td>
+        <td class="negative">-7.05%</td>
+        <td class="negative">-0.94%</td>
+        <td class="positive">+11.42%</td>
+        <td class="negative">
+          -828
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          
+            <span class="tag">PCB/銅箔基板</span><span class="tag">光學薄膜</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3051.html">3051</a></td>
+        <td>
+          <a href="../company/3051.html">力特</a>
+          
+          
+          
+        </td>
+        <td>23.15</td>
+        <td class="negative">-8.13%</td>
+        <td class="positive">+11.57%</td>
+        <td class="positive">+14.60%</td>
+        <td class="positive">
+          +525
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.1 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3543.html">3543</a></td>
+        <td>
+          <a href="../company/3543.html">州巧</a>
+          
+          
+          
+        </td>
+        <td>42.00</td>
+        <td class="negative">-3.23%</td>
+        <td class="negative">-2.44%</td>
+        <td class="negative">-12.77%</td>
+        <td class="negative">
+          -212
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.0 億</td>
+        <td>
+          
+          
+            <span class="tag">光學精密元件</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2331.html">2331</a></td>
+        <td>
+          <a href="../company/2331.html">精英</a>
+          
+          
+          
+        </td>
+        <td>20.75</td>
+        <td class="negative">-5.90%</td>
+        <td class="negative">-6.32%</td>
+        <td class="negative">-7.16%</td>
+        <td class="negative">
+          -1353
+        </td>
+        <td class="negative">
+          -63
+        </td>
+        <td>8573 萬</td>
+        <td>
+          
+          
+            <span class="tag">電腦週邊/配件</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3530.html">3530</a></td>
+        <td>
+          <a href="../company/3530.html">晶相光</a>
+          
+          
+          
+        </td>
+        <td>65.00</td>
+        <td class="negative">-4.27%</td>
+        <td class="positive">+4.84%</td>
+        <td class="positive">+13.44%</td>
+        <td class="negative">
+          -22
+        </td>
+        <td class="negative">
+          -24
+        </td>
+        <td>7001 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6405.html">6405</a></td>
+        <td>
+          <a href="../company/6405.html">悅城</a>
+          
+          
+          
+        </td>
+        <td>35.90</td>
+        <td class="negative">-4.27%</td>
+        <td class="negative">-0.14%</td>
+        <td class="positive">+21.49%</td>
+        <td class="negative">
+          -252
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4402 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8105.html">8105</a></td>
+        <td>
+          <a href="../company/8105.html">凌巨</a>
+          
+          
+          
+        </td>
+        <td>13.85</td>
+        <td class="negative">-2.81%</td>
+        <td class="negative">-3.15%</td>
+        <td class="positive">+8.20%</td>
+        <td class="negative">
+          -327
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3937 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3622.html">3622</a></td>
+        <td>
+          <a href="../company/3622.html">洋華</a>
+          <span class="hl-star" data-tip="觸控模組 前五｜洋華電子觸控螢幕" title="觸控模組 前五｜洋華電子觸控螢幕">★</span>
+          
+          
+        </td>
+        <td>55.30</td>
+        <td class="negative">-1.95%</td>
+        <td class="negative">-2.12%</td>
+        <td class="negative">-5.63%</td>
+        <td class="negative">
+          -190
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2956 萬</td>
+        <td>
+          
+          
+            <span class="tag">光學薄膜</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6167.html">6167</a></td>
+        <td>
+          <a href="../company/6167.html">久正</a>
+          
+          
+          
+        </td>
+        <td>13.10</td>
+        <td class="negative">-2.60%</td>
+        <td class="negative">-8.71%</td>
+        <td class="negative">-7.42%</td>
+        <td class="negative">
+          -175
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1317 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5245.html">5245</a></td>
+        <td>
+          <a href="../company/5245.html">智晶</a>
+          
+          
+          
+        </td>
+        <td>25.40</td>
+        <td class="negative">-2.68%</td>
+        <td class="positive">+2.42%</td>
+        <td class="positive">+5.83%</td>
+        <td class="negative">
+          -26
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>503 萬</td>
+        <td>
+          
+          
+            <span class="tag">OLED/Micro LED</span>
+            
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:54</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<sc

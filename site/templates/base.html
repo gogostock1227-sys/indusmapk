@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}台股產業寶{% endblock %}</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ static_prefix|default('') }}static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="{{ static_prefix|default('') }}index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="{{ static_prefix|default('') }}index.html" class="{% if page=='index' %}active{% endif %}">首頁</a>
+      <a href="{{ static_prefix|default('') }}today.html" class="{% if page=='today' %}active{% endif %}">今日焦點</a>
+      <a href="{{ static_prefix|default('') }}topics.html" class="{% if page=='topics' %}active{% endif %}">題材列表</a>
+      <a href="{{ static_prefix|default('') }}heatmap.html" class="{% if page=='heatmap' %}active{% endif %}">產業地圖</a>
+      <a href="{{ static_prefix|default('') }}database.html" class="{% if page=='database' %}active{% endif %}">公司資料庫</a>
+      <a href="{{ static_prefix|default('') }}ai.html" class="{% if page=='ai' %}active{% endif %}">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：{{ last_date }} · 建置時間：{{ now }}</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "{{ static_prefix|default('') }}";
+</script>
+<script src="{{ static_prefix|default('') }}data/search-data.js" defer></script>
+<script src="{{ static_prefix|default('') }}static/app.js" defer></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

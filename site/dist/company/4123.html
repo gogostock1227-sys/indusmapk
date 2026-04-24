@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>晟德 (4123) · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <span>晟德 (4123)</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#ff7847;">
+  <div class="topic-hero-inner">
+    <div class="category-tag">生技醫療業</div>
+    <h1>晟德 <small class="muted">4123</small></h1>
+    <p class="topic-en">上櫃</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>收盤</em><strong>39.55</strong></span>
+      <span class="kpi"><em>今日</em><strong class="negative">-2.35%</strong></span>
+      <span class="kpi"><em>5日</em><strong class="negative">-5.04%</strong></span>
+      <span class="kpi"><em>20日</em><strong class="negative">-5.50%</strong></span>
+      <span class="kpi"><em>成交金額</em><strong>1.3 億</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>60 日走勢</h2>
+    <span class="muted">日K + 成交量 + MA20/MA60 · 資料：FinLab</span>
+  </div>
+  <div id="price_chart_4123" style="height:460px; width:100%; padding:8px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "ohlc": [[43.0, 42.2, 42.1, 44.55], [42.8, 41.65, 41.4, 42.95], [41.55, 41.7, 41.4, 42.05], [41.7, 41.0, 40.9, 41.7], [41.15, 41.5, 40.8, 41.6], [41.5, 42.3, 41.2, 42.3], [42.4, 42.5, 42.35, 43.5], [43.0, 43.3, 42.95, 44.3], [43.9, 42.45, 42.0, 43.95], [42.1, 41.4, 41.35, 42.15], [41.5, 40.3, 40.15, 41.7], [40.4, 39.75, 39.5, 40.65], [40.5, 39.45, 39.3, 40.5], [39.45, 40.1, 39.3, 40.1], [40.1, 39.6, 39.5, 40.75], [39.1, 39.4, 38.35, 39.45], [39.4, 39.05, 38.75, 39.7], [40.2, 39.7, 39.35, 40.5], [39.7, 40.0, 39.3, 40.05], [40.5, 42.4, 40.4, 42.95], [42.3, 43.65, 42.2, 43.7], [43.7, 43.15, 42.9, 44.35], [43.85, 43.8, 43.35, 44.4], [43.3, 45.0, 42.8, 45.15], [44.8, 44.9, 43.8, 45.2], [48.5, 49.35, 45.8, 49.35], [49.8, 48.0, 48.0, 51.4], [48.8, 48.95, 48.15, 49.6], [45.4, 44.55, 44.2, 46.6], [44.55, 43.85, 42.85, 45.35], [44.0, 44.4, 43.8, 45.1], [44.2, 44.65, 43.55, 44.75], [44.2, 43.75, 43.65, 44.65], [44.5, 44.4, 43.85, 44.8], [45.0, 44.65, 43.85, 45.0], [44.95, 44.35, 44.35, 45.1], [44.1, 42.8, 42.75, 44.1], [42.9, 42.25, 42.25, 43.15], [41.0, 41.1, 40.8, 41.95], [42.0, 41.85, 41.05, 42.2], [42.4, 41.65, 41.45, 42.45], [41.75, 41.4, 41.4, 42.25], [41.05, 40.8, 40.5, 41.2], [40.15, 40.5, 40.05, 41.25], [40.9, 40.5, 40.25, 41.15], [41.0, 42.0, 41.0, 42.25], [42.65, 41.7, 41.5, 43.2], [42.1, 40.95, 40.6, 42.1], [41.3, 41.1, 40.7, 41.35], [41.05, 39.7, 39.6, 41.1], [40.1, 39.95, 39.9, 40.85], [39.95, 39.9, 39.75, 40.35], [40.0, 40.25, 40.0, 40.9], [41.15, 41.55, 40.8, 42.05], [41.7, 41.65, 41.35, 42.05], [41.7, 40.4, 40.3, 41.75], [40.65, 39.8, 39.6, 40.7], [40.0, 39.55, 39.35, 40.0], [39.55, 40.5, 39.35, 40.85], [40.7, 39.55, 39.0, 40.7]], "volume": [7792.0, 3443.0, 1586.0, 1645.0, 1426.0, 2217.0, 3648.0, 5501.0, 4485.0, 2047.0, 2236.0, 2155.0, 1324.0, 1403.0, 2635.0, 2098.0, 1458.0, 1209.0, 1106.0, 6160.0, 5604.0, 3112.0, 4042.0, 11918.0, 10880.0, 39716.0, 45475.0, 15637.0, 12148.0, 9638.0, 4759.0, 3408.0, 2900.0, 3483.0, 4729.0, 3358.0, 4665.0, 3515.0, 2924.0, 3053.0, 3452.0, 1652.0, 1932.0, 1693.0, 1581.0, 2397.0, 3445.0, 1885.0, 1625.0, 3926.0, 2087.0, 1927.0, 1915.0, 5375.0, 2882.0, 4395.0, 3711.0, 2978.0, 3169.0, 3196.0], "ma20": [39.77, 39.96, 40.14, 40.31, 40.53, 40.8, 41.07, 41.27, 41.32, 41.31, 41.3, 41.27, 41.23, 41.27, 41.23, 41.16, 41.06, 41.02, 40.96, 40.99, 41.06, 41.13, 41.24, 41.44, 41.61, 41.96, 42.24, 42.52, 42.62, 42.75, 42.95, 43.2, 43.41, 43.63, 43.88, 44.13, 44.31, 44.44, 44.5, 44.47, 44.37, 44.28, 44.13, 43.91, 43.69, 43.32, 43.0, 42.61, 42.43, 42.23, 42.0, 41.77, 41.59, 41.45, 41.3, 41.1, 40.95, 40.82, 40.79, 40.67], "ma60": [37.42, 37.54, 37.66, 37.77, 37.9, 38.04, 38.18, 38.34, 38.46, 38.53, 38.61, 38.69, 38.77, 38.85, 38.93, 38.97, 39.0, 39.04, 39.09, 39.2, 39.33, 39.44, 39.57, 39.71, 39.86, 40.07, 40.26, 40.45, 40.55, 40.64, 40.76, 40.88, 40.98, 41.11, 41.23, 41.36, 41.45, 41.53, 41.59, 41.66, 41.73, 41.79, 41.84, 41.89, 41.94, 42.03, 42.1, 42.13, 42.13, 42.09, 42.09, 42.08, 42.08, 42.11, 42.14, 42.13, 42.11, 42.09, 42.08, 42.04]};
+    if (!raw) {
+      document.getElementById('price_chart_4123').innerHTML =
+        '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const el = document.getElementById('price_chart_4123');
+      const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const upColor = '#ef4444';   // 台股紅漲
+      const downColor = '#10b981'; // 台股綠跌
+      chart.setOption({
+        backgroundColor: 'transparent',
+        animation: false,
+        legend: {
+          data: ['K線','MA20','MA60'],
+          top: 0, textStyle: { color: '#9ca3af' }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          backgroundColor: '#1f2937',
+          borderColor: '#374151',
+          textStyle: { color: '#e5e7eb' },
+          formatter: (p) => {
+            const d = p[0].axisValue;
+            const k = p.find(x => x.seriesName === 'K線');
+            const v = p.find(x => x.seriesName === '成交量');
+            const m20 = p.find(x => x.seriesName === 'MA20');
+            const m60 = p.find(x => x.seriesName === 'MA60');
+            let s = `<b>${d}</b><br>`;
+            if (k) {
+              const [o, c, l, h] = k.value.slice(1);
+              s += `開 <b>${o}</b> · 高 <b style="color:${upColor}">${h}</b> · 低 <b style="color:${downColor}">${l}</b> · 收 <b>${c}</b><br>`;
+            }
+            if (v) s += `量 ${Math.round(v.value[1]).toLocaleString()} 張<br>`;
+            if (m20 && m20.value != null) s += `MA20 ${m20.value}<br>`;
+            if (m60 && m60.value != null) s += `MA60 ${m60.value}`;
+            return s;
+          }
+        },
+        axisPointer: { link: [{ xAxisIndex: 'all' }] },
+        grid: [
+          { left: 50, right: 16, top: 36, height: '62%' },
+          { left: 50, right: 16, top: '75%', height: '18%' }
+        ],
+        xAxis: [
+          {
+            type: 'category', data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { color: '#9ca3af' },
+            splitLine: { show: false },
+            boundaryGap: true,
+          },
+          {
+            type: 'category', gridIndex: 1, data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { show: false }, axisTick: { show: false }
+          }
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+            axisLabel: { color: '#9ca3af' }
+          },
+          {
+            gridIndex: 1, scale: true, splitNumber: 2,
+            splitLine: { show: false },
+            axisLabel: { color: '#9ca3af',
+              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+            }
+          }
+        ],
+        dataZoom: [
+          { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
+            borderColor: '#374151',
+            handleStyle: { color: '#ff7847' },
+            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
+            fillerColor: 'rgba(255,120,71,0.15)',
+            textStyle: { color: '#9ca3af' }
+          }
+        ],
+        series: [
+          {
+            name: 'K線', type: 'candlestick', data: raw.ohlc,
+            itemStyle: {
+              color: upColor, color0: downColor,
+              borderColor: upColor, borderColor0: downColor
+            }
+          },
+          {
+            name: 'MA20', type: 'line', data: raw.ma20,
+            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: 'MA60', type: 'line', data: raw.ma60,
+            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: '成交量', type: 'bar',
+            xAxisIndex: 1, yAxisIndex: 1,
+            data: raw.volume.map((v, i) => {
+              const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
+              return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
+            })
+          }
+        ]
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+
+
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>所屬題材 <span class="muted">(2)</span></h2>
+  </div>
+  
+  <div class="topic-grid compact">
+    
+    <a href="../topic/生技醫療.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#16a34a;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>生技醫療</h3>
+          <span class="pill" style="background:#16a34a22; color:#16a34a;">生技 / 醫療</span>
+        </div>
+        <p class="topic-card-desc">新藥、CDMO、疫苗。高端、藥華藥、保瑞為核心。2026 年多個關鍵里程碑。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/原料藥_化學藥.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#16a34a;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>原料藥/化學藥</h3>
+          <span class="pill" style="background:#16a34a22; color:#16a34a;">生技 / 醫療</span>
+        </div>
+        <p class="topic-card-desc">旭富、神隆、晟德等原料藥（API）與學名藥廠。GLP-1 熱潮 + 專利到期商機驅動。</p>
+      </div>
+    </a>
+    
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header"><h2>法人動向</h2></div>
+  <div class="snapshot">
+    <div><em>外資今日</em><strong class="negative">-1037 張</strong></div>
+    <div><em>外資 5 日</em><strong class="negative">-5022 張</strong></div>
+    <div><em>投信今日</em><strong class="">+0 張</strong></div>
+    <div><em>投信 5 日</em><strong class="positive">+4 張</strong></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

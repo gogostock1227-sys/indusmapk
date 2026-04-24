@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% set page = "database" %}
+{% block title %}公司資料庫 · 台股產業寶{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>公司資料庫 <small>{{ total_stocks }} 檔上市櫃</small></h1>
+  <p>台股全上市櫃個股的公司基本資料、市場表現、所屬題材。可依關鍵字、產業、市場篩選，點擊任一列進入個股詳情頁。</p>
+</section>
+
+<div class="database-toolbar">
+  <input type="text" id="db-search" placeholder="搜尋代號、簡稱或產業...（支援多關鍵字空白分隔）" autocomplete="off">
+  <select id="db-market">
+    <option value="">全部市場</option>
+    <option value="sii">上市</option>
+    <option value="otc">上櫃</option>
+    <option value="rotc">興櫃</option>
+  </select>
+  <select id="db-industry">
+    <option value="">全部產業</option>
+    {% for ind in industries %}
+    <option value="{{ ind }}">{{ ind }}</option>
+    {% endfor %}
+  </select>
+  <span class="database-stat">顯示 <b id="db-count">{{ rows|length }}</b> / {{ rows|length }} 檔</span>
+</div>
+
+<div class="panel" style="max-height:70vh; overflow:auto;">
+  <table class="database-table" id="db-table">
+    <thead>
+      <tr>
+        <th data-key="sym" data-type="str">代號</th>
+        <th data-key="name" data-type="str">公司</th>
+        <th data-key="industry" data-type="str">產業</th>
+        <th data-key="market" data-type="str">市場</th>
+        <th data-key="close" data-type="num">收盤</th>
+        <th data-key="ret_1d" data-type="num">今日</th>
+        <th data-key="ret_5d" data-type="num">5日</th>
+        <th data-key="ret_20d" data-type="num">20日</th>
+        <th data-key="amount" data-type="num">成交額(百萬)</th>
+        <th data-key="topics" data-type="str">所屬題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr data-sym="{{ r.sym }}" data-market="{{ r.market_code }}" data-industry="{{ r.industry }}"
+          data-name="{{ r.name }}" data-topics-txt="{{ r.topics_txt }}"
+          data-close="{{ r.close if r.close is not none else '' }}"
+          data-ret_1d="{{ r.ret_1d if r.ret_1d is not none else '' }}"
+          data-ret_5d="{{ r.ret_5d if r.ret_5d is not none else '' }}"
+          data-ret_20d="{{ r.ret_20d if r.ret_20d is not none else '' }}"
+          data-amount="{{ r.amount if r.amount is not none else '' }}"
+          onclick="location.href='company/{{ r.sym }}.html'" style="cursor:pointer;">
+        <td class="sym">{{ r.sym }}</td>
+        <td class="sym-name">{{ r.name }}</td>
+        <td>{{ r.industry or '—' }}</td>
+        <td>{{ r.market or '—' }}</td>
+        <td>{{ "%.2f"|format(r.close) if r.close is not none else '—' }}</td>
+        <td class="{% if r.ret_1d is not none and r.ret_1d > 0 %}positive{% elif r.ret_1d is not none and r.ret_1d < 0 %}negative{% endif %}">
+          {{ "%+.2f"|format(r.ret_1d*100) + '%' if r.ret_1d is not none else '—' }}
+        </td>
+        <td class="{% if r.ret_5d is not none and r.ret_5d > 0 %}positive{% elif r.ret_5d is not none and r.ret_5d < 0 %}negative{% endif %}">
+          {{ "%+.2f"|format(r.ret_5d*100) + '%' if r.ret_5d is not none else '—' }}
+        </td>
+        <td class="{% if r.ret_20d is not none and r.ret_20d > 0 %}positive{% elif r.ret_20d is not none and r.ret_20d < 0 %}negative{% endif %}">
+          {{ "%+.2f"|format(r.ret_20d*100) + '%' if r.ret_20d is not none else '—' }}
+        </td>
+        <td>{{ "{:,.0f}".format(r.amount) if r.amount is not none else '—' }}</td>
+        <td style="max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.topics_txt or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+(function(){
+  const search = document.getElementById('db-search');
+  const marketSel = document.getElementById('db-market');
+  const industrySel = document.getElementById('db-industry');
+  const counter = document.getElementById('db-count');
+  const rows = Array.from(document.querySelectorAll('#db-table tbody tr'));
+
+  function applyFilter() {
+    const q = search.value.toLowerCase().trim();
+    const tokens = q.split(/\s+/).filter(Boolean);
+    const mk = marketSel.value;
+    const ind = industrySel.value;
+    let n = 0;
+    rows.forEach(r => {
+      const txt = (r.dataset.sym + ' ' + r.dataset.name + ' ' + r.dataset.industry + ' ' + r.dataset.topicsTxt).toLowerCase();
+      const tokenOk = tokens.every(t => txt.includes(t));
+      const mkOk = !mk || r.dataset.market === mk;
+      const indOk = !ind || r.dataset.industry === ind;
+      const ok = tokenOk && mkOk && indOk;
+      r.classList.toggle('database-hidden', !ok);
+      if (ok) n++;
+    });
+    counter.textContent = n;
+  }
+
+  let debounce;
+  search.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(applyFilter, 120); });
+  marketSel.addEventListener('change', applyFilter);
+  industrySel.addEventListener('change', applyFilter);
+
+  // 排序
+  const ths = document.querySelectorAll('#db-table thead th');
+  let sortKey = null, sortDir = 1;
+  ths.forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      const type = th.dataset.type;
+      if (sortKey === key) sortDir = -sortDir;
+      else { sortKey = key; sortDir = 1; }
+      ths.forEach(x => x.classList.remove('sorted-asc', 'sorted-desc'));
+      th.classList.add(sortDir > 0 ? 'sorted-asc' : 'sorted-desc');
+      const tbody = document.querySelector('#db-table tbody');
+      const sorted = rows.slice().sort((a, b) => {
+        let va = a.dataset[key] ?? '';
+        let vb = b.dataset[key] ?? '';
+        if (type === 'num') {
+          va = va === '' ? (sortDir > 0 ? Infinity : -Infinity) : parseFloat(va);
+          vb = vb === '' ? (sortDir > 0 ? Infinity : -Infinity) : parseFloat(vb);
+          return (va - vb) * sortDir;
+        }
+        return va.localeCompare(vb, 'zh-Hant') * sortDir;
+      });
+      sorted.forEach(r => tbody.appendChild(r));
+    });
+  });
+})();
+</script>
+{% endblock %}

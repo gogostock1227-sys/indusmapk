@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>交通運輸/物流 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#2563eb;">交通運輸/物流</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#2563eb;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#2563eb22; color:#2563eb;">航運 / 傳產</div>
+    <h1>交通運輸/物流</h1>
+    <p class="topic-en">Transportation &amp; Logistics</p>
+    <p class="topic-desc">航空、海運、陸運、物流綜合族群。長榮航、華航、台灣高鐵、宅配通為代表。電商物流快速成長。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>8%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>—</strong></span>
+      <span class="kpi"><em>成分股</em><strong>15</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-1.51%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>分支</small>
+    <strong>空運 / 陸運 / 物流</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>電商物流</small>
+    <strong>快速成長</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>台廠</small>
+    <strong>長榮航 / 大車隊</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>景氣</small>
+    <strong>消費敏感</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_交通運輸_物流"></div>
+  <div id="topic_chart_交通運輸_物流" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, 0.93, 1.39, 1.71, 1.81, 1.0, 0.87, 0.92, 0.92, 0.57, -0.54, -0.72, 0.53, -0.1, 0.2, -0.32, 0.03, 0.29, -0.22, -0.83, -1.37, -0.36, -1.9, -2.5, -3.77, -4.6, -4.59, -3.7, -4.94, -4.2, -3.47, -1.44, -1.9, -1.58, -1.44, -0.96, -0.97, 0.2, -0.59, -0.89, -1.03, -1.51, -0.86, -0.94, -0.69, -1.41, -1.4, -2.09, -1.21, -0.68, -0.46, -1.03, -0.95, -0.44, -1.11, -0.68, -1.13, -2.19, -2.0, -0.95, -0.79, -0.37, -0.11, -1.04, -0.15, -0.07, -0.49, -0.52, 0.26, -0.01, 0.75, -0.37, 0.13, -0.19, -0.11, -0.55, -1.85, -2.75, -2.39, -1.47, -1.77, -2.53, -2.3, -1.89, -1.62, -1.25, -1.2, -0.75, -0.13, -1.07, -1.07, -3.89, -3.87, -4.74, -7.17, -6.32, -4.21, -4.74, -5.66, -4.82, -4.55, -4.83, -5.44, -5.55, -6.35, -5.31, -4.33, -4.82, -4.67, -5.42, -6.86, -5.29, -6.47, -6.89, -5.87, -6.33, -6.08, -5.87, -5.82, -5.29, -4.6, -4.52, -5.0, -5.19, -5.32, -6.75], "ret_1d": -1.51, "ret_1w": -2.26, "ret_1m": -1.52};
+    const kpiEl = document.getElementById('topic_chart_kpis_交通運輸_物流');
+    const chartEl = document.getElementById('topic_chart_交通運輸_物流');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-1.51%</strong></div>
+      <div><em>5日平均</em><strong class="negative">-2.25%</strong></div>
+      <div><em>20日平均</em><strong class="negative">-1.70%</strong></div>
+      <div><em>族群成交額</em><strong>38.0 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>1</strong></div>
+      <div><em>投信買超家數</em><strong>2</strong></div>
+      <div><em>今日最強</em><strong>亞航</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="航運_貨櫃.html" style="border-color:#1d4ed8; color:#1d4ed8;">
+        航運/貨櫃
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="航太.html" style="border-color:#b91c1c; color:#b91c1c;">
+        航太
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="旅遊_廉航_郵輪.html" style="border-color:#0284c7; color:#0284c7;">
+        旅遊/廉航/郵輪
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="無人機.html" style="border-color:#991b1b; color:#991b1b;">
+        無人機
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="航運_散裝.html" style="border-color:#2563eb; color:#2563eb;">
+        航運/散裝
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2618.html">2618</a></td>
+        <td>
+          <a href="../company/2618.html">長榮航</a>
+          <span class="hl-star" data-tip="國際航空 台灣 #1｜長榮航 767 / 787 機隊" title="國際航空 台灣 #1｜長榮航 767 / 787 機隊">★</span>
+          
+          
+        </td>
+        <td>33.75</td>
+        <td class="negative">-3.71%</td>
+        <td class="negative">-4.26%</td>
+        <td class="negative">-4.39%</td>
+        <td class="negative">
+          -37650
+        </td>
+        <td class="positive">
+          +1366
+        </td>
+        <td>22.0 億</td>
+        <td>
+          
+          
+            <span class="tag">航運/貨櫃</span><span class="tag">旅遊/廉航/郵輪</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2610.html">2610</a></td>
+        <td>
+          <a href="../company/2610.html">華航</a>
+          <span class="hl-star" data-tip="國際航空 台灣 #2｜華航 A350 長程機隊" title="國際航空 台灣 #2｜華航 A350 長程機隊">★</span>
+          
+          
+        </td>
+        <td>17.90</td>
+        <td class="negative">-1.38%</td>
+        <td class="negative">-2.45%</td>
+        <td class="negative">-4.53%</td>
+        <td class="negative">
+          -19019
+        </td>
+        <td class="negative">
+          -3986
+        </td>
+        <td>8.4 億</td>
+        <td>
+          
+          
+            <span class="tag">航太</span><span class="tag">旅遊/廉航/郵輪</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2633.html">2633</a></td>
+        <td>
+          <a href="../company/2633.html">台灣高鐵</a>
+          <span class="hl-star" data-tip="高鐵 台灣 #1｜台灣高鐵 北高高速運輸" title="高鐵 台灣 #1｜台灣高鐵 北高高速運輸">★</span>
+          
+          
+        </td>
+        <td>26.30</td>
+        <td class="negative">-0.75%</td>
+        <td class="negative">-2.41%</td>
+        <td class="positive">+0.96%</td>
+        <td class="negative">
+          -1922
+        </td>
+        <td class="positive">
+          +8
+        </td>
+        <td>1.6 億</td>
+        <td>
+          
+          
+            <span class="tag">旅遊/廉航/郵輪</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2646.html">2646</a></td>
+        <td>
+          <a href="../company/2646.html">星宇航空</a>
+          
+          
+          
+        </td>
+        <td>20.40</td>
+        <td class="negative">-0.97%</td>
+        <td class="negative">-4.00%</td>
+        <td class="negative">-5.99%</td>
+        <td class="negative">
+          -1508
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.5 億</td>
+        <td>
+          
+          
+            <span class="tag">無人機</span><span class="tag">航太</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2630.html">2630</a></td>
+        <td>
+          <a href="../company/2630.html">亞航</a>
+          
+          
+          
+        </td>
+        <td>51.30</td>
+        <td class="positive">+0.20%</td>
+        <td class="positive">+5.34%</td>
+        <td class="positive">+4.80%</td>
+        <td class="positive">
+          +98
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          
+            <span class="tag">無人機</span><span class="tag">航太</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6757.html">6757</a></td>
+        <td>
+          <a href="../company/6757.html">台灣虎航</a>
+          
+          
+          
+        </td>
+        <td>48.55</td>
+        <td class="negative">-0.82%</td>
+        <td class="negative">-3.09%</td>
+        <td class="negative">-10.59%</td>
+        <td class="negative">
+          -208
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8142 萬</td>
+        <td>
+          
+          
+            <span class="tag">無人機</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2641.html">2641</a></td>
+        <td>
+          <a href="../company/2641.html">正德</a>
+          
+          
+          
+        </td>
+        <td>17.35</td>
+        <td class="negative">-2.53%</td>
+        <td class="negative">-4.93%</td>
+        <td class="negative">-4.41%</td>
+        <td class="negative">
+          -1263
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5752 萬</td>
+        <td>
+          
+          
+            <span class="tag">航運/散裝</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2753.html">2753</a></td>
+        <td>
+          <a href="../company/2753.html">八方雲集</a>
+          
+          
+          
+        </td>
+        <td>180.00</td>
+        <td class="negative">+0.00%</td>
+        <td class="negative">-1.64%</td>
+        <td class="negative">-0.55%</td>
+        <td class="negative">
+          -161
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5460 萬</td>
+        <td>
+          
+          
+            <span class="tag">觀光餐旅</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2612.html">2612</a></td>
+        <td>
+          <a href="../company/2612.html">中航</a>
+          
+          
+          
+        </td>
+        <td>56.20</td>
+        <td class="negative">-3.10%</td>
+        <td class="negative">-5.07%</td>
+        <td class="positive">+0.90%</td>
+        <td class="negative">
+          -198
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4863 萬</td>
+        <td>
+          
+          
+            <span class="tag">航太</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5607.html">5607</a></td>
+        <td>
+          <a href="../company/5607.html">遠雄港</a>
+          
+          
+          
+        </td>
+        <td>48.00</td>
+        <td class="negative">-0.83%</td>
+        <td class="negative">-0.62%</td>
+        <td class="positive">+3.67%</td>
+        <td class="negative">
+          -167
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3160 萬</td>
+        <td>
+          
+          
+            <span class="tag">航運/貨櫃</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5609.html">5609</a></td>
+        <td>
+          <a href="../company/5609.html">中菲行</a>
+          
+          
+          
+        </td>
+        <td>79.20</td>
+        <td class="negative">-0.88%</td>
+        <td class="negative">-0.50%</td>
+        <td class="positive">+0.64%</td>
+        <td class="negative">
+          -70
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1575 萬</td>
+        <td>
+          
+          
+            <span class="tag">航運/貨櫃</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2640.html">2640</a></td>
+        <td>
+          <a href="../company/2640.html">大車隊</a>
+          
+          
+          
+        </td>
+        <td>171.50</td>
+        <td class="negative">-4.19%</td>
+        <td class="negative">-6.28%</td>
+        <td class="positive">+4.57%</td>
+        <td class="negative">
+          -11
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1427 萬</td>
+        <td>
+          
+          
+            <span class="tag">雲端服務/SaaS</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2642.html">2642</a></td>
+        <td>
+          <a href="../company/2642.html">宅配通</a>
+          
+          
+          
+        </td>
+        <td>22.45</td>
+        <td class="negative">-0.88%</td>
+        <td class="negative">-2.39%</td>
+        <td class="negative">-4.06%</td>
+        <td class="negative">
+          -23
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>394 萬</td>
+        <td>
+          
+          
+            <span class="tag">航運/貨櫃</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2643.html">2643</a></td>
+        <td>
+          <a href="../company/2643.html">捷迅</a>
+          
+          
+          
+        </td>
+        <td>67.50</td>
+        <td class="negative">-0.74%</td>
+        <td class="negative">-1.89%</td>
+        <td class="negative">-4.80%</td>
+        <td class="negative">
+          -5
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>241 萬</td>
+        <td>
+          
+          
+            <span class="tag">航運/貨櫃</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/7716.html">7716</a></td>
+        <td>
+          <a href="../company/7716.html">昱臺國際</a>
+          
+          
+          
+        </td>
+        <td>25.40</td>
+        <td class="negative">-2.12%</td>
+        <td class="positive">+0.40%</td>
+        <td class="">—</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>3 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>安全監控/影像監控 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#991b1b;">安全監控/影像監控</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#991b1b;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#991b1b22; color:#991b1b;">國防 / 資安</div>
+    <h1>安全監控/影像監控</h1>
+    <p class="topic-en">Video Surveillance</p>
+    <p class="topic-desc">AI 影像辨識加速取代傳統 DVR。晶睿、奇偶卡位智慧城市、交通、邊境安控。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>15%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>30B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>8</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-3.72%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>趨勢</small>
+    <strong>AI 邊緣運算</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>台廠</small>
+    <strong>晶睿 / 奇偶</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>應用</small>
+    <strong>智慧城市 / 交通</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>去中國化</small>
+    <strong>海康禁令受惠</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_安全監控_影像監控"></div>
+  <div id="topic_chart_安全監控_影像監控" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -2.64, -0.37, 0.89, -0.44, -0.04, 2.16, 2.23, 2.36, 3.88, 3.33, 1.73, 0.12, 0.37, 0.12, -2.19, -3.24, -1.46, -3.12, -2.95, -1.97, -2.16, -1.04, -2.36, -3.76, -5.06, -6.32, -3.55, -6.01, -4.62, -3.76, -1.74, -1.53, -0.78, -0.9, 0.0, 1.75, 1.54, 0.89, 2.99, 4.83, 6.14, 6.03, 4.96, 3.72, 2.69, 1.52, 0.49, 1.54, 4.0, 3.44, 2.98, 1.6, 2.12, 1.1, 0.74, 1.34, 1.21, 1.14, 0.95, 0.51, -0.15, 1.03, 0.83, 2.13, 2.56, 2.86, 3.45, 2.98, 1.66, 2.48, 2.99, 4.03, 3.25, 3.67, 2.9, 0.67, -0.81, 0.4, 0.51, -0.8, -1.64, 0.67, 0.17, -1.44, 0.1, 0.93, 1.81, 3.02, 1.23, -0.68, -5.97, -3.01, -3.04, -7.29, -5.05, -1.43, -1.16, -0.49, 0.28, 1.08, 2.32, 0.8, 2.6, 1.64, 1.81, 2.73, 3.7, 3.86, 1.98, 0.05, 4.71, 6.05, 5.52, 7.62, 10.45, 11.01, 12.63, 12.54, 15.91, 17.43, 19.63, 20.23, 23.88, 26.34, 22.23], "ret_1d": -3.25, "ret_1w": 4.09, "ret_1m": 20.05};
+    const kpiEl = document.getElementById('topic_chart_kpis_安全監控_影像監控');
+    const chartEl = document.getElementById('topic_chart_安全監控_影像監控');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-3.72%</strong></div>
+      <div><em>5日平均</em><strong class="positive">+4.79%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+23.04%</strong></div>
+      <div><em>族群成交額</em><strong>57.9 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>6</strong></div>
+      <div><em>投信買超家數</em><strong>1</strong></div>
+      <div><em>今日最強</em><strong>浪凡</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="資安.html" style="border-color:#dc2626; color:#dc2626;">
+        資安
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="智慧城市_V2X.html" style="border-color:#0891b2; color:#0891b2;">
+        智慧城市/V2X
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="射頻RF_PA.html" style="border-color:#0891b2; color:#0891b2;">
+        射頻 RF/PA
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="PCB設備_耗材.html" style="border-color:#db2777; color:#db2777;">
+        PCB設備/耗材
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="軍工_國防.html" style="border-color:#7c2d12; color:#7c2d12;">
+        軍工/國防
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2388.html">2388</a></td>
+        <td>
+          <a href="../company/2388.html">威盛</a>
+          <span class="hl-star" data-tip="IC 設計老牌｜威盛電子、Centaur CPU" title="IC 設計老牌｜威盛電子、Centaur CPU">★</span>
+          
+          
+        </td>
+        <td>76.10</td>
+        <td class="negative">-4.88%</td>
+        <td class="positive">+23.94%</td>
+        <td class="positive">+44.40%</td>
+        <td class="positive">
+          +3985
+        </td>
+        <td class="positive">
+          +599
+        </td>
+        <td>31.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6462.html">6462</a></td>
+        <td>
+          <a href="../company/6462.html">神盾</a>
+          <span class="hl-star" data-tip="指紋辨識 IC 全球 #2｜神盾指紋 IC、手機 + 車用" title="指紋辨識 IC 全球 #2｜神盾指紋 IC、手機 + 車用">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>129.50</td>
+        <td class="negative">-9.76%</td>
+        <td class="positive">+11.16%</td>
+        <td class="positive">+33.51%</td>
+        <td class="positive">
+          +771
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>11.0 億</td>
+        <td>
+          
+          
+            <span class="tag">軍工/國防</span><span class="tag">資安</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6664.html">6664</a></td>
+        <td>
+          <a href="../company/6664.html">群翊</a>
+          <span class="hl-star" data-tip="PCB 曝光設備 前三｜群翊 PCB 曝光機台" title="PCB 曝光設備 前三｜群翊 PCB 曝光機台">★</span>
+          
+          
+        </td>
+        <td>402.00</td>
+        <td class="negative">-3.25%</td>
+        <td class="negative">-7.37%</td>
+        <td class="positive">+46.45%</td>
+        <td class="positive">
+          +709
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>9.3 億</td>
+        <td>
+          
+          
+            <span class="tag">PCB/銅箔基板</span><span class="tag">PCB設備/耗材</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8091.html">8091</a></td>
+        <td>
+          <a href="../company/8091.html">翔名</a>
+          <span class="hl-star" data-tip="半導體零件 前十｜翔名科技 真空零件" title="半導體零件 前十｜翔名科技 真空零件">★</span>
+          
+          
+        </td>
+        <td>176.50</td>
+        <td class="negative">-4.34%</td>
+        <td class="negative">-1.12%</td>
+        <td class="positive">+14.24%</td>
+        <td class="positive">
+          +414
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6214.html">6214</a></td>
+        <td>
+          <a href="../company/6214.html">精誠</a>
+          <span class="hl-star" data-tip="系統整合 台灣 #1｜精誠資訊 SI + 資安" title="系統整合 台灣 #1｜精誠資訊 SI + 資安">★</span>
+          
+          
+        </td>
+        <td>121.00</td>
+        <td class="negative">-3.97%</td>
+        <td class="negative">-2.02%</td>
+        <td class="positive">+11.01%</td>
+        <td class="positive">
+          +146
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2.3 億</td>
+        <td>
+          
+          
+            <span class="tag">資安</span><span class="tag">軟體/SaaS</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6165.html">6165</a></td>
+        <td>
+          <a href="../company/6165.html">浪凡</a>
+          <span class="hl-star" data-tip="AI 安防 前十｜浪凡 AI 影像監控" title="AI 安防 前十｜浪凡 AI 影像監控">★</span>
+          
+          
+        </td>
+        <td>50.10</td>
+        <td class="positive">+2.77%</td>
+        <td class="positive">+11.58%</td>
+        <td class="positive">+7.17%</td>
+        <td class="positive">
+          +992
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3356.html">3356</a></td>
+        <td>
+          <a href="../company/3356.html">奇偶</a>
+          <span class="hl-star" data-tip="監控 IC 前三｜奇偶科技 DVR / IP Cam IC" title="監控 IC 前三｜奇偶科技 DVR / IP Cam IC">★</span>
+          
+          
+        </td>
+        <td>52.00</td>
+        <td class="negative">-2.62%</td>
+        <td class="negative">-2.62%</td>
+        <td class="positive">+4.52%</td>
+        <td class="negative">
+          -193
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4843 萬</td>
+        <td>
+          
+          
+            <span class="tag">射頻 RF/PA</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3454.html">3454</a></td>
+        <td>
+          <a href="../company/3454.html">3454</a>
+          <span class="hl-star" data-tip="監控 前三｜晶睿通訊 IP Cam + NVR" title="監控 前三｜晶睿通訊 IP Cam + NVR">★</span>
+          
+          
+        </td>
+        <td>—</td>
+        <td class="">—</td>
+        <td class="">—</td>
+        <td class="">—</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>—</td>
+        <td>
+          
+          
+            <span class="tag">智慧城市/V2X</span>
+            
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

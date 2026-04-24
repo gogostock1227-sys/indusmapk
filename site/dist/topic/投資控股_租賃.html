@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>投資控股/租賃 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#0369a1;">投資控股/租賃</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#0369a1;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#0369a122; color:#0369a1;">金融</div>
+    <h1>投資控股/租賃</h1>
+    <p class="topic-en">Holdings &amp; Leasing</p>
+    <p class="topic-desc">中租、和潤、裕融為汽車融資租賃三雄。潤泰、中保科等投控為多元持股。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>10%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>—</strong></span>
+      <span class="kpi"><em>成分股</em><strong>25</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-1.78%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>龍頭</small>
+    <strong>中租 / 和潤</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>業務</small>
+    <strong>汽車融資</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>殖利率</small>
+    <strong>3-5%</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>風險</small>
+    <strong>利率敏感</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_投資控股_租賃"></div>
+  <div id="topic_chart_投資控股_租賃" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -0.57, -0.11, 0.25, 0.09, -0.1, -0.24, 1.2, 1.22, 0.92, 0.0, -0.03, -0.33, -0.44, -1.13, -1.54, -1.65, -0.34, -0.25, -1.21, -2.22, -1.67, -1.05, -1.32, -2.36, -3.88, -4.41, -3.65, -3.86, -2.75, -2.59, -1.42, -1.23, -1.02, -1.76, -1.15, -1.43, -0.8, -0.86, -1.6, -2.21, -2.56, -2.61, -2.06, -1.63, -2.35, -2.94, -2.65, -2.07, -1.66, -2.01, -2.16, -2.39, -2.48, -2.99, -3.42, -3.92, -5.05, -4.36, -4.15, -3.61, -3.4, -3.47, -3.56, -2.63, -2.84, -3.3, -3.5, -3.63, -4.24, -3.75, -3.83, -3.44, -3.7, -4.21, -4.15, -4.88, -5.35, -5.27, -4.85, -5.26, -6.18, -6.21, -5.93, -5.61, -4.32, -4.36, -4.57, -4.75, -5.07, -5.71, -8.12, -7.48, -6.36, -9.43, -8.09, -6.87, -7.08, -6.61, -5.99, -5.9, -5.81, -6.65, -6.33, -7.65, -7.28, -6.48, -6.38, -6.35, -7.19, -8.13, -6.99, -7.43, -7.4, -6.73, -7.31, -7.2, -7.1, -6.57, -5.48, -5.18, -5.55, -5.39, -5.2, -5.4, -7.08], "ret_1d": -1.78, "ret_1w": -2.0, "ret_1m": 0.22};
+    const kpiEl = document.getElementById('topic_chart_kpis_投資控股_租賃');
+    const chartEl = document.getElementById('topic_chart_投資控股_租賃');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-1.78%</strong></div>
+      <div><em>5日平均</em><strong class="negative">-2.03%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+0.26%</strong></div>
+      <div><em>族群成交額</em><strong>37.5 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>4</strong></div>
+      <div><em>投信買超家數</em><strong>1</strong></div>
+      <div><em>今日最強</em><strong>裕融</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="其他（多元族群）.html" style="border-color:#71717a; color:#71717a;">
+        其他（多元族群）
+        <small>共用 21 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="文化傳媒_出版.html" style="border-color:#a21caf; color:#a21caf;">
+        文化傳媒/出版
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="交通運輸_物流.html" style="border-color:#2563eb; color:#2563eb;">
+        交通運輸/物流
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr>
+        <td><a href="../company/5284.html">5284</a></td>
+        <td>
+          <a href="../company/5284.html">jpp-KY</a>
+          
+          
+          
+        </td>
+        <td>336.00</td>
+        <td class="negative">-7.18%</td>
+        <td class="positive">+5.99%</td>
+        <td class="positive">+23.53%</td>
+        <td class="positive">
+          +821
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>13.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5871.html">5871</a></td>
+        <td>
+          <a href="../company/5871.html">中租-KY</a>
+          <span class="hl-star" data-tip="租賃 台灣 #1｜中租-KY 車輛 + 設備融資" title="租賃 台灣 #1｜中租-KY 車輛 + 設備融資">★</span>
+          
+          
+        </td>
+        <td>121.00</td>
+        <td class="negative">+0.00%</td>
+        <td class="positive">+3.86%</td>
+        <td class="positive">+15.79%</td>
+        <td class="positive">
+          +5912
+        </td>
+        <td class="negative">
+          -2466
+        </td>
+        <td>12.9 億</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9945.html">9945</a></td>
+        <td>
+          <a href="../company/9945.html">潤泰新</a>
+          
+          
+          
+        </td>
+        <td>24.30</td>
+        <td class="negative">-1.22%</td>
+        <td class="negative">-3.38%</td>
+        <td class="negative">-2.21%</td>
+        <td class="negative">
+          -479
+        </td>
+        <td class="negative">
+          -10
+        </td>
+        <td>2.4 億</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9939.html">9939</a></td>
+        <td>
+          <a href="../company/9939.html">宏全</a>
+          
+          
+          
+        </td>
+        <td>114.50</td>
+        <td class="negative">-2.55%</td>
+        <td class="negative">+0.00%</td>
+        <td class="negative">-2.55%</td>
+        <td class="negative">
+          -493
+        </td>
+        <td class="negative">
+          -51
+        </td>
+        <td>1.8 億</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9941.html">9941</a></td>
+        <td>
+          <a href="../company/9941.html">裕融</a>
+          
+          
+          
+        </td>
+        <td>79.00</td>
+        <td class="positive">+0.25%</td>
+        <td class="positive">+1.54%</td>
+        <td class="positive">+1.15%</td>
+        <td class="positive">
+          +471
+        </td>
+        <td class="negative">
+          -1
+        </td>
+        <td>1.5 億</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9938.html">9938</a></td>
+        <td>
+          <a href="../company/9938.html">百和</a>
+          
+          
+          
+        </td>
+        <td>43.95</td>
+        <td class="negative">-1.79%</td>
+        <td class="negative">-5.99%</td>
+        <td class="negative">-7.18%</td>
+        <td class="negative">
+          -1205
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9917.html">9917</a></td>
+        <td>
+          <a href="../company/9917.html">中保科</a>
+          
+          
+          
+        </td>
+        <td>115.00</td>
+        <td class="negative">-0.43%</td>
+        <td class="negative">-1.29%</td>
+        <td class="positive">+1.77%</td>
+        <td class="negative">
+          -258
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.1 億</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9907.html">9907</a></td>
+        <td>
+          <a href="../company/9907.html">統一實</a>
+          
+          
+          
+        </td>
+        <td>17.75</td>
+        <td class="negative">-0.56%</td>
+        <td class="negative">-1.66%</td>
+        <td class="negative">-1.66%</td>
+        <td class="negative">
+          -2414
+        </td>
+        <td class="negative">
+          -250
+        </td>
+        <td>9702 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6592.html">6592</a></td>
+        <td>
+          <a href="../company/6592.html">和潤企業</a>
+          
+          
+          
+        </td>
+        <td>62.50</td>
+        <td class="negative">-1.11%</td>
+        <td class="negative">-3.55%</td>
+        <td class="negative">-5.16%</td>
+        <td class="negative">
+          -70
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5633 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2348.html">2348</a></td>
+        <td>
+          <a href="../company/2348.html">海悅</a>
+          
+          
+          
+        </td>
+        <td>74.60</td>
+        <td class="negative">-2.86%</td>
+        <td class="negative">-4.97%</td>
+        <td class="negative">-5.21%</td>
+        <td class="negative">
+          -151
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5517 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8404.html">8404</a></td>
+        <td>
+          <a href="../company/8404.html">百和興業-KY</a>
+          
+          
+          
+        </td>
+        <td>16.95</td>
+        <td class="negative">-3.14%</td>
+        <td class="negative">-6.35%</td>
+        <td class="negative">-12.18%</td>
+        <td class="negative">
+          -100
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2181 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6914.html">6914</a></td>
+        <td>
+          <a href="../company/6914.html">阜爾運通</a>
+          
+          
+          
+        </td>
+        <td>148.00</td>
+        <td class="negative">-1.00%</td>
+        <td class="negative">-2.63%</td>
+        <td class="negative">-0.34%</td>
+        <td class="negative">
+          -32
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1538 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6901.html">6901</a></td>
+        <td>
+          <a href="../company/6901.html">鑽石投資</a>
+          
+          
+          
+        </td>
+        <td>13.70</td>
+        <td class="negative">-4.53%</td>
+        <td class="negative">-7.43%</td>
+        <td class="negative">-1.44%</td>
+        <td class="negative">
+          -136
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1402 萬</td>
+        <td>
+          
+          
+            <span class="tag">文化傳媒/出版</span><span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9940.html">9940</a></td>
+        <td>
+          <a href="../company/9940.html">信義</a>
+          
+          
+          
+        </td>
+        <td>19.85</td>
+        <td class="negative">-0.75%</td>
+        <td class="negative">-1.73%</td>
+        <td class="negative">-1.00%</td>
+        <td class="negative">
+          -240
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1367 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3040.html">3040</a></td>
+        <td>
+          <a href="../company/3040.html">遠見</a>
+          
+          
+          
+        </td>
+        <td>46.50</td>
+        <td class="negative">-0.75%</td>
+        <td class="positive">+0.65%</td>
+        <td class="negative">-5.87%</td>
+        <td class="negative">
+          -21
+        </td>
+        <td class="positive">
+          +12
+        </td>
+        <td>1254 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6958.html">6958</a></td>
+        <td>
+          <a href="../company/6958.html">日盛台駿</a>
+          
+          
+          
+        </td>
+        <td>18.80</td>
+        <td class="negative">-3.84%</td>
+        <td class="negative">-6.23%</td>
+        <td class="positive">+9.94%</td>
+        <td class="negative">
+          -18
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>383 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2496.html">2496</a></td>
+        <td>
+          <a href="../company/2496.html">卓越</a>
+          
+          
+          
+        </td>
+        <td>64.30</td>
+        <td class="negative">-1.23%</td>
+        <td class="negative">-2.87%</td>
+        <td class="negative">-6.54%</td>
+        <td class="negative">
+          -6
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>366 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9902.html">9902</a></td>
+        <td>
+          <a href="../company/9902.html">台火</a>
+          
+          
+          
+        </td>
+        <td>14.65</td>
+        <td class="negative">-2.98%</td>
+        <td class="negative">-1.68%</td>
+        <td class="positive">+2.09%</td>
+        <td class="negative">
+          -73
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>339 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9905.html">9905</a></td>
+        <td>
+          <a href="../company/9905.html">大華</a>
+          
+          
+          
+        </td>
+        <td>21.10</td>
+        <td class="negative">-0.94%</td>
+        <td class="negative">-2.31%</td>
+        <td class="positive">+2.18%</td>
+        <td class="negative">
+          -31
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>306 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2514.html">2514</a></td>
+        <td>
+          <a href="../company/2514.html">龍邦</a>
+          
+          
+          
+        </td>
+        <td>13.40</td>
+        <td class="negative">-0.37%</td>
+        <td class="negative">-0.74%</td>
+        <td class="negative">-1.11%</td>
+        <td class="negative">
+          -37
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>204 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2904.html">2904</a></td>
+        <td>
+          <a href="../company/2904.html">匯僑</a>
+          
+          
+          
+        </td>
+        <td>16.30</td>
+        <td class="negative">-1.21%</td>
+        <td class="negative">-2.40%</td>
+        <td class="negative">-1.81%</td>
+        <td class="negative">
+          -38
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>192 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6881.html">6881</a></td>
+        <td>
+          <a href="../company/6881.html">潤德</a>
+          
+          
+          
+        </td>
+        <td>251.50</td>
+        <td class="negative">-0.79%</td>
+        <td class="negative">+0.00%</td>
+        <td class="positive">+6.34%</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>94 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9944.html">9944</a></td>
+        <td>
+          <a href="../company/9944.html">新麗</a>
+          
+          
+          
+        </td>
+        <td>16.25</td>
+        <td class="negative">-2.11%</td>
+        <td class="negative">-2.40%</td>
+        <td class="negative">-1.52%</td>
+        <td class="negative">
+          -2
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>61 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6952.html">6952</a></td>
+        <td>
+          <a href="../company/6952.html">大武山</a>
+          
+          
+          
+        </td>
+        <td>39.00</td>
+        <td class="negative">-1.52%</td>
+        <td class="negative">-3.23%</td>
+        <td class="negative">-0.89%</td>
+        <td class="positive">
+          +2
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>43 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他（多元族群）</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5605.html">5605</a></td>
+        <td>
+          <a href="../company/5605.html">5605</a>
+          
+          
+          
+        </td>
+        <td>—</td>
+        <td class="">—</td>
+        <td class="">—</td>
+        <td class="">—</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>—</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

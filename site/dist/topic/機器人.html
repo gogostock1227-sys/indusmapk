@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>機器人 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#fb923c;">機器人</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#fb923c;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#fb923c22; color:#fb923c;">車用 / 機器人</div>
+    <h1>機器人</h1>
+    <p class="topic-en">Robotics</p>
+    <p class="topic-desc">人形機器人 + 工業機器人。Tesla Optimus、Figure 進入商業化擴張點，線性馬達、減速器、滾珠螺桿為台廠強項。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>50%+</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>15B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>16</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-2.76%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>人形滲透</small>
+    <strong>2028 量產</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>關鍵零件</small>
+    <strong>線性馬達 / 減速器</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>台廠龍頭</small>
+    <strong>上銀 / 大銀微</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>驅動力</small>
+    <strong>勞動力短缺 + AI</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_機器人"></div>
+  <div id="topic_chart_機器人" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -2.47, -1.01, 0.33, -1.26, 0.52, 1.79, 2.18, 0.96, 2.53, 3.14, 3.33, 3.09, 3.6, 4.01, 1.27, 0.56, 2.53, 0.15, 0.42, -0.41, -0.2, -0.67, -3.33, -4.61, -7.82, -7.93, -5.76, -8.75, -8.0, -6.97, -4.46, -3.79, -3.64, -5.06, -5.39, -4.32, -3.09, -2.8, -2.93, -2.93, -2.61, -2.35, -1.76, -3.32, -5.12, -5.37, -6.44, -4.64, -2.79, -3.2, -3.0, -3.17, -2.9, -3.5, -3.72, -3.24, -4.24, -2.85, -2.86, -4.19, -3.36, -2.33, -3.7, 0.47, 0.19, 2.33, 2.43, 3.36, 2.84, 4.87, 4.59, 5.48, 5.93, 7.95, 5.2, 2.01, -1.37, 0.25, 2.0, -0.07, -1.8, 1.28, 1.28, 1.35, 3.93, 6.06, 7.65, 9.17, 9.71, 6.19, 0.98, 4.33, 3.69, -3.0, -0.89, 3.11, 2.58, 3.31, 3.28, 3.69, 4.6, 3.89, 3.21, 1.99, 2.36, 6.57, 6.61, 7.09, 6.23, 1.18, 4.11, 1.47, 3.56, 7.93, 8.36, 11.21, 12.79, 16.52, 17.08, 18.95, 20.86, 23.24, 25.38, 27.77, 24.24], "ret_1d": -2.76, "ret_1w": 4.45, "ret_1m": 21.38};
+    const kpiEl = document.getElementById('topic_chart_kpis_機器人');
+    const chartEl = document.getElementById('topic_chart_機器人');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-2.76%</strong></div>
+      <div><em>5日平均</em><strong class="positive">+4.71%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+21.68%</strong></div>
+      <div><em>族群成交額</em><strong>1085.2 億</strong></div>
+      <div><em>漲停家數</em><strong>1</strong></div>
+      <div><em>外資買超家數</em><strong>7</strong></div>
+      <div><em>投信買超家數</em><strong>5</strong></div>
+      <div><em>今日最強</em><strong>良維</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="軸承_精密機構.html" style="border-color:#6b7280; color:#6b7280;">
+        軸承/精密機構
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="電動車.html" style="border-color:#84cc16; color:#84cc16;">
+        電動車
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="HVDC_直流電力.html" style="border-color:#d97706; color:#d97706;">
+        HVDC/直流電力
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="自行車零件.html" style="border-color:#166534; color:#166534;">
+        自行車零件
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="齒輪_減速機.html" style="border-color:#047857; color:#047857;">
+        齒輪/減速機
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2317.html">2317</a></td>
+        <td>
+          <a href="../company/2317.html">鴻海</a>
+          <span class="hl-star" data-tip="全球最大 EMS（電子代工）｜蘋果 iPhone 組裝 70%+、AI 伺服器新 B200 GB200" title="全球最大 EMS（電子代工）｜蘋果 iPhone 組裝 70%+、AI 伺服器新 B200 GB200">★</span>
+          
+          
+        </td>
+        <td>225.00</td>
+        <td class="positive">+1.81%</td>
+        <td class="positive">+8.70%</td>
+        <td class="positive">+15.38%</td>
+        <td class="positive">
+          +27796
+        </td>
+        <td class="positive">
+          +210
+        </td>
+        <td>389.8 億</td>
+        <td>
+          
+          
+            <span class="tag">AI伺服器</span><span class="tag">輝達概念股</span><span class="tag">電動車</span>
+            
+              <span class="tag tag-more" data-tip="蘋果概念股、固態電池、折疊機/Apple 新機、新南向/東南亞產能、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、美國製造回流/晶片法案、印度產能/印度概念、伺服器準系統、川普概念/關稅戰" title="蘋果概念股、固態電池、折疊機/Apple 新機、新南向/東南亞產能、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、美國製造回流/晶片法案、印度產能/印度概念、伺服器準系統、川普概念/關稅戰">+10</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2308.html">2308</a></td>
+        <td>
+          <a href="../company/2308.html">台達電</a>
+          <span class="hl-star" data-tip="電源供應器 全球 #1｜12kW / 33kW 伺服器電源、800V HVDC、液冷 CDU" title="電源供應器 全球 #1｜12kW / 33kW 伺服器電源、800V HVDC、液冷 CDU">★</span>
+          
+          
+        </td>
+        <td>1980.00</td>
+        <td class="negative">-1.74%</td>
+        <td class="positive">+7.32%</td>
+        <td class="positive">+39.93%</td>
+        <td class="negative">
+          -4522
+        </td>
+        <td class="positive">
+          +385
+        </td>
+        <td>350.2 億</td>
+        <td>
+          
+          
+            <span class="tag">散熱/液冷</span><span class="tag">電源供應器/BBU</span><span class="tag">重電</span>
+            
+              <span class="tag tag-more" data-tip="HVDC/直流電力、綠能/儲能、電動車、車用電子、碳化矽/SiC、碳權/ESG、固態電池、稀土/關鍵金屬、充電樁/充電服務、智慧電錶/AMI、美國製造回流/晶片法案、儲能系統/BESS、智慧城市/V2X、電動車供應鏈、AI基礎設施/資料中心" title="HVDC/直流電力、綠能/儲能、電動車、車用電子、碳化矽/SiC、碳權/ESG、固態電池、稀土/關鍵金屬、充電樁/充電服務、智慧電錶/AMI、美國製造回流/晶片法案、儲能系統/BESS、智慧城市/V2X、電動車供應鏈、AI基礎設施/資料中心">+15</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2382.html">2382</a></td>
+        <td>
+          <a href="../company/2382.html">廣達</a>
+          <span class="hl-star" data-tip="AI 伺服器 ODM 全球 #1｜NVIDIA DGX/HGX 獨家組裝、GB200 最大贏家" title="AI 伺服器 ODM 全球 #1｜NVIDIA DGX/HGX 獨家組裝、GB200 最大贏家">★</span>
+          
+          
+        </td>
+        <td>322.00</td>
+        <td class="negative">-3.88%</td>
+        <td class="positive">+1.10%</td>
+        <td class="positive">+14.39%</td>
+        <td class="negative">
+          -2629
+        </td>
+        <td class="negative">
+          -440
+        </td>
+        <td>88.9 億</td>
+        <td>
+          
+          
+            <span class="tag">AI伺服器</span><span class="tag">輝達概念股</span><span class="tag">AI PC/邊緣AI</span>
+            
+              <span class="tag tag-more" data-tip="蘋果概念股、印度產能/印度概念、伺服器準系統、AI基礎設施/資料中心" title="蘋果概念股、印度產能/印度概念、伺服器準系統、AI基礎設施/資料中心">+4</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6290.html">6290</a></td>
+        <td>
+          <a href="../company/6290.html">良維</a>
+          <span class="hl-star" data-tip="連接線模組 前十｜良維連接線、Type-C 線材" title="連接線模組 前十｜良維連接線、Type-C 線材">★</span>
+           <span class="badge badge-red">漲停</span>
+          
+        </td>
+        <td>306.50</td>
+        <td class="positive">+9.86%</td>
+        <td class="positive">+35.32%</td>
+        <td class="positive">+47.36%</td>
+        <td class="positive">
+          +716
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>78.7 億</td>
+        <td>
+          
+          
+            <span class="tag">散熱/液冷</span><span class="tag">連接器</span><span class="tag">熱交換器/散熱器</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4977.html">4977</a></td>
+        <td>
+          <a href="../company/4977.html">眾達-KY</a>
+          <span class="hl-star" data-tip="眾達-KY 光模組｜高速光收發模組" title="眾達-KY 光模組｜高速光收發模組">★</span>
+          
+          
+        </td>
+        <td>225.50</td>
+        <td class="negative">-6.82%</td>
+        <td class="positive">+5.13%</td>
+        <td class="positive">+24.24%</td>
+        <td class="positive">
+          +754
+        </td>
+        <td class="positive">
+          +25
+        </td>
+        <td>48.5 億</td>
+        <td>
+          
+          
+            <span class="tag">光通訊/CPO</span><span class="tag">影音串流/OTT</span><span class="tag">光學鏡片/鏡頭</span>
+            
+              <span class="tag tag-more" data-tip="光通訊細分" title="光通訊細分">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2049.html">2049</a></td>
+        <td>
+          <a href="../company/2049.html">上銀</a>
+          <span class="hl-star" data-tip="滾珠螺桿 全球 #2｜工具機精密傳動、人形機器人諧波減速機" title="滾珠螺桿 全球 #2｜工具機精密傳動、人形機器人諧波減速機">★</span>
+          
+          
+        </td>
+        <td>302.00</td>
+        <td class="negative">-3.36%</td>
+        <td class="positive">+8.24%</td>
+        <td class="positive">+33.92%</td>
+        <td class="positive">
+          +3910
+        </td>
+        <td class="negative">
+          -5
+        </td>
+        <td>45.0 億</td>
+        <td>
+          
+          
+            <span class="tag">工具機</span><span class="tag">手工具/電動工具</span><span class="tag">軸承/精密機構</span>
+            
+              <span class="tag tag-more" data-tip="齒輪/減速機、手術機器人/智慧醫療器材" title="齒輪/減速機、手術機器人/智慧醫療器材">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2059.html">2059</a></td>
+        <td>
+          <a href="../company/2059.html">川湖</a>
+          <span class="hl-star" data-tip="滑軌 全球 #3｜川湖伺服器滑軌" title="滑軌 全球 #3｜川湖伺服器滑軌">★</span>
+          
+          
+        </td>
+        <td>3585.00</td>
+        <td class="negative">-8.89%</td>
+        <td class="positive">+4.06%</td>
+        <td class="positive">+1.85%</td>
+        <td class="negative">
+          -86
+        </td>
+        <td class="negative">
+          -7
+        </td>
+        <td>44.5 億</td>
+        <td>
+          
+          
+            <span class="tag">散熱/液冷</span><span class="tag">稀土/關鍵金屬</span><span class="tag">軸承/精密機構</span>
+            
+              <span class="tag tag-more" data-tip="金屬粉末/3D 列印、熱交換器/散熱器" title="金屬粉末/3D 列印、熱交換器/散熱器">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1504.html">1504</a></td>
+        <td>
+          <a href="../company/1504.html">東元</a>
+          <span class="hl-star" data-tip="重電馬達 全球 #5｜東元馬達 + 機器人 + 重電" title="重電馬達 全球 #5｜東元馬達 + 機器人 + 重電">★</span>
+          
+          
+        </td>
+        <td>61.30</td>
+        <td class="negative">-3.16%</td>
+        <td class="negative">-3.01%</td>
+        <td class="negative">-5.11%</td>
+        <td class="negative">
+          -1612
+        </td>
+        <td class="positive">
+          +5
+        </td>
+        <td>8.8 億</td>
+        <td>
+          
+          
+            <span class="tag">重電</span><span class="tag">HVDC/直流電力</span><span class="tag">銅纜/銅加工</span>
+            
+              <span class="tag tag-more" data-tip="固態電池" title="固態電池">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3588.html">3588</a></td>
+        <td>
+          <a href="../company/3588.html">通嘉</a>
+          <span class="hl-star" data-tip="電源管理 IC 前五｜通嘉 LED 驅動 + PMIC" title="電源管理 IC 前五｜通嘉 LED 驅動 + PMIC">★</span>
+          
+          
+        </td>
+        <td>67.80</td>
+        <td class="positive">+2.42%</td>
+        <td class="positive">+25.56%</td>
+        <td class="positive">+37.11%</td>
+        <td class="negative">
+          -34
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6.6 億</td>
+        <td>
+          
+          
+            <span class="tag">被動元件</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1503.html">1503</a></td>
+        <td>
+          <a href="../company/1503.html">士電</a>
+          <span class="hl-star" data-tip="重電三雄之一｜變壓器 + 配電設備" title="重電三雄之一｜變壓器 + 配電設備">★</span>
+          
+          
+        </td>
+        <td>192.00</td>
+        <td class="negative">-2.78%</td>
+        <td class="negative">-2.04%</td>
+        <td class="positive">+0.26%</td>
+        <td class="negative">
+          -113
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6.4 億</td>
+        <td>
+          
+          
+            <span class="tag">重電</span><span class="tag">HVDC/直流電力</span><span class="tag">綠能/儲能</span>
+            
+              <span class="tag tag-more" data-tip="海底電纜、智慧電錶/AMI、閥門管材、智慧城市/V2X、風電/離岸風電" title="海底電纜、智慧電錶/AMI、閥門管材、智慧城市/V2X、風電/離岸風電">+5</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1597.html">1597</a></td>
+        <td>
+          <a href="../company/1597.html">直得</a>
+          <span class="hl-star" data-tip="線性滑軌 全球 #3｜精密直線傳動" title="線性滑軌 全球 #3｜精密直線傳動">★</span>
+          
+          
+        </td>
+        <td>107.50</td>
+        <td class="negative">-6.93%</td>
+        <td class="negative">-8.12%</td>
+        <td class="positive">+31.26%</td>
+        <td class="positive">
+          +873
+        </td>
+        <td class="positive">
+          +23
+        </td>
+        <td>5.9 億</td>
+        <td>
+          
+          
+            <span class="tag">工具機</span><span class="tag">自行車零件</span><span class="tag">自行車零件</span>
+            
+              <span class="tag tag-more" data-tip="手工具/電動工具、軸承/精密機構、齒輪/減速機" title="手工具/電動工具、軸承/精密機構、齒輪/減速機">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2231.html">2231</a></td>
+        <td>
+          <a href="../company/2231.html">為升</a>
+          <span class="hl-star" data-tip="胎壓偵測 TPMS 全球 #1｜TPMS 系統、車用感測" title="胎壓偵測 TPMS 全球 #1｜TPMS 系統、車用感測">★</span>
+          
+          
+        </td>
+        <td>135.50</td>
+        <td class="negative">-4.91%</td>
+        <td class="positive">+5.86%</td>
+        <td class="positive">+36.32%</td>
+        <td class="positive">
+          +289
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5.9 億</td>
+        <td>
+          
+          
+            <span class="tag">電動車</span><span class="tag">車用電子</span><span class="tag">自行車零件</span>
+            
+              <span class="tag tag-more" data-tip="汽車零件/售後、電動車供應鏈" title="汽車零件/售後、電動車供應鏈">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4576.html">4576</a></td>
+        <td>
+          <a href="../company/4576.html">大銀微系統</a>
+          <span class="hl-star" data-tip="線性馬達 台灣 #1｜PMSM 線性馬達、機器人關節" title="線性馬達 台灣 #1｜PMSM 線性馬達、機器人關節">★</span>
+          
+          
+        </td>
+        <td>190.00</td>
+        <td class="negative">-4.04%</td>
+        <td class="negative">-1.55%</td>
+        <td class="positive">+59.66%</td>
+        <td class="positive">
+          +208
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.0 億</td>
+        <td>
+          
+          
+            <span class="tag">工具機</span><span class="tag">軸承/精密機構</span><span class="tag">齒輪/減速機</span>
+            
+              <span class="tag tag-more" data-tip="金屬粉末/3D 列印、手術機器人/智慧醫療器材" title="金屬粉末/3D 列印、手術機器人/智慧醫療器材">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1536.html">1536</a></td>
+        <td>
+          <a href="../company/1536.html">和大</a>
+          <span class="hl-star" data-tip="EV 減速器齒輪 全球領先｜Tesla Model 3/Y 齒輪獨家" title="EV 減速器齒輪 全球領先｜Tesla Model 3/Y 齒輪獨家">★</span>
+          
+          
+        </td>
+        <td>49.50</td>
+        <td class="negative">-4.44%</td>
+        <td class="negative">-2.56%</td>
+        <td class="negative">-3.13%</td>
+        <td class="negative">
+          -761
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          
+            <span class="tag">電動車</span><span class="tag">車用電子</span><span class="tag">自行車零件</span>
+            
+              <span class="tag tag-more" data-tip="汽車零件/售後、碳纖維/輕量材料、電動車供應鏈" title="汽車零件/售後、碳纖維/輕量材料、電動車供應鏈">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8374.html">8374</a></td>
+        <td>
+          <a href="../company/8374.html">羅昇</a>
+          <span class="hl-star" data-tip="自動化代理 前五｜羅昇 西門子 / FANUC 代理" title="自動化代理 前五｜羅昇 西門子 / FANUC 代理">★</span>
+          
+          
+        </td>
+        <td>76.80</td>
+        <td class="negative">-6.91%</td>
+        <td class="negative">-7.02%</td>
+        <td class="positive">+11.30%</td>
+        <td class="negative">
+          -130
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5964 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4506.html">4506</a></td>
+        <td>
+          <a href="../company/4506.html">崇友</a>
+          <span class="hl-star" data-tip="電梯 前五｜崇友實業 電梯" title="電梯 前五｜崇友實業 電梯">★</span>
+          
+          
+        </td>
+        <td>119.00</td>
+        <td class="negative">-0.42%</td>
+        <td class="negative">-1.65%</td>
+        <td class="positive">+2.15%</td>
+        <td class="negative">
+          -8
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1261 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

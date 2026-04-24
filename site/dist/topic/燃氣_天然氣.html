@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>燃氣/天然氣 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#d97706;">燃氣/天然氣</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#d97706;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#d9770622; color:#d97706;">傳產</div>
+    <h1>燃氣/天然氣</h1>
+    <p class="topic-en">Natural Gas</p>
+    <p class="topic-desc">天然氣公用事業，政策價格穩定、高殖利率。大台北、欣天然、新海等區域燃氣公司為主。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>5%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>—</strong></span>
+      <span class="kpi"><em>成分股</em><strong>11</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-0.83%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>龍頭</small>
+    <strong>大台北 / 欣天然</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>殖利率</small>
+    <strong>4-6%</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>管制</small>
+    <strong>政府訂價</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>防禦性</small>
+    <strong>高</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_燃氣_天然氣"></div>
+  <div id="topic_chart_燃氣_天然氣" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, 0.19, -0.15, 0.19, -0.03, 0.06, 0.32, 0.42, 0.32, -0.22, -0.32, -0.38, -0.38, -0.3, -0.13, 0.19, 0.01, 0.11, -0.06, -0.57, -0.78, -0.7, -1.29, -1.99, -2.77, -3.63, -3.38, -3.33, -3.99, -3.85, -3.73, -3.51, -2.91, -1.96, -2.18, -1.14, -1.13, -1.24, -1.4, -1.49, -2.09, -2.24, -2.3, -2.25, -2.49, -3.09, -3.39, -3.22, -2.98, -3.0, -3.37, -3.44, -3.6, -3.35, -3.5, -3.46, -3.46, -3.94, -4.07, -3.81, -3.9, -3.87, -3.93, -3.91, -3.5, -3.2, -3.03, -2.6, -1.76, -1.79, -1.73, -2.01, -2.09, -1.88, -2.5, -2.56, -3.48, -4.12, -3.75, -3.61, -3.36, -3.88, -3.76, -3.51, -2.82, -1.96, -2.32, -2.17, -1.99, -0.57, 0.94, 5.22, 7.75, 12.04, 19.57, 10.47, 5.47, 5.75, 3.88, 3.68, 1.28, 1.05, 4.78, 3.09, 5.76, 3.14, 2.07, 3.04, 2.84, 2.63, 0.61, 0.11, -0.02, -0.27, -1.54, -1.77, -1.88, -0.93, -1.24, -0.94, -0.99, -0.85, -1.18, -1.4, -1.53, -2.36], "ret_1d": -0.83, "ret_1w": -1.38, "ret_1m": -5.32};
+    const kpiEl = document.getElementById('topic_chart_kpis_燃氣_天然氣');
+    const chartEl = document.getElementById('topic_chart_燃氣_天然氣');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-0.83%</strong></div>
+      <div><em>5日平均</em><strong class="negative">-1.39%</strong></div>
+      <div><em>20日平均</em><strong class="negative">-5.39%</strong></div>
+      <div><em>族群成交額</em><strong>1.6 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>4</strong></div>
+      <div><em>投信買超家數</em><strong>0</strong></div>
+      <div><em>今日最強</em><strong>欣高</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="能源服務_石油燃料.html" style="border-color:#78350f; color:#78350f;">
+        能源服務/石油燃料
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr>
+        <td><a href="../company/8926.html">8926</a></td>
+        <td>
+          <a href="../company/8926.html">台汽電</a>
+          
+          
+          
+        </td>
+        <td>45.40</td>
+        <td class="negative">-0.66%</td>
+        <td class="positive">+1.79%</td>
+        <td class="positive">+0.11%</td>
+        <td class="positive">
+          +261
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7052 萬</td>
+        <td>
+          
+          
+            <span class="tag">能源服務/石油燃料</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9908.html">9908</a></td>
+        <td>
+          <a href="../company/9908.html">大台北</a>
+          
+          
+          
+        </td>
+        <td>29.55</td>
+        <td class="negative">-0.51%</td>
+        <td class="negative">-0.84%</td>
+        <td class="negative">-1.17%</td>
+        <td class="">
+          +0
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3545 萬</td>
+        <td>
+          
+          
+            <span class="tag">能源服務/石油燃料</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2616.html">2616</a></td>
+        <td>
+          <a href="../company/2616.html">山隆</a>
+          
+          
+          
+        </td>
+        <td>14.85</td>
+        <td class="negative">-1.66%</td>
+        <td class="negative">-3.88%</td>
+        <td class="negative">-16.57%</td>
+        <td class="negative">
+          -8
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1142 萬</td>
+        <td>
+          
+          
+            <span class="tag">能源服務/石油燃料</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8927.html">8927</a></td>
+        <td>
+          <a href="../company/8927.html">北基</a>
+          
+          
+          
+        </td>
+        <td>23.05</td>
+        <td class="negative">-1.07%</td>
+        <td class="negative">-2.33%</td>
+        <td class="negative">-0.86%</td>
+        <td class="positive">
+          +74
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1128 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9918.html">9918</a></td>
+        <td>
+          <a href="../company/9918.html">欣天然</a>
+          
+          
+          
+        </td>
+        <td>43.05</td>
+        <td class="negative">-1.26%</td>
+        <td class="negative">-1.03%</td>
+        <td class="negative">-12.05%</td>
+        <td class="positive">
+          +14
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>776 萬</td>
+        <td>
+          
+          
+            <span class="tag">能源服務/石油燃料</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9931.html">9931</a></td>
+        <td>
+          <a href="../company/9931.html">欣高</a>
+          
+          
+          
+        </td>
+        <td>36.15</td>
+        <td class="negative">+0.00%</td>
+        <td class="positive">+0.42%</td>
+        <td class="negative">-9.40%</td>
+        <td class="negative">
+          -2
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>684 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8908.html">8908</a></td>
+        <td>
+          <a href="../company/8908.html">欣雄</a>
+          
+          
+          
+        </td>
+        <td>40.40</td>
+        <td class="negative">-0.25%</td>
+        <td class="negative">-2.65%</td>
+        <td class="negative">-4.15%</td>
+        <td class="negative">
+          -62
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>677 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9926.html">9926</a></td>
+        <td>
+          <a href="../company/9926.html">新海</a>
+          
+          
+          
+        </td>
+        <td>49.40</td>
+        <td class="negative">-0.70%</td>
+        <td class="negative">-1.10%</td>
+        <td class="negative">-1.00%</td>
+        <td class="negative">
+          -32
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>511 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/9937.html">9937</a></td>
+        <td>
+          <a href="../company/9937.html">全國</a>
+          
+          
+          
+        </td>
+        <td>56.50</td>
+        <td class="negative">-1.57%</td>
+        <td class="negative">-1.57%</td>
+        <td class="negative">-0.18%</td>
+        <td class="positive">
+          +1
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>279 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8931.html">8931</a></td>
+        <td>
+          <a href="../company/8931.html">大汽電</a>
+          
+          
+          
+        </td>
+        <td>41.30</td>
+        <td class="negative">-1.31%</td>
+        <td class="negative">-2.36%</td>
+        <td class="negative">-7.50%</td>
+        <td class="negative">
+          -6
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>215 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8917.html">8917</a></td>
+        <td>
+          <a href="../company/8917.html">欣泰</a>
+          
+          
+          
+        </td>
+        <td>51.60</td>
+        <td class="negative">-0.19%</td>
+        <td class="negative">-1.71%</td>
+        <td class="negative">-6.52%</td>
+        <td class="negative">
+          -5
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>126 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

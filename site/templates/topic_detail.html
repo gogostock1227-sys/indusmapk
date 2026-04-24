@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% set page = "topics" %}
+{% set static_prefix = "../" %}
+{% block title %}{{ group }} · 台股 AI 產業寶{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:{{ meta.color }};">{{ group }}</span>
+</nav>
+
+<section class="topic-hero" style="--accent:{{ meta.color }};">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:{{ meta.color }}22; color:{{ meta.color }};">{{ meta.category }}</div>
+    <h1>{{ group }}</h1>
+    <p class="topic-en">{{ meta.en }}</p>
+    <p class="topic-desc">{{ meta.desc }}</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>{{ meta.cagr }}</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>{{ meta.market_size }}</strong></span>
+      <span class="kpi"><em>成分股</em><strong>{{ summary.n_stocks or 0 }}</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="{% if summary.ret_1d_mean and summary.ret_1d_mean > 0 %}positive{% elif summary.ret_1d_mean %}negative{% endif %}">{{ summary.ret_1d_mean|pct if summary.ret_1d_mean else '—' }}</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  {% for ind in meta.indicators %}
+  <div class="indicator-card">
+    <small>{{ ind.label }}</small>
+    <strong>{{ ind.value }}</strong>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_{{ group|slugify }}"></div>
+  <div id="topic_chart_{{ group|slugify }}" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {{ topic_series_json|safe }};
+    const kpiEl = document.getElementById('topic_chart_kpis_{{ group|slugify }}');
+    const chartEl = document.getElementById('topic_chart_{{ group|slugify }}');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="{% if summary.ret_1d_mean and summary.ret_1d_mean > 0 %}positive{% elif summary.ret_1d_mean %}negative{% endif %}">{{ summary.ret_1d_mean|pct if summary.ret_1d_mean else '—' }}</strong></div>
+      <div><em>5日平均</em><strong class="{% if summary.ret_5d_mean and summary.ret_5d_mean > 0 %}positive{% elif summary.ret_5d_mean %}negative{% endif %}">{{ summary.ret_5d_mean|pct if summary.ret_5d_mean else '—' }}</strong></div>
+      <div><em>20日平均</em><strong class="{% if summary.ret_20d_mean and summary.ret_20d_mean > 0 %}positive{% elif summary.ret_20d_mean %}negative{% endif %}">{{ summary.ret_20d_mean|pct if summary.ret_20d_mean else '—' }}</strong></div>
+      <div><em>族群成交額</em><strong>{{ summary.amount_sum_mn|fmt_amount if summary.amount_sum_mn else '—' }}</strong></div>
+      <div><em>漲停家數</em><strong>{{ summary.n_limit_up or 0 }}</strong></div>
+      <div><em>外資買超家數</em><strong>{{ summary.n_foreign_buy or 0 }}</strong></div>
+      <div><em>投信買超家數</em><strong>{{ summary.n_trust_buy or 0 }}</strong></div>
+      <div><em>今日最強</em><strong>{{ name_map.get(summary.top_stock, summary.top_stock) or '—' }}</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      {% for r in related %}
+      {% set rmeta = get_meta(r.name) %}
+      <a class="related-chip" href="{{ r.name|slugify }}.html" style="border-color:{{ rmeta.color }}; color:{{ rmeta.color }};">
+        {{ r.name }}
+        <small>共用 {{ r.shared }} 檔</small>
+      </a>
+      {% endfor %}
+      {% if not related %}<p class="muted">此題材沒有與其他族群明顯重疊的股票。</p>{% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sym, row in stocks.iterrows() %}
+      {% set hl = STOCK_HIGHLIGHTS.get(sym) %}
+      <tr{% if hl %} class="has-hl"{% endif %}>
+        <td><a href="../company/{{ sym }}.html">{{ sym }}</a></td>
+        <td>
+          <a href="../company/{{ sym }}.html">{{ row.display_name }}</a>
+          {% if hl %}<span class="hl-star" data-tip="{{ hl.ranking }}｜{{ hl.tech }}" title="{{ hl.ranking }}｜{{ hl.tech }}">★</span>{% endif %}
+          {% if row.limit_up %} <span class="badge badge-red">漲停</span>{% endif %}
+          {% if row.limit_down %} <span class="badge badge-green">跌停</span>{% endif %}
+        </td>
+        <td>{{ "%.2f"|format(row.close) if row.close == row.close else '—' }}</td>
+        <td class="{% if row.ret_1d == row.ret_1d and row.ret_1d > 0 %}positive{% elif row.ret_1d == row.ret_1d %}negative{% endif %}">{{ row.ret_1d|pct }}</td>
+        <td class="{% if row.ret_5d == row.ret_5d and row.ret_5d > 0 %}positive{% elif row.ret_5d == row.ret_5d %}negative{% endif %}">{{ row.ret_5d|pct }}</td>
+        <td class="{% if row.ret_20d == row.ret_20d and row.ret_20d > 0 %}positive{% elif row.ret_20d == row.ret_20d %}negative{% endif %}">{{ row.ret_20d|pct }}</td>
+        <td class="{% if row.foreign_1d and row.foreign_1d > 0 %}positive{% elif row.foreign_1d and row.foreign_1d < 0 %}negative{% endif %}">
+          {% if row.foreign_1d == row.foreign_1d %}{{ "%+.0f"|format(row.foreign_1d) }}{% else %}—{% endif %}
+        </td>
+        <td class="{% if row.trust_1d and row.trust_1d > 0 %}positive{% elif row.trust_1d and row.trust_1d < 0 %}negative{% endif %}">
+          {% if row.trust_1d == row.trust_1d %}{{ "%+.0f"|format(row.trust_1d) }}{% else %}—{% endif %}
+        </td>
+        <td>{{ row.amount_mn|fmt_amount }}</td>
+        <td>
+          {% set tp = company_topics.get(sym, []) | reject('equalto', group) | list %}
+          {% if tp %}
+            {% for t in tp[:3] %}<span class="tag">{{ t }}</span>{% endfor %}
+            {% if tp|length > 3 %}
+              <span class="tag tag-more" data-tip="{{ tp[3:]|join('、') }}" title="{{ tp[3:]|join('、') }}">+{{ tp|length - 3 }}</span>
+            {% endif %}
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

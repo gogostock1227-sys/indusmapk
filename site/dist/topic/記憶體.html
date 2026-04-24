@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>記憶體 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../database.html" class="">公司資料庫</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#a78bfa;">記憶體</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#a78bfa;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#a78bfa22; color:#a78bfa;">AI / 半導體</div>
+    <h1>記憶體</h1>
+    <p class="topic-en">Memory</p>
+    <p class="topic-desc">DRAM、NAND Flash。2026 Q1 HBM 缺貨帶動 DDR 價格大漲，南亞科、華邦電受惠。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>20%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>180B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>21</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-5.71%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>循環位置</small>
+    <strong>上升期</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>HBM 滲透</small>
+    <strong>AI 需求爆發</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>DDR 漲幅</small>
+    <strong>2026 Q1 +20%</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>台廠</small>
+    <strong>南亞科 / 華邦 / 群聯</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_記憶體"></div>
+  <div id="topic_chart_記憶體" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -3.42, -1.01, 4.4, 3.55, 4.88, 5.43, 6.09, 5.98, 11.3, 11.73, 11.42, 12.36, 11.45, 13.01, 7.45, 8.88, 13.47, 15.0, 20.28, 22.42, 26.46, 27.34, 23.27, 24.37, 19.78, 16.9, 17.95, 10.03, 10.38, 14.15, 11.13, 14.21, 15.68, 15.71, 15.57, 15.54, 14.8, 16.25, 21.1, 22.46, 20.11, 20.1, 22.53, 21.33, 17.72, 20.83, 20.28, 20.08, 24.32, 24.72, 28.99, 30.11, 30.09, 34.4, 37.45, 42.84, 45.32, 52.1, 58.54, 60.36, 55.49, 59.53, 58.8, 60.95, 60.94, 67.28, 76.0, 74.69, 67.24, 69.27, 67.12, 75.0, 75.47, 81.52, 81.0, 82.16, 69.57, 66.93, 71.11, 66.59, 59.93, 64.48, 60.4, 61.02, 65.57, 73.15, 70.74, 72.48, 74.73, 65.0, 55.06, 63.33, 61.47, 54.06, 61.26, 72.31, 72.84, 76.69, 86.21, 95.06, 104.39, 107.35, 99.15, 86.9, 78.1, 83.1, 75.46, 73.84, 72.05, 60.97, 70.15, 67.23, 69.93, 79.7, 75.44, 80.27, 81.65, 84.45, 82.87, 82.75, 83.86, 85.96, 98.51, 105.46, 93.72], "ret_1d": -5.71, "ret_1w": 6.0, "ret_1m": 8.77};
+    const kpiEl = document.getElementById('topic_chart_kpis_記憶體');
+    const chartEl = document.getElementById('topic_chart_記憶體');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-5.71%</strong></div>
+      <div><em>5日平均</em><strong class="positive">+6.20%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+9.01%</strong></div>
+      <div><em>族群成交額</em><strong>1871.0 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>6</strong></div>
+      <div><em>投信買超家數</em><strong>4</strong></div>
+      <div><em>今日最強</em><strong>達能</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="NANDFlash_SSD控制.html" style="border-color:#e11d48; color:#e11d48;">
+        NAND Flash/SSD 控制
+        <small>共用 8 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="DDR5_LPDDR5記憶體.html" style="border-color:#b91c1c; color:#b91c1c;">
+        DDR5/LPDDR5 記憶體
+        <small>共用 7 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="HBM高頻寬記憶體.html" style="border-color:#b91c1c; color:#b91c1c;">
+        HBM 高頻寬記憶體
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="IC設計.html" style="border-color:#5b8def; color:#5b8def;">
+        IC設計
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="印度產能_印度概念.html" style="border-color:#fb923c; color:#fb923c;">
+        印度產能/印度概念
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2408.html">2408</a></td>
+        <td>
+          <a href="../company/2408.html">南亞科</a>
+          <span class="hl-star" data-tip="DRAM 台灣 #1｜10nm DDR4 / DDR5 量產" title="DRAM 台灣 #1｜10nm DDR4 / DDR5 量產">★</span>
+          
+          
+        </td>
+        <td>208.00</td>
+        <td class="negative">-5.02%</td>
+        <td class="negative">-2.58%</td>
+        <td class="negative">-3.93%</td>
+        <td class="negative">
+          -17424
+        </td>
+        <td class="negative">
+          -1331
+        </td>
+        <td>304.5 億</td>
+        <td>
+          
+          
+            <span class="tag">HBM 高頻寬記憶體</span><span class="tag">DDR5/LPDDR5 記憶體</span><span class="tag">印度產能/印度概念</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2337.html">2337</a></td>
+        <td>
+          <a href="../company/2337.html">旺宏</a>
+          <span class="hl-star" data-tip="Niche Flash 全球 #1｜旺宏 NOR Flash、ROM 車用" title="Niche Flash 全球 #1｜旺宏 NOR Flash、ROM 車用">★</span>
+          
+          
+        </td>
+        <td>126.00</td>
+        <td class="negative">-6.32%</td>
+        <td class="negative">-9.35%</td>
+        <td class="negative">-7.69%</td>
+        <td class="positive">
+          +7066
+        </td>
+        <td class="negative">
+          -16640
+        </td>
+        <td>294.9 億</td>
+        <td>
+          
+          
+            <span class="tag">NAND Flash/SSD 控制</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3260.html">3260</a></td>
+        <td>
+          <a href="../company/3260.html">威剛</a>
+          <span class="hl-star" data-tip="記憶體模組 前三｜威剛 DDR / SSD / 記憶卡" title="記憶體模組 前三｜威剛 DDR / SSD / 記憶卡">★</span>
+          
+          
+        </td>
+        <td>397.50</td>
+        <td class="negative">-5.69%</td>
+        <td class="positive">+10.26%</td>
+        <td class="positive">+2.85%</td>
+        <td class="negative">
+          -4521
+        </td>
+        <td class="negative">
+          -277
+        </td>
+        <td>221.7 億</td>
+        <td>
+          
+          
+            <span class="tag">DDR5/LPDDR5 記憶體</span><span class="tag">NAND Flash/SSD 控制</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6531.html">6531</a></td>
+        <td>
+          <a href="../company/6531.html">愛普*</a>
+          <span class="hl-star" data-tip="DRAM IC 設計 前五｜愛普 低功耗 DRAM + 記憶體模組" title="DRAM IC 設計 前五｜愛普 低功耗 DRAM + 記憶體模組">★</span>
+          
+          
+        </td>
+        <td>785.00</td>
+        <td class="negative">-0.88%</td>
+        <td class="positive">+33.96%</td>
+        <td class="positive">+56.69%</td>
+        <td class="positive">
+          +206
+        </td>
+        <td class="positive">
+          +173
+        </td>
+        <td>218.0 億</td>
+        <td>
+          
+          
+            <span class="tag">IC設計</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8299.html">8299</a></td>
+        <td>
+          <a href="../company/8299.html">群聯</a>
+          <span class="hl-star" data-tip="NAND 控制晶片 全球 #1｜aiDAPTIV+ 將 SSD 模擬為 DRAM、AI 伺服器獨家" title="NAND 控制晶片 全球 #1｜aiDAPTIV+ 將 SSD 模擬為 DRAM、AI 伺服器獨家">★</span>
+          
+          
+        </td>
+        <td>1705.00</td>
+        <td class="negative">-3.94%</td>
+        <td class="positive">+7.57%</td>
+        <td class="positive">+1.19%</td>
+        <td class="negative">
+          -548
+        </td>
+        <td class="negative">
+          -199
+        </td>
+        <td>199.9 億</td>
+        <td>
+          
+          
+            <span class="tag">HBM 高頻寬記憶體</span><span class="tag">DDR5/LPDDR5 記憶體</span><span class="tag">NAND Flash/SSD 控制</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2344.html">2344</a></td>
+        <td>
+          <a href="../company/2344.html">華邦電</a>
+          <span class="hl-star" data-tip="Niche DRAM 全球 #1｜Niche DRAM、NOR Flash 利基型記憶體" title="Niche DRAM 全球 #1｜Niche DRAM、NOR Flash 利基型記憶體">★</span>
+          
+          
+        </td>
+        <td>87.80</td>
+        <td class="negative">-3.09%</td>
+        <td class="negative">-2.01%</td>
+        <td class="negative">-11.76%</td>
+        <td class="positive">
+          +3813
+        </td>
+        <td class="negative">
+          -377
+        </td>
+        <td>152.6 億</td>
+        <td>
+          
+          
+            <span class="tag">HBM 高頻寬記憶體</span><span class="tag">DDR5/LPDDR5 記憶體</span><span class="tag">NAND Flash/SSD 控制</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3450.html">3450</a></td>
+        <td>
+          <a href="../company/3450.html">聯鈞</a>
+          <span class="hl-star" data-tip="光通訊模組 前五｜聯鈞光通訊 VCSEL" title="光通訊模組 前五｜聯鈞光通訊 VCSEL">★</span>
+          
+          
+        </td>
+        <td>333.50</td>
+        <td class="negative">-8.25%</td>
+        <td class="negative">-2.20%</td>
+        <td class="positive">+29.77%</td>
+        <td class="positive">
+          +2675
+        </td>
+        <td class="negative">
+          -17
+        </td>
+        <td>91.9 億</td>
+        <td>
+          
+          
+            <span class="tag">低軌衛星</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4967.html">4967</a></td>
+        <td>
+          <a href="../company/4967.html">十銓</a>
+          <span class="hl-star" data-tip="記憶體模組 前五｜十銓 DDR5 / SSD 模組" title="記憶體模組 前五｜十銓 DDR5 / SSD 模組">★</span>
+          
+          
+        </td>
+        <td>250.00</td>
+        <td class="negative">-4.58%</td>
+        <td class="positive">+17.37%</td>
+        <td class="negative">-0.40%</td>
+        <td class="negative">
+          -178
+        </td>
+        <td class="negative">
+          -46
+        </td>
+        <td>82.6 億</td>
+        <td>
+          
+          
+            <span class="tag">DDR5/LPDDR5 記憶體</span><span class="tag">NAND Flash/SSD 控制</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5289.html">5289</a></td>
+        <td>
+          <a href="../company/5289.html">宜鼎</a>
+          <span class="hl-star" data-tip="工業級 SSD 台灣 #1｜宜鼎國際工控 / 醫療 SSD" title="工業級 SSD 台灣 #1｜宜鼎國際工控 / 醫療 SSD">★</span>
+          
+          
+        </td>
+        <td>1105.00</td>
+        <td class="negative">-5.15%</td>
+        <td class="positive">+1.84%</td>
+        <td class="positive">+12.99%</td>
+        <td class="negative">
+          -231
+        </td>
+        <td class="positive">
+          +99
+        </td>
+        <td>69.8 億</td>
+        <td>
+          
+          
+            <span class="tag">NAND Flash/SSD 控制</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8271.html">8271</a></td>
+        <td>
+          <a href="../company/8271.html">宇瞻</a>
+          <span class="hl-star" data-tip="記憶體模組 前五｜宇瞻 DRAM / SSD 模組" title="記憶體模組 前五｜宇瞻 DRAM / SSD 模組">★</span>
+          
+          
+        </td>
+        <td>222.00</td>
+        <td class="negative">-6.72%</td>
+        <td class="positive">+35.78%</td>
+        <td class="positive">+44.63%</td>
+        <td class="positive">
+          +166
+        </td>
+        <td class="negative">
+          -27
+        </td>
+        <td>57.7 億</td>
+        <td>
+          
+          
+            <span class="tag">DDR5/LPDDR5 記憶體</span><span class="tag">NAND Flash/SSD 控制</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3006.html">3006</a></td>
+        <td>
+          <a href="../company/3006.html">晶豪科</a>
+          <span class="hl-star" data-tip="DRAM 設計 前三｜晶豪科 Niche DRAM" title="DRAM 設計 前三｜晶豪科 Niche DRAM">★</span>
+          
+          
+        </td>
+        <td>155.50</td>
+        <td class="negative">-7.16%</td>
+        <td class="negative">-0.96%</td>
+        <td class="negative">-4.01%</td>
+        <td class="negative">
+          -3738
+        </td>
+        <td class="negative">
+          -55
+        </td>
+        <td>49.2 億</td>
+        <td>
+          
+          
+            <span class="tag">穿戴/智慧眼鏡</span><span class="tag">DDR5/LPDDR5 記憶體</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8150.html">8150</a></td>
+        <td>
+          <a href="../company/8150.html">南茂</a>
+          <span class="hl-star" data-tip="封測 前十｜南茂記憶體封測、LCD Driver" title="封測 前十｜南茂記憶體封測、LCD Driver">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>71.90</td>
+        <td class="negative">-9.90%</td>
+        <td class="negative">-2.44%</td>
+        <td class="positive">+25.92%</td>
+        <td class="negative">
+          -5369
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>44.0 億</td>
+        <td>
+          
+          
+            <span class="tag">CoWoS先進封裝</span><span class="tag">晶片封測</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2451.html">2451</a></td>
+        <td>
+          <a href="../company/2451.html">創見</a>
+          
+          
+          
+        </td>
+        <td>251.50</td>
+        <td class="negative">-6.51%</td>
+        <td class="positive">+1.82%</td>
+        <td class="negative">-0.59%</td>
+        <td class="negative">
+          -1010
+        </td>
+        <td class="positive">
+          +373
+        </td>
+        <td>35.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6643.html">6643</a></td>
+        <td>
+          <a href="../company/6643.html">M31</a>
+          
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>564.00</td>
+        <td class="negative">-9.90%</td>
+        <td class="positive">+14.63%</td>
+        <td class="positive">+22.61%</td>
+        <td class="negative">
+          -138
+        </td>
+        <td class="positive">
+          +35
+        </td>
+        <td>30.9 億</td>
+        <td>
+          
+          
+            <span class="tag">IC設計</span><span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4973.html">4973</a></td>
+        <td>
+          <a href="../company/4973.html">廣穎電通</a>
+          <span class="hl-star" data-tip="記憶卡 / 隨身碟 前五｜廣穎電通 Silicon Power" title="記憶卡 / 隨身碟 前五｜廣穎電通 Silicon Power">★</span>
+          
+          
+        </td>
+        <td>82.40</td>
+        <td class="negative">-8.65%</td>
+        <td class="positive">+7.29%</td>
+        <td class="positive">+14.92%</td>
+        <td class="negative">
+          -1403
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8.1 億</td>
+        <td>
+          
+          
+            <span class="tag">NAND Flash/SSD 控制</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8110.html">8110</a></td>
+        <td>
+          <a href="../company/8110.html">華東</a>
+          
+          
+          
+        </td>
+        <td>46.45</td>
+        <td class="negative">-7.10%</td>
+        <td class="negative">-6.16%</td>
+        <td class="negative">-13.18%</td>
+        <td class="negative">
+          -2638
+        </td>
+        <td class="negative">
+          -177
+        </td>
+        <td>6.6 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2342.html">2342</a></td>
+        <td>
+          <a href="../company/2342.html">茂矽</a>
+          
+          
+          
+        </td>
+        <td>32.00</td>
+        <td class="negative">-3.90%</td>
+        <td class="positive">+6.49%</td>
+        <td class="positive">+2.89%</td>
+        <td class="negative">
+          -145
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6485.html">6485</a></td>
+        <td>
+          <a href="../company/6485.html">點序</a>
+          
+          
+          
+        </td>
+        <td>77.30</td>
+        <td class="negative">-7.43%</td>
+        <td class="negative">-0.39%</td>
+        <td class="negative">-11.15%</td>
+        <td class="negative">
+          -142
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8830 萬</td>
+        <td>
+          
+          
+            <span class="tag">IC設計</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3141.html">3141</a></td>
+        <td>
+          <a href="../company/3141.html">晶宏</a>
+          
+          
+          
+        </td>
+        <td>48.60</td>
+        <td class="negative">-5.81%</td>
+        <td class="positive">+11.34%</td>
+        <td class="positive">+13.55%</td>
+        <td class="positive">
+          +114
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8602 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5285.html">5285</a></td>
+        <td>
+          <a href="../company/5285.html">界霖</a>
+          
+          
+          
+        </td>
+        <td>55.20</td>
+        <td class="negative">-4.50%</td>
+        <td class="positive">+6.15%</td>
+        <td class="positive">+15.48%</td>
+        <td class="negative">
+          -74
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3584 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3686.html">3686</a></td>
+        <td>
+          <a href="../company/3686.html">達能</a>
+          
+          
+          
+        </td>
+        <td>18.00</td>
+        <td class="positive">+0.56%</td>
+        <td class="positive">+1.69%</td>
+        <td class="negative">-1.64%</td>
+        <td class="negative">
+          -174
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>566 萬</td>
+        <td>
+          
+          
+            <span class="tag">IC設計</span>
+            
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:54</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<sc

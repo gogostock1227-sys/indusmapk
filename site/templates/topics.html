@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% set page = "topics" %}
+{% block title %}題材總覽 · 台股 AI 產業寶{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>題材總覽</h1>
+  <p>45+ 台股產業族群一覽。點擊卡片進入題材詳情頁，看成分股、法人動向、熱力圖、相關題材。</p>
+</section>
+
+<div class="filter-bar">
+  <button class="filter-chip active" data-filter="all">全部</button>
+  {% for c in categories %}
+  <button class="filter-chip" data-filter="{{ c }}" style="border-color:{{ CATEGORY_COLORS.get(c, '#64748b') }};">{{ c }}</button>
+  {% endfor %}
+</div>
+
+<section class="topic-grid">
+  {% for g in groups %}
+  {% set meta = get_meta(g) %}
+  {% set m = group_metrics.get(g, {}) %}
+  <a href="topic/{{ g|slugify }}.html" class="topic-card" data-category="{{ meta.category }}">
+    <div class="topic-card-accent" style="background:{{ meta.color }};"></div>
+    <div class="topic-card-body">
+      <div class="topic-card-header">
+        <h3>{{ g }}</h3>
+        <span class="pill" style="background:{{ meta.color }}22; color:{{ meta.color }};">{{ meta.category }}</span>
+      </div>
+      <p class="topic-card-desc">{{ meta.desc[:80] }}{% if meta.desc|length > 80 %}…{% endif %}</p>
+      <div class="topic-card-stats">
+        <div>
+          <span class="stat-mini-label">成分股</span>
+          <span class="stat-mini-value">{{ m.n_stocks or 0 }}</span>
+        </div>
+        <div>
+          <span class="stat-mini-label">今日</span>
+          <span class="stat-mini-value {% if m.ret_1d_mean and m.ret_1d_mean > 0 %}positive{% elif m.ret_1d_mean %}negative{% endif %}">
+            {{ m.ret_1d_mean|pct if m.ret_1d_mean else '—' }}
+          </span>
+        </div>
+        <div>
+          <span class="stat-mini-label">5日</span>
+          <span class="stat-mini-value {% if m.ret_5d_mean and m.ret_5d_mean > 0 %}positive{% elif m.ret_5d_mean %}negative{% endif %}">
+            {{ m.ret_5d_mean|pct if m.ret_5d_mean else '—' }}
+          </span>
+        </div>
+        <div>
+          <span class="stat-mini-label">CAGR</span>
+          <span class="stat-mini-value">{{ meta.cagr }}</span>
+        </div>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</section>
+
+<script>
+function applyFilter(filterValue) {
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  const target = Array.from(document.querySelectorAll('.filter-chip'))
+    .find(b => b.dataset.filter === filterValue) || document.querySelector('.filter-chip[data-filter="all"]');
+  if (target) target.classList.add('active');
+  const f = target ? target.dataset.filter : 'all';
+  document.querySelectorAll('.topic-card').forEach(c => {
+    c.style.display = (f === 'all' || c.dataset.category === f) ? '' : 'none';
+  });
+}
+
+document.querySelectorAll('.filter-chip').forEach(btn => {
+  btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+});
+
+// 頁面載入時讀 ?cat=XXX 自動套用該分類的 filter
+(function initFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get('cat');
+  if (cat) applyFilter(cat);
+})();
+</script>
+{% endblock %}

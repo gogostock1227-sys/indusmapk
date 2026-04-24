@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>電源供應器/BBU · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../database.html" class="">公司資料庫</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#eab308;">電源供應器/BBU</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#eab308;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#eab30822; color:#eab308;">散熱 / 電源</div>
+    <h1>電源供應器/BBU</h1>
+    <p class="topic-en">Power Supply / BBU</p>
+    <p class="topic-desc">AI 伺服器 PSU 從 3kW 升級至 12kW，BBU 備用電池模組是 AI 機櫃必備。台達電、光寶科為核心玩家。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>30%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>15B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>25</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-2.22%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>ASP 提升</small>
+    <strong>3kW → 12kW</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>BBU 滲透率</small>
+    <strong>2026E 50%</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>核心客戶</small>
+    <strong>NVIDIA / CSP</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>台廠</small>
+    <strong>台達 / 光寶 / 群電</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_電源供應器_BBU"></div>
+  <div id="topic_chart_電源供應器_BBU" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -1.39, -1.0, 0.2, -0.94, -0.85, 0.1, 2.67, 2.31, 3.32, 2.81, 2.84, 2.13, 1.21, 0.39, -1.34, -1.03, -0.13, -0.96, -1.16, -1.98, -1.34, -1.3, -2.28, -3.03, -4.77, -6.38, -4.54, -7.33, -7.64, -6.08, -4.07, -2.94, -1.79, -2.11, -2.57, -1.98, -1.46, -2.1, -1.8, -1.3, -1.65, -1.34, -1.15, -0.91, -2.28, -2.13, -1.26, -0.46, 1.67, 0.84, 0.72, 1.2, 1.54, 1.96, 1.19, 1.56, -0.38, 0.69, 1.03, -0.41, 0.37, 0.26, -0.62, 1.24, 0.97, 1.46, 2.46, 3.69, 3.29, 4.86, 4.59, 3.92, 2.9, 3.18, 1.01, -1.53, -2.47, -0.44, 1.95, 0.97, -0.93, -0.55, -0.77, -0.21, 1.93, 3.02, 2.56, 2.91, 2.92, 0.2, -5.0, -1.72, -1.52, -6.93, -5.11, -2.58, -2.15, -2.19, -2.17, 0.07, 1.06, 0.24, 0.35, -2.91, -3.35, -0.83, -1.33, -1.4, -3.34, -6.46, -4.59, -6.34, -6.77, -4.73, -5.32, -5.08, -3.58, -3.07, -2.26, -0.06, -0.31, 0.71, 2.6, 5.84, 3.49], "ret_1d": -2.22, "ret_1w": 3.55, "ret_1m": 7.08};
+    const kpiEl = document.getElementById('topic_chart_kpis_電源供應器_BBU');
+    const chartEl = document.getElementById('topic_chart_電源供應器_BBU');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-2.22%</strong></div>
+      <div><em>5日平均</em><strong class="positive">+3.49%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+8.15%</strong></div>
+      <div><em>族群成交額</em><strong>565.0 億</strong></div>
+      <div><em>漲停家數</em><strong>1</strong></div>
+      <div><em>外資買超家數</em><strong>5</strong></div>
+      <div><em>投信買超家數</em><strong>1</strong></div>
+      <div><em>今日最強</em><strong>西勝</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="儲能系統_BESS.html" style="border-color:#10b981; color:#10b981;">
+        儲能系統/BESS
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="AI基礎設施_資料中心.html" style="border-color:#ea580c; color:#ea580c;">
+        AI基礎設施/資料中心
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="HVDC_直流電力.html" style="border-color:#d97706; color:#d97706;">
+        HVDC/直流電力
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="充電樁_充電服務.html" style="border-color:#16a34a; color:#16a34a;">
+        充電樁/充電服務
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="碳化矽_SiC.html" style="border-color:#f59e0b; color:#f59e0b;">
+        碳化矽/SiC
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2308.html">2308</a></td>
+        <td>
+          <a href="../company/2308.html">台達電</a>
+          <span class="hl-star" data-tip="電源供應器 全球 #1｜12kW / 33kW 伺服器電源、800V HVDC、液冷 CDU" title="電源供應器 全球 #1｜12kW / 33kW 伺服器電源、800V HVDC、液冷 CDU">★</span>
+          
+          
+        </td>
+        <td>1980.00</td>
+        <td class="negative">-1.74%</td>
+        <td class="positive">+7.32%</td>
+        <td class="positive">+39.93%</td>
+        <td class="negative">
+          -4522
+        </td>
+        <td class="positive">
+          +385
+        </td>
+        <td>350.2 億</td>
+        <td>
+          
+          
+            <span class="tag">散熱/液冷</span><span class="tag">重電</span><span class="tag">HVDC/直流電力</span>
+            
+              <span class="tag tag-more" data-tip="綠能/儲能、電動車、車用電子、機器人、碳化矽/SiC、碳權/ESG、固態電池、稀土/關鍵金屬、充電樁/充電服務、智慧電錶/AMI、美國製造回流/晶片法案、儲能系統/BESS、智慧城市/V2X、電動車供應鏈、AI基礎設施/資料中心" title="綠能/儲能、電動車、車用電子、機器人、碳化矽/SiC、碳權/ESG、固態電池、稀土/關鍵金屬、充電樁/充電服務、智慧電錶/AMI、美國製造回流/晶片法案、儲能系統/BESS、智慧城市/V2X、電動車供應鏈、AI基礎設施/資料中心">+15</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4931.html">4931</a></td>
+        <td>
+          <a href="../company/4931.html">新盛力</a>
+          
+          
+          
+        </td>
+        <td>165.50</td>
+        <td class="positive">+3.76%</td>
+        <td class="positive">+17.79%</td>
+        <td class="positive">+15.33%</td>
+        <td class="negative">
+          -1215
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>92.6 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2301.html">2301</a></td>
+        <td>
+          <a href="../company/2301.html">光寶科</a>
+          <span class="hl-star" data-tip="電源供應 + LED 全球 #2｜光寶科電源 + 光學元件" title="電源供應 + LED 全球 #2｜光寶科電源 + 光學元件">★</span>
+          
+          
+        </td>
+        <td>164.50</td>
+        <td class="negative">-6.53%</td>
+        <td class="positive">+2.17%</td>
+        <td class="positive">+7.52%</td>
+        <td class="negative">
+          -4832
+        </td>
+        <td class="negative">
+          -1543
+        </td>
+        <td>82.6 億</td>
+        <td>
+          
+          
+            <span class="tag">車用電子</span><span class="tag">蘋果概念股</span><span class="tag">碳化矽/SiC</span>
+            
+              <span class="tag tag-more" data-tip="印度產能/印度概念、AI基礎設施/資料中心" title="印度產能/印度概念、AI基礎設施/資料中心">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6282.html">6282</a></td>
+        <td>
+          <a href="../company/6282.html">康舒</a>
+          <span class="hl-star" data-tip="電源供應器 前十｜康舒 AC/DC 電源" title="電源供應器 前十｜康舒 AC/DC 電源">★</span>
+          
+          
+        </td>
+        <td>48.00</td>
+        <td class="negative">-6.61%</td>
+        <td class="negative">-4.19%</td>
+        <td class="positive">+6.43%</td>
+        <td class="negative">
+          -3313
+        </td>
+        <td class="negative">
+          -397
+        </td>
+        <td>23.1 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6121.html">6121</a></td>
+        <td>
+          <a href="../company/6121.html">新普</a>
+          <span class="hl-star" data-tip="電池模組 台灣 #1｜新普筆電電池 + 儲能 BESS" title="電池模組 台灣 #1｜新普筆電電池 + 儲能 BESS">★</span>
+          
+          
+        </td>
+        <td>364.00</td>
+        <td class="negative">-2.54%</td>
+        <td class="positive">+4.45%</td>
+        <td class="positive">+4.90%</td>
+        <td class="negative">
+          -211
+        </td>
+        <td class="negative">
+          -123
+        </td>
+        <td>4.3 億</td>
+        <td>
+          
+          
+            <span class="tag">固態電池</span><span class="tag">功率半導體 IC</span><span class="tag">鋰電池材料</span>
+            
+              <span class="tag tag-more" data-tip="儲能系統/BESS" title="儲能系統/BESS">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6117.html">6117</a></td>
+        <td>
+          <a href="../company/6117.html">迎廣</a>
+          
+          
+          
+        </td>
+        <td>81.80</td>
+        <td class="negative">-5.21%</td>
+        <td class="positive">+0.74%</td>
+        <td class="positive">+15.21%</td>
+        <td class="positive">
+          +78
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.5 億</td>
+        <td>
+          
+          
+            <span class="tag">工業電腦/IPC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2457.html">2457</a></td>
+        <td>
+          <a href="../company/2457.html">飛宏</a>
+          <span class="hl-star" data-tip="電源供應 前十｜飛宏電源 + EV 充電模組" title="電源供應 前十｜飛宏電源 + EV 充電模組">★</span>
+          
+          
+        </td>
+        <td>24.65</td>
+        <td class="negative">-4.27%</td>
+        <td class="negative">-1.00%</td>
+        <td class="negative">-6.10%</td>
+        <td class="negative">
+          -1052
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8109.html">8109</a></td>
+        <td>
+          <a href="../company/8109.html">博大</a>
+          
+          
+          
+        </td>
+        <td>120.00</td>
+        <td class="positive">+4.35%</td>
+        <td class="positive">+12.15%</td>
+        <td class="positive">+19.40%</td>
+        <td class="positive">
+          +275
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3078.html">3078</a></td>
+        <td>
+          <a href="../company/3078.html">僑威</a>
+          <span class="hl-star" data-tip="電源供應器 前十｜僑威電腦電源 + 伺服器" title="電源供應器 前十｜僑威電腦電源 + 伺服器">★</span>
+          
+          
+        </td>
+        <td>57.20</td>
+        <td class="negative">-3.05%</td>
+        <td class="positive">+1.24%</td>
+        <td class="negative">-0.52%</td>
+        <td class="negative">
+          -766
+        </td>
+        <td class="negative">
+          -2
+        </td>
+        <td>1.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6412.html">6412</a></td>
+        <td>
+          <a href="../company/6412.html">群電</a>
+          <span class="hl-star" data-tip="電源供應器 前五｜群電電源 + BBU" title="電源供應器 前五｜群電電源 + BBU">★</span>
+          
+          
+        </td>
+        <td>77.20</td>
+        <td class="negative">-2.65%</td>
+        <td class="negative">-2.03%</td>
+        <td class="positive">+2.39%</td>
+        <td class="negative">
+          -572
+        </td>
+        <td class="negative">
+          -7
+        </td>
+        <td>1.1 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6419.html">6419</a></td>
+        <td>
+          <a href="../company/6419.html">京晨科</a>
+          <span class="hl-star" data-tip="工控伺服器 前十｜京晨科 IPC + 伺服器" title="工控伺服器 前十｜京晨科 IPC + 伺服器">★</span>
+          
+          
+        </td>
+        <td>140.00</td>
+        <td class="negative">-6.67%</td>
+        <td class="positive">+2.94%</td>
+        <td class="positive">+73.05%</td>
+        <td class="positive">
+          +2
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8481 萬</td>
+        <td>
+          
+          
+            <span class="tag">AI伺服器</span><span class="tag">AI基礎設施/資料中心</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3617.html">3617</a></td>
+        <td>
+          <a href="../company/3617.html">碩天</a>
+          
+          
+          
+        </td>
+        <td>192.50</td>
+        <td class="negative">-1.28%</td>
+        <td class="positive">+1.58%</td>
+        <td class="positive">+12.24%</td>
+        <td class="negative">
+          -43
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7959 萬</td>
+        <td>
+          
+          
+            <span class="tag">其他電子/工控</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3625.html">3625</a></td>
+        <td>
+          <a href="../company/3625.html">西勝</a>
+          
+           <span class="badge badge-red">漲停</span>
+          
+        </td>
+        <td>19.35</td>
+        <td class="positive">+9.94%</td>
+        <td class="positive">+13.82%</td>
+        <td class="positive">+13.49%</td>
+        <td class="negative">
+          -578
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6800 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3094.html">3094</a></td>
+        <td>
+          <a href="../company/3094.html">聯傑</a>
+          
+          
+          
+        </td>
+        <td>26.45</td>
+        <td class="negative">-4.86%</td>
+        <td class="positive">+5.17%</td>
+        <td class="positive">+15.50%</td>
+        <td class="negative">
+          -153
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6246 萬</td>
+        <td>
+          
+          
+            <span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3518.html">3518</a></td>
+        <td>
+          <a href="../company/3518.html">柏騰</a>
+          
+          
+          
+        </td>
+        <td>30.60</td>
+        <td class="negative">-6.42%</td>
+        <td class="positive">+16.79%</td>
+        <td class="positive">+39.73%</td>
+        <td class="negative">
+          -6
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6094 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6558.html">6558</a></td>
+        <td>
+          <a href="../company/6558.html">興能高</a>
+          
+          
+          
+        </td>
+        <td>30.55</td>
+        <td class="negative">-3.78%</td>
+        <td class="positive">+2.69%</td>
+        <td class="positive">+5.16%</td>
+        <td class="negative">
+          -34
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5302 萬</td>
+        <td>
+          
+          
+            <span class="tag">太陽能/光電板</span><span class="tag">其他電子/工控</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3540.html">3540</a></td>
+        <td>
+          <a href="../company/3540.html">曜越</a>
+          
+          
+          
+        </td>
+        <td>28.95</td>
+        <td class="positive">+4.14%</td>
+        <td class="positive">+6.04%</td>
+        <td class="positive">+3.95%</td>
+        <td class="negative">
+          -47
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4959 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2420.html">2420</a></td>
+        <td>
+          <a href="../company/2420.html">新巨</a>
+          <span class="hl-star" data-tip="電源供應 前十｜新巨 AC/DC 電源" title="電源供應 前十｜新巨 AC/DC 電源">★</span>
+          
+          
+        </td>
+        <td>54.90</td>
+        <td class="negative">-1.61%</td>
+        <td class="negative">-0.90%</td>
+        <td class="positive">+4.57%</td>
+        <td class="positive">
+          +121
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3524 萬</td>
+        <td>
+          
+          
+            <span class="tag">文創/IP 內容</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6203.html">6203</a></td>
+        <td>
+          <a href="../company/6203.html">海韻電</a>
+          <span class="hl-star" data-tip="電源供應器 前十｜海韻電源" title="電源供應器 前十｜海韻電源">★</span>
+          
+          
+        </td>
+        <td>65.80</td>
+        <td class="negative">-1.79%</td>
+        <td class="positive">+1.39%</td>
+        <td class="positive">+1.08%</td>
+        <td class="negative">
+          -100
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2233 萬</td>
+        <td>
+          
+          
+            <span class="tag">航太</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3015.html">3015</a></td>
+        <td>
+          <a href="../company/3015.html">全漢</a>
+          <span class="hl-star" data-tip="電源供應 前五｜全漢電源 伺服器 + 消費" title="電源供應 前五｜全漢電源 伺服器 + 消費">★</span>
+          
+          
+        </td>
+        <td>50.10</td>
+        <td class="negative">-3.28%</td>
+        <td class="negative">-2.34%</td>
+        <td class="negative">-1.18%</td>
+        <td class="negative">
+          -81
+        </td>
+        <td class="negative">
+          -13
+        </td>
+        <td>2021 萬</td>
+        <td>
+          
+          
+            <span class="tag">HVDC/直流電力</span><span class="tag">充電樁/充電服務</span><span class="tag">儲能系統/BESS</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3508.html">3508</a></td>
+        <td>
+          <a href="../company/3508.html">位速</a>
+          
+          
+          
+        </td>
+        <td>26.70</td>
+        <td class="negative">+0.00%</td>
+        <td class="positive">+0.75%</td>
+        <td class="negative">-32.75%</td>
+        <td class="positive">
+          +7
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1380 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5356.html">5356</a></td>
+        <td>
+          <a href="../company/5356.html">協益</a>
+          
+          
+          
+        </td>
+        <td>26.70</td>
+        <td class="negative">-2.02%</td>
+        <td class="positive">+3.09%</td>
+        <td class="positive">+8.32%</td>
+        <td class="negative">
+          -17
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>606 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6276.html">6276</a></td>
+        <td>
+          <a href="../company/6276.html">安鈦克</a>
+          
+          
+          
+        </td>
+        <td>31.25</td>
+        <td class="negative">-3.70%</td>
+        <td class="negative">-1.88%</td>
+        <td class="negative">-5.45%</td>
+        <td class="negative">
+          -7
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>281 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6201.html">6201</a></td>
+        <td>
+          <a href="../company/6201.html">亞弘電</a>
+          
+          
+          
+        </td>
+        <td>50.30</td>
+        <td class="positive">+0.20%</td>
+        <td class="negative">-0.79%</td>
+        <td class="positive">+0.20%</td>
+        <td class="negative">
+          -13
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>278 萬</td>
+        <td>
+          
+          
+            <span class="tag">精密機械/自動化</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3664.html">3664</a></td>
+        <td>
+          <a href="../company/3664.html">安瑞-KY</a>
+          <span class="hl-star" data-tip="電源模組 前十｜安瑞-KY 工業電源" title="電源模組 前十｜安瑞-KY 工業電源">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>7.56</td>
+        <td class="negative">-9.89%</td>
+        <td class="positive">+0.13%</td>
+        <td class="negative">-38.54%</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>89 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:54</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<sc

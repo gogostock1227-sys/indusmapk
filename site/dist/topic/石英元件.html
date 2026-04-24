@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>石英元件 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#14b8a6;">石英元件</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#14b8a6;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#14b8a622; color:#14b8a6;">利基零組件</div>
+    <h1>石英元件</h1>
+    <p class="topic-en">Quartz Components</p>
+    <p class="topic-desc">石英振盪器（OSC/TCXO）為 5G、AI 伺服器、衛星、車用的基礎時脈元件。晶技全球 TCXO 龍頭。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>12%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>3B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>7</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-4.60%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>應用</small>
+    <strong>5G / AI / 衛星 / 車用</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>龍頭</small>
+    <strong>晶技</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>規格</small>
+    <strong>高頻低相噪</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>進入門檻</small>
+    <strong>認證嚴</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_石英元件"></div>
+  <div id="topic_chart_石英元件" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -0.51, 0.64, 1.83, 1.16, 1.44, 2.76, 3.71, 2.85, 3.51, 2.8, 4.89, 5.39, 4.45, 5.51, 2.19, 1.7, 1.81, 1.2, 0.95, 1.11, 2.27, 1.99, -0.17, -0.99, -3.34, -3.62, -1.81, -4.34, -3.37, -2.14, -1.13, -0.76, 0.28, -0.71, -0.27, 0.32, 0.27, 0.37, 2.15, 3.34, 2.04, 2.0, 2.18, 2.22, 2.08, 1.29, 0.33, 1.15, 1.93, 1.42, 1.13, 0.77, 0.53, 0.04, -0.01, 0.83, -0.24, 1.29, 3.37, 3.79, 4.92, 8.89, 9.3, 12.05, 12.1, 11.65, 11.24, 13.35, 11.41, 11.62, 12.62, 11.97, 13.99, 13.25, 11.03, 9.39, 8.81, 11.17, 10.94, 8.42, 7.23, 7.56, 7.97, 8.05, 11.46, 13.47, 13.44, 15.45, 17.9, 15.1, 10.6, 14.19, 13.71, 9.67, 12.93, 16.36, 15.55, 16.44, 15.06, 17.38, 18.73, 20.11, 20.29, 16.49, 15.38, 18.74, 19.5, 20.42, 19.11, 16.17, 20.03, 17.86, 18.65, 23.47, 25.9, 27.54, 30.15, 29.86, 31.28, 35.93, 39.3, 38.65, 38.86, 41.37, 34.87], "ret_1d": -4.6, "ret_1w": -0.78, "ret_1m": 16.89};
+    const kpiEl = document.getElementById('topic_chart_kpis_石英元件');
+    const chartEl = document.getElementById('topic_chart_石英元件');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-4.60%</strong></div>
+      <div><em>5日平均</em><strong class="negative">-0.85%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+17.45%</strong></div>
+      <div><em>族群成交額</em><strong>138.5 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>3</strong></div>
+      <div><em>投信買超家數</em><strong>1</strong></div>
+      <div><em>今日最強</em><strong>崑鼎</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="檢測_設備服務.html" style="border-color:#14b8a6; color:#14b8a6;">
+        檢測/設備服務
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="被動元件.html" style="border-color:#8b5cf6; color:#8b5cf6;">
+        被動元件
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="IC設計.html" style="border-color:#5b8def; color:#5b8def;">
+        IC設計
+        <small>共用 1 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2360.html">2360</a></td>
+        <td>
+          <a href="../company/2360.html">致茂</a>
+          <span class="hl-star" data-tip="ATE 測試設備 全球前五｜電源、訊號測試平台" title="ATE 測試設備 全球前五｜電源、訊號測試平台">★</span>
+          
+          
+        </td>
+        <td>1940.00</td>
+        <td class="negative">-4.43%</td>
+        <td class="negative">-5.37%</td>
+        <td class="positive">+31.08%</td>
+        <td class="positive">
+          +200
+        </td>
+        <td class="negative">
+          -364
+        </td>
+        <td>116.8 億</td>
+        <td>
+          
+          
+            <span class="tag">檢測/設備服務</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6104.html">6104</a></td>
+        <td>
+          <a href="../company/6104.html">創惟</a>
+          <span class="hl-star" data-tip="USB IC 前五｜創惟 USB 控制 IC" title="USB IC 前五｜創惟 USB 控制 IC">★</span>
+          
+          
+        </td>
+        <td>98.00</td>
+        <td class="negative">-5.77%</td>
+        <td class="positive">+5.60%</td>
+        <td class="positive">+5.38%</td>
+        <td class="negative">
+          -1130
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>10.1 億</td>
+        <td>
+          
+          
+            <span class="tag">IC設計</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3042.html">3042</a></td>
+        <td>
+          <a href="../company/3042.html">晶技</a>
+          <span class="hl-star" data-tip="石英元件 全球 TCXO #1｜高頻低相噪 TCXO / OCXO" title="石英元件 全球 TCXO #1｜高頻低相噪 TCXO / OCXO">★</span>
+          
+          
+        </td>
+        <td>153.00</td>
+        <td class="negative">-8.38%</td>
+        <td class="positive">+9.29%</td>
+        <td class="positive">+67.21%</td>
+        <td class="positive">
+          +34
+        </td>
+        <td class="negative">
+          -200
+        </td>
+        <td>6.4 億</td>
+        <td>
+          
+          
+            <span class="tag">被動元件</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2419.html">2419</a></td>
+        <td>
+          <a href="../company/2419.html">仲琦</a>
+          <span class="hl-star" data-tip="網通 Cable Modem｜仲琦北美 Cable + 衛星" title="網通 Cable Modem｜仲琦北美 Cable + 衛星">★</span>
+          
+          
+        </td>
+        <td>32.05</td>
+        <td class="negative">-8.95%</td>
+        <td class="negative">-15.10%</td>
+        <td class="positive">+10.71%</td>
+        <td class="negative">
+          -2268
+        </td>
+        <td class="positive">
+          +37
+        </td>
+        <td>3.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3022.html">3022</a></td>
+        <td>
+          <a href="../company/3022.html">威強電</a>
+          <span class="hl-star" data-tip="石英元件 前十｜IC 晶技相關精密元件" title="石英元件 前十｜IC 晶技相關精密元件">★</span>
+          
+          
+        </td>
+        <td>68.90</td>
+        <td class="negative">-4.17%</td>
+        <td class="positive">+0.73%</td>
+        <td class="positive">+9.89%</td>
+        <td class="positive">
+          +256
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6803.html">6803</a></td>
+        <td>
+          <a href="../company/6803.html">崑鼎</a>
+          <span class="hl-star" data-tip="航太 前十｜崴航 國際物流" title="航太 前十｜崴航 國際物流">★</span>
+          
+          
+        </td>
+        <td>289.50</td>
+        <td class="positive">+0.17%</td>
+        <td class="negative">-0.17%</td>
+        <td class="negative">-0.86%</td>
+        <td class="negative">
+          -54
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3972 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6184.html">6184</a></td>
+        <td>
+          <a href="../company/6184.html">大豐電</a>
+          <span class="hl-star" data-tip="電源 前十｜大河 電源供應器" title="電源 前十｜大河 電源供應器">★</span>
+          
+          
+        </td>
+        <td>47.20</td>
+        <td class="negative">-0.63%</td>
+        <td class="negative">-0.94%</td>
+        <td class="negative">-1.26%</td>
+        <td class="negative">
+          -46
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>838 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

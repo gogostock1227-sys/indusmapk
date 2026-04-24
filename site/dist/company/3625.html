@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>西勝 (3625) · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <span>西勝 (3625)</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#ff7847;">
+  <div class="topic-hero-inner">
+    <div class="category-tag">電腦及週邊設備業</div>
+    <h1>西勝 <small class="muted">3625</small></h1>
+    <p class="topic-en">上櫃</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>收盤</em><strong>19.35</strong></span>
+      <span class="kpi"><em>今日</em><strong class="positive">+9.94%</strong></span>
+      <span class="kpi"><em>5日</em><strong class="positive">+13.82%</strong></span>
+      <span class="kpi"><em>20日</em><strong class="positive">+13.49%</strong></span>
+      <span class="kpi"><em>成交金額</em><strong>6800 萬</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>60 日走勢</h2>
+    <span class="muted">日K + 成交量 + MA20/MA60 · 資料：FinLab</span>
+  </div>
+  <div id="price_chart_3625" style="height:460px; width:100%; padding:8px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "ohlc": [[20.2, 20.05, 20.05, 20.4], [20.05, 20.0, 19.9, 20.55], [20.0, 19.8, 19.8, 20.45], [19.9, 19.6, 19.4, 20.0], [19.65, 20.85, 19.65, 21.0], [21.05, 20.3, 20.3, 22.3], [20.2, 20.5, 20.0, 20.5], [20.5, 20.0, 19.95, 20.5], [20.0, 19.9, 19.9, 20.25], [19.9, 19.55, 19.5, 20.0], [19.55, 19.0, 19.0, 19.55], [18.75, 18.75, 18.7, 19.3], [19.0, 18.75, 18.65, 19.15], [18.75, 19.65, 18.75, 19.95], [19.7, 19.7, 19.4, 20.4], [19.3, 19.1, 18.55, 19.3], [19.15, 18.9, 18.8, 19.2], [18.9, 18.75, 18.65, 19.0], [18.75, 18.75, 18.75, 19.5], [18.8, 19.0, 18.6, 19.15], [19.0, 19.05, 18.5, 19.15], [19.1, 18.85, 18.8, 19.4], [18.9, 19.05, 18.8, 19.15], [19.0, 18.7, 18.45, 19.0], [18.7, 17.75, 17.7, 18.9], [17.0, 16.65, 16.1, 17.3], [17.1, 17.25, 16.8, 17.5], [17.25, 17.0, 17.0, 17.35], [16.7, 16.1, 15.85, 16.7], [17.35, 16.8, 16.35, 17.35], [17.0, 17.2, 17.0, 17.25], [17.8, 17.15, 17.05, 17.8], [16.55, 16.95, 16.2, 17.05], [17.0, 16.95, 16.45, 17.1], [17.1, 17.25, 17.1, 17.75], [17.05, 16.95, 16.9, 17.25], [16.95, 16.75, 16.65, 17.0], [16.75, 17.2, 16.3, 17.5], [17.2, 16.85, 16.7, 17.2], [17.0, 17.05, 17.0, 17.7], [17.1, 18.0, 17.1, 18.0], [18.0, 18.05, 17.7, 18.35], [17.85, 17.5, 17.4, 18.0], [17.25, 17.25, 17.25, 17.95], [17.25, 17.05, 16.6, 17.6], [17.2, 16.8, 16.8, 17.25], [17.05, 16.4, 16.4, 17.05], [16.8, 16.05, 16.05, 16.8], [16.15, 17.0, 16.15, 17.1], [17.3, 16.7, 16.4, 17.3], [16.7, 16.45, 16.35, 16.7], [16.6, 16.5, 16.4, 16.7], [16.5, 16.55, 16.35, 16.8], [16.55, 17.1, 16.55, 17.15], [17.25, 17.0, 16.8, 17.25], [17.15, 16.9, 16.7, 17.15], [16.95, 17.15, 16.8, 17.15], [17.15, 17.05, 16.85, 17.2], [17.1, 17.6, 17.05, 17.7], [17.7, 19.35, 17.7, 19.35]], "volume": [513.0, 692.0, 1089.0, 831.0, 2012.0, 2509.0, 731.0, 625.0, 494.0, 1036.0, 987.0, 416.0, 284.0, 427.0, 481.0, 430.0, 400.0, 334.0, 290.0, 234.0, 482.0, 458.0, 374.0, 581.0, 849.0, 793.0, 393.0, 174.0, 510.0, 234.0, 181.0, 191.0, 286.0, 310.0, 171.0, 278.0, 246.0, 460.0, 203.0, 391.0, 566.0, 670.0, 367.0, 300.0, 348.0, 235.0, 319.0, 226.0, 290.0, 178.0, 245.0, 207.0, 532.0, 440.0, 275.0, 228.0, 435.0, 350.0, 870.0, 3586.0], "ma20": [20.44, 20.34, 20.29, 20.21, 20.23, 20.23, 20.21, 20.18, 20.11, 20.06, 19.99, 19.92, 19.85, 19.84, 19.84, 19.79, 19.74, 19.69, 19.6, 19.54, 19.49, 19.44, 19.4, 19.36, 19.2, 19.02, 18.86, 18.71, 18.52, 18.38, 18.29, 18.21, 18.12, 17.98, 17.86, 17.75, 17.65, 17.57, 17.47, 17.38, 17.32, 17.28, 17.21, 17.13, 17.1, 17.11, 17.06, 17.02, 17.06, 17.05, 17.02, 16.98, 16.96, 16.97, 16.96, 16.96, 16.98, 16.97, 17.01, 17.12], "ma60": [22.07, 21.86, 21.61, 21.38, 21.22, 21.08, 20.94, 20.81, 20.72, 20.63, 20.54, 20.44, 20.36, 20.31, 20.25, 20.18, 20.13, 20.09, 20.06, 20.04, 20.02, 20.0, 19.99, 19.99, 19.96, 19.91, 19.86, 19.77, 19.7, 19.64, 19.59, 19.54, 19.49, 19.44, 19.39, 19.34, 19.27, 19.22, 19.17, 19.12, 19.09, 19.02, 18.96, 18.9, 18.84, 18.78, 18.71, 18.63, 18.56, 18.5, 18.43, 18.37, 18.31, 18.26, 18.22, 18.17, 18.12, 18.08, 18.03, 18.01]};
+    if (!raw) {
+      document.getElementById('price_chart_3625').innerHTML =
+        '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const el = document.getElementById('price_chart_3625');
+      const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const upColor = '#ef4444';   // 台股紅漲
+      const downColor = '#10b981'; // 台股綠跌
+      chart.setOption({
+        backgroundColor: 'transparent',
+        animation: false,
+        legend: {
+          data: ['K線','MA20','MA60'],
+          top: 0, textStyle: { color: '#9ca3af' }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          backgroundColor: '#1f2937',
+          borderColor: '#374151',
+          textStyle: { color: '#e5e7eb' },
+          formatter: (p) => {
+            const d = p[0].axisValue;
+            const k = p.find(x => x.seriesName === 'K線');
+            const v = p.find(x => x.seriesName === '成交量');
+            const m20 = p.find(x => x.seriesName === 'MA20');
+            const m60 = p.find(x => x.seriesName === 'MA60');
+            let s = `<b>${d}</b><br>`;
+            if (k) {
+              const [o, c, l, h] = k.value.slice(1);
+              s += `開 <b>${o}</b> · 高 <b style="color:${upColor}">${h}</b> · 低 <b style="color:${downColor}">${l}</b> · 收 <b>${c}</b><br>`;
+            }
+            if (v) s += `量 ${Math.round(v.value[1]).toLocaleString()} 張<br>`;
+            if (m20 && m20.value != null) s += `MA20 ${m20.value}<br>`;
+            if (m60 && m60.value != null) s += `MA60 ${m60.value}`;
+            return s;
+          }
+        },
+        axisPointer: { link: [{ xAxisIndex: 'all' }] },
+        grid: [
+          { left: 50, right: 16, top: 36, height: '62%' },
+          { left: 50, right: 16, top: '75%', height: '18%' }
+        ],
+        xAxis: [
+          {
+            type: 'category', data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { color: '#9ca3af' },
+            splitLine: { show: false },
+            boundaryGap: true,
+          },
+          {
+            type: 'category', gridIndex: 1, data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { show: false }, axisTick: { show: false }
+          }
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+            axisLabel: { color: '#9ca3af' }
+          },
+          {
+            gridIndex: 1, scale: true, splitNumber: 2,
+            splitLine: { show: false },
+            axisLabel: { color: '#9ca3af',
+              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+            }
+          }
+        ],
+        dataZoom: [
+          { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
+            borderColor: '#374151',
+            handleStyle: { color: '#ff7847' },
+            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
+            fillerColor: 'rgba(255,120,71,0.15)',
+            textStyle: { color: '#9ca3af' }
+          }
+        ],
+        series: [
+          {
+            name: 'K線', type: 'candlestick', data: raw.ohlc,
+            itemStyle: {
+              color: upColor, color0: downColor,
+              borderColor: upColor, borderColor0: downColor
+            }
+          },
+          {
+            name: 'MA20', type: 'line', data: raw.ma20,
+            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: 'MA60', type: 'line', data: raw.ma60,
+            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: '成交量', type: 'bar',
+            xAxisIndex: 1, yAxisIndex: 1,
+            data: raw.volume.map((v, i) => {
+              const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
+              return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
+            })
+          }
+        ]
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+
+
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>所屬題材 <span class="muted">(1)</span></h2>
+  </div>
+  
+  <div class="topic-grid compact">
+    
+    <a href="../topic/電源供應器_BBU.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#eab308;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>電源供應器/BBU</h3>
+          <span class="pill" style="background:#eab30822; color:#eab308;">散熱 / 電源</span>
+        </div>
+        <p class="topic-card-desc">AI 伺服器 PSU 從 3kW 升級至 12kW，BBU 備用電池模組是 AI 機櫃必備。台達電、光寶科為核心玩家。</p>
+      </div>
+    </a>
+    
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header"><h2>法人動向</h2></div>
+  <div class="snapshot">
+    <div><em>外資今日</em><strong class="negative">-578 張</strong></div>
+    <div><em>外資 5 日</em><strong class="negative">-249 張</strong></div>
+    <div><em>投信今日</em><strong class="">+0 張</strong></div>
+    <div><em>投信 5 日</em><strong class="">+0 張</strong></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

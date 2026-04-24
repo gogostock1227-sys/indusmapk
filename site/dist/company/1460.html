@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>宏遠 (1460) · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <span>宏遠 (1460)</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#ff7847;">
+  <div class="topic-hero-inner">
+    <div class="category-tag">紡織纖維</div>
+    <h1>宏遠 <small class="muted">1460</small></h1>
+    <p class="topic-en">上市</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>收盤</em><strong>6.73</strong></span>
+      <span class="kpi"><em>今日</em><strong class="negative">-1.03%</strong></span>
+      <span class="kpi"><em>5日</em><strong class="negative">-3.30%</strong></span>
+      <span class="kpi"><em>20日</em><strong class="negative">-6.92%</strong></span>
+      <span class="kpi"><em>成交金額</em><strong>595 萬</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>60 日走勢</h2>
+    <span class="muted">日K + 成交量 + MA20/MA60 · 資料：FinLab</span>
+  </div>
+  <div id="price_chart_1460" style="height:460px; width:100%; padding:8px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "ohlc": [[6.5, 6.49, 6.41, 6.5], [6.49, 6.45, 6.43, 6.49], [6.5, 6.45, 6.41, 6.52], [6.49, 6.45, 6.38, 6.49], [6.47, 6.46, 6.3, 6.47], [6.41, 6.46, 6.33, 6.46], [6.37, 6.63, 6.36, 6.65], [6.62, 6.66, 6.6, 6.75], [6.73, 6.75, 6.63, 6.8], [6.76, 6.77, 6.69, 6.79], [6.79, 6.65, 6.64, 6.79], [6.65, 6.55, 6.45, 6.65], [6.56, 6.55, 6.47, 6.56], [6.55, 6.6, 6.54, 6.6], [6.63, 6.71, 6.63, 6.73], [6.75, 6.82, 6.75, 6.86], [6.86, 6.78, 6.64, 6.86], [6.76, 6.78, 6.7, 6.84], [6.78, 6.81, 6.75, 6.84], [6.81, 6.83, 6.75, 6.85], [6.85, 6.86, 6.81, 6.87], [6.85, 6.79, 6.7, 6.85], [6.79, 6.83, 6.77, 6.85], [6.81, 6.89, 6.7, 6.9], [6.84, 7.15, 6.84, 7.23], [7.02, 6.81, 6.8, 7.02], [6.81, 6.68, 6.62, 6.87], [6.61, 6.65, 6.58, 6.7], [6.52, 6.65, 6.46, 6.73], [6.66, 6.83, 6.66, 7.0], [6.89, 6.76, 6.71, 6.89], [6.75, 6.84, 6.69, 6.87], [6.84, 6.8, 6.74, 6.84], [6.8, 6.86, 6.75, 6.99], [6.96, 6.9, 6.84, 7.06], [6.99, 7.06, 6.94, 7.07], [7.05, 6.92, 6.9, 7.05], [6.91, 7.03, 6.88, 7.05], [7.02, 7.1, 6.9, 7.2], [7.13, 7.23, 7.0, 7.35], [7.28, 7.25, 7.16, 7.38], [7.27, 7.05, 7.05, 7.3], [6.97, 7.17, 6.97, 7.22], [7.17, 7.18, 7.05, 7.21], [7.12, 7.08, 7.08, 7.2], [7.09, 7.16, 7.09, 7.19], [7.16, 7.1, 7.05, 7.17], [7.1, 7.16, 7.07, 7.2], [7.1, 7.06, 7.01, 7.19], [7.15, 7.0, 6.89, 7.15], [6.98, 7.0, 6.89, 7.06], [7.01, 7.07, 6.92, 7.14], [7.08, 7.02, 6.95, 7.09], [7.0, 7.01, 6.97, 7.04], [7.0, 6.96, 6.94, 7.05], [6.96, 6.91, 6.81, 6.97], [6.91, 6.82, 6.8, 6.92], [6.82, 6.78, 6.75, 6.84], [6.86, 6.8, 6.76, 6.86], [6.8, 6.73, 6.59, 6.8]], "volume": [508.0, 339.0, 600.0, 575.0, 868.0, 992.0, 1328.0, 888.0, 1053.0, 602.0, 493.0, 539.0, 374.0, 414.0, 525.0, 1899.0, 665.0, 409.0, 1127.0, 763.0, 683.0, 805.0, 821.0, 1152.0, 1968.0, 1412.0, 1299.0, 731.0, 829.0, 834.0, 911.0, 926.0, 695.0, 832.0, 967.0, 1225.0, 736.0, 911.0, 1439.0, 1660.0, 1217.0, 641.0, 633.0, 538.0, 563.0, 532.0, 457.0, 527.0, 738.0, 859.0, 544.0, 716.0, 537.0, 497.0, 633.0, 965.0, 527.0, 803.0, 625.0, 888.0], "ma20": [6.37, 6.38, 6.39, 6.4, 6.41, 6.42, 6.43, 6.45, 6.47, 6.49, 6.5, 6.51, 6.52, 6.53, 6.54, 6.56, 6.58, 6.6, 6.62, 6.63, 6.65, 6.67, 6.69, 6.71, 6.74, 6.76, 6.76, 6.76, 6.76, 6.76, 6.77, 6.78, 6.79, 6.81, 6.82, 6.83, 6.83, 6.85, 6.86, 6.88, 6.9, 6.91, 6.93, 6.95, 6.94, 6.96, 6.98, 7.01, 7.03, 7.04, 7.05, 7.06, 7.07, 7.08, 7.08, 7.07, 7.07, 7.06, 7.04, 7.02], "ma60": [6.01, 6.02, 6.03, 6.04, 6.05, 6.06, 6.08, 6.09, 6.11, 6.13, 6.15, 6.17, 6.18, 6.2, 6.22, 6.24, 6.26, 6.28, 6.3, 6.32, 6.34, 6.36, 6.38, 6.4, 6.42, 6.44, 6.45, 6.47, 6.48, 6.49, 6.5, 6.51, 6.52, 6.54, 6.55, 6.56, 6.58, 6.59, 6.6, 6.62, 6.64, 6.65, 6.67, 6.68, 6.7, 6.71, 6.73, 6.74, 6.75, 6.76, 6.77, 6.78, 6.79, 6.8, 6.81, 6.82, 6.83, 6.83, 6.84, 6.84]};
+    if (!raw) {
+      document.getElementById('price_chart_1460').innerHTML =
+        '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const el = document.getElementById('price_chart_1460');
+      const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const upColor = '#ef4444';   // 台股紅漲
+      const downColor = '#10b981'; // 台股綠跌
+      chart.setOption({
+        backgroundColor: 'transparent',
+        animation: false,
+        legend: {
+          data: ['K線','MA20','MA60'],
+          top: 0, textStyle: { color: '#9ca3af' }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          backgroundColor: '#1f2937',
+          borderColor: '#374151',
+          textStyle: { color: '#e5e7eb' },
+          formatter: (p) => {
+            const d = p[0].axisValue;
+            const k = p.find(x => x.seriesName === 'K線');
+            const v = p.find(x => x.seriesName === '成交量');
+            const m20 = p.find(x => x.seriesName === 'MA20');
+            const m60 = p.find(x => x.seriesName === 'MA60');
+            let s = `<b>${d}</b><br>`;
+            if (k) {
+              const [o, c, l, h] = k.value.slice(1);
+              s += `開 <b>${o}</b> · 高 <b style="color:${upColor}">${h}</b> · 低 <b style="color:${downColor}">${l}</b> · 收 <b>${c}</b><br>`;
+            }
+            if (v) s += `量 ${Math.round(v.value[1]).toLocaleString()} 張<br>`;
+            if (m20 && m20.value != null) s += `MA20 ${m20.value}<br>`;
+            if (m60 && m60.value != null) s += `MA60 ${m60.value}`;
+            return s;
+          }
+        },
+        axisPointer: { link: [{ xAxisIndex: 'all' }] },
+        grid: [
+          { left: 50, right: 16, top: 36, height: '62%' },
+          { left: 50, right: 16, top: '75%', height: '18%' }
+        ],
+        xAxis: [
+          {
+            type: 'category', data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { color: '#9ca3af' },
+            splitLine: { show: false },
+            boundaryGap: true,
+          },
+          {
+            type: 'category', gridIndex: 1, data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { show: false }, axisTick: { show: false }
+          }
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+            axisLabel: { color: '#9ca3af' }
+          },
+          {
+            gridIndex: 1, scale: true, splitNumber: 2,
+            splitLine: { show: false },
+            axisLabel: { color: '#9ca3af',
+              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+            }
+          }
+        ],
+        dataZoom: [
+          { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
+            borderColor: '#374151',
+            handleStyle: { color: '#ff7847' },
+            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
+            fillerColor: 'rgba(255,120,71,0.15)',
+            textStyle: { color: '#9ca3af' }
+          }
+        ],
+        series: [
+          {
+            name: 'K線', type: 'candlestick', data: raw.ohlc,
+            itemStyle: {
+              color: upColor, color0: downColor,
+              borderColor: upColor, borderColor0: downColor
+            }
+          },
+          {
+            name: 'MA20', type: 'line', data: raw.ma20,
+            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: 'MA60', type: 'line', data: raw.ma60,
+            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: '成交量', type: 'bar',
+            xAxisIndex: 1, yAxisIndex: 1,
+            data: raw.volume.map((v, i) => {
+              const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
+              return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
+            })
+          }
+        ]
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+
+
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>所屬題材 <span class="muted">(1)</span></h2>
+  </div>
+  
+  <div class="topic-grid compact">
+    
+    <a href="../topic/紡織_機能布.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#1d4ed8;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>紡織/機能布</h3>
+          <span class="pill" style="background:#1d4ed822; color:#1d4ed8;">傳產利基</span>
+        </div>
+        <p class="topic-card-desc">儒鴻、聚陽接歐美大廠運動機能布訂單。品牌客戶 Nike、Lululemon、Under Armour。東南亞產能切換。</p>
+      </div>
+    </a>
+    
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header"><h2>法人動向</h2></div>
+  <div class="snapshot">
+    <div><em>外資今日</em><strong class="negative">-95 張</strong></div>
+    <div><em>外資 5 日</em><strong class="positive">+98 張</strong></div>
+    <div><em>投信今日</em><strong class="">+0 張</strong></div>
+    <div><em>投信 5 日</em><strong class="">+0 張</strong></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

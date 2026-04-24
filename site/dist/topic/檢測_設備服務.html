@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>檢測/設備服務 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#14b8a6;">檢測/設備服務</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#14b8a6;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#14b8a622; color:#14b8a6;">封裝 / 測試</div>
+    <h1>檢測/設備服務</h1>
+    <p class="topic-en">Testing &amp; Equipment Services</p>
+    <p class="topic-desc">探針卡、測試座、AOI、故障分析、晶圓再生等半導體檢測服務。先進封裝拉動測試設備需求。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>20%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>15B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>24</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-3.55%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>驅動</small>
+    <strong>先進封裝 / HBM</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>核心技術</small>
+    <strong>MEMS 探針</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>客戶</small>
+    <strong>封測廠 / 晶圓廠</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>壁壘</small>
+    <strong>認證週期 1-2 年</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_檢測_設備服務"></div>
+  <div id="topic_chart_檢測_設備服務" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -0.76, 2.14, 3.21, 2.12, 2.43, 3.18, 2.63, 1.87, 3.09, 2.76, 4.13, 2.32, 3.12, 3.37, 1.03, 0.42, 1.42, -0.58, -1.49, -2.27, -2.26, -2.29, -3.38, -3.55, -6.15, -7.31, -4.32, -7.52, -4.58, -2.2, -0.46, 0.44, 3.23, 2.35, 2.41, 2.77, 3.56, 3.25, 4.38, 4.76, 4.39, 4.34, 5.63, 6.04, 5.28, 4.58, 3.18, 5.45, 5.96, 5.4, 7.17, 9.32, 9.22, 9.93, 11.14, 13.38, 12.08, 12.36, 12.7, 10.2, 10.96, 13.33, 12.65, 13.9, 13.34, 13.78, 13.95, 17.2, 15.43, 15.17, 16.13, 18.8, 20.35, 21.49, 19.97, 18.22, 18.43, 22.53, 24.71, 24.08, 21.52, 25.25, 24.56, 25.3, 29.61, 33.21, 36.72, 43.04, 45.78, 43.58, 37.51, 44.35, 46.57, 36.8, 41.52, 50.22, 53.33, 55.09, 56.99, 59.35, 63.78, 65.27, 69.13, 66.81, 63.53, 72.77, 74.33, 76.54, 78.6, 68.91, 77.58, 77.71, 84.33, 92.64, 96.07, 105.41, 113.01, 114.39, 123.82, 130.03, 140.45, 146.91, 151.0, 156.26, 147.16], "ret_1d": -3.55, "ret_1w": 7.45, "ret_1m": 51.14};
+    const kpiEl = document.getElementById('topic_chart_kpis_檢測_設備服務');
+    const chartEl = document.getElementById('topic_chart_檢測_設備服務');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-3.55%</strong></div>
+      <div><em>5日平均</em><strong class="positive">+7.81%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+54.74%</strong></div>
+      <div><em>族群成交額</em><strong>671.3 億</strong></div>
+      <div><em>漲停家數</em><strong>1</strong></div>
+      <div><em>外資買超家數</em><strong>16</strong></div>
+      <div><em>投信買超家數</em><strong>3</strong></div>
+      <div><em>今日最強</em><strong>印能科技</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="GoogleTPU.html" style="border-color:#4285f4; color:#4285f4;">
+        Google TPU
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="射頻RF_PA.html" style="border-color:#0891b2; color:#0891b2;">
+        射頻 RF/PA
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="Chiplet小晶片.html" style="border-color:#f59e0b; color:#f59e0b;">
+        Chiplet 小晶片
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="2奈米先進製程.html" style="border-color:#dc2626; color:#dc2626;">
+        2奈米先進製程
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="HBM高頻寬記憶體.html" style="border-color:#b91c1c; color:#b91c1c;">
+        HBM 高頻寬記憶體
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2360.html">2360</a></td>
+        <td>
+          <a href="../company/2360.html">致茂</a>
+          <span class="hl-star" data-tip="ATE 測試設備 全球前五｜電源、訊號測試平台" title="ATE 測試設備 全球前五｜電源、訊號測試平台">★</span>
+          
+          
+        </td>
+        <td>1940.00</td>
+        <td class="negative">-4.43%</td>
+        <td class="negative">-5.37%</td>
+        <td class="positive">+31.08%</td>
+        <td class="positive">
+          +200
+        </td>
+        <td class="negative">
+          -364
+        </td>
+        <td>116.8 億</td>
+        <td>
+          
+          
+            <span class="tag">石英元件</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6223.html">6223</a></td>
+        <td>
+          <a href="../company/6223.html">旺矽</a>
+          <span class="hl-star" data-tip="探針卡 全球前五｜半導體測試探針" title="探針卡 全球前五｜半導體測試探針">★</span>
+          
+          
+        </td>
+        <td>4790.00</td>
+        <td class="negative">-0.73%</td>
+        <td class="negative">-2.54%</td>
+        <td class="positive">+30.52%</td>
+        <td class="positive">
+          +108
+        </td>
+        <td class="negative">
+          -53
+        </td>
+        <td>92.8 億</td>
+        <td>
+          
+          
+            <span class="tag">Google TPU</span><span class="tag">半導體設備</span><span class="tag">功率半導體 IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6187.html">6187</a></td>
+        <td>
+          <a href="../company/6187.html">萬潤</a>
+          <span class="hl-star" data-tip="半導體設備 前十｜萬潤半導體封測設備" title="半導體設備 前十｜萬潤半導體封測設備">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>1255.00</td>
+        <td class="negative">-9.71%</td>
+        <td class="positive">+13.57%</td>
+        <td class="positive">+44.42%</td>
+        <td class="positive">
+          +628
+        </td>
+        <td class="negative">
+          -816
+        </td>
+        <td>92.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6510.html">6510</a></td>
+        <td>
+          <a href="../company/6510.html">精測</a>
+          <span class="hl-star" data-tip="測試探針卡 台灣 #1｜MEMS 探針卡、高階 IC 測試" title="測試探針卡 台灣 #1｜MEMS 探針卡、高階 IC 測試">★</span>
+          
+          
+        </td>
+        <td>3850.00</td>
+        <td class="negative">-8.33%</td>
+        <td class="positive">+5.19%</td>
+        <td class="positive">+20.31%</td>
+        <td class="negative">
+          -58
+        </td>
+        <td class="negative">
+          -18
+        </td>
+        <td>47.6 億</td>
+        <td>
+          
+          
+            <span class="tag">Google TPU</span><span class="tag">半導體設備</span><span class="tag">2奈米先進製程</span>
+            
+              <span class="tag tag-more" data-tip="HBM 高頻寬記憶體、Chiplet 小晶片、射頻 RF/PA" title="HBM 高頻寬記憶體、Chiplet 小晶片、射頻 RF/PA">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3529.html">3529</a></td>
+        <td>
+          <a href="../company/3529.html">力旺</a>
+          <span class="hl-star" data-tip="非揮發性 IP（eFlash）全球 #1｜嵌入式記憶體 IP 業界標準" title="非揮發性 IP（eFlash）全球 #1｜嵌入式記憶體 IP 業界標準">★</span>
+          
+          
+        </td>
+        <td>3980.00</td>
+        <td class="negative">-1.85%</td>
+        <td class="positive">+7.42%</td>
+        <td class="positive">+57.00%</td>
+        <td class="positive">
+          +211
+        </td>
+        <td class="negative">
+          -83
+        </td>
+        <td>44.5 億</td>
+        <td>
+          
+          
+            <span class="tag">ASIC/IP矽智財</span><span class="tag">IC設計</span><span class="tag">CoWoS先進封裝</span>
+            
+              <span class="tag tag-more" data-tip="晶片封測" title="晶片封測">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6515.html">6515</a></td>
+        <td>
+          <a href="../company/6515.html">穎崴</a>
+          <span class="hl-star" data-tip="半導體測試介面 全球 #1｜高頻測試 socket、HBM 測試" title="半導體測試介面 全球 #1｜高頻測試 socket、HBM 測試">★</span>
+          
+          
+        </td>
+        <td>10730.00</td>
+        <td class="negative">+0.00%</td>
+        <td class="positive">+9.27%</td>
+        <td class="positive">+31.01%</td>
+        <td class="positive">
+          +21
+        </td>
+        <td class="positive">
+          +33
+        </td>
+        <td>43.2 億</td>
+        <td>
+          
+          
+            <span class="tag">輝達概念股</span><span class="tag">Google TPU</span><span class="tag">半導體設備</span>
+            
+              <span class="tag tag-more" data-tip="2奈米先進製程、HBM 高頻寬記憶體、Chiplet 小晶片、射頻 RF/PA" title="2奈米先進製程、HBM 高頻寬記憶體、Chiplet 小晶片、射頻 RF/PA">+4</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/7734.html">7734</a></td>
+        <td>
+          <a href="../company/7734.html">印能科技</a>
+          <span class="hl-star" data-tip="半導體壓著設備｜印能科技 CoWoS 壓著機台" title="半導體壓著設備｜印能科技 CoWoS 壓著機台">★</span>
+           <span class="badge badge-red">漲停</span>
+          
+        </td>
+        <td>3465.00</td>
+        <td class="positive">+10.00%</td>
+        <td class="positive">+51.97%</td>
+        <td class="positive">+108.73%</td>
+        <td class="negative">
+          -38
+        </td>
+        <td class="positive">
+          +276
+        </td>
+        <td>43.1 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3563.html">3563</a></td>
+        <td>
+          <a href="../company/3563.html">牧德</a>
+          <span class="hl-star" data-tip="PCB AOI 設備 全球 #1｜AOI 檢測、無塵室自動化" title="PCB AOI 設備 全球 #1｜AOI 檢測、無塵室自動化">★</span>
+          
+          
+        </td>
+        <td>904.00</td>
+        <td class="negative">-3.00%</td>
+        <td class="negative">-4.64%</td>
+        <td class="positive">+33.53%</td>
+        <td class="negative">
+          -126
+        </td>
+        <td class="positive">
+          +39
+        </td>
+        <td>42.4 億</td>
+        <td>
+          
+          
+            <span class="tag">半導體設備</span><span class="tag">PCB設備/耗材</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3030.html">3030</a></td>
+        <td>
+          <a href="../company/3030.html">德律</a>
+          <span class="hl-star" data-tip="半導體 AOI 測試 前三｜德律 AOI + ATE 測試" title="半導體 AOI 測試 前三｜德律 AOI + ATE 測試">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>322.50</td>
+        <td class="negative">-9.92%</td>
+        <td class="positive">+4.71%</td>
+        <td class="positive">+37.53%</td>
+        <td class="negative">
+          -3091
+        </td>
+        <td class="negative">
+          -101
+        </td>
+        <td>41.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3587.html">3587</a></td>
+        <td>
+          <a href="../company/3587.html">閎康</a>
+          <span class="hl-star" data-tip="IC 故障分析 前三｜閎康 材料分析 + 可靠度" title="IC 故障分析 前三｜閎康 材料分析 + 可靠度">★</span>
+          
+          
+        </td>
+        <td>333.00</td>
+        <td class="negative">-6.59%</td>
+        <td class="negative">-0.30%</td>
+        <td class="positive">+38.75%</td>
+        <td class="positive">
+          +1842
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>23.7 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8027.html">8027</a></td>
+        <td>
+          <a href="../company/8027.html">鈦昇</a>
+          <span class="hl-star" data-tip="半導體設備 前十｜鈦昇 Probe Card + 封測設備" title="半導體設備 前十｜鈦昇 Probe Card + 封測設備">★</span>
+          
+          
+        </td>
+        <td>142.50</td>
+        <td class="negative">-4.68%</td>
+        <td class="negative">-2.06%</td>
+        <td class="positive">+25.00%</td>
+        <td class="positive">
+          +405
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>13.7 億</td>
+        <td>
+          
+          
+            <span class="tag">矽晶圓</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/7822.html">7822</a></td>
+        <td>
+          <a href="../company/7822.html">倍利科</a>
+          <span class="hl-star" data-tip="探針卡 前五｜倍利科技 MEMS 探針" title="探針卡 前五｜倍利科技 MEMS 探針">★</span>
+          
+          
+        </td>
+        <td>1340.00</td>
+        <td class="negative">-6.94%</td>
+        <td class="negative">-18.54%</td>
+        <td class="">—</td>
+        <td class="positive">
+          +131
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>12.5 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3289.html">3289</a></td>
+        <td>
+          <a href="../company/3289.html">宜特</a>
+          <span class="hl-star" data-tip="IC 可靠度驗證 台灣 #1｜宜特 IC 故障分析 + 材料驗證" title="IC 可靠度驗證 台灣 #1｜宜特 IC 故障分析 + 材料驗證">★</span>
+          
+          
+        </td>
+        <td>190.50</td>
+        <td class="negative">-6.39%</td>
+        <td class="positive">+4.67%</td>
+        <td class="positive">+35.59%</td>
+        <td class="positive">
+          +274
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>12.1 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6877.html">6877</a></td>
+        <td>
+          <a href="../company/6877.html">鏵友益</a>
+          <span class="hl-star" data-tip="半導體 / PCB 檢測設備｜鏵友益 AOI 檢測" title="半導體 / PCB 檢測設備｜鏵友益 AOI 檢測">★</span>
+          
+          
+        </td>
+        <td>185.50</td>
+        <td class="positive">+3.06%</td>
+        <td class="positive">+29.27%</td>
+        <td class="positive">+75.83%</td>
+        <td class="positive">
+          +87
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>9.5 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6217.html">6217</a></td>
+        <td>
+          <a href="../company/6217.html">中探針</a>
+          <span class="hl-star" data-tip="探針卡 前五｜中探針 MEMS 探針" title="探針卡 前五｜中探針 MEMS 探針">★</span>
+          
+          
+        </td>
+        <td>282.00</td>
+        <td class="negative">-4.89%</td>
+        <td class="positive">+24.50%</td>
+        <td class="positive">+83.12%</td>
+        <td class="positive">
+          +243
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8.0 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6683.html">6683</a></td>
+        <td>
+          <a href="../company/6683.html">雍智科技</a>
+          <span class="hl-star" data-tip="半導體測試座 前三｜雍智科技 Probe Socket" title="半導體測試座 前三｜雍智科技 Probe Socket">★</span>
+          
+          
+        </td>
+        <td>1800.00</td>
+        <td class="negative">-4.76%</td>
+        <td class="negative">-4.76%</td>
+        <td class="positive">+63.64%</td>
+        <td class="positive">
+          +81
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6.5 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6830.html">6830</a></td>
+        <td>
+          <a href="../company/6830.html">汎銓</a>
+          <span class="hl-star" data-tip="IC 故障分析 前五｜汎銓科技失效分析" title="IC 故障分析 前五｜汎銓科技失效分析">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>803.00</td>
+        <td class="negative">-9.78%</td>
+        <td class="negative">-0.25%</td>
+        <td class="positive">+95.62%</td>
+        <td class="positive">
+          +23
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5.6 億</td>
+        <td>
+          
+          
+            <span class="tag">航太</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3455.html">3455</a></td>
+        <td>
+          <a href="../company/3455.html">由田</a>
+          <span class="hl-star" data-tip="AOI 檢測設備 前三｜由田 AI AOI 光學檢測" title="AOI 檢測設備 前三｜由田 AI AOI 光學檢測">★</span>
+          
+          
+        </td>
+        <td>214.00</td>
+        <td class="negative">-1.83%</td>
+        <td class="positive">+15.05%</td>
+        <td class="positive">+74.69%</td>
+        <td class="positive">
+          +109
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6829.html">6829</a></td>
+        <td>
+          <a href="../company/6829.html">千附精密</a>
+          <span class="hl-star" data-tip="精密機構 前十｜千附精密 半導體潔淨設備零件" title="精密機構 前十｜千附精密 半導體潔淨設備零件">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>235.50</td>
+        <td class="negative">-9.94%</td>
+        <td class="positive">+31.20%</td>
+        <td class="positive">+114.09%</td>
+        <td class="positive">
+          +9
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6208.html">6208</a></td>
+        <td>
+          <a href="../company/6208.html">日揚</a>
+          <span class="hl-star" data-tip="真空設備 前三｜日揚科技 真空幫浦" title="真空設備 前三｜日揚科技 真空幫浦">★</span>
+          
+          
+        </td>
+        <td>88.60</td>
+        <td class="positive">+7.39%</td>
+        <td class="positive">+17.51%</td>
+        <td class="positive">+86.92%</td>
+        <td class="negative">
+          -42
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2.2 億</td>
+        <td>
+          
+          
+            <span class="tag">真空設備</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/7556.html">7556</a></td>
+        <td>
+          <a href="../company/7556.html">意德士科技</a>
+          <span class="hl-star" data-tip="IC 老化測試 前三｜意德士科技 Burn-in 設備" title="IC 老化測試 前三｜意德士科技 Burn-in 設備">★</span>
+          
+          
+        </td>
+        <td>319.00</td>
+        <td class="positive">+5.63%</td>
+        <td class="positive">+18.15%</td>
+        <td class="positive">+88.20%</td>
+        <td class="negative">
+          -4
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/7810.html">7810</a></td>
+        <td>
+          <a href="../company/7810.html">捷創科技</a>
+          <span class="hl-star" data-tip="封測設備 前十｜捷創科技 IC 封測設備" title="封測設備 前十｜捷創科技 IC 封測設備">★</span>
+          
+          
+        </td>
+        <td>228.50</td>
+        <td class="negative">-6.73%</td>
+        <td class="negative">-9.33%</td>
+        <td class="negative">-15.37%</td>
+        <td class="negative">
+          -43
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8433 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3467.html">3467</a></td>
+        <td>
+          <a href="../company/3467.html">台灣精材</a>
+          <span class="hl-star" data-tip="晶圓再生 全球 #1｜台灣精材再生晶圓" title="晶圓再生 全球 #1｜台灣精材再生晶圓">★</span>
+          
+          
+        </td>
+        <td>63.00</td>
+        <td class="negative">-2.93%</td>
+        <td class="positive">+6.06%</td>
+        <td class="positive">+67.33%</td>
+        <td class="negative">
+          -10
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3861 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/7704.html">7704</a></td>
+        <td>
+          <a href="../company/7704.html">明遠精密</a>
+          <span class="hl-star" data-tip="半導體零件 前十｜明遠精密 半導體機件" title="半導體零件 前十｜明遠精密 半導體機件">★</span>
+          
+          
+        </td>
+        <td>59.00</td>
+        <td class="negative">-7.81%</td>
+        <td class="negative">-3.28%</td>
+        <td class="positive">+31.40%</td>
+        <td class="positive">
+          +17
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1897 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

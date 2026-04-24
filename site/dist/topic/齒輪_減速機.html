@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>齒輪/減速機 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#047857;">齒輪/減速機</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#047857;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#04785722; color:#047857;">利基零組件</div>
+    <h1>齒輪/減速機</h1>
+    <p class="topic-en">Gears &amp; Reducers</p>
+    <p class="topic-desc">工業機器人、工具機核心零件。上銀諧波減速機切入人形機器人供應鏈。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>15%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>—</strong></span>
+      <span class="kpi"><em>成分股</em><strong>6</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-3.78%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>應用</small>
+    <strong>機器人 / 工具機</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>龍頭</small>
+    <strong>上銀</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>新機會</small>
+    <strong>人形機器人</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>精度</small>
+    <strong>高端市場</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_齒輪_減速機"></div>
+  <div id="topic_chart_齒輪_減速機" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -2.61, -3.14, -1.96, -2.76, -2.67, -1.45, -1.09, -1.56, -1.8, -2.71, -2.52, -3.06, -2.54, -2.21, -3.41, -4.44, -3.39, -4.44, -5.56, -4.21, -2.96, -3.55, -5.6, -6.78, -8.85, -9.39, -8.78, -9.99, -9.93, -9.48, -7.16, -7.32, -6.47, -7.71, -7.19, -6.6, -5.23, -5.45, -4.65, -4.68, -4.61, -4.49, -4.41, -4.48, -5.28, -5.7, -6.37, -5.36, -4.18, -4.57, -4.66, -5.59, -4.75, -5.42, -5.29, -4.14, -5.86, -4.1, -4.62, -5.61, -4.1, -3.16, -3.76, -0.43, 0.34, 2.29, 3.56, 3.24, 3.03, 3.04, 2.65, 5.45, 5.39, 6.43, 5.37, 2.99, -0.3, 0.49, 2.58, 1.79, -1.05, 1.56, 1.64, 1.11, 2.76, 2.95, 1.08, 1.9, 5.02, 2.57, -0.47, 0.93, -0.03, -4.31, -1.26, 1.36, 2.05, 1.13, 1.79, 2.58, 2.91, 0.92, -0.29, -0.06, -0.17, 3.71, 4.37, 4.1, 4.51, 1.05, 2.86, 2.34, 5.28, 8.53, 11.75, 14.45, 20.4, 25.69, 25.57, 25.56, 27.07, 29.24, 29.97, 30.08, 25.16], "ret_1d": -3.78, "ret_1w": -0.32, "ret_1m": 25.38};
+    const kpiEl = document.getElementById('topic_chart_kpis_齒輪_減速機');
+    const chartEl = document.getElementById('topic_chart_齒輪_減速機');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-3.78%</strong></div>
+      <div><em>5日平均</em><strong class="negative">-0.37%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+26.78%</strong></div>
+      <div><em>族群成交額</em><strong>56.2 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>4</strong></div>
+      <div><em>投信買超家數</em><strong>1</strong></div>
+      <div><em>今日最強</em><strong>廣隆</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="軸承_精密機構.html" style="border-color:#6b7280; color:#6b7280;">
+        軸承/精密機構
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="手術機器人_智慧醫療器材.html" style="border-color:#9d174d; color:#9d174d;">
+        手術機器人/智慧醫療器材
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="手工具_電動工具.html" style="border-color:#57534e; color:#57534e;">
+        手工具/電動工具
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="機器人.html" style="border-color:#fb923c; color:#fb923c;">
+        機器人
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="工具機.html" style="border-color:#22c55e; color:#22c55e;">
+        工具機
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2049.html">2049</a></td>
+        <td>
+          <a href="../company/2049.html">上銀</a>
+          <span class="hl-star" data-tip="滾珠螺桿 全球 #2｜工具機精密傳動、人形機器人諧波減速機" title="滾珠螺桿 全球 #2｜工具機精密傳動、人形機器人諧波減速機">★</span>
+          
+          
+        </td>
+        <td>302.00</td>
+        <td class="negative">-3.36%</td>
+        <td class="positive">+8.24%</td>
+        <td class="positive">+33.92%</td>
+        <td class="positive">
+          +3910
+        </td>
+        <td class="negative">
+          -5
+        </td>
+        <td>45.0 億</td>
+        <td>
+          
+          
+            <span class="tag">機器人</span><span class="tag">工具機</span><span class="tag">手工具/電動工具</span>
+            
+              <span class="tag tag-more" data-tip="軸承/精密機構、手術機器人/智慧醫療器材" title="軸承/精密機構、手術機器人/智慧醫療器材">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1597.html">1597</a></td>
+        <td>
+          <a href="../company/1597.html">直得</a>
+          <span class="hl-star" data-tip="線性滑軌 全球 #3｜精密直線傳動" title="線性滑軌 全球 #3｜精密直線傳動">★</span>
+          
+          
+        </td>
+        <td>107.50</td>
+        <td class="negative">-6.93%</td>
+        <td class="negative">-8.12%</td>
+        <td class="positive">+31.26%</td>
+        <td class="positive">
+          +873
+        </td>
+        <td class="positive">
+          +23
+        </td>
+        <td>5.9 億</td>
+        <td>
+          
+          
+            <span class="tag">機器人</span><span class="tag">工具機</span><span class="tag">自行車零件</span>
+            
+              <span class="tag tag-more" data-tip="自行車零件、手工具/電動工具、軸承/精密機構" title="自行車零件、手工具/電動工具、軸承/精密機構">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4576.html">4576</a></td>
+        <td>
+          <a href="../company/4576.html">大銀微系統</a>
+          <span class="hl-star" data-tip="線性馬達 台灣 #1｜PMSM 線性馬達、機器人關節" title="線性馬達 台灣 #1｜PMSM 線性馬達、機器人關節">★</span>
+          
+          
+        </td>
+        <td>190.00</td>
+        <td class="negative">-4.04%</td>
+        <td class="negative">-1.55%</td>
+        <td class="positive">+59.66%</td>
+        <td class="positive">
+          +208
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.0 億</td>
+        <td>
+          
+          
+            <span class="tag">機器人</span><span class="tag">工具機</span><span class="tag">軸承/精密機構</span>
+            
+              <span class="tag tag-more" data-tip="金屬粉末/3D 列印、手術機器人/智慧醫療器材" title="金屬粉末/3D 列印、手術機器人/智慧醫療器材">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1591.html">1591</a></td>
+        <td>
+          <a href="../company/1591.html">駿吉-KY</a>
+          <span class="hl-star" data-tip="精密機構 前十｜駿吉-KY 機械零件" title="精密機構 前十｜駿吉-KY 機械零件">★</span>
+          
+          
+        </td>
+        <td>59.80</td>
+        <td class="negative">-5.68%</td>
+        <td class="positive">+3.10%</td>
+        <td class="positive">+46.93%</td>
+        <td class="positive">
+          +117
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6563 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4532.html">4532</a></td>
+        <td>
+          <a href="../company/4532.html">瑞智</a>
+          <span class="hl-star" data-tip="壓縮機 前五｜瑞智精密 冰箱壓縮機" title="壓縮機 前五｜瑞智精密 冰箱壓縮機">★</span>
+          
+          
+        </td>
+        <td>23.60</td>
+        <td class="negative">-2.28%</td>
+        <td class="negative">-2.68%</td>
+        <td class="negative">-11.11%</td>
+        <td class="negative">
+          -501
+        </td>
+        <td class="negative">
+          -28
+        </td>
+        <td>3868 萬</td>
+        <td>
+          
+          
+            <span class="tag">工具機</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1537.html">1537</a></td>
+        <td>
+          <a href="../company/1537.html">廣隆</a>
+          <span class="hl-star" data-tip="機車電池 全球 #1｜廣隆 Yuasa 授權 UPS 電池" title="機車電池 全球 #1｜廣隆 Yuasa 授權 UPS 電池">★</span>
+          
+          
+        </td>
+        <td>123.50</td>
+        <td class="negative">-0.40%</td>
+        <td class="negative">-1.20%</td>
+        <td class="negative">+0.00%</td>
+        <td class="negative">
+          -55
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2332 萬</td>
+        <td>
+          
+          
+            <span class="tag">健身/運動用品</span><span class="tag">鋰電池材料</span><span class="tag">運動休閒</span>
+            
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

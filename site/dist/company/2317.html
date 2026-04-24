@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>鴻海 (2317) · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <span>鴻海 (2317)</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#ff7847;">
+  <div class="topic-hero-inner">
+    <div class="category-tag">其他電子業</div>
+    <h1>鴻海 <small class="muted">2317</small></h1>
+    <p class="topic-en">上市</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>收盤</em><strong>225.00</strong></span>
+      <span class="kpi"><em>今日</em><strong class="positive">+1.81%</strong></span>
+      <span class="kpi"><em>5日</em><strong class="positive">+8.70%</strong></span>
+      <span class="kpi"><em>20日</em><strong class="positive">+15.38%</strong></span>
+      <span class="kpi"><em>成交金額</em><strong>389.8 億</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>60 日走勢</h2>
+    <span class="muted">日K + 成交量 + MA20/MA60 · 資料：FinLab</span>
+  </div>
+  <div id="price_chart_2317" style="height:460px; width:100%; padding:8px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "ohlc": [[235.0, 234.5, 231.0, 235.0], [233.5, 229.5, 229.0, 233.5], [228.5, 223.5, 223.5, 228.5], [221.0, 219.0, 219.0, 225.0], [223.5, 223.5, 222.0, 226.0], [225.5, 221.5, 221.5, 226.5], [222.5, 224.0, 220.0, 225.0], [226.0, 225.5, 224.0, 227.0], [227.0, 225.5, 224.0, 231.5], [226.5, 224.0, 222.0, 227.5], [223.5, 220.5, 218.5, 223.5], [219.5, 214.5, 213.5, 220.0], [218.5, 216.5, 214.5, 220.0], [214.5, 219.0, 214.0, 219.0], [217.5, 215.5, 215.0, 220.0], [215.0, 215.0, 210.5, 216.5], [219.0, 218.5, 217.5, 220.5], [220.0, 221.0, 218.0, 222.0], [222.5, 227.0, 220.5, 227.0], [229.5, 228.5, 227.0, 231.0], [229.5, 232.0, 228.0, 232.5], [235.0, 246.5, 234.5, 247.0], [253.5, 243.0, 241.5, 253.5], [234.0, 239.0, 232.5, 241.0], [239.0, 229.0, 228.0, 240.0], [224.5, 217.0, 216.5, 225.0], [224.5, 224.0, 222.0, 228.0], [221.0, 223.0, 219.0, 223.5], [208.0, 210.5, 206.0, 212.5], [216.0, 209.5, 209.5, 216.5], [212.5, 219.0, 212.5, 220.0], [217.0, 214.5, 213.0, 218.5], [211.5, 214.5, 210.0, 216.0], [216.0, 216.5, 214.0, 217.5], [215.5, 212.0, 212.0, 216.5], [212.5, 210.0, 210.0, 213.5], [207.5, 205.0, 205.0, 207.5], [203.5, 203.0, 200.5, 205.0], [196.5, 196.0, 195.0, 197.5], [198.5, 195.0, 194.0, 199.5], [200.0, 200.0, 197.0, 201.0], [202.5, 200.5, 200.5, 206.0], [197.0, 199.5, 196.5, 200.5], [194.5, 194.0, 193.0, 195.5], [191.0, 187.5, 187.5, 192.5], [195.0, 197.0, 194.5, 197.5], [198.0, 193.0, 191.5, 199.0], [195.0, 192.0, 189.5, 195.5], [196.5, 201.5, 196.5, 202.0], [201.0, 200.0, 198.0, 201.5], [200.5, 200.5, 199.5, 202.5], [200.0, 200.0, 198.5, 202.5], [204.0, 207.5, 203.5, 208.0], [211.5, 207.5, 206.5, 211.5], [207.5, 207.0, 206.0, 211.0], [207.5, 206.0, 203.5, 209.5], [206.0, 207.5, 204.5, 209.5], [210.0, 211.0, 209.5, 213.0], [213.0, 221.0, 212.5, 223.5], [229.5, 225.0, 218.0, 233.0]], "volume": [48950.0, 53439.0, 77124.0, 81042.0, 47823.0, 34323.0, 39852.0, 37140.0, 80017.0, 56613.0, 72547.0, 65660.0, 41495.0, 27678.0, 43304.0, 56501.0, 30838.0, 47159.0, 67662.0, 89438.0, 68380.0, 168289.0, 122693.0, 75106.0, 87820.0, 122302.0, 55660.0, 37319.0, 93408.0, 69439.0, 54703.0, 44784.0, 36890.0, 38534.0, 110777.0, 77136.0, 89096.0, 92926.0, 78471.0, 56280.0, 43133.0, 41973.0, 29525.0, 46504.0, 95729.0, 45229.0, 41955.0, 36598.0, 66909.0, 43946.0, 60471.0, 37375.0, 58959.0, 71251.0, 45262.0, 48943.0, 39106.0, 59285.0, 140960.0, 172707.0], "ma20": [229.15, 229.82, 229.93, 229.68, 229.65, 229.53, 229.45, 229.18, 229.05, 228.72, 228.15, 227.15, 226.18, 225.2, 224.5, 223.72, 223.22, 222.95, 222.57, 222.32, 222.2, 223.05, 224.03, 225.03, 225.3, 225.07, 225.07, 224.95, 224.2, 223.47, 223.4, 223.4, 223.3, 223.18, 223.0, 222.75, 222.07, 221.18, 219.62, 217.95, 216.35, 214.05, 211.88, 209.62, 207.55, 206.55, 205.0, 203.45, 203.0, 202.53, 201.6, 200.88, 200.53, 200.07, 199.82, 199.62, 199.75, 200.15, 201.4, 202.9], "ma60": [233.9, 233.68, 233.43, 232.97, 232.53, 231.88, 231.25, 230.72, 230.28, 229.95, 229.51, 228.95, 228.49, 227.98, 227.47, 226.87, 226.31, 225.97, 225.82, 225.8, 225.85, 226.02, 226.32, 226.63, 226.8, 226.63, 226.52, 226.47, 226.28, 226.07, 225.94, 225.71, 225.43, 225.18, 224.79, 224.4, 224.05, 223.65, 223.22, 222.84, 222.57, 222.31, 221.94, 221.44, 220.83, 220.38, 219.84, 219.19, 218.75, 218.24, 217.72, 217.14, 216.67, 216.15, 215.78, 215.37, 215.02, 214.76, 214.53, 214.39]};
+    if (!raw) {
+      document.getElementById('price_chart_2317').innerHTML =
+        '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const el = document.getElementById('price_chart_2317');
+      const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const upColor = '#ef4444';   // 台股紅漲
+      const downColor = '#10b981'; // 台股綠跌
+      chart.setOption({
+        backgroundColor: 'transparent',
+        animation: false,
+        legend: {
+          data: ['K線','MA20','MA60'],
+          top: 0, textStyle: { color: '#9ca3af' }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          backgroundColor: '#1f2937',
+          borderColor: '#374151',
+          textStyle: { color: '#e5e7eb' },
+          formatter: (p) => {
+            const d = p[0].axisValue;
+            const k = p.find(x => x.seriesName === 'K線');
+            const v = p.find(x => x.seriesName === '成交量');
+            const m20 = p.find(x => x.seriesName === 'MA20');
+            const m60 = p.find(x => x.seriesName === 'MA60');
+            let s = `<b>${d}</b><br>`;
+            if (k) {
+              const [o, c, l, h] = k.value.slice(1);
+              s += `開 <b>${o}</b> · 高 <b style="color:${upColor}">${h}</b> · 低 <b style="color:${downColor}">${l}</b> · 收 <b>${c}</b><br>`;
+            }
+            if (v) s += `量 ${Math.round(v.value[1]).toLocaleString()} 張<br>`;
+            if (m20 && m20.value != null) s += `MA20 ${m20.value}<br>`;
+            if (m60 && m60.value != null) s += `MA60 ${m60.value}`;
+            return s;
+          }
+        },
+        axisPointer: { link: [{ xAxisIndex: 'all' }] },
+        grid: [
+          { left: 50, right: 16, top: 36, height: '62%' },
+          { left: 50, right: 16, top: '75%', height: '18%' }
+        ],
+        xAxis: [
+          {
+            type: 'category', data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { color: '#9ca3af' },
+            splitLine: { show: false },
+            boundaryGap: true,
+          },
+          {
+            type: 'category', gridIndex: 1, data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { show: false }, axisTick: { show: false }
+          }
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+            axisLabel: { color: '#9ca3af' }
+          },
+          {
+            gridIndex: 1, scale: true, splitNumber: 2,
+            splitLine: { show: false },
+            axisLabel: { color: '#9ca3af',
+              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+            }
+          }
+        ],
+        dataZoom: [
+          { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
+            borderColor: '#374151',
+            handleStyle: { color: '#ff7847' },
+            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
+            fillerColor: 'rgba(255,120,71,0.15)',
+            textStyle: { color: '#9ca3af' }
+          }
+        ],
+        series: [
+          {
+            name: 'K線', type: 'candlestick', data: raw.ohlc,
+            itemStyle: {
+              color: upColor, color0: downColor,
+              borderColor: upColor, borderColor0: downColor
+            }
+          },
+          {
+            name: 'MA20', type: 'line', data: raw.ma20,
+            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: 'MA60', type: 'line', data: raw.ma60,
+            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: '成交量', type: 'bar',
+            xAxisIndex: 1, yAxisIndex: 1,
+            data: raw.volume.map((v, i) => {
+              const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
+              return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
+            })
+          }
+        ]
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+
+
+<section class="panel highlight-panel">
+  <div class="panel-header"><h2>技術亮點 · 產業地位</h2></div>
+  <div class="highlight-body">
+    <div class="highlight-ranking">全球最大 EMS（電子代工）</div>
+    <p class="highlight-tech"><strong>技術：</strong>蘋果 iPhone 組裝 70%+、AI 伺服器新 B200 GB200</p>
+    <p class="highlight-moat"><strong>護城河：</strong>全球產能規模最大、印度 + 墨西哥 + 越南分散</p>
+  </div>
+</section>
+
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>所屬題材 <span class="muted">(14)</span></h2>
+  </div>
+  
+  <div class="topic-grid compact">
+    
+    <a href="../topic/AI伺服器.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#ff7847;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>AI伺服器</h3>
+          <span class="pill" style="background:#ff784722; color:#ff7847;">AI / 半導體</span>
+        </div>
+        <p class="topic-card-desc">以 NVIDIA GB200/300 平台為核心，整合 GPU、HBM、液冷、BBU 電源模組的高密度運算伺服器。台廠ODM 取得全球 AI 伺服器代工 9 成以上，是 AI 資本…</p>
+      </div>
+    </a>
+    
+    <a href="../topic/輝達概念股.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#76b900;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>輝達概念股</h3>
+          <span class="pill" style="background:#76b90022; color:#76b900;">AI / 半導體</span>
+        </div>
+        <p class="topic-card-desc">NVIDIA GPU 供應鏈，從台積電代工、日月光封測、到緯創/鴻海/廣達組裝，貫穿整個 AI 產業價值鏈。GB300/Rubin 世代量產拉貨動能延續。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/電動車.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#84cc16;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>電動車</h3>
+          <span class="pill" style="background:#84cc1622; color:#84cc16;">車用 / 機器人</span>
+        </div>
+        <p class="topic-card-desc">Tesla、鴻海 MIH、中國新勢力供應鏈。充電樁、電池管理、馬達為三大重點。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/機器人.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#fb923c;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>機器人</h3>
+          <span class="pill" style="background:#fb923c22; color:#fb923c;">車用 / 機器人</span>
+        </div>
+        <p class="topic-card-desc">人形機器人 + 工業機器人。Tesla Optimus、Figure 進入商業化擴張點，線性馬達、減速器、滾珠螺桿為台廠強項。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/蘋果概念股.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#71717a;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>蘋果概念股</h3>
+          <span class="pill" style="background:#71717a22; color:#71717a;">消費電子</span>
+        </div>
+        <p class="topic-card-desc">iPhone、Vision Pro、Apple Intelligence 供應鏈。2026 年折疊機 + AI 功能為亮點。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/固態電池.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#7c3aed;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>固態電池</h3>
+          <span class="pill" style="background:#7c3aed22; color:#7c3aed;">車用 / 機器人</span>
+        </div>
+        <p class="topic-card-desc">2026 被視為固態電池「產業化」關鍵年，能量密度 +50%、安全性大幅提升。台廠電池模組、正負極材料、電源管理卡位。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/折疊機_Apple新機.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#6b21a8;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>折疊機/Apple 新機</h3>
+          <span class="pill" style="background:#6b21a822; color:#6b21a8;">消費電子</span>
+        </div>
+        <p class="topic-card-desc">蘋果 2026 H2 推摺疊 iPhone 與新款 iPad，台廠鉸鏈、OLED、鏡頭模組吃 big bite。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/新南向_東南亞產能.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#059669;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>新南向/東南亞產能</h3>
+          <span class="pill" style="background:#05966922; color:#059669;">政策驅動</span>
+        </div>
+        <p class="topic-card-desc">美中貿易戰與地緣政治推動製造業移出中國。紡織、自行車、PCB、電子代工加速越南 / 印度 / 印尼佈局。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/穿戴_智慧眼鏡.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#9333ea;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>穿戴/智慧眼鏡</h3>
+          <span class="pill" style="background:#9333ea22; color:#9333ea;">消費電子</span>
+        </div>
+        <p class="topic-card-desc">Meta Ray-Ban、Apple Vision Pro 帶動智慧眼鏡市場。2026 滲透率爆發，台廠鏡頭、SoC、鉸鏈受惠。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/AI眼鏡_MetaRay-Ban.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#c026d3;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>AI 眼鏡 / Meta Ray-Ban</h3>
+          <span class="pill" style="background:#c026d322; color:#c026d3;">消費電子</span>
+        </div>
+        <p class="topic-card-desc">Meta Ray-Ban 銷量超預期，Google Samsung Android XR 2026 上市。億豐 GaN MOCVD 獨家供應 Google，穩懋 RF 卡位。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/美國製造回流_晶片法案.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#1e40af;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>美國製造回流/晶片法案</h3>
+          <span class="pill" style="background:#1e40af22; color:#1e40af;">政策驅動</span>
+        </div>
+        <p class="topic-card-desc">美國 CHIPS Act 390 億補貼吸引台廠赴美設廠。台積電亞利桑那、環球晶德州、鴻海威斯康辛陸續量產。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/印度產能_印度概念.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#fb923c;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>印度產能/印度概念</h3>
+          <span class="pill" style="background:#fb923c22; color:#fb923c;">政策驅動</span>
+        </div>
+        <p class="topic-card-desc">Apple 分散產能、PLI 補貼吸引台廠赴印。鴻海、廣達、緯創、和碩印度廠陸續開出。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/伺服器準系統.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#f97316;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>伺服器準系統</h3>
+          <span class="pill" style="background:#f9731622; color:#f97316;">AI / 半導體</span>
+        </div>
+        <p class="topic-card-desc">AI 伺服器準系統組裝。緯穎 CSP 直營、廣達 NVIDIA 獨家、鴻海規模第一。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/川普概念_關稅戰.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#7c2d12;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>川普概念/關稅戰</h3>
+          <span class="pill" style="background:#7c2d1222; color:#7c2d12;">政策驅動</span>
+        </div>
+        <p class="topic-card-desc">川普 2.0 預料對中國課 60% 關稅、對全球 10-20%。台灣供應鏈面臨重組。</p>
+      </div>
+    </a>
+    
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header"><h2>法人動向</h2></div>
+  <div class="snapshot">
+    <div><em>外資今日</em><strong class="positive">+27796 張</strong></div>
+    <div><em>外資 5 日</em><strong class="positive">+90474 張</strong></div>
+    <div><em>投信今日</em><strong class="positive">+210 張</strong></div>
+    <div><em>投信 5 日</em><strong class="positive">+4293 張</strong></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

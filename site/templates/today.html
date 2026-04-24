@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% set page = "today" %}
+{% block title %}今日焦點 · 台股產業寶{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>今日焦點 <small>{{ last_date }}</small></h1>
+  <p>當日強弱族群、資金集中度、漲停家數與個股漲跌幅榜。點擊題材或個股可深入查看詳情。</p>
+</section>
+
+<section class="section-block">
+  <header class="section-head">
+    <h2 class="section-title">族群強弱</h2>
+    <p class="section-sub">按成分股平均漲跌幅排序</p>
+  </header>
+
+  <div class="grid-2col">
+    <div class="panel">
+      <div class="panel-header">
+        <h2>今日強勢題材</h2>
+        <span class="muted">按成分股平均漲幅</span>
+      </div>
+      <table class="table compact">
+        <thead><tr><th>題材</th><th>今日</th><th>5日</th><th>20日</th><th>資金</th></tr></thead>
+        <tbody>
+          {% for g, m in top_gain[:10] %}
+          {% set meta = get_meta(g) %}
+          <tr>
+            <td><a href="topic/{{ g|slugify }}.html" class="topic-chip" style="border-color:{{ meta.color }}; color:{{ meta.color }};">{{ g }}</a></td>
+            <td class="{% if m.ret_1d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_1d_mean|pct }}</td>
+            <td class="{% if m.ret_5d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_5d_mean|pct }}</td>
+            <td class="{% if m.ret_20d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_20d_mean|pct }}</td>
+            <td>{{ m.amount_sum_mn|fmt_amount }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2>今日弱勢題材</h2>
+        <span class="muted">按成分股平均跌幅</span>
+      </div>
+      <table class="table compact">
+        <thead><tr><th>題材</th><th>今日</th><th>5日</th><th>20日</th><th>資金</th></tr></thead>
+        <tbody>
+          {% for g, m in top_loss[:10] %}
+          {% set meta = get_meta(g) %}
+          <tr>
+            <td><a href="topic/{{ g|slugify }}.html" class="topic-chip" style="border-color:{{ meta.color }}; color:{{ meta.color }};">{{ g }}</a></td>
+            <td class="{% if m.ret_1d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_1d_mean|pct }}</td>
+            <td class="{% if m.ret_5d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_5d_mean|pct }}</td>
+            <td class="{% if m.ret_20d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_20d_mean|pct }}</td>
+            <td>{{ m.amount_sum_mn|fmt_amount }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid-2col">
+    <div class="panel">
+      <div class="panel-header"><h2>資金集中排行</h2><span class="muted">當日題材成交額</span></div>
+      <div class="bar-list">
+        {% set max_amt = top_flow[0][1].amount_sum_mn if top_flow else 1 %}
+        {% for g, m in top_flow[:12] %}
+        {% set meta = get_meta(g) %}
+        <a class="bar-row" href="topic/{{ g|slugify }}.html">
+          <span class="bar-label">{{ g }}</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:{{ (m.amount_sum_mn/max_amt*100)|round(1) }}%; background:{{ meta.color }};"></span>
+          </span>
+          <span class="bar-value">{{ m.amount_sum_mn|fmt_amount }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><h2>漲停家數最多</h2><span class="muted">族群輪動領頭</span></div>
+      <div class="bar-list">
+        {% set max_lu = top_limit[0][1].n_limit_up if top_limit and top_limit[0][1].n_limit_up > 0 else 1 %}
+        {% for g, m in top_limit[:12] %}
+        {% if m.n_limit_up > 0 %}
+        {% set meta = get_meta(g) %}
+        <a class="bar-row" href="topic/{{ g|slugify }}.html">
+          <span class="bar-label">{{ g }}</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:{{ (m.n_limit_up/max_lu*100)|round(1) }}%; background:#dc2626;"></span>
+          </span>
+          <span class="bar-value">{{ m.n_limit_up }} 檔</span>
+        </a>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-block">
+  <header class="section-head">
+    <h2 class="section-title">個股動向</h2>
+    <p class="section-sub">今日漲幅前 20 與跌幅前 20，點擊可查看個股詳情</p>
+  </header>
+
+  <div class="grid-2col">
+    <div class="panel">
+      <div class="panel-header"><h2>個股漲幅榜</h2></div>
+      <table class="table compact">
+        <thead><tr><th>股票</th><th>漲幅</th><th>5日</th><th>收盤</th><th>所屬題材</th></tr></thead>
+        <tbody>
+          {% for sym, row in movers_up.iterrows() %}
+          <tr>
+            <td><a href="company/{{ sym }}.html">{{ row.display_name }} <span class="muted">({{ sym }})</span></a></td>
+            <td class="positive">{{ row.ret_1d|pct }}</td>
+            <td class="{% if row.ret_5d > 0 %}positive{% else %}negative{% endif %}">{{ row.ret_5d|pct }}</td>
+            <td>{{ "%.2f"|format(row.close) }}</td>
+            <td>
+              {% set tp = company_topics.get(sym, []) %}
+              {% if tp %}
+                {% for t in tp[:2] %}<span class="tag">{{ t }}</span>{% endfor %}
+                {% if tp|length > 2 %}
+                  <span class="tag tag-more" data-tip="{{ tp[2:]|join('、') }}" title="{{ tp[2:]|join('、') }}">+{{ tp|length-2 }}</span>
+                {% endif %}
+              {% else %}
+                {% set ind = industry_map.get(sym) %}
+                {% if ind %}<span class="tag tag-industry">{{ ind }}</span>{% else %}<span class="muted">—</span>{% endif %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><h2>個股跌幅榜</h2></div>
+      <table class="table compact">
+        <thead><tr><th>股票</th><th>跌幅</th><th>5日</th><th>收盤</th><th>所屬題材</th></tr></thead>
+        <tbody>
+          {% for sym, row in movers_down.iterrows() %}
+          <tr>
+            <td><a href="company/{{ sym }}.html">{{ row.display_name }} <span class="muted">({{ sym }})</span></a></td>
+            <td class="negative">{{ row.ret_1d|pct }}</td>
+            <td class="{% if row.ret_5d > 0 %}positive{% else %}negative{% endif %}">{{ row.ret_5d|pct }}</td>
+            <td>{{ "%.2f"|format(row.close) }}</td>
+            <td>
+              {% set tp = company_topics.get(sym, []) %}
+              {% if tp %}
+                {% for t in tp[:2] %}<span class="tag">{{ t }}</span>{% endfor %}
+                {% if tp|length > 2 %}
+                  <span class="tag tag-more" data-tip="{{ tp[2:]|join('、') }}" title="{{ tp[2:]|join('、') }}">+{{ tp|length-2 }}</span>
+                {% endif %}
+              {% else %}
+                {% set ind = industry_map.get(sym) %}
+                {% if ind %}<span class="tag tag-industry">{{ ind }}</span>{% else %}<span class="muted">—</span>{% endif %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

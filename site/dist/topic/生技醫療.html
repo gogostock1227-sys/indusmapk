@@ -1,0 +1,1921 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>生技醫療 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#16a34a;">生技醫療</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#16a34a;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#16a34a22; color:#16a34a;">生技 / 醫療</div>
+    <h1>生技醫療</h1>
+    <p class="topic-en">Biotech</p>
+    <p class="topic-desc">新藥、CDMO、疫苗。高端、藥華藥、保瑞為核心。2026 年多個關鍵里程碑。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>15%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>—</strong></span>
+      <span class="kpi"><em>成分股</em><strong>60</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-1.63%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>臨床進度</small>
+    <strong>多標的 P3</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>CDMO</small>
+    <strong>保瑞擴廠</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>政策</small>
+    <strong>健保放寬</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>授權金</small>
+    <strong>2026 認列</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_生技醫療"></div>
+  <div id="topic_chart_生技醫療" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -0.67, -0.55, 0.08, 0.31, -0.11, 0.36, 1.24, 0.83, 0.33, -0.55, -0.88, -1.53, -0.9, -0.91, -1.27, -1.73, -1.63, -1.75, -2.29, -2.45, -1.26, -1.45, -1.48, -2.42, -3.9, -4.36, -3.82, -4.59, -3.45, -3.08, -2.15, -1.91, -1.48, -1.79, -1.43, -1.84, -1.55, -2.12, -2.84, -2.99, -3.35, -3.79, -3.97, -3.71, -4.17, -4.04, -3.88, -3.78, -3.61, -3.97, -4.17, -3.97, -3.88, -4.21, -3.94, -3.69, -4.34, -3.99, -3.13, -2.19, -1.69, -1.45, -1.06, -0.4, 0.18, 0.1, 0.03, 0.15, -0.69, -0.46, 0.58, 1.1, 2.64, 1.96, 1.31, 0.16, -0.36, -0.61, -0.23, -0.58, -1.41, -1.71, -1.88, -2.38, -1.39, -1.47, -1.66, -1.59, -1.91, -2.92, -4.76, -3.58, -2.96, -4.92, -4.59, -3.32, -4.25, -4.19, -3.7, -3.36, -2.85, -3.8, -4.08, -4.77, -4.36, -3.68, -4.14, -3.86, -4.22, -5.36, -3.73, -3.79, -4.05, -3.89, -4.18, -4.24, -4.61, -4.67, -4.18, -3.7, -4.13, -4.85, -4.56, -4.93, -6.47], "ret_1d": -1.62, "ret_1w": -2.88, "ret_1m": -2.21};
+    const kpiEl = document.getElementById('topic_chart_kpis_生技醫療');
+    const chartEl = document.getElementById('topic_chart_生技醫療');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-1.63%</strong></div>
+      <div><em>5日平均</em><strong class="negative">-2.93%</strong></div>
+      <div><em>20日平均</em><strong class="negative">-2.80%</strong></div>
+      <div><em>族群成交額</em><strong>37.8 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>8</strong></div>
+      <div><em>投信買超家數</em><strong>0</strong></div>
+      <div><em>今日最強</em><strong>泰宗</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="新藥研發.html" style="border-color:#be123c; color:#be123c;">
+        新藥研發
+        <small>共用 7 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="減重新藥_GLP-1.html" style="border-color:#0891b2; color:#0891b2;">
+        減重新藥/GLP-1
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="生技CDMO.html" style="border-color:#0891b2; color:#0891b2;">
+        生技 CDMO
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="CDMO_生技製造服務.html" style="border-color:#059669; color:#059669;">
+        CDMO/生技製造服務
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="原料藥_化學藥.html" style="border-color:#16a34a; color:#16a34a;">
+        原料藥/化學藥
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6446.html">6446</a></td>
+        <td>
+          <a href="../company/6446.html">藥華藥</a>
+          <span class="hl-star" data-tip="新藥授權收入 台灣 #1｜骨髓增殖性腫瘤 P3、ET 適應症通過 FDA" title="新藥授權收入 台灣 #1｜骨髓增殖性腫瘤 P3、ET 適應症通過 FDA">★</span>
+          
+          
+        </td>
+        <td>629.00</td>
+        <td class="negative">-2.78%</td>
+        <td class="negative">-4.70%</td>
+        <td class="positive">+1.45%</td>
+        <td class="negative">
+          -186
+        </td>
+        <td class="negative">
+          -1
+        </td>
+        <td>12.7 億</td>
+        <td>
+          
+          
+            <span class="tag">醫材</span><span class="tag">減重新藥/GLP-1</span><span class="tag">生技 CDMO</span>
+            
+              <span class="tag tag-more" data-tip="細胞治療、新藥研發、CDMO/生技製造服務" title="細胞治療、新藥研發、CDMO/生技製造服務">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4763.html">4763</a></td>
+        <td>
+          <a href="../company/4763.html">材料*-KY</a>
+          <span class="hl-star" data-tip="材料-KY 醫材｜NBR / 乳膠手套" title="材料-KY 醫材｜NBR / 乳膠手套">★</span>
+          
+          
+        </td>
+        <td>42.80</td>
+        <td class="negative">-2.95%</td>
+        <td class="negative">-9.32%</td>
+        <td class="negative">-2.28%</td>
+        <td class="positive">
+          +2131
+        </td>
+        <td class="negative">
+          -4588
+        </td>
+        <td>5.4 億</td>
+        <td>
+          
+          
+            <span class="tag">減重新藥/GLP-1</span><span class="tag">特用化學/光阻劑</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6472.html">6472</a></td>
+        <td>
+          <a href="../company/6472.html">保瑞</a>
+          <span class="hl-star" data-tip="CDMO 台灣 #1｜併購策略：Impax、Upsher-Smith、Promesa" title="CDMO 台灣 #1｜併購策略：Impax、Upsher-Smith、Promesa">★</span>
+          
+          
+        </td>
+        <td>411.00</td>
+        <td class="negative">-1.91%</td>
+        <td class="negative">-3.41%</td>
+        <td class="negative">-9.87%</td>
+        <td class="negative">
+          -2
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.5 億</td>
+        <td>
+          
+          
+            <span class="tag">生技 CDMO</span><span class="tag">細胞治療</span><span class="tag">新藥研發</span>
+            
+              <span class="tag tag-more" data-tip="CDMO/生技製造服務" title="CDMO/生技製造服務">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6547.html">6547</a></td>
+        <td>
+          <a href="../company/6547.html">高端疫苗</a>
+          <span class="hl-star" data-tip="疫苗 台灣 #1｜高端 mRNA + 蛋白次單位" title="疫苗 台灣 #1｜高端 mRNA + 蛋白次單位">★</span>
+          
+          
+        </td>
+        <td>46.80</td>
+        <td class="negative">-2.80%</td>
+        <td class="negative">-7.69%</td>
+        <td class="negative">-18.61%</td>
+        <td class="negative">
+          -403
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          
+            <span class="tag">防疫/口罩</span><span class="tag">宅經濟/遠距</span><span class="tag">電商/網購</span>
+            
+              <span class="tag tag-more" data-tip="疫苗/抗體新藥、文創/IP 內容" title="疫苗/抗體新藥、文創/IP 內容">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4743.html">4743</a></td>
+        <td>
+          <a href="../company/4743.html">合一</a>
+          <span class="hl-star" data-tip="新藥 台灣領先｜合一 FB825 全球 P3" title="新藥 台灣領先｜合一 FB825 全球 P3">★</span>
+          
+          
+        </td>
+        <td>51.40</td>
+        <td class="negative">-2.84%</td>
+        <td class="negative">-7.72%</td>
+        <td class="negative">-0.77%</td>
+        <td class="negative">
+          -500
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.3 億</td>
+        <td>
+          
+          
+            <span class="tag">減重新藥/GLP-1</span><span class="tag">AI 智慧醫療</span><span class="tag">細胞治療</span>
+            
+              <span class="tag tag-more" data-tip="新藥研發" title="新藥研發">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4123.html">4123</a></td>
+        <td>
+          <a href="../company/4123.html">晟德</a>
+          
+          
+          
+        </td>
+        <td>39.55</td>
+        <td class="negative">-2.35%</td>
+        <td class="negative">-5.04%</td>
+        <td class="negative">-5.50%</td>
+        <td class="negative">
+          -1037
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.3 億</td>
+        <td>
+          
+          
+            <span class="tag">原料藥/化學藥</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8436.html">8436</a></td>
+        <td>
+          <a href="../company/8436.html">大江</a>
+          
+          
+          
+        </td>
+        <td>120.50</td>
+        <td class="negative">-3.60%</td>
+        <td class="negative">-2.03%</td>
+        <td class="negative">-2.43%</td>
+        <td class="negative">
+          -637
+        </td>
+        <td class="negative">
+          -27
+        </td>
+        <td>1.3 億</td>
+        <td>
+          
+          
+            <span class="tag">動物保健/寵物醫療</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4147.html">4147</a></td>
+        <td>
+          <a href="../company/4147.html">中裕</a>
+          <span class="hl-star" data-tip="愛滋新藥 全球上市｜TMB-355 單株抗體" title="愛滋新藥 全球上市｜TMB-355 單株抗體">★</span>
+          
+          
+        </td>
+        <td>50.00</td>
+        <td class="negative">-1.38%</td>
+        <td class="negative">-6.37%</td>
+        <td class="negative">-5.48%</td>
+        <td class="negative">
+          -386
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8075 萬</td>
+        <td>
+          
+          
+            <span class="tag">防疫/口罩</span><span class="tag">醫材</span><span class="tag">減重新藥/GLP-1</span>
+            
+              <span class="tag tag-more" data-tip="生技 CDMO、疫苗/抗體新藥、美容保健/個人護理、新藥研發、CDMO/生技製造服務" title="生技 CDMO、疫苗/抗體新藥、美容保健/個人護理、新藥研發、CDMO/生技製造服務">+5</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4169.html">4169</a></td>
+        <td>
+          <a href="../company/4169.html">泰宗</a>
+          
+          
+          
+        </td>
+        <td>176.00</td>
+        <td class="positive">+2.33%</td>
+        <td class="positive">+5.07%</td>
+        <td class="">—</td>
+        <td class="positive">
+          +121
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7604 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6620.html">6620</a></td>
+        <td>
+          <a href="../company/6620.html">漢達</a>
+          
+          
+          
+        </td>
+        <td>78.70</td>
+        <td class="negative">-1.50%</td>
+        <td class="positive">+7.22%</td>
+        <td class="positive">+13.56%</td>
+        <td class="negative">
+          -72
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6324 萬</td>
+        <td>
+          
+          
+            <span class="tag">原料藥/化學藥</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3218.html">3218</a></td>
+        <td>
+          <a href="../company/3218.html">大學光</a>
+          
+          
+          
+        </td>
+        <td>128.50</td>
+        <td class="negative">-1.53%</td>
+        <td class="negative">-2.65%</td>
+        <td class="negative">-8.54%</td>
+        <td class="negative">
+          -181
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5811 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1707.html">1707</a></td>
+        <td>
+          <a href="../company/1707.html">葡萄王</a>
+          <span class="hl-star" data-tip="靈芝保健 台灣 #1｜葡萄王靈芝、紅麴發酵" title="靈芝保健 台灣 #1｜葡萄王靈芝、紅麴發酵">★</span>
+          
+          
+        </td>
+        <td>116.50</td>
+        <td class="negative">-0.85%</td>
+        <td class="negative">-1.27%</td>
+        <td class="negative">-2.92%</td>
+        <td class="negative">
+          -135
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5335 萬</td>
+        <td>
+          
+          
+            <span class="tag">食品/民生</span><span class="tag">銀髮/高齡經濟</span><span class="tag">保健食品/機能食品</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4162.html">4162</a></td>
+        <td>
+          <a href="../company/4162.html">智擎</a>
+          
+          
+          
+        </td>
+        <td>55.80</td>
+        <td class="negative">-2.45%</td>
+        <td class="negative">-5.26%</td>
+        <td class="negative">-2.11%</td>
+        <td class="negative">
+          -171
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5048 萬</td>
+        <td>
+          
+          
+            <span class="tag">新藥研發</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4746.html">4746</a></td>
+        <td>
+          <a href="../company/4746.html">台耀</a>
+          <span class="hl-star" data-tip="活性藥物原料 全球前十｜API 原料藥代工" title="活性藥物原料 全球前十｜API 原料藥代工">★</span>
+          
+          
+        </td>
+        <td>51.80</td>
+        <td class="negative">-2.45%</td>
+        <td class="negative">-3.36%</td>
+        <td class="negative">-5.47%</td>
+        <td class="negative">
+          -440
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4974 萬</td>
+        <td>
+          
+          
+            <span class="tag">AI 智慧醫療</span><span class="tag">AI 智慧醫療</span><span class="tag">生技 CDMO</span>
+            
+              <span class="tag tag-more" data-tip="CDMO/生技製造服務" title="CDMO/生技製造服務">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4130.html">4130</a></td>
+        <td>
+          <a href="../company/4130.html">健亞</a>
+          
+          
+          
+        </td>
+        <td>30.00</td>
+        <td class="negative">-0.17%</td>
+        <td class="negative">-7.98%</td>
+        <td class="negative">-3.07%</td>
+        <td class="positive">
+          +240
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4566 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6535.html">6535</a></td>
+        <td>
+          <a href="../company/6535.html">順藥</a>
+          
+          
+          
+        </td>
+        <td>128.50</td>
+        <td class="negative">-1.15%</td>
+        <td class="negative">-4.81%</td>
+        <td class="negative">-9.82%</td>
+        <td class="negative">
+          -13
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4359 萬</td>
+        <td>
+          
+          
+            <span class="tag">新藥研發</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1720.html">1720</a></td>
+        <td>
+          <a href="../company/1720.html">生達</a>
+          
+          
+          
+        </td>
+        <td>61.00</td>
+        <td class="negative">-1.45%</td>
+        <td class="negative">-4.24%</td>
+        <td class="negative">-2.56%</td>
+        <td class="negative">
+          -253
+        </td>
+        <td class="negative">
+          -1
+        </td>
+        <td>4183 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4137.html">4137</a></td>
+        <td>
+          <a href="../company/4137.html">麗豐-KY</a>
+          
+          
+          
+        </td>
+        <td>106.50</td>
+        <td class="negative">-1.84%</td>
+        <td class="negative">-3.18%</td>
+        <td class="positive">+0.47%</td>
+        <td class="negative">
+          -113
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3937 萬</td>
+        <td>
+          
+          
+            <span class="tag">美容保健/個人護理</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4129.html">4129</a></td>
+        <td>
+          <a href="../company/4129.html">聯合</a>
+          
+          
+          
+        </td>
+        <td>103.00</td>
+        <td class="negative">-0.48%</td>
+        <td class="negative">-1.90%</td>
+        <td class="positive">+1.48%</td>
+        <td class="negative">
+          -114
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3842 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4167.html">4167</a></td>
+        <td>
+          <a href="../company/4167.html">松瑞藥</a>
+          
+          
+          
+        </td>
+        <td>19.25</td>
+        <td class="negative">-1.53%</td>
+        <td class="negative">-3.27%</td>
+        <td class="negative">-8.33%</td>
+        <td class="negative">
+          -623
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3284 萬</td>
+        <td>
+          
+          
+            <span class="tag">原料藥/化學藥</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6492.html">6492</a></td>
+        <td>
+          <a href="../company/6492.html">生華科</a>
+          
+          
+          
+        </td>
+        <td>52.60</td>
+        <td class="negative">-3.66%</td>
+        <td class="negative">-3.49%</td>
+        <td class="negative">-2.77%</td>
+        <td class="positive">
+          +3
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3259 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1789.html">1789</a></td>
+        <td>
+          <a href="../company/1789.html">神隆</a>
+          
+          
+          
+        </td>
+        <td>20.55</td>
+        <td class="negative">-3.97%</td>
+        <td class="negative">-4.86%</td>
+        <td class="negative">-1.20%</td>
+        <td class="negative">
+          -462
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3184 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1784.html">1784</a></td>
+        <td>
+          <a href="../company/1784.html">訊聯</a>
+          
+          
+          
+        </td>
+        <td>75.80</td>
+        <td class="negative">-3.44%</td>
+        <td class="negative">-7.11%</td>
+        <td class="negative">-7.11%</td>
+        <td class="positive">
+          +50
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2746 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1786.html">1786</a></td>
+        <td>
+          <a href="../company/1786.html">科妍</a>
+          
+          
+          
+        </td>
+        <td>63.50</td>
+        <td class="negative">-0.94%</td>
+        <td class="negative">-2.16%</td>
+        <td class="negative">-2.61%</td>
+        <td class="negative">
+          -52
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2264 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1565.html">1565</a></td>
+        <td>
+          <a href="../company/1565.html">精華</a>
+          
+          
+          
+        </td>
+        <td>104.50</td>
+        <td class="negative">-0.95%</td>
+        <td class="negative">-4.13%</td>
+        <td class="positive">+0.97%</td>
+        <td class="negative">
+          -69
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1954 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3705.html">3705</a></td>
+        <td>
+          <a href="../company/3705.html">永信</a>
+          
+          
+          
+        </td>
+        <td>54.90</td>
+        <td class="negative">-0.54%</td>
+        <td class="negative">-2.31%</td>
+        <td class="positive">+4.17%</td>
+        <td class="negative">
+          -195
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1817 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4119.html">4119</a></td>
+        <td>
+          <a href="../company/4119.html">旭富</a>
+          
+          
+          
+        </td>
+        <td>47.10</td>
+        <td class="negative">-1.87%</td>
+        <td class="negative">-5.80%</td>
+        <td class="negative">-9.77%</td>
+        <td class="negative">
+          -125
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1760 萬</td>
+        <td>
+          
+          
+            <span class="tag">原料藥/化學藥</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4166.html">4166</a></td>
+        <td>
+          <a href="../company/4166.html">友霖</a>
+          
+          
+          
+        </td>
+        <td>25.50</td>
+        <td class="negative">-3.59%</td>
+        <td class="positive">+1.59%</td>
+        <td class="positive">+4.08%</td>
+        <td class="positive">
+          +37
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1511 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/1760.html">1760</a></td>
+        <td>
+          <a href="../company/1760.html">寶齡富錦</a>
+          <span class="hl-star" data-tip="生技保健 前五｜寶齡富錦 腎臟病新藥 + 保健食品" title="生技保健 前五｜寶齡富錦 腎臟病新藥 + 保健食品">★</span>
+          
+          
+        </td>
+        <td>64.50</td>
+        <td class="negative">-0.15%</td>
+        <td class="negative">-0.77%</td>
+        <td class="positive">+0.94%</td>
+        <td class="negative">
+          -33
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1467 萬</td>
+        <td>
+          
+          
+            <span class="tag">防疫/口罩</span><span class="tag">醫材</span><span class="tag">醫美/雷射</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1734.html">1734</a></td>
+        <td>
+          <a href="../company/1734.html">杏輝</a>
+          
+          
+          
+        </td>
+        <td>31.85</td>
+        <td class="negative">-1.39%</td>
+        <td class="negative">-0.78%</td>
+        <td class="positive">+1.92%</td>
+        <td class="positive">
+          +12
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1422 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4138.html">4138</a></td>
+        <td>
+          <a href="../company/4138.html">曜亞</a>
+          
+          
+          
+        </td>
+        <td>60.00</td>
+        <td class="negative">-8.40%</td>
+        <td class="negative">-5.06%</td>
+        <td class="negative">-1.15%</td>
+        <td class="negative">
+          -8
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1209 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1783.html">1783</a></td>
+        <td>
+          <a href="../company/1783.html">和康生</a>
+          
+          
+          
+        </td>
+        <td>40.10</td>
+        <td class="negative">-1.96%</td>
+        <td class="negative">-4.41%</td>
+        <td class="negative">-8.66%</td>
+        <td class="negative">
+          -28
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1084 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3176.html">3176</a></td>
+        <td>
+          <a href="../company/3176.html">基亞</a>
+          
+          
+          
+        </td>
+        <td>29.85</td>
+        <td class="negative">-1.32%</td>
+        <td class="negative">-4.94%</td>
+        <td class="negative">-8.44%</td>
+        <td class="negative">
+          -121
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>921 萬</td>
+        <td>
+          
+          
+            <span class="tag">新藥研發</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6523.html">6523</a></td>
+        <td>
+          <a href="../company/6523.html">達爾膚</a>
+          
+          
+          
+        </td>
+        <td>101.50</td>
+        <td class="negative">-1.93%</td>
+        <td class="negative">-4.69%</td>
+        <td class="negative">-13.62%</td>
+        <td class="negative">
+          -7
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>752 萬</td>
+        <td>
+          
+          
+            <span class="tag">美容保健/個人護理</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6461.html">6461</a></td>
+        <td>
+          <a href="../company/6461.html">益得</a>
+          
+          
+          
+        </td>
+        <td>19.00</td>
+        <td class="negative">-4.04%</td>
+        <td class="positive">+5.56%</td>
+        <td class="positive">+3.83%</td>
+        <td class="">
+          +0
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>714 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1762.html">1762</a></td>
+        <td>
+          <a href="../company/1762.html">中化生</a>
+          
+          
+          
+        </td>
+        <td>27.90</td>
+        <td class="negative">-0.89%</td>
+        <td class="negative">-6.06%</td>
+        <td class="negative">-5.10%</td>
+        <td class="negative">
+          -31
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>650 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3716.html">3716</a></td>
+        <td>
+          <a href="../company/3716.html">中化控股</a>
+          
+          
+          
+        </td>
+        <td>32.20</td>
+        <td class="negative">-0.62%</td>
+        <td class="negative">-2.42%</td>
+        <td class="negative">-2.57%</td>
+        <td class="negative">
+          -86
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>598 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4173.html">4173</a></td>
+        <td>
+          <a href="../company/4173.html">久裕</a>
+          
+          
+          
+        </td>
+        <td>19.00</td>
+        <td class="negative">-1.30%</td>
+        <td class="negative">-4.04%</td>
+        <td class="negative">-7.09%</td>
+        <td class="negative">
+          -140
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>572 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1731.html">1731</a></td>
+        <td>
+          <a href="../company/1731.html">美吾華</a>
+          
+          
+          
+        </td>
+        <td>21.70</td>
+        <td class="negative">-0.23%</td>
+        <td class="negative">-0.91%</td>
+        <td class="negative">-0.46%</td>
+        <td class="negative">
+          -40
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>495 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4911.html">4911</a></td>
+        <td>
+          <a href="../company/4911.html">德英</a>
+          
+          
+          
+        </td>
+        <td>34.45</td>
+        <td class="negative">-4.57%</td>
+        <td class="negative">-8.01%</td>
+        <td class="negative">-4.04%</td>
+        <td class="negative">
+          -2
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>474 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4747.html">4747</a></td>
+        <td>
+          <a href="../company/4747.html">強生製藥</a>
+          
+          
+          
+        </td>
+        <td>52.20</td>
+        <td class="positive">+0.38%</td>
+        <td class="negative">-3.51%</td>
+        <td class="negative">-5.09%</td>
+        <td class="positive">
+          +1
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>461 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4155.html">4155</a></td>
+        <td>
+          <a href="../company/4155.html">訊映</a>
+          
+          
+          
+        </td>
+        <td>13.00</td>
+        <td class="negative">-2.62%</td>
+        <td class="negative">-1.14%</td>
+        <td class="negative">-2.99%</td>
+        <td class="negative">
+          -16
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>451 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4108.html">4108</a></td>
+        <td>
+          <a href="../company/4108.html">懷特</a>
+          
+          
+          
+        </td>
+        <td>12.40</td>
+        <td class="negative">-2.36%</td>
+        <td class="negative">-5.34%</td>
+        <td class="negative">-4.98%</td>
+        <td class="negative">
+          -27
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>350 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1777.html">1777</a></td>
+        <td>
+          <a href="../company/1777.html">生泰</a>
+          
+          
+          
+        </td>
+        <td>70.90</td>
+        <td class="negative">-0.84%</td>
+        <td class="positive">+0.14%</td>
+        <td class="negative">-1.53%</td>
+        <td class="negative">
+          -2
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>325 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/1752.html">1752</a></td>
+        <td>
+          <a href="../company/1752.html">南光</a>
+          
+          
+          
+        </td>
+        <td>34.95</td>
+        <td class="negative">-1.55%</td>
+        <td class="negative">-1.83%</td>
+        <td class="negative">-3.32%</td>
+        <td class="negative">
+          -35
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>298 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8279.html">8279</a></td>
+        <td>
+          <a href="../company/8279.html">生展</a>
+          
+          
+          
+        </td>
+        <td>105.50</td>
+        <td class="negative">+0.00%</td>
+        <td class="negative">-0.94%</td>
+        <td class="negative">-1.40%</td>
+        <td class="negative">
+          -3
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>279 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4148.html">4148</a></td>
+        <td>
+          <a href="../company/4148.html">全宇生技-KY</a>
+          
+          
+          
+        </td>
+        <td>37.00</td>
+        <td class="negative">-0.80%</td>
+        <td class="negative">-3.65%</td>
+        <td class="negative">-11.38%</td>
+        <td class="negative">
+          -14
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>234 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4127.html">4127</a></td>
+        <td>
+          <a href="../company/4127.html">天良</a>
+          
+          
+          
+        </td>
+        <td>37.50</td>
+        <td class="negative">-0.66%</td>
+        <td class="positive">+3.31%</td>
+        <td class="positive">+6.23%</td>
+        <td class="negative">
+          -20
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>219 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4133.html">4133</a></td>
+        <td>
+          <a href="../company/4133.html">亞諾法</a>
+          
+          
+          
+        </td>
+        <td>22.35</td>
+        <td class="negative">-0.67%</td>
+        <td class="negative">-1.97%</td>
+        <td class="negative">-3.04%</td>
+        <td class="negative">
+          -42
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>202 萬</td>
+        <td>
+          
+          
+            <span class="tag">原料藥/化學藥</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4190.html">4190</a></td>
+        <td>
+          <a href="../company/4190.html">佐登-KY</a>
+          
+          
+          
+        </td>
+        <td>26.10</td>
+        <td class="negative">-1.14%</td>
+        <td class="negative">-3.33%</td>
+        <td class="negative">-6.12%</td>
+        <td class="negative">
+          -24
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>199 萬</td>
+        <td>
+          
+          
+            <span class="tag">美容保健/個人護理</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4111.html">4111</a></td>
+        <td>
+          <a href="../company/4111.html">濟生</a>
+          
+          
+          
+        </td>
+        <td>29.25</td>
+        <td class="negative">-0.34%</td>
+        <td class="negative">-0.68%</td>
+        <td class="positive">+0.52%</td>
+        <td class="negative">
+          -18
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>189 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4120.html">4120</a></td>
+        <td>
+          <a href="../company/4120.html">友華</a>
+          <span class="hl-star" data-tip="生技通路 前五｜友華生技醫材代理" title="生技通路 前五｜友華生技醫材代理">★</span>
+          
+          
+        </td>
+        <td>47.00</td>
+        <td class="negative">-0.53%</td>
+        <td class="negative">-1.05%</td>
+        <td class="positive">+2.62%</td>
+        <td class="negative">
+          -1
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>158 萬</td>
+        <td>
+          
+          
+            <span class="tag">減重新藥/GLP-1</span><span class="tag">生技 CDMO</span><span class="tag">保健食品/機能食品</span>
+            
+              <span class="tag tag-more" data-tip="動物保健/寵物醫療、CDMO/生技製造服務" title="動物保健/寵物醫療、CDMO/生技製造服務">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4102.html">4102</a></td>
+        <td>
+          <a href="../company/4102.html">永日</a>
+          
+          
+          
+        </td>
+        <td>18.90</td>
+        <td class="negative">-1.05%</td>
+        <td class="negative">-1.05%</td>
+        <td class="negative">-0.53%</td>
+        <td class="negative">
+          -23
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>146 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3164.html">3164</a></td>
+        <td>
+          <a href="../company/3164.html">景岳</a>
+          
+          
+          
+        </td>
+        <td>17.70</td>
+        <td class="negative">-1.12%</td>
+        <td class="negative">-1.39%</td>
+        <td class="negative">-1.39%</td>
+        <td class="negative">
+          -20
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>109 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6242.html">6242</a></td>
+        <td>
+          <a href="../company/6242.html">立康</a>
+          
+          
+          
+        </td>
+        <td>38.40</td>
+        <td class="positive">+0.52%</td>
+        <td class="positive">+0.13%</td>
+        <td class="positive">+2.54%</td>
+        <td class="negative">
+          -1
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>56 萬</td>
+        <td>
+          
+          
+            <span class="tag">光通訊細分</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4192.html">4192</a></td>
+        <td>
+          <a href="../company/4192.html">杏國</a>
+          
+          
+          
+        </td>
+        <td>19.55</td>
+        <td class="">—</td>
+        <td class="negative">-4.40%</td>
+        <td class="negative">-2.01%</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>28 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6496.html">6496</a></td>
+        <td>
+          <a href="../company/6496.html">科懋</a>
+          
+          
+          
+        </td>
+        <td>25.25</td>
+        <td class="negative">-1.17%</td>
+        <td class="negative">-3.99%</td>
+        <td class="negative">-4.36%</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>24 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4198.html">4198</a></td>
+        <td>
+          <a href="../company/4198.html">欣大健康</a>
+          
+          
+          
+        </td>
+        <td>38.20</td>
+        <td class="">—</td>
+        <td class="negative">-4.86%</td>
+        <td class="negative">-1.55%</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>15 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4139.html">4139</a></td>
+        <td>
+          <a href="../company/4139.html">馬光-KY</a>
+          
+          
+          
+        </td>
+        <td>24.75</td>
+        <td class="negative">-0.20%</td>
+        <td class="negative">-0.60%</td>
+        <td class="positive">+0.61%</td>
+        <td class="negative">
+          -1
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>10 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6662.html">6662</a></td>
+        <td>
+          <a href="../company/6662.html">樂斯科</a>
+          
+          
+          
+        </td>
+        <td>29.45</td>
+        <td class="negative">-0.67%</td>
+        <td class="negative">-3.12%</td>
+        <td class="positive">+1.55%</td>
+        <td class="">
+          —
+        </td>
+        <td class="">
+          —
+        </td>
+        <td>9 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>穩懋 (3105) · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <span>穩懋 (3105)</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#ff7847;">
+  <div class="topic-hero-inner">
+    <div class="category-tag">半導體業</div>
+    <h1>穩懋 <small class="muted">3105</small></h1>
+    <p class="topic-en">上櫃</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>收盤</em><strong>560.00</strong></span>
+      <span class="kpi"><em>今日</em><strong class="negative">-6.67%</strong></span>
+      <span class="kpi"><em>5日</em><strong class="positive">+14.17%</strong></span>
+      <span class="kpi"><em>20日</em><strong class="positive">+78.63%</strong></span>
+      <span class="kpi"><em>成交金額</em><strong>298.9 億</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>60 日走勢</h2>
+    <span class="muted">日K + 成交量 + MA20/MA60 · 資料：FinLab</span>
+  </div>
+  <div id="price_chart_3105" style="height:460px; width:100%; padding:8px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "ohlc": [[225.5, 218.5, 215.0, 225.5], [217.0, 213.0, 211.0, 219.5], [213.0, 227.0, 213.0, 229.0], [225.5, 222.0, 218.5, 240.5], [232.5, 234.5, 232.0, 243.5], [238.5, 230.5, 224.0, 240.0], [235.0, 234.0, 230.0, 243.0], [237.0, 241.0, 230.5, 244.0], [250.5, 258.0, 250.5, 265.0], [259.5, 245.0, 245.0, 261.5], [242.5, 234.5, 233.5, 245.0], [227.0, 221.5, 214.5, 232.0], [237.5, 236.5, 224.5, 238.0], [236.0, 251.5, 228.0, 253.0], [247.0, 240.0, 240.0, 258.5], [228.0, 219.5, 216.0, 231.0], [230.0, 236.5, 225.5, 240.5], [243.0, 255.5, 241.5, 259.0], [255.5, 246.0, 240.0, 258.5], [270.0, 270.5, 266.5, 270.5], [274.5, 297.5, 274.0, 297.5], [319.0, 322.0, 306.5, 325.5], [331.0, 338.0, 321.0, 348.5], [331.0, 331.5, 330.0, 354.0], [341.0, 326.0, 309.0, 352.5], [310.0, 293.5, 293.5, 310.5], [311.0, 300.0, 282.5, 315.5], [289.0, 298.5, 289.0, 305.0], [269.0, 269.0, 269.0, 269.0], [281.0, 272.0, 260.0, 281.0], [283.0, 299.0, 283.0, 299.0], [295.0, 306.5, 295.0, 321.0], [297.0, 313.0, 297.0, 315.0], [314.0, 303.5, 300.5, 314.0], [303.0, 293.5, 290.5, 316.5], [302.0, 322.5, 298.0, 322.5], [332.5, 354.5, 332.0, 354.5], [372.0, 344.0, 340.0, 381.0], [313.5, 315.0, 311.0, 332.0], [330.0, 313.5, 306.0, 334.5], [344.5, 344.5, 344.5, 344.5], [350.0, 358.5, 348.5, 377.5], [343.0, 382.5, 340.0, 387.5], [373.0, 390.5, 358.5, 397.5], [372.5, 351.5, 351.5, 385.5], [375.0, 376.5, 370.0, 385.0], [384.0, 376.0, 374.0, 404.0], [396.5, 407.0, 391.0, 413.0], [430.5, 440.0, 424.5, 445.0], [443.5, 436.0, 431.5, 453.5], [447.0, 464.0, 434.0, 474.0], [466.0, 458.0, 458.0, 481.0], [468.0, 457.0, 437.0, 472.0], [459.0, 446.5, 444.0, 472.0], [448.0, 490.5, 447.5, 491.0], [511.0, 539.0, 503.0, 539.0], [546.0, 592.0, 539.0, 592.0], [625.0, 617.0, 585.0, 637.0], [615.0, 600.0, 598.0, 626.0], [612.0, 560.0, 540.0, 622.0]], "volume": [20646.0, 13539.0, 30925.0, 40789.0, 32856.0, 23061.0, 30897.0, 30477.0, 35787.0, 26320.0, 16166.0, 21072.0, 18784.0, 25142.0, 28210.0, 24351.0, 18477.0, 40694.0, 31859.0, 37644.0, 15292.0, 40260.0, 43276.0, 37580.0, 12600.0, 12089.0, 8085.0, 3803.0, 2859.0, 7954.0, 7172.0, 7821.0, 4980.0, 7437.0, 25843.0, 23589.0, 44154.0, 62153.0, 28406.0, 37867.0, 5359.0, 47694.0, 60854.0, 52927.0, 50309.0, 49497.0, 59230.0, 37458.0, 40094.0, 33459.0, 48046.0, 34579.0, 34743.0, 31849.0, 51230.0, 29993.0, 42870.0, 54738.0, 28328.0, 52014.0], "ma20": [194.78, 197.0, 199.65, 201.2, 203.5, 205.62, 207.85, 210.75, 214.4, 217.5, 220.28, 222.2, 224.82, 228.1, 230.22, 230.38, 230.55, 232.82, 234.35, 236.78, 240.72, 246.18, 251.72, 257.2, 261.77, 264.93, 268.23, 271.1, 271.65, 273.0, 276.23, 280.48, 284.3, 286.9, 289.57, 294.73, 300.62, 305.05, 308.5, 310.65, 313.0, 314.82, 317.05, 320.0, 321.27, 325.43, 329.23, 334.65, 343.2, 351.4, 359.65, 367.23, 374.43, 381.57, 391.43, 402.25, 414.12, 427.77, 442.02, 454.35], "ma60": [152.99, 154.87, 157.01, 159.02, 161.26, 163.42, 165.69, 167.92, 170.25, 172.28, 174.04, 175.63, 177.57, 179.75, 181.72, 183.32, 185.11, 187.37, 189.42, 191.93, 194.93, 198.32, 202.11, 205.6, 208.8, 211.5, 214.33, 216.93, 219.06, 221.07, 223.62, 226.33, 229.09, 231.62, 233.72, 236.22, 239.23, 241.93, 244.13, 246.57, 249.5, 252.67, 256.14, 259.47, 262.18, 265.32, 268.43, 272.17, 276.42, 280.63, 285.38, 289.97, 294.52, 298.86, 303.74, 309.12, 315.1, 321.88, 328.29, 333.93]};
+    if (!raw) {
+      document.getElementById('price_chart_3105').innerHTML =
+        '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const el = document.getElementById('price_chart_3105');
+      const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const upColor = '#ef4444';   // 台股紅漲
+      const downColor = '#10b981'; // 台股綠跌
+      chart.setOption({
+        backgroundColor: 'transparent',
+        animation: false,
+        legend: {
+          data: ['K線','MA20','MA60'],
+          top: 0, textStyle: { color: '#9ca3af' }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          backgroundColor: '#1f2937',
+          borderColor: '#374151',
+          textStyle: { color: '#e5e7eb' },
+          formatter: (p) => {
+            const d = p[0].axisValue;
+            const k = p.find(x => x.seriesName === 'K線');
+            const v = p.find(x => x.seriesName === '成交量');
+            const m20 = p.find(x => x.seriesName === 'MA20');
+            const m60 = p.find(x => x.seriesName === 'MA60');
+            let s = `<b>${d}</b><br>`;
+            if (k) {
+              const [o, c, l, h] = k.value.slice(1);
+              s += `開 <b>${o}</b> · 高 <b style="color:${upColor}">${h}</b> · 低 <b style="color:${downColor}">${l}</b> · 收 <b>${c}</b><br>`;
+            }
+            if (v) s += `量 ${Math.round(v.value[1]).toLocaleString()} 張<br>`;
+            if (m20 && m20.value != null) s += `MA20 ${m20.value}<br>`;
+            if (m60 && m60.value != null) s += `MA60 ${m60.value}`;
+            return s;
+          }
+        },
+        axisPointer: { link: [{ xAxisIndex: 'all' }] },
+        grid: [
+          { left: 50, right: 16, top: 36, height: '62%' },
+          { left: 50, right: 16, top: '75%', height: '18%' }
+        ],
+        xAxis: [
+          {
+            type: 'category', data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { color: '#9ca3af' },
+            splitLine: { show: false },
+            boundaryGap: true,
+          },
+          {
+            type: 'category', gridIndex: 1, data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { show: false }, axisTick: { show: false }
+          }
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+            axisLabel: { color: '#9ca3af' }
+          },
+          {
+            gridIndex: 1, scale: true, splitNumber: 2,
+            splitLine: { show: false },
+            axisLabel: { color: '#9ca3af',
+              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+            }
+          }
+        ],
+        dataZoom: [
+          { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
+            borderColor: '#374151',
+            handleStyle: { color: '#ff7847' },
+            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
+            fillerColor: 'rgba(255,120,71,0.15)',
+            textStyle: { color: '#9ca3af' }
+          }
+        ],
+        series: [
+          {
+            name: 'K線', type: 'candlestick', data: raw.ohlc,
+            itemStyle: {
+              color: upColor, color0: downColor,
+              borderColor: upColor, borderColor0: downColor
+            }
+          },
+          {
+            name: 'MA20', type: 'line', data: raw.ma20,
+            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: 'MA60', type: 'line', data: raw.ma60,
+            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: '成交量', type: 'bar',
+            xAxisIndex: 1, yAxisIndex: 1,
+            data: raw.volume.map((v, i) => {
+              const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
+              return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
+            })
+          }
+        ]
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+
+
+<section class="panel highlight-panel">
+  <div class="panel-header"><h2>技術亮點 · 產業地位</h2></div>
+  <div class="highlight-body">
+    <div class="highlight-ranking">GaAs 代工 全球 #1</div>
+    <p class="highlight-tech"><strong>技術：</strong>砷化鎵 RF 代工、GaN 擴產、CPO 封裝</p>
+    <p class="highlight-moat"><strong>護城河：</strong>全球 60% GaAs 代工市占</p>
+  </div>
+</section>
+
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>所屬題材 <span class="muted">(9)</span></h2>
+  </div>
+  
+  <div class="topic-grid compact">
+    
+    <a href="../topic/矽光子.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#059669;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>矽光子</h3>
+          <span class="pill" style="background:#05966922; color:#059669;">光通訊 / 網通</span>
+        </div>
+        <p class="topic-card-desc">以矽製程製造光通訊晶片，是 CPO 的上游核心。台積電 COUPE 平台、穩懋、聯亞深度切入。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/高速傳輸.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#34d399;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>高速傳輸</h3>
+          <span class="pill" style="background:#34d39922; color:#34d399;">光通訊 / 網通</span>
+        </div>
+        <p class="topic-card-desc">CXL、PCIe 6.0、224G SerDes 等高速介面，AI 叢集內部互連關鍵。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/碳化矽_SiC.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#f59e0b;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>碳化矽/SiC</h3>
+          <span class="pill" style="background:#f59e0b22; color:#f59e0b;">第三代半導體</span>
+        </div>
+        <p class="topic-card-desc">第三代半導體材料，耐高溫、高壓、高頻，電動車主逆變器 + AI 資料中心電源必備。從車用轉戰資料中心，漢磊、嘉晶、環球晶卡位。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/砷化鎵_GaAs.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#eab308;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>砷化鎵/GaAs</h3>
+          <span class="pill" style="background:#eab30822; color:#eab308;">第三代半導體</span>
+        </div>
+        <p class="topic-card-desc">化合物半導體代工龍頭穩懋 + 磊晶供應鏈。受惠 CPO、衛星、WiFi 7 需求。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/氮化鎵_GaN.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#fb923c;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>氮化鎵/GaN</h3>
+          <span class="pill" style="background:#fb923c22; color:#fb923c;">第三代半導體</span>
+        </div>
+        <p class="topic-card-desc">GaN 耐高壓、高功率、低損耗，適用 EV、5G、快充、AI 眼鏡。Wolfspeed 重整後台廠穩懋、力積電吃下轉單。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/AI眼鏡_MetaRay-Ban.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#c026d3;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>AI 眼鏡 / Meta Ray-Ban</h3>
+          <span class="pill" style="background:#c026d322; color:#c026d3;">消費電子</span>
+        </div>
+        <p class="topic-card-desc">Meta Ray-Ban 銷量超預期，Google Samsung Android XR 2026 上市。億豐 GaN MOCVD 獨家供應 Google，穩懋 RF 卡位。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/5G_6G基地台.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#0d9488;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>5G/6G 基地台</h3>
+          <span class="pill" style="background:#0d948822; color:#0d9488;">光通訊 / 網通</span>
+        </div>
+        <p class="topic-card-desc">5G 滲透率接近飽和、6G 規格已定義。中磊、啟碁、智邦為 Open RAN 主力供應商。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/射頻RF_PA.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#0891b2;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>射頻 RF/PA</h3>
+          <span class="pill" style="background:#0891b222; color:#0891b2;">光通訊 / 網通</span>
+        </div>
+        <p class="topic-card-desc">手機、WiFi、衛星需高頻功率放大器。穩懋、全新、宏捷科為 GaAs 代工三雄。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/FlexiblePCB_軟板.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#f43f5e;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>Flexible PCB/軟板</h3>
+          <span class="pill" style="background:#f43f5e22; color:#f43f5e;">基板 / PCB</span>
+        </div>
+        <p class="topic-card-desc">軟板用於手機、穿戴、摺疊機、車用。健鼎、嘉聯益、台郡受惠 Apple 新機。</p>
+      </div>
+    </a>
+    
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header"><h2>法人動向</h2></div>
+  <div class="snapshot">
+    <div><em>外資今日</em><strong class="positive">+1520 張</strong></div>
+    <div><em>外資 5 日</em><strong class="positive">+1686 張</strong></div>
+    <div><em>投信今日</em><strong class="negative">-1906 張</strong></div>
+    <div><em>投信 5 日</em><strong class="positive">+1321 張</strong></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

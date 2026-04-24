@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>中興電 (1513) · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <span>中興電 (1513)</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#ff7847;">
+  <div class="topic-hero-inner">
+    <div class="category-tag">電機機械</div>
+    <h1>中興電 <small class="muted">1513</small></h1>
+    <p class="topic-en">上市</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>收盤</em><strong>151.50</strong></span>
+      <span class="kpi"><em>今日</em><strong class="negative">-2.57%</strong></span>
+      <span class="kpi"><em>5日</em><strong class="negative">-2.26%</strong></span>
+      <span class="kpi"><em>20日</em><strong class="negative">-3.19%</strong></span>
+      <span class="kpi"><em>成交金額</em><strong>12.1 億</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>60 日走勢</h2>
+    <span class="muted">日K + 成交量 + MA20/MA60 · 資料：FinLab</span>
+  </div>
+  <div id="price_chart_1513" style="height:460px; width:100%; padding:8px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "ohlc": [[154.5, 160.0, 152.5, 160.0], [160.5, 160.5, 156.5, 166.0], [160.5, 176.5, 158.0, 176.5], [177.0, 177.5, 175.0, 187.5], [182.0, 184.0, 178.0, 189.0], [185.5, 184.0, 179.0, 188.5], [183.0, 181.0, 179.0, 186.5], [182.0, 177.0, 176.0, 182.0], [177.0, 185.5, 173.5, 187.5], [185.5, 178.0, 177.5, 186.5], [177.0, 168.5, 168.5, 179.5], [165.5, 163.5, 161.0, 167.0], [167.5, 169.0, 164.5, 170.5], [167.0, 170.5, 166.5, 172.5], [168.0, 164.5, 163.5, 170.5], [163.0, 158.5, 157.0, 163.5], [162.5, 163.0, 159.5, 163.5], [163.5, 163.0, 163.0, 167.0], [164.0, 163.5, 162.0, 165.0], [165.0, 168.0, 165.0, 172.0], [169.5, 168.0, 166.5, 170.0], [169.0, 170.5, 168.5, 173.5], [171.5, 175.5, 168.0, 178.0], [171.0, 171.5, 170.0, 175.0], [172.0, 165.5, 165.0, 173.5], [161.5, 155.0, 155.0, 163.0], [160.0, 160.0, 156.5, 161.5], [159.0, 160.0, 157.0, 164.0], [152.0, 151.5, 148.0, 153.0], [154.5, 151.0, 149.5, 154.5], [153.0, 156.5, 153.0, 158.0], [156.0, 157.5, 155.0, 159.5], [154.5, 158.0, 154.0, 158.5], [158.0, 158.5, 156.0, 159.5], [160.5, 162.0, 160.0, 164.5], [164.0, 162.0, 161.0, 164.5], [161.5, 159.5, 158.5, 161.5], [161.0, 157.5, 156.0, 161.0], [155.0, 154.0, 152.5, 160.5], [157.5, 156.5, 153.0, 158.0], [158.5, 158.5, 157.5, 160.5], [155.5, 153.5, 153.5, 158.0], [152.0, 152.0, 149.5, 152.0], [149.0, 149.0, 148.0, 149.5], [148.0, 143.0, 142.5, 149.5], [146.5, 145.0, 143.5, 148.5], [147.0, 144.0, 143.5, 148.0], [145.5, 144.5, 143.5, 145.5], [147.0, 148.0, 147.0, 149.5], [149.5, 150.0, 147.5, 150.0], [150.5, 150.5, 149.5, 151.0], [150.5, 151.5, 147.5, 152.0], [153.0, 151.5, 150.0, 153.0], [153.0, 150.5, 150.5, 155.0], [151.0, 155.0, 150.5, 155.0], [156.0, 153.0, 152.0, 156.0], [154.0, 153.5, 152.0, 156.5], [154.5, 155.5, 154.0, 155.5], [155.5, 155.5, 154.0, 156.0], [157.5, 151.5, 149.0, 158.0]], "volume": [22229.0, 25154.0, 46776.0, 91704.0, 53759.0, 24170.0, 13620.0, 11026.0, 27637.0, 14724.0, 14177.0, 8637.0, 7703.0, 5950.0, 5811.0, 7106.0, 5442.0, 5938.0, 4158.0, 7716.0, 5150.0, 12302.0, 16103.0, 8395.0, 8129.0, 8640.0, 4353.0, 4891.0, 6403.0, 5195.0, 4252.0, 3417.0, 2484.0, 2400.0, 3615.0, 3495.0, 2439.0, 3218.0, 3779.0, 2167.0, 2185.0, 4522.0, 4086.0, 2962.0, 8045.0, 5931.0, 2855.0, 1979.0, 3546.0, 2238.0, 2022.0, 2882.0, 3173.0, 4361.0, 4730.0, 5866.0, 7113.0, 4069.0, 3925.0, 7888.0], "ma20": [149.53, 150.32, 151.6, 152.88, 154.53, 156.25, 157.78, 159.1, 160.82, 162.25, 163.25, 164.07, 165.18, 166.4, 167.38, 167.97, 168.82, 169.62, 169.95, 170.8, 171.2, 171.7, 171.65, 171.35, 170.43, 168.97, 167.93, 167.07, 165.38, 164.03, 163.43, 163.12, 162.57, 161.97, 161.85, 162.03, 161.85, 161.57, 161.1, 160.53, 160.05, 159.2, 158.03, 156.9, 155.78, 155.28, 154.47, 153.7, 153.53, 153.47, 153.18, 152.88, 152.55, 152.15, 151.8, 151.35, 151.05, 150.95, 151.03, 150.78], "ma60": [149.32, 149.43, 149.85, 150.28, 150.85, 151.45, 151.95, 152.35, 152.82, 153.23, 153.52, 153.72, 154.12, 154.56, 154.9, 155.15, 155.37, 155.65, 155.96, 156.31, 156.61, 156.93, 157.33, 157.67, 157.94, 158.03, 158.18, 158.36, 158.43, 158.5, 158.65, 158.82, 158.99, 159.16, 159.36, 159.55, 159.72, 159.8, 159.89, 160.06, 160.26, 160.41, 160.43, 160.38, 160.24, 160.17, 160.06, 159.96, 159.91, 159.92, 159.95, 160.03, 160.1, 160.18, 160.34, 160.45, 160.57, 160.72, 160.69, 160.7]};
+    if (!raw) {
+      document.getElementById('price_chart_1513').innerHTML =
+        '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const el = document.getElementById('price_chart_1513');
+      const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const upColor = '#ef4444';   // 台股紅漲
+      const downColor = '#10b981'; // 台股綠跌
+      chart.setOption({
+        backgroundColor: 'transparent',
+        animation: false,
+        legend: {
+          data: ['K線','MA20','MA60'],
+          top: 0, textStyle: { color: '#9ca3af' }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          backgroundColor: '#1f2937',
+          borderColor: '#374151',
+          textStyle: { color: '#e5e7eb' },
+          formatter: (p) => {
+            const d = p[0].axisValue;
+            const k = p.find(x => x.seriesName === 'K線');
+            const v = p.find(x => x.seriesName === '成交量');
+            const m20 = p.find(x => x.seriesName === 'MA20');
+            const m60 = p.find(x => x.seriesName === 'MA60');
+            let s = `<b>${d}</b><br>`;
+            if (k) {
+              const [o, c, l, h] = k.value.slice(1);
+              s += `開 <b>${o}</b> · 高 <b style="color:${upColor}">${h}</b> · 低 <b style="color:${downColor}">${l}</b> · 收 <b>${c}</b><br>`;
+            }
+            if (v) s += `量 ${Math.round(v.value[1]).toLocaleString()} 張<br>`;
+            if (m20 && m20.value != null) s += `MA20 ${m20.value}<br>`;
+            if (m60 && m60.value != null) s += `MA60 ${m60.value}`;
+            return s;
+          }
+        },
+        axisPointer: { link: [{ xAxisIndex: 'all' }] },
+        grid: [
+          { left: 50, right: 16, top: 36, height: '62%' },
+          { left: 50, right: 16, top: '75%', height: '18%' }
+        ],
+        xAxis: [
+          {
+            type: 'category', data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { color: '#9ca3af' },
+            splitLine: { show: false },
+            boundaryGap: true,
+          },
+          {
+            type: 'category', gridIndex: 1, data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { show: false }, axisTick: { show: false }
+          }
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+            axisLabel: { color: '#9ca3af' }
+          },
+          {
+            gridIndex: 1, scale: true, splitNumber: 2,
+            splitLine: { show: false },
+            axisLabel: { color: '#9ca3af',
+              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+            }
+          }
+        ],
+        dataZoom: [
+          { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
+            borderColor: '#374151',
+            handleStyle: { color: '#ff7847' },
+            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
+            fillerColor: 'rgba(255,120,71,0.15)',
+            textStyle: { color: '#9ca3af' }
+          }
+        ],
+        series: [
+          {
+            name: 'K線', type: 'candlestick', data: raw.ohlc,
+            itemStyle: {
+              color: upColor, color0: downColor,
+              borderColor: upColor, borderColor0: downColor
+            }
+          },
+          {
+            name: 'MA20', type: 'line', data: raw.ma20,
+            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: 'MA60', type: 'line', data: raw.ma60,
+            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: '成交量', type: 'bar',
+            xAxisIndex: 1, yAxisIndex: 1,
+            data: raw.volume.map((v, i) => {
+              const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
+              return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
+            })
+          }
+        ]
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+
+
+<section class="panel highlight-panel">
+  <div class="panel-header"><h2>技術亮點 · 產業地位</h2></div>
+  <div class="highlight-body">
+    <div class="highlight-ranking">重電三雄之一</div>
+    <p class="highlight-tech"><strong>技術：</strong>智慧電錶、儲能 PCS</p>
+    <p class="highlight-moat"><strong>護城河：</strong>台電 300 萬戶 AMI 標案得主</p>
+  </div>
+</section>
+
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>所屬題材 <span class="muted">(9)</span></h2>
+  </div>
+  
+  <div class="topic-grid compact">
+    
+    <a href="../topic/重電.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#f59e0b;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>重電</h3>
+          <span class="pill" style="background:#f59e0b22; color:#f59e0b;">散熱 / 電源</span>
+        </div>
+        <p class="topic-card-desc">AI 資料中心耗電暴增帶動重電設備需求，台電 2025-2030 強韌電網預算 5,645 億。士電、中興電、華城受惠。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/綠能_儲能.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#16a34a;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>綠能/儲能</h3>
+          <span class="pill" style="background:#16a34a22; color:#16a34a;">散熱 / 電源</span>
+        </div>
+        <p class="topic-card-desc">太陽能、風電、儲能系統。政策支持 + AI DC 綠電需求。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/氫能_燃料電池.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#06b6d4;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>氫能/燃料電池</h3>
+          <span class="pill" style="background:#06b6d422; color:#06b6d4;">散熱 / 電源</span>
+        </div>
+        <p class="topic-card-desc">氫能列入國家淨零關鍵技術。燃料電池、氫能發電、氫能車三大方向。高力、中興電切入氫能系統。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/海底電纜.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#1e3a8a;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>海底電纜</h3>
+          <span class="pill" style="background:#1e3a8a22; color:#1e3a8a;">散熱 / 電源</span>
+        </div>
+        <p class="topic-card-desc">華新攜手丹麥 NKT 投資 180 億在高雄設海纜廠，2026 試產、2027 量產。離岸風電在地化硬指標，全球 AI DC 大陸海底互連需求噴發。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/充電樁_充電服務.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#16a34a;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>充電樁/充電服務</h3>
+          <span class="pill" style="background:#16a34a22; color:#16a34a;">車用 / 機器人</span>
+        </div>
+        <p class="topic-card-desc">全球電動車滲透 35%，充電樁佈建加速。台達電全球 DC 快充龍頭、華城、中興電卡位國內充電站。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/智慧電錶_AMI.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#eab308;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>智慧電錶/AMI</h3>
+          <span class="pill" style="background:#eab30822; color:#eab308;">散熱 / 電源</span>
+        </div>
+        <p class="topic-card-desc">台電智慧電錶 300 萬戶汰換計畫。中興電、士電、華城為標案主要得主。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/儲能系統_BESS.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#10b981;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>儲能系統/BESS</h3>
+          <span class="pill" style="background:#10b98122; color:#10b981;">散熱 / 電源</span>
+        </div>
+        <p class="topic-card-desc">台電儲能 2026 目標 3 GW、全球 BESS 年增 40%。台達電、華城為 PCS 主力，森崴能源整合案場。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/智慧城市_V2X.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#0891b2;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>智慧城市/V2X</h3>
+          <span class="pill" style="background:#0891b222; color:#0891b2;">政策驅動</span>
+        </div>
+        <p class="topic-card-desc">V2X 車聯網、智慧路燈、智慧電錶、AI 影像交通。台廠網通 + 重電雙線佈局。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/風電_離岸風電.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#0d9488;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>風電/離岸風電</h3>
+          <span class="pill" style="background:#0d948822; color:#0d9488;">綠能 / 環保</span>
+        </div>
+        <p class="topic-card-desc">世紀風電、世紀鋼為離岸風電水下基礎代表。上緯、天力離岸切入風機零件，政策推動 3.5 GW/年。</p>
+      </div>
+    </a>
+    
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header"><h2>法人動向</h2></div>
+  <div class="snapshot">
+    <div><em>外資今日</em><strong class="negative">-2001 張</strong></div>
+    <div><em>外資 5 日</em><strong class="negative">-4147 張</strong></div>
+    <div><em>投信今日</em><strong class="positive">+317 張</strong></div>
+    <div><em>投信 5 日</em><strong class="positive">+641 張</strong></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

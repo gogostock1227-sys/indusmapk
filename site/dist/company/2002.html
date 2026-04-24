@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>中鋼 (2002) · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <span>中鋼 (2002)</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#ff7847;">
+  <div class="topic-hero-inner">
+    <div class="category-tag">鋼鐵工業</div>
+    <h1>中鋼 <small class="muted">2002</small></h1>
+    <p class="topic-en">上市</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>收盤</em><strong>19.15</strong></span>
+      <span class="kpi"><em>今日</em><strong class="negative">-2.05%</strong></span>
+      <span class="kpi"><em>5日</em><strong class="negative">-4.01%</strong></span>
+      <span class="kpi"><em>20日</em><strong class="negative">-0.26%</strong></span>
+      <span class="kpi"><em>成交金額</em><strong>12.9 億</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>60 日走勢</h2>
+    <span class="muted">日K + 成交量 + MA20/MA60 · 資料：FinLab</span>
+  </div>
+  <div id="price_chart_2002" style="height:460px; width:100%; padding:8px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "ohlc": [[19.55, 19.25, 19.2, 19.55], [19.25, 19.65, 19.05, 19.7], [19.65, 19.15, 19.15, 19.65], [19.1, 18.95, 18.9, 19.15], [19.15, 19.0, 18.9, 19.25], [19.1, 19.15, 18.95, 19.25], [19.2, 19.65, 19.15, 19.7], [19.75, 19.35, 19.35, 19.95], [19.35, 19.6, 19.25, 19.6], [19.85, 20.7, 19.8, 21.35], [20.8, 20.75, 20.35, 21.55], [21.05, 21.1, 20.8, 21.6], [21.4, 20.65, 20.6, 21.4], [20.65, 20.95, 20.15, 21.25], [21.15, 20.95, 20.8, 21.3], [20.8, 20.4, 20.25, 20.8], [20.6, 20.35, 20.2, 20.6], [20.45, 20.5, 20.25, 20.5], [20.6, 20.9, 20.6, 21.1], [20.75, 20.45, 20.35, 20.8], [20.6, 20.7, 20.45, 20.75], [20.7, 21.25, 20.5, 21.25], [21.25, 20.75, 20.6, 21.25], [20.4, 20.25, 20.15, 20.6], [20.1, 20.05, 19.9, 20.4], [19.8, 19.2, 19.1, 19.8], [19.6, 19.3, 19.2, 19.6], [19.1, 19.9, 19.1, 19.9], [19.15, 19.15, 18.8, 19.3], [19.4, 19.2, 19.15, 19.4], [19.25, 19.5, 19.2, 19.65], [19.3, 19.35, 19.25, 19.5], [19.3, 19.1, 19.05, 19.3], [19.2, 19.15, 19.05, 19.35], [19.25, 19.25, 19.15, 19.4], [19.4, 19.3, 19.3, 19.65], [19.0, 18.8, 18.8, 19.05], [19.1, 19.45, 19.05, 19.8], [19.8, 19.05, 19.05, 19.85], [19.35, 19.2, 19.1, 19.45], [19.5, 19.3, 19.25, 19.55], [19.45, 19.75, 19.35, 19.95], [19.75, 19.6, 19.5, 19.85], [19.25, 19.15, 19.1, 19.55], [19.0, 18.9, 18.85, 19.4], [19.25, 19.5, 19.1, 19.5], [19.6, 19.5, 19.35, 19.6], [19.5, 19.5, 19.4, 19.75], [19.8, 19.95, 19.55, 19.95], [20.0, 20.2, 19.95, 20.2], [20.3, 20.05, 19.95, 20.55], [20.05, 20.2, 19.85, 20.2], [20.2, 20.5, 20.1, 20.5], [20.5, 20.1, 20.05, 20.55], [20.25, 19.95, 19.85, 20.25], [20.05, 20.1, 19.95, 20.15], [20.15, 19.85, 19.85, 20.25], [19.9, 19.75, 19.7, 19.9], [19.75, 19.55, 19.5, 19.9], [19.4, 19.15, 19.0, 19.45]], "volume": [35619.0, 76962.0, 60140.0, 45828.0, 26848.0, 31337.0, 84072.0, 55309.0, 50012.0, 252713.0, 236124.0, 192450.0, 101403.0, 87524.0, 45959.0, 52136.0, 37219.0, 22843.0, 59286.0, 63019.0, 59289.0, 100937.0, 78353.0, 60300.0, 51449.0, 72826.0, 42848.0, 34596.0, 63581.0, 27186.0, 32463.0, 39253.0, 37371.0, 34663.0, 26522.0, 38923.0, 106377.0, 103795.0, 79823.0, 32031.0, 33740.0, 72875.0, 25814.0, 65473.0, 72974.0, 40567.0, 28468.0, 31432.0, 47760.0, 59320.0, 45397.0, 28986.0, 50312.0, 41024.0, 46230.0, 26198.0, 30078.0, 24047.0, 31505.0, 67365.0], "ma20": [18.99, 19.06, 19.07, 19.08, 19.1, 19.13, 19.17, 19.18, 19.2, 19.29, 19.39, 19.51, 19.62, 19.7, 19.79, 19.86, 19.89, 19.95, 20.02, 20.07, 20.14, 20.23, 20.3, 20.37, 20.42, 20.43, 20.41, 20.43, 20.41, 20.34, 20.27, 20.19, 20.11, 20.02, 19.94, 19.88, 19.8, 19.75, 19.66, 19.59, 19.52, 19.45, 19.39, 19.34, 19.28, 19.3, 19.3, 19.29, 19.32, 19.38, 19.4, 19.45, 19.52, 19.56, 19.6, 19.64, 19.69, 19.71, 19.73, 19.73], "ma60": [18.58, 18.59, 18.6, 18.6, 18.6, 18.61, 18.62, 18.63, 18.65, 18.7, 18.74, 18.79, 18.83, 18.88, 18.92, 18.96, 19.0, 19.04, 19.09, 19.13, 19.18, 19.24, 19.29, 19.33, 19.37, 19.39, 19.4, 19.43, 19.44, 19.45, 19.45, 19.46, 19.47, 19.48, 19.49, 19.51, 19.51, 19.53, 19.53, 19.54, 19.55, 19.58, 19.59, 19.6, 19.6, 19.62, 19.63, 19.63, 19.65, 19.67, 19.69, 19.71, 19.75, 19.76, 19.77, 19.79, 19.8, 19.8, 19.8, 19.8]};
+    if (!raw) {
+      document.getElementById('price_chart_2002').innerHTML =
+        '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const el = document.getElementById('price_chart_2002');
+      const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const upColor = '#ef4444';   // 台股紅漲
+      const downColor = '#10b981'; // 台股綠跌
+      chart.setOption({
+        backgroundColor: 'transparent',
+        animation: false,
+        legend: {
+          data: ['K線','MA20','MA60'],
+          top: 0, textStyle: { color: '#9ca3af' }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          backgroundColor: '#1f2937',
+          borderColor: '#374151',
+          textStyle: { color: '#e5e7eb' },
+          formatter: (p) => {
+            const d = p[0].axisValue;
+            const k = p.find(x => x.seriesName === 'K線');
+            const v = p.find(x => x.seriesName === '成交量');
+            const m20 = p.find(x => x.seriesName === 'MA20');
+            const m60 = p.find(x => x.seriesName === 'MA60');
+            let s = `<b>${d}</b><br>`;
+            if (k) {
+              const [o, c, l, h] = k.value.slice(1);
+              s += `開 <b>${o}</b> · 高 <b style="color:${upColor}">${h}</b> · 低 <b style="color:${downColor}">${l}</b> · 收 <b>${c}</b><br>`;
+            }
+            if (v) s += `量 ${Math.round(v.value[1]).toLocaleString()} 張<br>`;
+            if (m20 && m20.value != null) s += `MA20 ${m20.value}<br>`;
+            if (m60 && m60.value != null) s += `MA60 ${m60.value}`;
+            return s;
+          }
+        },
+        axisPointer: { link: [{ xAxisIndex: 'all' }] },
+        grid: [
+          { left: 50, right: 16, top: 36, height: '62%' },
+          { left: 50, right: 16, top: '75%', height: '18%' }
+        ],
+        xAxis: [
+          {
+            type: 'category', data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { color: '#9ca3af' },
+            splitLine: { show: false },
+            boundaryGap: true,
+          },
+          {
+            type: 'category', gridIndex: 1, data: raw.dates,
+            axisLine: { lineStyle: { color: '#374151' } },
+            axisLabel: { show: false }, axisTick: { show: false }
+          }
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+            axisLabel: { color: '#9ca3af' }
+          },
+          {
+            gridIndex: 1, scale: true, splitNumber: 2,
+            splitLine: { show: false },
+            axisLabel: { color: '#9ca3af',
+              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+            }
+          }
+        ],
+        dataZoom: [
+          { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
+            borderColor: '#374151',
+            handleStyle: { color: '#ff7847' },
+            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
+            fillerColor: 'rgba(255,120,71,0.15)',
+            textStyle: { color: '#9ca3af' }
+          }
+        ],
+        series: [
+          {
+            name: 'K線', type: 'candlestick', data: raw.ohlc,
+            itemStyle: {
+              color: upColor, color0: downColor,
+              borderColor: upColor, borderColor0: downColor
+            }
+          },
+          {
+            name: 'MA20', type: 'line', data: raw.ma20,
+            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: 'MA60', type: 'line', data: raw.ma60,
+            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
+            symbol: 'none'
+          },
+          {
+            name: '成交量', type: 'bar',
+            xAxisIndex: 1, yAxisIndex: 1,
+            data: raw.volume.map((v, i) => {
+              const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
+              return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
+            })
+          }
+        ]
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+
+
+<section class="panel highlight-panel">
+  <div class="panel-header"><h2>技術亮點 · 產業地位</h2></div>
+  <div class="highlight-body">
+    <div class="highlight-ranking">鋼鐵 台灣 #1</div>
+    <p class="highlight-tech"><strong>技術：</strong>冷軋 / 電磁鋼片、碳鋼</p>
+    <p class="highlight-moat"><strong>護城河：</strong>中鋼集團整合、政府大股東</p>
+  </div>
+</section>
+
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>所屬題材 <span class="muted">(4)</span></h2>
+  </div>
+  
+  <div class="topic-grid compact">
+    
+    <a href="../topic/鋼鐵.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#6b7280;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>鋼鐵</h3>
+          <span class="pill" style="background:#6b728022; color:#6b7280;">傳產</span>
+        </div>
+        <p class="topic-card-desc">中鋼、東和鋼鐵、豐興等。2026 年中國限產 + 基建復甦。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/碳權_ESG.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#15803d;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>碳權/ESG</h3>
+          <span class="pill" style="background:#15803d22; color:#15803d;">政策驅動</span>
+        </div>
+        <p class="topic-card-desc">2026 台灣碳費開徵 + 歐盟 CBAM 上路。高排碳業者透過減碳、綠電、碳權交易降低成本。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/川普概念_關稅戰.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#7c2d12;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>川普概念/關稅戰</h3>
+          <span class="pill" style="background:#7c2d1222; color:#7c2d12;">政策驅動</span>
+        </div>
+        <p class="topic-card-desc">川普 2.0 預料對中國課 60% 關稅、對全球 10-20%。台灣供應鏈面臨重組。</p>
+      </div>
+    </a>
+    
+    <a href="../topic/重建_災後_基礎建設.html" class="topic-card">
+      <div class="topic-card-accent" style="background:#6b7280;"></div>
+      <div class="topic-card-body">
+        <div class="topic-card-header">
+          <h3>重建/災後/基礎建設</h3>
+          <span class="pill" style="background:#6b728022; color:#6b7280;">傳產</span>
+        </div>
+        <p class="topic-card-desc">台灣半導體擴廠 + 政府重大公建。台泥、中鋼、營建股受惠。</p>
+      </div>
+    </a>
+    
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header"><h2>法人動向</h2></div>
+  <div class="snapshot">
+    <div><em>外資今日</em><strong class="negative">-37450 張</strong></div>
+    <div><em>外資 5 日</em><strong class="negative">-36427 張</strong></div>
+    <div><em>投信今日</em><strong class="negative">-43 張</strong></div>
+    <div><em>投信 5 日</em><strong class="negative">-320 張</strong></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

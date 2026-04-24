@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>光通訊/CPO · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#10b981;">光通訊/CPO</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#10b981;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#10b98122; color:#10b981;">光通訊 / 網通</div>
+    <h1>光通訊/CPO</h1>
+    <p class="topic-en">Silicon Photonics &amp; CPO</p>
+    <p class="topic-desc">半導體異質整合的尖端技術，將光通訊元件與邏輯晶片共同封裝 (Co-Packaged Optics)，解決 AI 叢集對頻寬與功耗的需求。2026 為量產元年。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>70%+</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>12B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>13</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-6.01%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>量產時程</small>
+    <strong>2026 商轉</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>頻寬世代</small>
+    <strong>1.6T / 3.2T</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>核心客戶</small>
+    <strong>NVIDIA / Broadcom</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>矽光子七劍客</small>
+    <strong>聯亞 / 全新 / 波若威等</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_光通訊_CPO"></div>
+  <div id="topic_chart_光通訊_CPO" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -4.85, -4.33, -2.15, -3.29, 1.35, 1.86, 0.34, -1.81, 0.44, 3.58, 5.8, 2.8, 2.88, 3.68, 0.32, -1.05, 1.86, 1.58, 1.97, 0.51, 1.88, 5.26, 2.49, 4.83, 2.09, -0.19, 4.91, 1.03, 5.94, 10.69, 14.76, 18.27, 21.48, 20.68, 19.59, 22.56, 21.26, 23.03, 26.17, 30.56, 34.06, 34.98, 41.16, 43.43, 39.4, 37.14, 32.63, 35.57, 41.06, 45.47, 48.33, 50.04, 46.4, 49.79, 51.06, 53.31, 50.91, 48.03, 47.39, 47.16, 46.66, 51.28, 45.9, 49.64, 51.68, 49.7, 49.76, 57.52, 57.84, 58.31, 60.06, 61.85, 67.7, 78.04, 82.06, 79.96, 81.92, 90.06, 98.25, 89.54, 83.86, 92.87, 99.32, 99.3, 113.53, 129.59, 135.54, 145.49, 157.88, 154.01, 131.33, 126.97, 127.46, 106.86, 110.37, 127.99, 129.74, 138.36, 148.26, 145.67, 151.72, 158.37, 166.1, 146.91, 146.21, 166.73, 170.79, 181.1, 175.37, 150.26, 168.37, 172.77, 192.12, 208.35, 216.57, 231.75, 235.48, 231.67, 239.75, 250.55, 272.51, 294.17, 292.82, 289.08, 265.7], "ret_1d": -6.01, "ret_1w": 4.32, "ret_1m": 48.53};
+    const kpiEl = document.getElementById('topic_chart_kpis_光通訊_CPO');
+    const chartEl = document.getElementById('topic_chart_光通訊_CPO');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-6.01%</strong></div>
+      <div><em>5日平均</em><strong class="positive">+4.62%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+48.28%</strong></div>
+      <div><em>族群成交額</em><strong>582.4 億</strong></div>
+      <div><em>漲停家數</em><strong>0</strong></div>
+      <div><em>外資買超家數</em><strong>9</strong></div>
+      <div><em>投信買超家數</em><strong>5</strong></div>
+      <div><em>今日最強</em><strong>聯亞</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="砷化鎵_GaAs.html" style="border-color:#eab308; color:#eab308;">
+        砷化鎵/GaAs
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="矽光子.html" style="border-color:#059669; color:#059669;">
+        矽光子
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="氮化鎵_GaN.html" style="border-color:#fb923c; color:#fb923c;">
+        氮化鎵/GaN
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="5G_6G基地台.html" style="border-color:#0d9488; color:#0d9488;">
+        5G/6G 基地台
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="GoogleTPU.html" style="border-color:#4285f4; color:#4285f4;">
+        Google TPU
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3081.html">3081</a></td>
+        <td>
+          <a href="../company/3081.html">聯亞</a>
+          <span class="hl-star" data-tip="矽光子 InP 雷射 獨家｜1.6T 光收發模組 InP 雷射晶片自製" title="矽光子 InP 雷射 獨家｜1.6T 光收發模組 InP 雷射晶片自製">★</span>
+          
+          
+        </td>
+        <td>3020.00</td>
+        <td class="positive">+0.50%</td>
+        <td class="positive">+27.70%</td>
+        <td class="positive">+115.71%</td>
+        <td class="negative">
+          -389
+        </td>
+        <td class="positive">
+          +186
+        </td>
+        <td>197.5 億</td>
+        <td>
+          
+          
+            <span class="tag">Google TPU</span><span class="tag">砷化鎵/GaAs</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3363.html">3363</a></td>
+        <td>
+          <a href="../company/3363.html">上詮</a>
+          <span class="hl-star" data-tip="光纖被動元件 全球前三｜AWG、WDM 器件、光連接器" title="光纖被動元件 全球前三｜AWG、WDM 器件、光連接器">★</span>
+          
+          
+        </td>
+        <td>911.00</td>
+        <td class="negative">-4.71%</td>
+        <td class="positive">+9.76%</td>
+        <td class="positive">+36.99%</td>
+        <td class="positive">
+          +1269
+        </td>
+        <td class="positive">
+          +2
+        </td>
+        <td>89.7 億</td>
+        <td>
+          
+          
+            <span class="tag">Google TPU</span><span class="tag">砷化鎵/GaAs</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3491.html">3491</a></td>
+        <td>
+          <a href="../company/3491.html">昇達科</a>
+          <span class="hl-star" data-tip="毫米波 / 衛星 RF 台灣 #1｜昇達科毫米波 + CPO 濾波器" title="毫米波 / 衛星 RF 台灣 #1｜昇達科毫米波 + CPO 濾波器">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>1550.00</td>
+        <td class="negative">-9.88%</td>
+        <td class="negative">-11.43%</td>
+        <td class="positive">+20.62%</td>
+        <td class="negative">
+          -243
+        </td>
+        <td class="negative">
+          -81
+        </td>
+        <td>58.9 億</td>
+        <td>
+          
+          
+            <span class="tag">矽光子</span><span class="tag">高速傳輸</span><span class="tag">低軌衛星</span>
+            
+              <span class="tag tag-more" data-tip="5G/6G 基地台" title="5G/6G 基地台">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4977.html">4977</a></td>
+        <td>
+          <a href="../company/4977.html">眾達-KY</a>
+          <span class="hl-star" data-tip="眾達-KY 光模組｜高速光收發模組" title="眾達-KY 光模組｜高速光收發模組">★</span>
+          
+          
+        </td>
+        <td>225.50</td>
+        <td class="negative">-6.82%</td>
+        <td class="positive">+5.13%</td>
+        <td class="positive">+24.24%</td>
+        <td class="positive">
+          +754
+        </td>
+        <td class="positive">
+          +25
+        </td>
+        <td>48.5 億</td>
+        <td>
+          
+          
+            <span class="tag">機器人</span><span class="tag">影音串流/OTT</span><span class="tag">光學鏡片/鏡頭</span>
+            
+              <span class="tag tag-more" data-tip="光通訊細分" title="光通訊細分">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6442.html">6442</a></td>
+        <td>
+          <a href="../company/6442.html">光聖</a>
+          <span class="hl-star" data-tip="光聖 光通訊元件｜光纖跳接 / 模組" title="光聖 光通訊元件｜光纖跳接 / 模組">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>2020.00</td>
+        <td class="negative">-9.82%</td>
+        <td class="negative">-2.65%</td>
+        <td class="positive">+4.39%</td>
+        <td class="positive">
+          +74
+        </td>
+        <td class="negative">
+          -684
+        </td>
+        <td>46.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4971.html">4971</a></td>
+        <td>
+          <a href="../company/4971.html">IET-KY</a>
+          <span class="hl-star" data-tip="IET-KY 光通訊｜VCSEL 光引擎" title="IET-KY 光通訊｜VCSEL 光引擎">★</span>
+          
+          
+        </td>
+        <td>835.00</td>
+        <td class="negative">-3.69%</td>
+        <td class="positive">+19.63%</td>
+        <td class="positive">+91.73%</td>
+        <td class="positive">
+          +299
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>43.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4979.html">4979</a></td>
+        <td>
+          <a href="../company/4979.html">華星光</a>
+          <span class="hl-star" data-tip="矽光子七劍客｜華星光光通訊模組" title="矽光子七劍客｜華星光光通訊模組">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>567.00</td>
+        <td class="negative">-9.86%</td>
+        <td class="negative">-3.24%</td>
+        <td class="positive">+46.51%</td>
+        <td class="positive">
+          +297
+        </td>
+        <td class="negative">
+          -1182
+        </td>
+        <td>26.5 億</td>
+        <td>
+          
+          
+            <span class="tag">矽光子</span><span class="tag">低軌衛星</span><span class="tag">碳化矽/SiC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2455.html">2455</a></td>
+        <td>
+          <a href="../company/2455.html">全新</a>
+          <span class="hl-star" data-tip="GaAs 代工 全球 #2｜砷化鎵磊晶、WiFi PA、CPO 光引擎" title="GaAs 代工 全球 #2｜砷化鎵磊晶、WiFi PA、CPO 光引擎">★</span>
+          
+          
+        </td>
+        <td>346.00</td>
+        <td class="negative">-5.08%</td>
+        <td class="positive">+19.31%</td>
+        <td class="positive">+42.68%</td>
+        <td class="positive">
+          +236
+        </td>
+        <td class="positive">
+          +346
+        </td>
+        <td>16.9 億</td>
+        <td>
+          
+          
+            <span class="tag">碳化矽/SiC</span><span class="tag">砷化鎵/GaAs</span><span class="tag">氮化鎵/GaN</span>
+            
+              <span class="tag tag-more" data-tip="5G/6G 基地台、射頻 RF/PA" title="5G/6G 基地台、射頻 RF/PA">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3163.html">3163</a></td>
+        <td>
+          <a href="../company/3163.html">波若威</a>
+          <span class="hl-star" data-tip="波若威 光通訊｜WDM 被動元件" title="波若威 光通訊｜WDM 被動元件">★</span>
+          
+          
+        </td>
+        <td>1160.00</td>
+        <td class="negative">-1.69%</td>
+        <td class="positive">+2.20%</td>
+        <td class="positive">+38.26%</td>
+        <td class="negative">
+          -272
+        </td>
+        <td class="negative">
+          -5
+        </td>
+        <td>14.6 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6426.html">6426</a></td>
+        <td>
+          <a href="../company/6426.html">統新</a>
+          <span class="hl-star" data-tip="光通訊模組 前十｜統新光通訊 被動元件" title="光通訊模組 前十｜統新光通訊 被動元件">★</span>
+          
+          
+        </td>
+        <td>239.50</td>
+        <td class="negative">-2.64%</td>
+        <td class="positive">+15.98%</td>
+        <td class="positive">+65.17%</td>
+        <td class="positive">
+          +193
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>14.4 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3714.html">3714</a></td>
+        <td>
+          <a href="../company/3714.html">富采</a>
+          <span class="hl-star" data-tip="LED + 矽光子 整合｜Mini LED / Micro LED 磊晶" title="LED + 矽光子 整合｜Mini LED / Micro LED 磊晶">★</span>
+          
+          
+        </td>
+        <td>70.00</td>
+        <td class="negative">-4.50%</td>
+        <td class="negative">-7.89%</td>
+        <td class="positive">+50.05%</td>
+        <td class="positive">
+          +1734
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>12.8 億</td>
+        <td>
+          
+          
+            <span class="tag">矽光子</span><span class="tag">LED/光電</span><span class="tag">氮化鎵/GaN</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/7717.html">7717</a></td>
+        <td>
+          <a href="../company/7717.html">萊德光電-KY</a>
+          <span class="hl-star" data-tip="光電 前十｜萊德光電-KY 光通訊" title="光電 前十｜萊德光電-KY 光通訊">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>796.00</td>
+        <td class="negative">-9.95%</td>
+        <td class="negative">-4.78%</td>
+        <td class="positive">+37.24%</td>
+        <td class="negative">
+          -38
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>9.3 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6451.html">6451</a></td>
+        <td>
+          <a href="../company/6451.html">訊芯-KY</a>
+          <span class="hl-star" data-tip="CIS 封裝 前五｜訊芯-KY 光通訊封裝" title="CIS 封裝 前五｜訊芯-KY 光通訊封裝">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>446.50</td>
+        <td class="negative">-9.98%</td>
+        <td class="negative">-9.62%</td>
+        <td class="positive">+53.97%</td>
+        <td class="positive">
+          +8
+        </td>
+        <td class="positive">
+          +13
+        </td>
+        <td>3.6 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

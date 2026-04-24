@@ -1,0 +1,2071 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IC設計 · 台股 AI 產業寶</title>
+<meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <span class="logo-mark">寶</span>
+      <span class="logo-text">
+        <strong>台股產業寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#5b8def;">IC設計</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#5b8def;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#5b8def22; color:#5b8def;">AI / 半導體</div>
+    <h1>IC設計</h1>
+    <p class="topic-en">IC Design</p>
+    <p class="topic-desc">涵蓋聯發科、聯詠、瑞昱等 IC 設計龍頭，產品橫跨手機 SoC、顯示 IC、網通、周邊控制。2026 年受惠 AI PC、AI 手機邊緣運算需求。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>12%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>90B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>64</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="negative">-3.46%</strong></span>
+    </div>
+  </div>
+</section>
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>製程</small>
+    <strong>3nm / 4nm</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>應用</small>
+    <strong>SoC / 網通 / 顯示</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>客戶</small>
+    <strong>OEM / ODM</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>產業地位</small>
+    <strong>台灣 IC 設計產值全球 #2</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_IC設計"></div>
+  <div id="topic_chart_IC設計" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23"], "values": [0.0, -1.58, -0.88, 0.44, -0.04, 0.78, 2.46, 2.1, 1.1, 1.79, 0.85, 1.4, 0.71, 0.9, 0.52, -1.42, -2.3, -0.78, -2.06, -1.49, -1.36, -0.37, -0.3, -2.27, -2.64, -5.59, -6.9, -5.39, -8.12, -7.03, -5.39, -3.61, -2.99, -1.45, -2.17, -2.05, -1.18, -1.3, -1.54, -0.6, -0.72, -1.39, -1.84, -1.92, -1.88, -2.77, -2.49, -3.47, -2.87, -1.59, -1.89, -2.1, -1.41, -0.93, -0.57, -0.38, 0.49, -0.27, 1.64, 3.83, 2.34, 2.34, 4.04, 3.93, 5.18, 4.91, 4.84, 7.34, 7.93, 6.72, 7.76, 9.2, 10.88, 11.54, 12.92, 11.63, 8.28, 5.17, 7.0, 8.13, 6.78, 4.54, 6.03, 7.46, 7.99, 10.49, 12.86, 13.51, 15.19, 15.39, 12.86, 7.3, 11.04, 11.46, 5.64, 7.69, 11.86, 12.54, 12.63, 13.17, 15.35, 18.58, 17.1, 17.24, 13.54, 12.24, 15.26, 13.9, 13.74, 11.81, 7.61, 10.87, 9.37, 10.74, 15.12, 14.26, 15.07, 17.19, 19.17, 19.81, 22.56, 24.82, 26.3, 30.94, 37.77, 32.94], "ret_1d": -3.5, "ret_1w": 8.46, "ret_1m": 18.44};
+    const kpiEl = document.getElementById('topic_chart_kpis_IC設計');
+    const chartEl = document.getElementById('topic_chart_IC設計');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="negative">-3.46%</strong></div>
+      <div><em>5日平均</em><strong class="positive">+8.53%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+18.99%</strong></div>
+      <div><em>族群成交額</em><strong>1975.1 億</strong></div>
+      <div><em>漲停家數</em><strong>2</strong></div>
+      <div><em>外資買超家數</em><strong>25</strong></div>
+      <div><em>投信買超家數</em><strong>19</strong></div>
+      <div><em>今日最強</em><strong>金麗科</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="半導體類比IC.html" style="border-color:#5b8def; color:#5b8def;">
+        半導體類比IC
+        <small>共用 10 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="功率半導體IC.html" style="border-color:#dc2626; color:#dc2626;">
+        功率半導體 IC
+        <small>共用 6 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="半導體_晶片代工次族.html" style="border-color:#8b5cf6; color:#8b5cf6;">
+        半導體/晶片代工次族
+        <small>共用 8 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="ASIC_IP矽智財.html" style="border-color:#ff7847; color:#ff7847;">
+        ASIC/IP矽智財
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="記憶體.html" style="border-color:#a78bfa; color:#a78bfa;">
+        記憶體
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2454.html">2454</a></td>
+        <td>
+          <a href="../company/2454.html">聯發科</a>
+          <span class="hl-star" data-tip="IC 設計 全球 #4 / 台灣 #1｜Dimensity 9400 旗艦 SoC、5G 數據晶片全球 #1" title="IC 設計 全球 #4 / 台灣 #1｜Dimensity 9400 旗艦 SoC、5G 數據晶片全球 #1">★</span>
+          
+          
+        </td>
+        <td>2215.00</td>
+        <td class="negative">-3.49%</td>
+        <td class="positive">+16.89%</td>
+        <td class="positive">+36.73%</td>
+        <td class="positive">
+          +747
+        </td>
+        <td class="positive">
+          +595
+        </td>
+        <td>672.2 億</td>
+        <td>
+          
+          
+            <span class="tag">Google TPU</span><span class="tag">ASIC/IP矽智財</span><span class="tag">AI PC/邊緣AI</span>
+            
+              <span class="tag tag-more" data-tip="網通、2奈米先進製程、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、射頻 RF/PA" title="網通、2奈米先進製程、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、射頻 RF/PA">+5</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6531.html">6531</a></td>
+        <td>
+          <a href="../company/6531.html">愛普*</a>
+          <span class="hl-star" data-tip="DRAM IC 設計 前五｜愛普 低功耗 DRAM + 記憶體模組" title="DRAM IC 設計 前五｜愛普 低功耗 DRAM + 記憶體模組">★</span>
+          
+          
+        </td>
+        <td>785.00</td>
+        <td class="negative">-0.88%</td>
+        <td class="positive">+33.96%</td>
+        <td class="positive">+56.69%</td>
+        <td class="positive">
+          +206
+        </td>
+        <td class="positive">
+          +173
+        </td>
+        <td>218.0 億</td>
+        <td>
+          
+          
+            <span class="tag">記憶體</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3661.html">3661</a></td>
+        <td>
+          <a href="../company/3661.html">世芯-KY</a>
+          <span class="hl-star" data-tip="ASIC 設計服務 台灣 #1｜AWS Trainium、Meta MTIA、Google TPU 設計合作" title="ASIC 設計服務 台灣 #1｜AWS Trainium、Meta MTIA、Google TPU 設計合作">★</span>
+          
+          
+        </td>
+        <td>3980.00</td>
+        <td class="negative">-2.09%</td>
+        <td class="positive">+14.53%</td>
+        <td class="positive">+27.97%</td>
+        <td class="positive">
+          +1124
+        </td>
+        <td class="positive">
+          +42
+        </td>
+        <td>172.2 億</td>
+        <td>
+          
+          
+            <span class="tag">輝達概念股</span><span class="tag">ASIC/IP矽智財</span><span class="tag">2奈米先進製程</span>
+            
+              <span class="tag tag-more" data-tip="HBM 高頻寬記憶體、量子電腦、Chiplet 小晶片" title="HBM 高頻寬記憶體、量子電腦、Chiplet 小晶片">+3</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6415.html">6415</a></td>
+        <td>
+          <a href="../company/6415.html">矽力*-KY</a>
+          <span class="hl-star" data-tip="電源管理 IC 全球前十｜DC-DC 轉換、AI 伺服器 PMIC" title="電源管理 IC 全球前十｜DC-DC 轉換、AI 伺服器 PMIC">★</span>
+          
+          
+        </td>
+        <td>415.50</td>
+        <td class="positive">+3.23%</td>
+        <td class="positive">+37.36%</td>
+        <td class="positive">+47.08%</td>
+        <td class="positive">
+          +4023
+        </td>
+        <td class="positive">
+          +1250
+        </td>
+        <td>114.3 億</td>
+        <td>
+          
+          
+            <span class="tag">軟體/SaaS</span><span class="tag">功率半導體 IC</span><span class="tag">光學鏡片/鏡頭</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3443.html">3443</a></td>
+        <td>
+          <a href="../company/3443.html">創意</a>
+          <span class="hl-star" data-tip="ASIC 設計服務 台灣 #2｜AWS、Microsoft、Tesla Dojo 設計服務" title="ASIC 設計服務 台灣 #2｜AWS、Microsoft、Tesla Dojo 設計服務">★</span>
+          
+          
+        </td>
+        <td>3910.00</td>
+        <td class="positive">+6.39%</td>
+        <td class="positive">+16.89%</td>
+        <td class="positive">+56.09%</td>
+        <td class="positive">
+          +55
+        </td>
+        <td class="positive">
+          +4
+        </td>
+        <td>69.7 億</td>
+        <td>
+          
+          
+            <span class="tag">輝達概念股</span><span class="tag">Google TPU</span><span class="tag">ASIC/IP矽智財</span>
+            
+              <span class="tag tag-more" data-tip="車用電子、蘋果概念股、2奈米先進製程、HBM 高頻寬記憶體、量子電腦、Chiplet 小晶片" title="車用電子、蘋果概念股、2奈米先進製程、HBM 高頻寬記憶體、量子電腦、Chiplet 小晶片">+6</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5274.html">5274</a></td>
+        <td>
+          <a href="../company/5274.html">信驊</a>
+          <span class="hl-star" data-tip="BMC 伺服器管理晶片 全球 #1｜ServerOn Chip、AI 伺服器管理 IC" title="BMC 伺服器管理晶片 全球 #1｜ServerOn Chip、AI 伺服器管理 IC">★</span>
+          
+          
+        </td>
+        <td>15670.00</td>
+        <td class="negative">-2.58%</td>
+        <td class="positive">+8.22%</td>
+        <td class="positive">+43.63%</td>
+        <td class="negative">
+          -58
+        </td>
+        <td class="positive">
+          +10
+        </td>
+        <td>68.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5269.html">5269</a></td>
+        <td>
+          <a href="../company/5269.html">祥碩</a>
+          <span class="hl-star" data-tip="USB Host IC 全球 #1｜AMD 主機板 USB 獨家、PCIe Switch 卡位" title="USB Host IC 全球 #1｜AMD 主機板 USB 獨家、PCIe Switch 卡位">★</span>
+          
+          
+        </td>
+        <td>1275.00</td>
+        <td class="negative">-7.61%</td>
+        <td class="negative">-1.16%</td>
+        <td class="positive">+10.39%</td>
+        <td class="negative">
+          -478
+        </td>
+        <td class="positive">
+          +4
+        </td>
+        <td>65.9 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2436.html">2436</a></td>
+        <td>
+          <a href="../company/2436.html">偉詮電</a>
+          
+          
+          
+        </td>
+        <td>76.50</td>
+        <td class="negative">-2.30%</td>
+        <td class="positive">+21.24%</td>
+        <td class="positive">+21.82%</td>
+        <td class="negative">
+          -2199
+        </td>
+        <td class="positive">
+          +5
+        </td>
+        <td>53.6 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4966.html">4966</a></td>
+        <td>
+          <a href="../company/4966.html">譜瑞-KY</a>
+          <span class="hl-star" data-tip="Display Port / USB IC 全球 #1｜DP / eDP Timing Controller 主流供應" title="Display Port / USB IC 全球 #1｜DP / eDP Timing Controller 主流供應">★</span>
+          
+          
+        </td>
+        <td>600.00</td>
+        <td class="positive">+1.69%</td>
+        <td class="positive">+8.11%</td>
+        <td class="positive">+21.33%</td>
+        <td class="negative">
+          -149
+        </td>
+        <td class="positive">
+          +355
+        </td>
+        <td>45.6 億</td>
+        <td>
+          
+          
+            <span class="tag">矽光子</span><span class="tag">網通</span><span class="tag">晶圓代工成熟製程</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3529.html">3529</a></td>
+        <td>
+          <a href="../company/3529.html">力旺</a>
+          <span class="hl-star" data-tip="非揮發性 IP（eFlash）全球 #1｜嵌入式記憶體 IP 業界標準" title="非揮發性 IP（eFlash）全球 #1｜嵌入式記憶體 IP 業界標準">★</span>
+          
+          
+        </td>
+        <td>3980.00</td>
+        <td class="negative">-1.85%</td>
+        <td class="positive">+7.42%</td>
+        <td class="positive">+57.00%</td>
+        <td class="positive">
+          +211
+        </td>
+        <td class="negative">
+          -83
+        </td>
+        <td>44.5 億</td>
+        <td>
+          
+          
+            <span class="tag">ASIC/IP矽智財</span><span class="tag">CoWoS先進封裝</span><span class="tag">檢測/設備服務</span>
+            
+              <span class="tag tag-more" data-tip="晶片封測" title="晶片封測">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3034.html">3034</a></td>
+        <td>
+          <a href="../company/3034.html">聯詠</a>
+          <span class="hl-star" data-tip="顯示 IC 全球 #3｜Driver IC、Tcon、車用顯示" title="顯示 IC 全球 #3｜Driver IC、Tcon、車用顯示">★</span>
+          
+          
+        </td>
+        <td>406.00</td>
+        <td class="negative">-6.13%</td>
+        <td class="negative">-1.46%</td>
+        <td class="positive">+9.73%</td>
+        <td class="negative">
+          -2633
+        </td>
+        <td class="positive">
+          +632
+        </td>
+        <td>40.1 億</td>
+        <td>
+          
+          
+            <span class="tag">AI 智慧醫療</span><span class="tag">功率半導體 IC</span><span class="tag">智慧家庭/Matter</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2379.html">2379</a></td>
+        <td>
+          <a href="../company/2379.html">瑞昱</a>
+          <span class="hl-star" data-tip="網通 IC 全球 #1｜乙太網、WiFi 7、PCIe Switch 全系列" title="網通 IC 全球 #1｜乙太網、WiFi 7、PCIe Switch 全系列">★</span>
+          
+          
+        </td>
+        <td>542.00</td>
+        <td class="negative">-4.41%</td>
+        <td class="positive">+0.37%</td>
+        <td class="positive">+12.80%</td>
+        <td class="positive">
+          +683
+        </td>
+        <td class="negative">
+          -831
+        </td>
+        <td>36.3 億</td>
+        <td>
+          
+          
+            <span class="tag">ASIC/IP矽智財</span><span class="tag">CoWoS先進封裝</span><span class="tag">矽光子</span>
+            
+              <span class="tag tag-more" data-tip="網通、射頻 RF/PA" title="網通、射頻 RF/PA">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3035.html">3035</a></td>
+        <td>
+          <a href="../company/3035.html">智原</a>
+          <span class="hl-star" data-tip="IC 設計服務老牌｜智原科技、ASIC 設計服務" title="IC 設計服務老牌｜智原科技、ASIC 設計服務">★</span>
+          
+          
+        </td>
+        <td>168.50</td>
+        <td class="negative">-5.87%</td>
+        <td class="positive">+7.67%</td>
+        <td class="positive">+13.85%</td>
+        <td class="positive">
+          +3595
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>34.7 億</td>
+        <td>
+          
+          
+            <span class="tag">充電樁/充電服務</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6643.html">6643</a></td>
+        <td>
+          <a href="../company/6643.html">M31</a>
+          
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>564.00</td>
+        <td class="negative">-9.90%</td>
+        <td class="positive">+14.63%</td>
+        <td class="positive">+22.61%</td>
+        <td class="negative">
+          -138
+        </td>
+        <td class="positive">
+          +35
+        </td>
+        <td>30.9 億</td>
+        <td>
+          
+          
+            <span class="tag">記憶體</span><span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6147.html">6147</a></td>
+        <td>
+          <a href="../company/6147.html">頎邦</a>
+          <span class="hl-star" data-tip="封測 前十｜頎邦 COF 軟板封測" title="封測 前十｜頎邦 COF 軟板封測">★</span>
+          
+          
+        </td>
+        <td>134.00</td>
+        <td class="negative">-5.30%</td>
+        <td class="positive">+17.54%</td>
+        <td class="positive">+107.75%</td>
+        <td class="positive">
+          +129
+        </td>
+        <td class="positive">
+          +689
+        </td>
+        <td>27.0 億</td>
+        <td>
+          
+          
+            <span class="tag">遊戲股</span><span class="tag">功率半導體 IC</span><span class="tag">金屬粉末/3D 列印</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3227.html">3227</a></td>
+        <td>
+          <a href="../company/3227.html">原相</a>
+          <span class="hl-star" data-tip="CMOS 影像 IC 全球 #3｜原相滑鼠感測 IC、遊戲主機" title="CMOS 影像 IC 全球 #3｜原相滑鼠感測 IC、遊戲主機">★</span>
+          
+          
+        </td>
+        <td>215.00</td>
+        <td class="negative">-2.27%</td>
+        <td class="positive">+8.59%</td>
+        <td class="positive">+13.76%</td>
+        <td class="positive">
+          +1326
+        </td>
+        <td class="negative">
+          -691
+        </td>
+        <td>23.9 億</td>
+        <td>
+          
+          
+            <span class="tag">矽晶圓</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6526.html">6526</a></td>
+        <td>
+          <a href="../company/6526.html">達發</a>
+          <span class="hl-star" data-tip="達發科技 IC 設計｜網通 SoC、連發科子公司" title="達發科技 IC 設計｜網通 SoC、連發科子公司">★</span>
+          
+          
+        </td>
+        <td>556.00</td>
+        <td class="negative">-8.85%</td>
+        <td class="positive">+10.54%</td>
+        <td class="positive">+15.71%</td>
+        <td class="negative">
+          -136
+        </td>
+        <td class="positive">
+          +31
+        </td>
+        <td>22.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5351.html">5351</a></td>
+        <td>
+          <a href="../company/5351.html">鈺創</a>
+          <span class="hl-star" data-tip="車用 IC 前十｜鉅創車用 LCD Driver + MCU" title="車用 IC 前十｜鉅創車用 LCD Driver + MCU">★</span>
+          
+          
+        </td>
+        <td>65.90</td>
+        <td class="negative">-7.96%</td>
+        <td class="negative">-0.90%</td>
+        <td class="negative">-5.86%</td>
+        <td class="negative">
+          -10559
+        </td>
+        <td class="positive">
+          +10
+        </td>
+        <td>22.0 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3036.html">3036</a></td>
+        <td>
+          <a href="../company/3036.html">文曄</a>
+          
+          
+          
+        </td>
+        <td>206.00</td>
+        <td class="negative">-3.51%</td>
+        <td class="negative">-12.34%</td>
+        <td class="negative">-11.21%</td>
+        <td class="positive">
+          +841
+        </td>
+        <td class="positive">
+          +44
+        </td>
+        <td>20.7 億</td>
+        <td>
+          
+          
+            <span class="tag">電子通路</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/7751.html">7751</a></td>
+        <td>
+          <a href="../company/7751.html">竑騰</a>
+          <span class="hl-star" data-tip="IC 設計 前十｜竑騰 MCU / Timing IC" title="IC 設計 前十｜竑騰 MCU / Timing IC">★</span>
+          
+          
+        </td>
+        <td>2195.00</td>
+        <td class="positive">+5.78%</td>
+        <td class="positive">+18.97%</td>
+        <td class="positive">+44.88%</td>
+        <td class="negative">
+          -67
+        </td>
+        <td class="positive">
+          +31
+        </td>
+        <td>15.5 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3135.html">3135</a></td>
+        <td>
+          <a href="../company/3135.html">凌航</a>
+          
+          
+          
+        </td>
+        <td>129.50</td>
+        <td class="negative">-2.63%</td>
+        <td class="positive">+6.15%</td>
+        <td class="negative">-1.89%</td>
+        <td class="positive">
+          +530
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>13.3 億</td>
+        <td>
+          
+          
+            <span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6291.html">6291</a></td>
+        <td>
+          <a href="../company/6291.html">沛亨</a>
+          
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>455.50</td>
+        <td class="negative">-9.98%</td>
+        <td class="positive">+9.89%</td>
+        <td class="positive">+34.56%</td>
+        <td class="negative">
+          -70
+        </td>
+        <td class="positive">
+          +43
+        </td>
+        <td>12.8 億</td>
+        <td>
+          
+          
+            <span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6533.html">6533</a></td>
+        <td>
+          <a href="../company/6533.html">晶心科</a>
+          
+          
+          
+        </td>
+        <td>236.50</td>
+        <td class="negative">-6.71%</td>
+        <td class="positive">+8.24%</td>
+        <td class="positive">+26.47%</td>
+        <td class="negative">
+          -142
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>12.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8016.html">8016</a></td>
+        <td>
+          <a href="../company/8016.html">矽創</a>
+          <span class="hl-star" data-tip="驅動 IC 前五｜矽創電子 LCD Driver + Timing" title="驅動 IC 前五｜矽創電子 LCD Driver + Timing">★</span>
+          
+          
+        </td>
+        <td>224.50</td>
+        <td class="negative">-6.65%</td>
+        <td class="positive">+6.65%</td>
+        <td class="positive">+15.42%</td>
+        <td class="negative">
+          -9
+        </td>
+        <td class="negative">
+          -4
+        </td>
+        <td>12.0 億</td>
+        <td>
+          
+          
+            <span class="tag">晶圓代工成熟製程</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4961.html">4961</a></td>
+        <td>
+          <a href="../company/4961.html">天鈺</a>
+          
+          
+          
+        </td>
+        <td>162.00</td>
+        <td class="negative">-4.14%</td>
+        <td class="positive">+3.85%</td>
+        <td class="positive">+14.89%</td>
+        <td class="negative">
+          -479
+        </td>
+        <td class="negative">
+          -1
+        </td>
+        <td>10.9 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6104.html">6104</a></td>
+        <td>
+          <a href="../company/6104.html">創惟</a>
+          <span class="hl-star" data-tip="USB IC 前五｜創惟 USB 控制 IC" title="USB IC 前五｜創惟 USB 控制 IC">★</span>
+          
+          
+        </td>
+        <td>98.00</td>
+        <td class="negative">-5.77%</td>
+        <td class="positive">+5.60%</td>
+        <td class="positive">+5.38%</td>
+        <td class="negative">
+          -1130
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>10.1 億</td>
+        <td>
+          
+          
+            <span class="tag">石英元件</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3228.html">3228</a></td>
+        <td>
+          <a href="../company/3228.html">金麗科</a>
+          
+           <span class="badge badge-red">漲停</span>
+          
+        </td>
+        <td>201.50</td>
+        <td class="positive">+9.81%</td>
+        <td class="positive">+49.81%</td>
+        <td class="positive">+62.50%</td>
+        <td class="positive">
+          +478
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>9.8 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4968.html">4968</a></td>
+        <td>
+          <a href="../company/4968.html">立積</a>
+          
+          
+          
+        </td>
+        <td>123.00</td>
+        <td class="negative">-5.38%</td>
+        <td class="positive">+11.31%</td>
+        <td class="positive">+17.14%</td>
+        <td class="negative">
+          -612
+        </td>
+        <td class="positive">
+          +3
+        </td>
+        <td>9.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6202.html">6202</a></td>
+        <td>
+          <a href="../company/6202.html">盛群</a>
+          <span class="hl-star" data-tip="MCU 前五｜盛群 Arm MCU + 觸控 IC" title="MCU 前五｜盛群 Arm MCU + 觸控 IC">★</span>
+          
+          
+        </td>
+        <td>55.40</td>
+        <td class="negative">-8.43%</td>
+        <td class="positive">+3.55%</td>
+        <td class="positive">+9.27%</td>
+        <td class="positive">
+          +852
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>9.1 億</td>
+        <td>
+          
+          
+            <span class="tag">晶圓代工成熟製程</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2458.html">2458</a></td>
+        <td>
+          <a href="../company/2458.html">義隆</a>
+          <span class="hl-star" data-tip="觸控 IC 全球 #2｜義隆 觸控板 + 生物辨識" title="觸控 IC 全球 #2｜義隆 觸控板 + 生物辨識">★</span>
+          
+          
+        </td>
+        <td>136.00</td>
+        <td class="negative">-2.86%</td>
+        <td class="negative">-1.81%</td>
+        <td class="positive">+6.25%</td>
+        <td class="positive">
+          +1634
+        </td>
+        <td class="negative">
+          -120
+        </td>
+        <td>7.9 億</td>
+        <td>
+          
+          
+            <span class="tag">AI 智慧醫療</span><span class="tag">功率半導體 IC</span><span class="tag">智慧家庭/Matter</span>
+            
+              <span class="tag tag-more" data-tip="手術機器人/智慧醫療器材" title="手術機器人/智慧醫療器材">+1</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6907.html">6907</a></td>
+        <td>
+          <a href="../company/6907.html">雅特力-KY</a>
+          <span class="hl-star" data-tip="MCU 前十｜雅特力-KY Arm MCU" title="MCU 前十｜雅特力-KY Arm MCU">★</span>
+           <span class="badge badge-red">漲停</span>
+          
+        </td>
+        <td>140.00</td>
+        <td class="positive">+9.80%</td>
+        <td class="negative">-1.41%</td>
+        <td class="positive">+4.48%</td>
+        <td class="positive">
+          +29
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>6.8 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3545.html">3545</a></td>
+        <td>
+          <a href="../company/3545.html">敦泰</a>
+          
+          
+          
+        </td>
+        <td>52.10</td>
+        <td class="negative">-7.30%</td>
+        <td class="positive">+5.36%</td>
+        <td class="positive">+22.73%</td>
+        <td class="negative">
+          -1165
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5.8 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3592.html">3592</a></td>
+        <td>
+          <a href="../company/3592.html">瑞鼎</a>
+          
+          
+          
+        </td>
+        <td>236.50</td>
+        <td class="negative">-7.07%</td>
+        <td class="positive">+1.72%</td>
+        <td class="positive">+12.89%</td>
+        <td class="negative">
+          -134
+        </td>
+        <td class="negative">
+          -2
+        </td>
+        <td>4.9 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6423.html">6423</a></td>
+        <td>
+          <a href="../company/6423.html">億而得</a>
+          
+          
+          
+        </td>
+        <td>125.50</td>
+        <td class="positive">+1.21%</td>
+        <td class="positive">+41.01%</td>
+        <td class="positive">+45.76%</td>
+        <td class="negative">
+          -75
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.7 億</td>
+        <td>
+          
+          
+            <span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5236.html">5236</a></td>
+        <td>
+          <a href="../company/5236.html">凌陽創新</a>
+          
+          
+          
+        </td>
+        <td>168.00</td>
+        <td class="positive">+0.30%</td>
+        <td class="positive">+15.07%</td>
+        <td class="positive">+32.28%</td>
+        <td class="negative">
+          -232
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.7 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5471.html">5471</a></td>
+        <td>
+          <a href="../company/5471.html">松翰</a>
+          
+          
+          
+        </td>
+        <td>45.90</td>
+        <td class="positive">+1.32%</td>
+        <td class="positive">+10.34%</td>
+        <td class="positive">+13.90%</td>
+        <td class="negative">
+          -1552
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.5 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6435.html">6435</a></td>
+        <td>
+          <a href="../company/6435.html">大中</a>
+          <span class="hl-star" data-tip="功率元件 台灣 #2｜MOSFET 分離元件" title="功率元件 台灣 #2｜MOSFET 分離元件">★</span>
+          
+          
+        </td>
+        <td>176.00</td>
+        <td class="negative">-7.12%</td>
+        <td class="positive">+7.32%</td>
+        <td class="positive">+4.45%</td>
+        <td class="negative">
+          -46
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4.4 億</td>
+        <td>
+          
+          
+            <span class="tag">功率半導體 IC</span><span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5222.html">5222</a></td>
+        <td>
+          <a href="../company/5222.html">全訊</a>
+          
+          
+          
+        </td>
+        <td>142.00</td>
+        <td class="negative">-0.70%</td>
+        <td class="positive">+7.98%</td>
+        <td class="positive">+7.17%</td>
+        <td class="positive">
+          +167
+        </td>
+        <td class="negative">
+          -1
+        </td>
+        <td>3.9 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/2401.html">2401</a></td>
+        <td>
+          <a href="../company/2401.html">凌陽</a>
+          
+          
+          
+        </td>
+        <td>24.75</td>
+        <td class="negative">-3.13%</td>
+        <td class="positive">+9.03%</td>
+        <td class="positive">+21.03%</td>
+        <td class="positive">
+          +3207
+        </td>
+        <td class="positive">
+          +5
+        </td>
+        <td>3.7 億</td>
+        <td>
+          
+          
+            <span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6909.html">6909</a></td>
+        <td>
+          <a href="../company/6909.html">創控</a>
+          <span class="hl-star" data-tip="氣體偵測 前三｜創控科技廢氣 / 污染防治" title="氣體偵測 前三｜創控科技廢氣 / 污染防治">★</span>
+          
+           <span class="badge badge-green">跌停</span>
+        </td>
+        <td>59.70</td>
+        <td class="negative">-9.82%</td>
+        <td class="positive">+1.19%</td>
+        <td class="positive">+36.30%</td>
+        <td class="positive">
+          +228
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3.5 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6138.html">6138</a></td>
+        <td>
+          <a href="../company/6138.html">茂達</a>
+          <span class="hl-star" data-tip="功率 IC 台灣 #1｜MOSFET、電源管理 IC" title="功率 IC 台灣 #1｜MOSFET、電源管理 IC">★</span>
+          
+          
+        </td>
+        <td>239.50</td>
+        <td class="negative">-2.64%</td>
+        <td class="positive">+7.16%</td>
+        <td class="positive">+7.88%</td>
+        <td class="positive">
+          +63
+        </td>
+        <td class="negative">
+          -47
+        </td>
+        <td>3.4 億</td>
+        <td>
+          
+          
+            <span class="tag">功率半導體 IC</span><span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/4952.html">4952</a></td>
+        <td>
+          <a href="../company/4952.html">凌通</a>
+          
+          
+          
+        </td>
+        <td>52.00</td>
+        <td class="negative">-2.80%</td>
+        <td class="positive">+23.22%</td>
+        <td class="positive">+27.76%</td>
+        <td class="negative">
+          -196
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3.2 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3014.html">3014</a></td>
+        <td>
+          <a href="../company/3014.html">聯陽</a>
+          <span class="hl-star" data-tip="驅動 IC 前五｜聯陽 TFT / 觸控 Driver IC" title="驅動 IC 前五｜聯陽 TFT / 觸控 Driver IC">★</span>
+          
+          
+        </td>
+        <td>123.50</td>
+        <td class="negative">-3.89%</td>
+        <td class="positive">+0.82%</td>
+        <td class="positive">+5.56%</td>
+        <td class="negative">
+          -622
+        </td>
+        <td class="negative">
+          -8
+        </td>
+        <td>3.1 億</td>
+        <td>
+          
+          
+            <span class="tag">穿戴/智慧眼鏡</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/8081.html">8081</a></td>
+        <td>
+          <a href="../company/8081.html">致新</a>
+          
+          
+          
+        </td>
+        <td>242.00</td>
+        <td class="negative">-3.59%</td>
+        <td class="positive">+1.89%</td>
+        <td class="positive">+3.86%</td>
+        <td class="negative">
+          -28
+        </td>
+        <td class="negative">
+          -1
+        </td>
+        <td>2.9 億</td>
+        <td>
+          
+          
+            <span class="tag">半導體設備</span><span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3317.html">3317</a></td>
+        <td>
+          <a href="../company/3317.html">尼克森</a>
+          
+          
+          
+        </td>
+        <td>51.40</td>
+        <td class="negative">-6.55%</td>
+        <td class="positive">+0.59%</td>
+        <td class="positive">+16.29%</td>
+        <td class="negative">
+          -319
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          
+            <span class="tag">晶片封測</span><span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3041.html">3041</a></td>
+        <td>
+          <a href="../company/3041.html">揚智</a>
+          
+          
+          
+        </td>
+        <td>23.60</td>
+        <td class="negative">-5.98%</td>
+        <td class="positive">+5.36%</td>
+        <td class="positive">+2.16%</td>
+        <td class="negative">
+          -203
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>9869 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6485.html">6485</a></td>
+        <td>
+          <a href="../company/6485.html">點序</a>
+          
+          
+          
+        </td>
+        <td>77.30</td>
+        <td class="negative">-7.43%</td>
+        <td class="negative">-0.39%</td>
+        <td class="negative">-11.15%</td>
+        <td class="negative">
+          -142
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8830 萬</td>
+        <td>
+          
+          
+            <span class="tag">記憶體</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6732.html">6732</a></td>
+        <td>
+          <a href="../company/6732.html">昇佳電子</a>
+          
+          
+          
+        </td>
+        <td>156.50</td>
+        <td class="negative">-5.15%</td>
+        <td class="positive">+2.96%</td>
+        <td class="positive">+2.96%</td>
+        <td class="negative">
+          -98
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8688 萬</td>
+        <td>
+          
+          
+            <span class="tag">半導體設備</span><span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3556.html">3556</a></td>
+        <td>
+          <a href="../company/3556.html">禾瑞亞</a>
+          
+          
+          
+        </td>
+        <td>53.00</td>
+        <td class="negative">-5.86%</td>
+        <td class="positive">+9.84%</td>
+        <td class="positive">+26.34%</td>
+        <td class="positive">
+          +282
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8344 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6411.html">6411</a></td>
+        <td>
+          <a href="../company/6411.html">晶焱</a>
+          
+          
+          
+        </td>
+        <td>79.40</td>
+        <td class="negative">-4.45%</td>
+        <td class="positive">+2.45%</td>
+        <td class="positive">+5.44%</td>
+        <td class="negative">
+          -79
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>8232 萬</td>
+        <td>
+          
+          
+            <span class="tag">晶片封測</span><span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6799.html">6799</a></td>
+        <td>
+          <a href="../company/6799.html">來頡</a>
+          
+          
+          
+        </td>
+        <td>85.60</td>
+        <td class="negative">-6.04%</td>
+        <td class="positive">+7.94%</td>
+        <td class="positive">+9.18%</td>
+        <td class="positive">
+          +35
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7913 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6243.html">6243</a></td>
+        <td>
+          <a href="../company/6243.html">迅杰</a>
+          
+          
+          
+        </td>
+        <td>34.00</td>
+        <td class="negative">-6.46%</td>
+        <td class="positive">+8.28%</td>
+        <td class="positive">+13.71%</td>
+        <td class="negative">
+          -229
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7804 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6716.html">6716</a></td>
+        <td>
+          <a href="../company/6716.html">應廣</a>
+          <span class="hl-star" data-tip="MCU 前十｜應廣 MCU + PMIC" title="MCU 前十｜應廣 MCU + PMIC">★</span>
+          
+          
+        </td>
+        <td>78.20</td>
+        <td class="negative">-7.46%</td>
+        <td class="positive">+3.03%</td>
+        <td class="positive">+11.71%</td>
+        <td class="negative">
+          -188
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>7600 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6233.html">6233</a></td>
+        <td>
+          <a href="../company/6233.html">旺玖</a>
+          
+          
+          
+        </td>
+        <td>27.50</td>
+        <td class="negative">-5.17%</td>
+        <td class="positive">+3.77%</td>
+        <td class="positive">+2.23%</td>
+        <td class="negative">
+          -309
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>5992 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6494.html">6494</a></td>
+        <td>
+          <a href="../company/6494.html">九齊</a>
+          
+          
+          
+        </td>
+        <td>55.70</td>
+        <td class="negative">-4.46%</td>
+        <td class="positive">+4.31%</td>
+        <td class="positive">+18.64%</td>
+        <td class="negative">
+          -29
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4794 萬</td>
+        <td>
+          
+          
+            <span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5299.html">5299</a></td>
+        <td>
+          <a href="../company/5299.html">杰力</a>
+          
+          
+          
+        </td>
+        <td>84.70</td>
+        <td class="negative">-3.86%</td>
+        <td class="positive">+3.42%</td>
+        <td class="positive">+9.15%</td>
+        <td class="positive">
+          +4
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>4599 萬</td>
+        <td>
+          
+          
+            <span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6129.html">6129</a></td>
+        <td>
+          <a href="../company/6129.html">普誠</a>
+          
+          
+          
+        </td>
+        <td>17.05</td>
+        <td class="negative">-3.40%</td>
+        <td class="positive">+4.60%</td>
+        <td class="positive">+10.00%</td>
+        <td class="positive">
+          +18
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>3059 萬</td>
+        <td>
+          
+          
+            <span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3527.html">3527</a></td>
+        <td>
+          <a href="../company/3527.html">聚積</a>
+          
+          
+          
+        </td>
+        <td>60.50</td>
+        <td class="negative">-3.04%</td>
+        <td class="positive">+5.95%</td>
+        <td class="positive">+17.02%</td>
+        <td class="negative">
+          -40
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>2417 萬</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3150.html">3150</a></td>
+        <td>
+          <a href="../company/3150.html">鈺寶-創</a>
+          
+          
+          
+        </td>
+        <td>21.55</td>
+        <td class="negative">-2.49%</td>
+        <td class="positive">+11.08%</td>
+        <td class="positive">+22.44%</td>
+        <td class="negative">
+          -41
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1751 萬</td>
+        <td>
+          
+          
+            <span class="tag">半導體/晶片代工次族</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3438.html">3438</a></td>
+        <td>
+          <a href="../company/3438.html">類比科</a>
+          
+          
+          
+        </td>
+        <td>47.60</td>
+        <td class="negative">-5.93%</td>
+        <td class="positive">+0.53%</td>
+        <td class="positive">+5.31%</td>
+        <td class="positive">
+          +53
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1225 萬</td>
+        <td>
+          
+          
+            <span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/6708.html">6708</a></td>
+        <td>
+          <a href="../company/6708.html">天擎</a>
+          
+          
+          
+        </td>
+        <td>43.50</td>
+        <td class="positive">+0.69%</td>
+        <td class="positive">+12.99%</td>
+        <td class="positive">+13.28%</td>
+        <td class="negative">
+          -12
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>649 萬</td>
+        <td>
+          
+          
+            <span class="tag">OLED/Micro LED</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/3686.html">3686</a></td>
+        <td>
+          <a href="../company/3686.html">達能</a>
+          
+          
+          
+        </td>
+        <td>18.00</td>
+        <td class="positive">+0.56%</td>
+        <td class="positive">+1.69%</td>
+        <td class="negative">-1.64%</td>
+        <td class="negative">
+          -174
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>566 萬</td>
+        <td>
+          
+          
+            <span class="tag">記憶體</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5468.html">5468</a></td>
+        <td>
+          <a href="../company/5468.html">凱鈺</a>
+          
+          
+          
+        </td>
+        <td>18.00</td>
+        <td class="negative">-2.17%</td>
+        <td class="negative">-1.91%</td>
+        <td class="positive">+0.84%</td>
+        <td class="negative">
+          -8
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>225 萬</td>
+        <td>
+          
+          
+            <span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr>
+        <td><a href="../company/5487.html">5487</a></td>
+        <td>
+          <a href="../company/5487.html">通泰</a>
+          
+          
+          
+        </td>
+        <td>28.60</td>
+        <td class="negative">-1.04%</td>
+        <td class="negative">-1.55%</td>
+        <td class="positive">+2.88%</td>
+        <td class="negative">
+          -3
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>78 萬</td>
+        <td>
+          
+          
+            <span class="tag">半導體類比IC</span>
+            
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>
