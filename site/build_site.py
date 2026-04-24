@@ -1,5 +1,5 @@
 """
-台股 AI 產業寶 - 網站建置主腳本
+族群寶 - 網站建置主腳本
 
 用法：
   python site/build_site.py                       # 產生完整站點到 site/dist/
@@ -876,7 +876,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     )
     (DIST_DIR / "index.html").write_text(index_html, encoding="utf-8")
 
-    # 今日漲停分析（用產業寶原生樣式渲染 enriched JSON）
+    # 今日漲停分析（用族群寶原生樣式渲染 enriched JSON）
     if has_limit_up:
         # 分族群分組：依 groupOrder 排序（不在 groupOrder 的放最後）
         stocks = limit_up_data.get("stocks", [])
@@ -1160,7 +1160,7 @@ def main():
     args = parser.parse_args()
 
     print("═" * 60)
-    print("  台股 AI 產業寶 - 網站建置")
+    print("  族群寶 - 網站建置")
     print("═" * 60)
 
     DIST_DIR.mkdir(parents=True, exist_ok=True)
