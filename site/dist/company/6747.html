@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>6747 (6747) · 台股 AI 產業寶</title>
+<title>6747 (6747) · 台股產業寶</title>
 <meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,8 +26,9 @@
     <nav class="primary-nav">
       <a href="../index.html" class="">首頁</a>
       <a href="../today.html" class="">今日焦點</a>
-      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../topics.html" class="">題材列表</a>
       <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../database.html" class="active">公司資料庫</a>
       <a href="../ai.html" class="">市場觀察</a>
     </nav>
 
@@ -42,7 +43,7 @@
 <main class="site-main">
   
 <nav class="breadcrumb">
-  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <a href="../index.html">首頁</a> › <a href="../database.html">公司資料庫</a> ›
   <span>6747 (6747)</span>
 </nav>
 
@@ -50,7 +51,7 @@
   <div class="topic-hero-inner">
     <div class="category-tag">個股</div>
     <h1>6747 <small class="muted">6747</small></h1>
-    <p class="topic-en"></p>
+    
     <div class="topic-kpis">
       <span class="kpi"><em>收盤</em><strong>—</strong></span>
       <span class="kpi"><em>今日</em><strong class="">—</strong></span>
@@ -60,6 +61,15 @@
     </div>
   </div>
 </section>
+
+
+
+
+<section class="panel">
+  <div class="panel-header"><h2>主要經營業務</h2></div>
+  <div class="business-body">隱形眼鏡製造隱形眼鏡護理產品批發</div>
+</section>
+
 
 <section class="panel">
   <div class="panel-header">
@@ -79,15 +89,12 @@
       if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
       const el = document.getElementById('price_chart_6747');
       const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
-      const upColor = '#ef4444';   // 台股紅漲
-      const downColor = '#10b981'; // 台股綠跌
+      const upColor = '#ef4444';
+      const downColor = '#10b981';
       chart.setOption({
         backgroundColor: 'transparent',
         animation: false,
-        legend: {
-          data: ['K線','MA20','MA60'],
-          top: 0, textStyle: { color: '#9ca3af' }
-        },
+        legend: { data: ['K線','MA20','MA60'], top: 0, textStyle: { color: '#9ca3af' } },
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'cross' },
@@ -117,64 +124,22 @@
           { left: 50, right: 16, top: '75%', height: '18%' }
         ],
         xAxis: [
-          {
-            type: 'category', data: raw.dates,
-            axisLine: { lineStyle: { color: '#374151' } },
-            axisLabel: { color: '#9ca3af' },
-            splitLine: { show: false },
-            boundaryGap: true,
-          },
-          {
-            type: 'category', gridIndex: 1, data: raw.dates,
-            axisLine: { lineStyle: { color: '#374151' } },
-            axisLabel: { show: false }, axisTick: { show: false }
-          }
+          { type: 'category', data: raw.dates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af' }, splitLine: { show: false }, boundaryGap: true },
+          { type: 'category', gridIndex: 1, data: raw.dates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { show: false }, axisTick: { show: false } }
         ],
         yAxis: [
-          {
-            scale: true,
-            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
-            axisLabel: { color: '#9ca3af' }
-          },
-          {
-            gridIndex: 1, scale: true, splitNumber: 2,
-            splitLine: { show: false },
-            axisLabel: { color: '#9ca3af',
-              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
-            }
-          }
+          { scale: true, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }, axisLabel: { color: '#9ca3af' } },
+          { gridIndex: 1, scale: true, splitNumber: 2, splitLine: { show: false }, axisLabel: { color: '#9ca3af', formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v } }
         ],
         dataZoom: [
           { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
-          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
-            borderColor: '#374151',
-            handleStyle: { color: '#ff7847' },
-            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
-            fillerColor: 'rgba(255,120,71,0.15)',
-            textStyle: { color: '#9ca3af' }
-          }
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18, borderColor: '#374151', handleStyle: { color: '#ff7847' }, dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } }, fillerColor: 'rgba(255,120,71,0.15)', textStyle: { color: '#9ca3af' } }
         ],
         series: [
-          {
-            name: 'K線', type: 'candlestick', data: raw.ohlc,
-            itemStyle: {
-              color: upColor, color0: downColor,
-              borderColor: upColor, borderColor0: downColor
-            }
-          },
-          {
-            name: 'MA20', type: 'line', data: raw.ma20,
-            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
-            symbol: 'none'
-          },
-          {
-            name: 'MA60', type: 'line', data: raw.ma60,
-            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
-            symbol: 'none'
-          },
-          {
-            name: '成交量', type: 'bar',
-            xAxisIndex: 1, yAxisIndex: 1,
+          { name: 'K線', type: 'candlestick', data: raw.ohlc, itemStyle: { color: upColor, color0: downColor, borderColor: upColor, borderColor0: downColor } },
+          { name: 'MA20', type: 'line', data: raw.ma20, smooth: true, lineStyle: { color: '#ff7847', width: 1 }, symbol: 'none' },
+          { name: 'MA60', type: 'line', data: raw.ma60, smooth: true, lineStyle: { color: '#3b82f6', width: 1 }, symbol: 'none' },
+          { name: '成交量', type: 'bar', xAxisIndex: 1, yAxisIndex: 1,
             data: raw.volume.map((v, i) => {
               const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
               return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
@@ -190,6 +155,192 @@
 </section>
 
 
+<section class="panel">
+  <div class="panel-header">
+    <h2>月營收 · 近 19 個月</h2>
+    <span class="muted">單位：百萬元 · 折線為年增率 YoY %</span>
+  </div>
+  <div id="rev_chart_6747" style="height:340px; width:100%; padding:8px;"></div>
+  <script>
+  (function(){
+    const raw = [{"ym": "2024-05", "rev": 61.0, "yoy": 18.72}, {"ym": "2024-06", "rev": 59.0, "yoy": 3.32}, {"ym": "2024-07", "rev": 46.0, "yoy": -4.09}, {"ym": "2024-08", "rev": 73.0, "yoy": -4.12}, {"ym": "2024-09", "rev": 90.0, "yoy": -2.98}, {"ym": "2024-10", "rev": 67.0, "yoy": 1.07}, {"ym": "2024-11", "rev": 62.0, "yoy": 5.45}, {"ym": "2024-12", "rev": 56.0, "yoy": 9.47}, {"ym": "2025-01", "rev": 62.0, "yoy": 25.87}, {"ym": "2025-02", "rev": 52.0, "yoy": -4.5}, {"ym": "2025-03", "rev": 86.0, "yoy": 29.3}, {"ym": "2025-04", "rev": 69.0, "yoy": -1.25}, {"ym": "2025-05", "rev": 62.0, "yoy": 0.93}, {"ym": "2025-06", "rev": 51.0, "yoy": -13.35}, {"ym": "2025-07", "rev": 49.0, "yoy": 4.81}, {"ym": "2025-08", "rev": 69.0, "yoy": -5.92}, {"ym": "2025-09", "rev": 82.0, "yoy": -8.42}, {"ym": "2025-10", "rev": 66.0, "yoy": -0.97}, {"ym": "2025-11", "rev": 66.0, "yoy": 6.38}];
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const el = document.getElementById('rev_chart_6747');
+      const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
+      chart.setOption({
+        backgroundColor: 'transparent',
+        animation: false,
+        legend: { data: ['月營收(百萬)', 'YoY %'], top: 0, textStyle: { color: '#9ca3af' } },
+        grid: { left: 60, right: 60, top: 36, bottom: 50 },
+        tooltip: { trigger: 'axis', backgroundColor: '#1f2937', borderColor: '#374151', textStyle: { color: '#e5e7eb' } },
+        xAxis: { type: 'category', data: raw.map(r => r.ym), axisLabel: { color: '#9ca3af', rotate: 45 }, axisLine: { lineStyle: { color: '#374151' } } },
+        yAxis: [
+          { type: 'value', name: '百萬', nameTextStyle: { color: '#9ca3af' }, axisLabel: { color: '#9ca3af', formatter: (v) => v >= 1000 ? (v/1000).toFixed(0)+'K' : v }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } } },
+          { type: 'value', name: 'YoY %', nameTextStyle: { color: '#9ca3af' }, axisLabel: { color: '#9ca3af', formatter: '{value}%' }, splitLine: { show: false } }
+        ],
+        series: [
+          { name: '月營收(百萬)', type: 'bar', data: raw.map(r => Math.round(r.rev/1000)), itemStyle: { color: '#ff7847' } },
+          { name: 'YoY %', type: 'line', yAxisIndex: 1, data: raw.map(r => r.yoy), smooth: true, lineStyle: { color: '#3b82f6', width: 2 }, symbol: 'circle', symbolSize: 5,
+            markLine: { silent: true, symbol: 'none', data: [{ yAxis: 0, lineStyle: { color: '#6b7280', type: 'dashed' } }] }
+          }
+        ]
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+
+
+<section class="panel">
+  <div class="panel-header"><h2>季報指標 · 近 8 季</h2><span class="muted">資料：FinLab 財務統計</span></div>
+  <table class="table compact">
+    <thead><tr><th>季別</th><th>營收(百萬)</th><th>EPS(元)</th><th>毛利率</th><th>營益率</th><th>淨利率</th><th>ROE</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td>2025-Q4</td>
+        <td>—</td>
+        <td class="">—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td class="">—</td>
+      </tr>
+      
+      <tr>
+        <td>2025-Q3</td>
+        <td>217</td>
+        <td class="positive">2.15</td>
+        <td>68.7%</td>
+        <td>25.1%</td>
+        <td>26.2%</td>
+        <td class="positive">4.7%</td>
+      </tr>
+      
+      <tr>
+        <td>2025-Q2</td>
+        <td>162</td>
+        <td class="negative">-1.65</td>
+        <td>57.0%</td>
+        <td>-1.7%</td>
+        <td>-28.0%</td>
+        <td class="negative">-3.3%</td>
+      </tr>
+      
+      <tr>
+        <td>2025-Q1</td>
+        <td>206</td>
+        <td class="positive">1.43</td>
+        <td>69.3%</td>
+        <td>16.6%</td>
+        <td>18.7%</td>
+        <td class="positive">2.7%</td>
+      </tr>
+      
+      <tr>
+        <td>2024-Q4</td>
+        <td>180</td>
+        <td class="positive">0.60</td>
+        <td>62.7%</td>
+        <td>16.6%</td>
+        <td>8.7%</td>
+        <td class="positive">1.1%</td>
+      </tr>
+      
+      <tr>
+        <td>2024-Q3</td>
+        <td>229</td>
+        <td class="positive">1.88</td>
+        <td>68.8%</td>
+        <td>29.0%</td>
+        <td>22.0%</td>
+        <td class="positive">3.8%</td>
+      </tr>
+      
+      <tr>
+        <td>2024-Q2</td>
+        <td>167</td>
+        <td class="positive">1.20</td>
+        <td>64.3%</td>
+        <td>13.1%</td>
+        <td>19.3%</td>
+        <td class="positive">2.5%</td>
+      </tr>
+      
+      <tr>
+        <td>2024-Q1</td>
+        <td>190</td>
+        <td class="positive">2.05</td>
+        <td>65.9%</td>
+        <td>20.3%</td>
+        <td>25.8%</td>
+        <td class="positive">3.8%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+
+
+<section class="panel">
+  <div class="panel-header"><h2>股利政策 · 近 6 年</h2></div>
+  <table class="table compact">
+    <thead><tr><th>所屬期間</th><th>現金股利 (元/股)</th><th>股票股利 (元/股)</th><th>除息交易日</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td>2024</td>
+        <td class="positive">9.19</td>
+        <td>—</td>
+        <td>2025-04-17</td>
+      </tr>
+      
+      <tr>
+        <td>2023</td>
+        <td class="positive">5.37</td>
+        <td>1.25</td>
+        <td>2024-07-18</td>
+      </tr>
+      
+      <tr>
+        <td>2022</td>
+        <td class="positive">9.10</td>
+        <td>—</td>
+        <td>2023-04-13</td>
+      </tr>
+      
+      <tr>
+        <td>2021</td>
+        <td class="positive">8.06</td>
+        <td>—</td>
+        <td>2022-07-04</td>
+      </tr>
+      
+      <tr>
+        <td>2020</td>
+        <td class="positive">4.96</td>
+        <td>—</td>
+        <td>2021-08-03</td>
+      </tr>
+      
+      <tr>
+        <td>2019</td>
+        <td class="positive">4.54</td>
+        <td>—</td>
+        <td>2020-07-03</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+
+
 
 
 <section class="panel">
@@ -197,7 +348,7 @@
     <h2>所屬題材 <span class="muted">(0)</span></h2>
   </div>
   
-  <p class="muted">此股票尚未被任何題材收錄。</p>
+  <p class="muted" style="padding:16px 22px;">此股票尚未被任何題材收錄。</p>
   
 </section>
 
@@ -216,7 +367,7 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
-    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+    <span>最後更新：2026-04-24 · 建置時間：2026-04-24 17:29</span>
   </div>
 </footer>
 

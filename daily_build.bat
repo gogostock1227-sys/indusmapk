@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 > nul
 REM ===========================================================
 REM  Taiwan Industry Map - Daily Auto Rebuild
 REM
@@ -12,7 +13,9 @@ REM  Suggested cron: daily 14:30 (30min after market close)
 REM ===========================================================
 setlocal enabledelayedexpansion
 
-set "PROJECT_DIR=C:\Users\user\Desktop\fin ai\族群統計網頁"
+REM %~dp0 = directory of this bat (with trailing backslash) - codepage-safe
+set "PROJECT_DIR=%~dp0"
+if "%PROJECT_DIR:~-1%"=="\" set "PROJECT_DIR=%PROJECT_DIR:~0,-1%"
 set "PYTHON=C:\Users\user\AppData\Local\Programs\Python\Python313\python.exe"
 set "BUILD_SCRIPT=site\build_site.py"
 

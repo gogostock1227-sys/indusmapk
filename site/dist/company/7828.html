@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>創新服務 (7828) · 台股 AI 產業寶</title>
+<title>創新服務 (7828) · 台股產業寶</title>
 <meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,8 +26,9 @@
     <nav class="primary-nav">
       <a href="../index.html" class="">首頁</a>
       <a href="../today.html" class="">今日焦點</a>
-      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../topics.html" class="">題材列表</a>
       <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../database.html" class="active">公司資料庫</a>
       <a href="../ai.html" class="">市場觀察</a>
     </nav>
 
@@ -42,24 +43,52 @@
 <main class="site-main">
   
 <nav class="breadcrumb">
-  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <a href="../index.html">首頁</a> › <a href="../database.html">公司資料庫</a> ›
   <span>創新服務 (7828)</span>
 </nav>
 
 <section class="topic-hero" style="--accent:#ff7847;">
   <div class="topic-hero-inner">
-    <div class="category-tag">半導體業</div>
+    <div class="category-tag">半導體業 · 上櫃</div>
     <h1>創新服務 <small class="muted">7828</small></h1>
-    <p class="topic-en">上櫃</p>
+    <p class="topic-en">INNOSTAR</p>
     <div class="topic-kpis">
-      <span class="kpi"><em>收盤</em><strong>1380.00</strong></span>
-      <span class="kpi"><em>今日</em><strong class="negative">-11.54%</strong></span>
+      <span class="kpi"><em>收盤</em><strong>1260.00</strong></span>
+      <span class="kpi"><em>今日</em><strong class="negative">-8.70%</strong></span>
       <span class="kpi"><em>5日</em><strong class="">—</strong></span>
       <span class="kpi"><em>20日</em><strong class="">—</strong></span>
-      <span class="kpi"><em>成交金額</em><strong>17.7 億</strong></span>
+      <span class="kpi"><em>成交金額</em><strong>12.7 億</strong></span>
     </div>
   </div>
 </section>
+
+
+<section class="panel">
+  <div class="panel-header"><h2>公司資料</h2><span class="muted">FinLab · 公開資訊</span></div>
+  <div class="company-info-grid">
+    <div><em>公司全名</em><strong>創新服務股份有限公司</strong></div>
+    <div><em>產業</em><strong>半導體業</strong></div>
+    <div><em>成立日</em><strong>2004-10-20</strong></div>
+    <div><em>上市日</em><strong>nan</strong></div>
+    <div><em>董事長</em><strong>吳智孟</strong></div>
+    <div><em>總經理</em><strong>吳智孟</strong></div>
+    <div><em>發言人</em><strong>林俊忠 · 業務部副總</strong></div>
+    <div><em>實收資本額</em><strong>4.0 億元</strong></div>
+    <div><em>已發行股數</em><strong>0.4 億股</strong></div>
+    <div><em>董監持股</em><strong>12153599.0 %</strong></div>
+    <div><em>電話</em><strong>04-2680-1023</strong></div>
+    <div class="wide"><em>地址</em><strong>台中市大甲區大安港路116巷10號</strong></div>
+    <div class="wide"><em>網址</em><strong><a href="https://www.inno-stars.com/" target="_blank" rel="noopener">https://www.inno-stars.com/</a></strong></div>
+  </div>
+</section>
+
+
+
+<section class="panel">
+  <div class="panel-header"><h2>主要經營業務</h2></div>
+  <div class="business-body">半導體自動化設備開發、製造及銷售業務</div>
+</section>
+
 
 <section class="panel">
   <div class="panel-header">
@@ -79,15 +108,12 @@
       if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
       const el = document.getElementById('price_chart_7828');
       const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
-      const upColor = '#ef4444';   // 台股紅漲
-      const downColor = '#10b981'; // 台股綠跌
+      const upColor = '#ef4444';
+      const downColor = '#10b981';
       chart.setOption({
         backgroundColor: 'transparent',
         animation: false,
-        legend: {
-          data: ['K線','MA20','MA60'],
-          top: 0, textStyle: { color: '#9ca3af' }
-        },
+        legend: { data: ['K線','MA20','MA60'], top: 0, textStyle: { color: '#9ca3af' } },
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'cross' },
@@ -117,64 +143,22 @@
           { left: 50, right: 16, top: '75%', height: '18%' }
         ],
         xAxis: [
-          {
-            type: 'category', data: raw.dates,
-            axisLine: { lineStyle: { color: '#374151' } },
-            axisLabel: { color: '#9ca3af' },
-            splitLine: { show: false },
-            boundaryGap: true,
-          },
-          {
-            type: 'category', gridIndex: 1, data: raw.dates,
-            axisLine: { lineStyle: { color: '#374151' } },
-            axisLabel: { show: false }, axisTick: { show: false }
-          }
+          { type: 'category', data: raw.dates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af' }, splitLine: { show: false }, boundaryGap: true },
+          { type: 'category', gridIndex: 1, data: raw.dates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { show: false }, axisTick: { show: false } }
         ],
         yAxis: [
-          {
-            scale: true,
-            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
-            axisLabel: { color: '#9ca3af' }
-          },
-          {
-            gridIndex: 1, scale: true, splitNumber: 2,
-            splitLine: { show: false },
-            axisLabel: { color: '#9ca3af',
-              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
-            }
-          }
+          { scale: true, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }, axisLabel: { color: '#9ca3af' } },
+          { gridIndex: 1, scale: true, splitNumber: 2, splitLine: { show: false }, axisLabel: { color: '#9ca3af', formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v } }
         ],
         dataZoom: [
           { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
-          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
-            borderColor: '#374151',
-            handleStyle: { color: '#ff7847' },
-            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
-            fillerColor: 'rgba(255,120,71,0.15)',
-            textStyle: { color: '#9ca3af' }
-          }
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18, borderColor: '#374151', handleStyle: { color: '#ff7847' }, dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } }, fillerColor: 'rgba(255,120,71,0.15)', textStyle: { color: '#9ca3af' } }
         ],
         series: [
-          {
-            name: 'K線', type: 'candlestick', data: raw.ohlc,
-            itemStyle: {
-              color: upColor, color0: downColor,
-              borderColor: upColor, borderColor0: downColor
-            }
-          },
-          {
-            name: 'MA20', type: 'line', data: raw.ma20,
-            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
-            symbol: 'none'
-          },
-          {
-            name: 'MA60', type: 'line', data: raw.ma60,
-            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
-            symbol: 'none'
-          },
-          {
-            name: '成交量', type: 'bar',
-            xAxisIndex: 1, yAxisIndex: 1,
+          { name: 'K線', type: 'candlestick', data: raw.ohlc, itemStyle: { color: upColor, color0: downColor, borderColor: upColor, borderColor0: downColor } },
+          { name: 'MA20', type: 'line', data: raw.ma20, smooth: true, lineStyle: { color: '#ff7847', width: 1 }, symbol: 'none' },
+          { name: 'MA60', type: 'line', data: raw.ma60, smooth: true, lineStyle: { color: '#3b82f6', width: 1 }, symbol: 'none' },
+          { name: '成交量', type: 'bar', xAxisIndex: 1, yAxisIndex: 1,
             data: raw.volume.map((v, i) => {
               const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
               return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
@@ -193,11 +177,107 @@
 
 
 <section class="panel">
+  <div class="panel-header"><h2>季報指標 · 近 8 季</h2><span class="muted">資料：FinLab 財務統計</span></div>
+  <table class="table compact">
+    <thead><tr><th>季別</th><th>營收(百萬)</th><th>EPS(元)</th><th>毛利率</th><th>營益率</th><th>淨利率</th><th>ROE</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td>2025-Q4</td>
+        <td>394</td>
+        <td class="positive">4.91</td>
+        <td>79.4%</td>
+        <td>51.1%</td>
+        <td>44.9%</td>
+        <td class="positive">16.2%</td>
+      </tr>
+      
+      <tr>
+        <td>2025-Q3</td>
+        <td>157</td>
+        <td class="positive">1.37</td>
+        <td>79.4%</td>
+        <td>34.6%</td>
+        <td>31.7%</td>
+        <td class="positive">5.1%</td>
+      </tr>
+      
+      <tr>
+        <td>2025-Q2</td>
+        <td>165</td>
+        <td class="positive">0.03</td>
+        <td>65.8%</td>
+        <td>13.6%</td>
+        <td>0.6%</td>
+        <td class="positive">0.1%</td>
+      </tr>
+      
+      <tr>
+        <td>2025-Q1</td>
+        <td>—</td>
+        <td class="">—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td class="">—</td>
+      </tr>
+      
+      <tr>
+        <td>2024-Q4</td>
+        <td>406</td>
+        <td class="positive">5.25</td>
+        <td>80.3%</td>
+        <td>37.1%</td>
+        <td>36.9%</td>
+        <td class="positive">23.9%</td>
+      </tr>
+      
+      <tr>
+        <td>2024-Q3</td>
+        <td>—</td>
+        <td class="">—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td class="">—</td>
+      </tr>
+      
+      <tr>
+        <td>2024-Q2</td>
+        <td>—</td>
+        <td class="">—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td class="">—</td>
+      </tr>
+      
+      <tr>
+        <td>2024-Q1</td>
+        <td>—</td>
+        <td class="">—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td class="">—</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+
+
+
+
+
+
+<section class="panel">
   <div class="panel-header">
     <h2>所屬題材 <span class="muted">(0)</span></h2>
   </div>
   
-  <p class="muted">此股票尚未被任何題材收錄。</p>
+  <p class="muted" style="padding:16px 22px;">此股票尚未被任何題材收錄。</p>
   
 </section>
 
@@ -216,7 +296,7 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
-    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+    <span>最後更新：2026-04-24 · 建置時間：2026-04-24 17:29</span>
   </div>
 </footer>
 

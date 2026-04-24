@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>2326 (2326) · 台股 AI 產業寶</title>
+<title>2326 (2326) · 台股產業寶</title>
 <meta name="description" content="台股產業寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,8 +26,9 @@
     <nav class="primary-nav">
       <a href="../index.html" class="">首頁</a>
       <a href="../today.html" class="">今日焦點</a>
-      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../topics.html" class="">題材列表</a>
       <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../database.html" class="active">公司資料庫</a>
       <a href="../ai.html" class="">市場觀察</a>
     </nav>
 
@@ -42,7 +43,7 @@
 <main class="site-main">
   
 <nav class="breadcrumb">
-  <a href="../index.html">每日焦點</a> › <a href="../topics.html">題材總覽</a> ›
+  <a href="../index.html">首頁</a> › <a href="../database.html">公司資料庫</a> ›
   <span>2326 (2326)</span>
 </nav>
 
@@ -50,7 +51,7 @@
   <div class="topic-hero-inner">
     <div class="category-tag">個股</div>
     <h1>2326 <small class="muted">2326</small></h1>
-    <p class="topic-en"></p>
+    
     <div class="topic-kpis">
       <span class="kpi"><em>收盤</em><strong>—</strong></span>
       <span class="kpi"><em>今日</em><strong class="">—</strong></span>
@@ -60,6 +61,10 @@
     </div>
   </div>
 </section>
+
+
+
+
 
 <section class="panel">
   <div class="panel-header">
@@ -79,15 +84,12 @@
       if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
       const el = document.getElementById('price_chart_2326');
       const chart = echarts.init(el, 'dark', { renderer: 'canvas' });
-      const upColor = '#ef4444';   // 台股紅漲
-      const downColor = '#10b981'; // 台股綠跌
+      const upColor = '#ef4444';
+      const downColor = '#10b981';
       chart.setOption({
         backgroundColor: 'transparent',
         animation: false,
-        legend: {
-          data: ['K線','MA20','MA60'],
-          top: 0, textStyle: { color: '#9ca3af' }
-        },
+        legend: { data: ['K線','MA20','MA60'], top: 0, textStyle: { color: '#9ca3af' } },
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'cross' },
@@ -117,64 +119,22 @@
           { left: 50, right: 16, top: '75%', height: '18%' }
         ],
         xAxis: [
-          {
-            type: 'category', data: raw.dates,
-            axisLine: { lineStyle: { color: '#374151' } },
-            axisLabel: { color: '#9ca3af' },
-            splitLine: { show: false },
-            boundaryGap: true,
-          },
-          {
-            type: 'category', gridIndex: 1, data: raw.dates,
-            axisLine: { lineStyle: { color: '#374151' } },
-            axisLabel: { show: false }, axisTick: { show: false }
-          }
+          { type: 'category', data: raw.dates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af' }, splitLine: { show: false }, boundaryGap: true },
+          { type: 'category', gridIndex: 1, data: raw.dates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { show: false }, axisTick: { show: false } }
         ],
         yAxis: [
-          {
-            scale: true,
-            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
-            axisLabel: { color: '#9ca3af' }
-          },
-          {
-            gridIndex: 1, scale: true, splitNumber: 2,
-            splitLine: { show: false },
-            axisLabel: { color: '#9ca3af',
-              formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
-            }
-          }
+          { scale: true, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }, axisLabel: { color: '#9ca3af' } },
+          { gridIndex: 1, scale: true, splitNumber: 2, splitLine: { show: false }, axisLabel: { color: '#9ca3af', formatter: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v } }
         ],
         dataZoom: [
           { type: 'inside', xAxisIndex: [0,1], start: 50, end: 100 },
-          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18,
-            borderColor: '#374151',
-            handleStyle: { color: '#ff7847' },
-            dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } },
-            fillerColor: 'rgba(255,120,71,0.15)',
-            textStyle: { color: '#9ca3af' }
-          }
+          { type: 'slider', xAxisIndex: [0,1], top: '96%', height: 18, borderColor: '#374151', handleStyle: { color: '#ff7847' }, dataBackground: { lineStyle: { color: '#374151' }, areaStyle: { color: '#1f2937' } }, fillerColor: 'rgba(255,120,71,0.15)', textStyle: { color: '#9ca3af' } }
         ],
         series: [
-          {
-            name: 'K線', type: 'candlestick', data: raw.ohlc,
-            itemStyle: {
-              color: upColor, color0: downColor,
-              borderColor: upColor, borderColor0: downColor
-            }
-          },
-          {
-            name: 'MA20', type: 'line', data: raw.ma20,
-            smooth: true, lineStyle: { color: '#ff7847', width: 1 },
-            symbol: 'none'
-          },
-          {
-            name: 'MA60', type: 'line', data: raw.ma60,
-            smooth: true, lineStyle: { color: '#3b82f6', width: 1 },
-            symbol: 'none'
-          },
-          {
-            name: '成交量', type: 'bar',
-            xAxisIndex: 1, yAxisIndex: 1,
+          { name: 'K線', type: 'candlestick', data: raw.ohlc, itemStyle: { color: upColor, color0: downColor, borderColor: upColor, borderColor0: downColor } },
+          { name: 'MA20', type: 'line', data: raw.ma20, smooth: true, lineStyle: { color: '#ff7847', width: 1 }, symbol: 'none' },
+          { name: 'MA60', type: 'line', data: raw.ma60, smooth: true, lineStyle: { color: '#3b82f6', width: 1 }, symbol: 'none' },
+          { name: '成交量', type: 'bar', xAxisIndex: 1, yAxisIndex: 1,
             data: raw.volume.map((v, i) => {
               const o = raw.ohlc[i][0], c = raw.ohlc[i][1];
               return { value: [i, v], itemStyle: { color: c >= o ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.6)' } };
@@ -192,12 +152,18 @@
 
 
 
+
+
+
+
+
+
 <section class="panel">
   <div class="panel-header">
     <h2>所屬題材 <span class="muted">(0)</span></h2>
   </div>
   
-  <p class="muted">此股票尚未被任何題材收錄。</p>
+  <p class="muted" style="padding:16px 22px;">此股票尚未被任何題材收錄。</p>
   
 </section>
 
@@ -216,7 +182,7 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <span>© 2026 台股 AI 產業寶 · 資料來源：FinLab · 僅供研究參考，非投資建議</span>
-    <span>最後更新：2026-04-23 · 建置時間：2026-04-24 16:33</span>
+    <span>最後更新：2026-04-24 · 建置時間：2026-04-24 17:29</span>
   </div>
 </footer>
 
