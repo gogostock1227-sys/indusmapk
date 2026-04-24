@@ -176,6 +176,17 @@ def load_extras() -> dict:
     disposal = d.get("disposal") or {}
     hist     = d.get("holders_history") or {}
     levels   = d.get("holder_levels") or []
+    # 清洗 disposal 文字欄位殘留的 markdown link（如 "(./attention.html)"）
+    import re as _re
+    _URL_TAIL = _re.compile(r'\s*\((?:\./|https?://)[^\s)]+\)')
+    _MD_LINK  = _re.compile(r'\[([^\]]+)\]\([^\)]+\)')
+    for _sym, _info in disposal.items():
+        for _k in ("reason", "action", "detail", "name"):
+            _v = _info.get(_k)
+            if isinstance(_v, str) and ('](' in _v or '(./' in _v or '(http' in _v):
+                _v = _MD_LINK.sub(r'\1', _v)
+                _v = _URL_TAIL.sub('', _v)
+                _info[_k] = _re.sub(r'\s+', ' ', _v).strip()
     n_weeks = len({date for by_date in hist.values() for date in by_date.keys()})
     print(f"[extras] 處置股 {len(disposal)} 檔 / 集保分級 {len(hist)} 檔 / 歷史 {n_weeks} 週 / 抓取時間 {d.get('fetched_at','?')}")
     return {"disposal": disposal, "holders_history": hist, "holder_levels": levels}
@@ -1584,11 +1595,42 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     (DIST_DIR / "database.html").write_text(db_html, encoding="utf-8")
 
     # 每檔個股頁：全上市櫃覆蓋（有題材無題材都產頁），加上 FinLab 豐富資料
+    # [FILTER] 過濾 strict 下市：無正式股名 AND 近 20 日完全無成交。ETF / 特別股保留（有股名就活）。
+    amount_df = data.get("amount")
+    delisted = set()
+    for sym in stock_metrics.index:
+        nm = name_map.get(sym)
+        has_name = isinstance(nm, str) and nm.strip() and nm.strip() != sym
+        if has_name:
+            continue  # 有名就保留（ETF 權證特別股不殺）
+        if amount_df is not None and sym in amount_df.columns:
+            recent_amt = amount_df[sym].iloc[-20:].fillna(0).sum()
+            if recent_amt == 0:
+                delisted.add(sym)
+    if delisted:
+        print(f"       ↳ 過濾 {len(delisted)} 檔已下市/停牌")
+        (DIST_DIR / "data").mkdir(exist_ok=True)
+        (DIST_DIR / "data" / "delisted.json").write_text(
+            json.dumps(sorted(delisted), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        # 同步刪除殘留 HTML（避免舊 build 留下的下市股頁仍可被索引）
+        stale = 0
+        for s in delisted:
+            f = DIST_DIR / "company" / f"{s}.html"
+            if f.exists():
+                f.unlink()
+                stale += 1
+        if stale:
+            print(f"       ↳ 清除 {stale} 個殘留 HTML")
+
     company_dir = DIST_DIR / "company"
     company_dir.mkdir(exist_ok=True)
     tpl_company = env.get_template("company.html")
     n_pages = 0
     for sym in stock_metrics.index:
+        if sym in delisted:
+            continue
         row = stock_metrics.loc[sym]
         name_raw = name_map.get(sym)
         name = name_raw if isinstance(name_raw, str) and name_raw.strip() else sym
