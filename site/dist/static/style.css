@@ -107,17 +107,21 @@ a:hover { color: var(--accent); }
 }
 
 .primary-nav {
-  display: flex; gap: 4px;
+  display: flex; gap: 2px;
   justify-self: start;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.primary-nav::-webkit-scrollbar { display: none; }
 .primary-nav a {
-  padding: 9px 16px;
+  padding: 9px 12px;
   border-radius: 8px;
   color: var(--text-soft);
   font-weight: 500;
   transition: all 0.15s;
-  font-size: 15px;
+  font-size: 14.5px;
   position: relative;
+  white-space: nowrap;
 }
 .primary-nav a:hover {
   background: var(--bg-elev);
@@ -131,7 +135,7 @@ a:hover { color: var(--accent); }
 
 .search-box {
   position: relative;
-  min-width: 340px;
+  min-width: 240px;
 }
 .search-box input {
   width: 100%;
@@ -1358,6 +1362,103 @@ a:hover { color: var(--accent); }
   letter-spacing: 0.3px;
 }
 
+/* ─────── COVERAGE（個股深度資料 · 六分頁） ─────── */
+.coverage-panel .panel-header { margin-bottom: 0; }
+.coverage-tabs {
+  display: block;
+}
+.coverage-tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px 12px 0;
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--border-soft);
+}
+.coverage-tab {
+  padding: 12px 18px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.coverage-tab:hover {
+  color: var(--accent);
+  background: rgba(234,88,12,0.05);
+}
+.coverage-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: var(--bg);
+}
+.coverage-tab.empty {
+  color: var(--text-mute);
+  opacity: 0.72;
+}
+.coverage-tab .cov-empty-dot {
+  font-style: normal;
+  margin-left: 2px;
+  opacity: 0.55;
+}
+.coverage-panel-body {
+  display: none;
+  padding: 18px 24px 22px;
+  color: var(--text-soft);
+  font-size: 14.5px;
+  line-height: 1.88;
+  letter-spacing: 0.25px;
+}
+.coverage-panel-body.active { display: block; }
+.coverage-panel-body .coverage-sub {
+  margin: 14px 0 8px;
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.coverage-panel-body p {
+  margin: 0 0 10px;
+}
+.coverage-panel-body ul.coverage-list {
+  margin: 6px 0 10px;
+  padding-left: 22px;
+}
+.coverage-panel-body ul.coverage-list li {
+  margin: 0 0 8px;
+}
+.coverage-panel-body strong {
+  color: var(--text);
+  font-weight: 700;
+}
+.coverage-panel-body .wiki-ref {
+  display: inline-block;
+  padding: 0 6px;
+  margin: 0 1px;
+  border-radius: 4px;
+  background: rgba(234,88,12,0.08);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.95em;
+  border: 1px solid rgba(234,88,12,0.18);
+}
+.coverage-empty {
+  padding: 18px 4px;
+  font-size: 14px;
+  font-style: italic;
+}
+@media (max-width: 760px) {
+  .coverage-tab { padding: 10px 13px; font-size: 14px; }
+  .coverage-panel-body { padding: 14px 18px 18px; font-size: 14px; line-height: 1.8; }
+}
+
 /* ─────── SCROLL TABLE（可滑動資料表）─────── */
 .scroll-table {
   max-height: 460px;
@@ -1816,3 +1917,138 @@ a:hover { color: var(--accent); }
   .holder-thresholds { grid-template-columns: 1fr; }
   .holder-snapshots  { grid-template-columns: 1fr; }
 }
+
+
+/* ─────── RANKINGS PAGE ─────── */
+.rank-no {
+  color: var(--text-mute);
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  width: 40px;
+}
+.rank-tab-body > .grid-2col:first-child { margin-top: 4px; }
+
+/* ─────── COMPARE PAGE ─────── */
+.compare-toolbar {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  padding: 14px 18px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+}
+.compare-pick {
+  position: relative;
+  display: flex; align-items: center; gap: 8px;
+  flex: 1 1 320px;
+}
+.compare-pick label { color: var(--text-mute); font-size: 13px; white-space: nowrap; }
+.compare-pick input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+.compare-pick input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.compare-pick .search-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 64px; right: 0;
+  max-height: 360px; overflow-y: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  z-index: 20;
+}
+.compare-selected {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  flex: 2 1 480px;
+}
+.cmp-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border: 1.5px solid;
+  border-radius: 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.85);
+}
+.cmp-chip-x {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+.cmp-chip-x:hover { color: var(--red); }
+
+
+/* ─────── AI SUMMARY PANEL（題材 AI 分析）─────── */
+.ai-summary-panel {
+  border-left: 3px solid var(--accent-2);
+  background: linear-gradient(180deg, var(--accent-2-soft) 0%, var(--bg) 40%);
+}
+.ai-summary-body {
+  padding: 18px 24px 22px;
+}
+.ai-summary-text {
+  margin: 0 0 20px;
+  font-size: 15.5px;
+  line-height: 1.9;
+  color: var(--text-soft);
+  letter-spacing: 0.2px;
+}
+.ai-summary-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-soft);
+}
+.ai-summary-col h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--accent-2-dark);
+  text-transform: uppercase;
+}
+.ai-summary-col ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ai-summary-col li {
+  padding: 4px 0 4px 14px;
+  font-size: 13.5px;
+  color: var(--text-soft);
+  line-height: 1.65;
+  position: relative;
+}
+.ai-summary-col li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent-2);
+  font-size: 10px;
+}
+@media (max-width: 720px) {
+  .ai-summary-meta { grid-template-columns: 1fr; gap: 12px; }
+}
+
+/* ─────── RANKINGS grid：左右表獨立高度 ─────── */
+.rank-tab-body .grid-2col {
+  align-items: start;
+}
+.rank-tab-body .panel { height: auto; }
+

@@ -25,6 +25,38 @@
   </div>
 </section>
 
+{% if ai_summary %}
+<section class="panel ai-summary-panel">
+  <div class="panel-header">
+    <h2>AI 產業分析</h2>
+    <span class="muted">深度解析 · 驅動因子與風險</span>
+  </div>
+  <div class="ai-summary-body">
+    <p class="ai-summary-text">{{ ai_summary.analysis }}</p>
+    <div class="ai-summary-meta">
+      {% if ai_summary.key_drivers %}
+      <div class="ai-summary-col">
+        <h4>成長驅動</h4>
+        <ul>{% for d in ai_summary.key_drivers %}<li>{{ d }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+      {% if ai_summary.risks %}
+      <div class="ai-summary-col">
+        <h4>主要風險</h4>
+        <ul>{% for r in ai_summary.risks %}<li>{{ r }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+      {% if ai_summary.leaders %}
+      <div class="ai-summary-col">
+        <h4>代表龍頭</h4>
+        <ul>{% for l in ai_summary.leaders %}<li>{{ l }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <section class="indicator-grid">
   {% for ind in meta.indicators %}
   <div class="indicator-card">

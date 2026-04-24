@@ -1840,6 +1840,53 @@ INDUSTRY_META = {
         "cagr": "—", "market_size": "—",
         "indicators": [{"label":"範圍","value":"多元"},{"label":"屬性","value":"價值股"},{"label":"殖利率","value":"變動大"},{"label":"分析難度","value":"較高"}],
     },
+
+    # ═══════════════════════════════════════════
+    #  新增族群（MyTWC themes 整合 2026-04-24）
+    # ═══════════════════════════════════════════
+    "5G 通訊": {
+        "en": "5G Communications", "category": "光通訊 / 網通", "color": "#0891b2",
+        "desc": "5G 基地台、小基站、天線、RF 元件、網通設備全鏈。台廠受惠 Open RAN、企業專網與海外 Tier-1 電信商擴建，"
+                "中華電/遠傳/台灣大完成 5G 全島覆蓋，下一波成長在 5G-Advanced 與 6G 預研。",
+        "cagr": "12%", "market_size": "80B USD",
+        "indicators": [{"label":"台廠龍頭","value":"中華電 / 智邦 / 台揚"},{"label":"技術趨勢","value":"Open RAN / 5G-A"},{"label":"應用","value":"企業專網 / FWA"},{"label":"滲透率","value":"2027E 50%"}],
+    },
+    "EUV 極紫外光微影": {
+        "en": "EUV Lithography", "category": "封裝 / 測試", "color": "#7c3aed",
+        "desc": "極紫外光微影為 7nm 以下先進製程關鍵設備，全球獨家由 [[ASML]] 供應。台廠切入 EUV 載台、光罩盒、清洗與周邊耗材，"
+                "跟隨台積電 A16/A14 擴產週期放量。",
+        "cagr": "20%", "market_size": "40B USD",
+        "indicators": [{"label":"獨家設備商","value":"ASML"},{"label":"台廠受惠","value":"家登 / 弘塑"},{"label":"製程節點","value":"3nm / 2nm / A14"},{"label":"訂單週期","value":"2025-2030"}],
+    },
+    "特斯拉概念股": {
+        "en": "Tesla Supply Chain", "category": "車用 / 機器人", "color": "#cc0000",
+        "desc": "Tesla 供應鏈是台灣 EV 題材最具體的概念股組合，涵蓋電源、連接器、齒輪傳動、感測器與人形機器人零組件。"
+                "台達電為充電樁龍頭；貿聯-KY 為 Model 系列線束獨家；大銀微系統 2024 年切入 Optimus 線性馬達。"
+                "Model Y 改款、Optimus 2026 量產、Robotaxi 商業化為三大催化。",
+        "cagr": "18%", "market_size": "—",
+        "indicators": [{"label":"台廠代表","value":"台達電 / 貿聯-KY / 大銀"},{"label":"催化","value":"Optimus / Robotaxi"},{"label":"客戶","value":"Tesla Model Y/3 / Optimus"},{"label":"風險","value":"Musk 政策 / 銷售波動"}],
+    },
+    "VCSEL 雷射": {
+        "en": "VCSEL Laser", "category": "光通訊 / 網通", "color": "#d946ef",
+        "desc": "垂直腔面發射雷射，應用於 3D 感測（Face ID、光學滑鼠）、光通訊（資料中心短距）、車用 LiDAR。"
+                "台廠聯亞、穩懋為化合物半導體代工，3D 感測與 CPO 光模組雙引擎拉動。",
+        "cagr": "22%", "market_size": "5B USD",
+        "indicators": [{"label":"應用","value":"3D 感測 / 資料中心 / LiDAR"},{"label":"台廠","value":"聯亞 / 穩懋"},{"label":"核心客戶","value":"Apple / 光模組廠"},{"label":"趨勢","value":"CPO 整合需求"}],
+    },
+    "磷化銦/InP": {
+        "en": "Indium Phosphide (InP)", "category": "第三代半導體", "color": "#059669",
+        "desc": "磷化銦化合物半導體基板，為光通訊、高頻元件與矽光子必備晶圓材料。"
+                "CPO、800G/1.6T 光模組量產帶動 InP 需求躍升，下游直接受惠矽光子題材。",
+        "cagr": "25%", "market_size": "1.5B USD",
+        "indicators": [{"label":"應用","value":"矽光子 / CPO / EML"},{"label":"台廠","value":"聯亞 / IET-KY"},{"label":"驅動","value":"資料中心光互連"},{"label":"競爭","value":"Sumitomo / II-VI"}],
+    },
+    "資料中心": {
+        "en": "Data Center", "category": "AI / 半導體", "color": "#ea580c",
+        "desc": "超大規模資料中心供應鏈整體解決方案：從 GPU 伺服器、HBM、液冷、電源、網通交換器到機櫃與機房廠務。"
+                "北美 CSP（Meta/Google/AWS/Azure）2025-2027 資本支出年複合 40%+，台廠 ODM 與零組件全面吃貨。",
+        "cagr": "35%", "market_size": "300B USD",
+        "indicators": [{"label":"CSP 資本支出","value":"2026E +40%"},{"label":"台廠龍頭","value":"鴻海 / 廣達 / 緯創"},{"label":"熱點","value":"液冷 / 800V HVDC / 光互連"},{"label":"訂單能見度","value":"2-3 年"}],
+    },
 }
 
 

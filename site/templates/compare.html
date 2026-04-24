@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% set page = "compare" %}
+{% block title %}題材對比 · 族群寶{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>題材對比 <small>多題材疊加走勢</small></h1>
+  <p>選擇 2-5 個題材，疊加近 6 個月累積報酬曲線，快速判讀強弱輪動。資料：等權重持有該題材全部成分股。</p>
+</section>
+
+<div class="compare-toolbar">
+  <div class="compare-pick">
+    <label>加入題材：</label>
+    <input type="text" id="cmp-search" placeholder="輸入題材關鍵字（例：AI、CPO、CoWoS）" autocomplete="off">
+    <div class="search-dropdown" id="cmp-dropdown" hidden></div>
+  </div>
+  <button class="filter-chip" id="cmp-clear">清空</button>
+  <div class="compare-selected" id="cmp-selected"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>累積報酬對比</h2>
+    <span class="muted" id="cmp-meta">請在上方加入至少 1 個題材</span>
+  </div>
+  <div id="cmp-chart" style="height:480px; width:100%; padding:8px;"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>階段報酬對比</h2>
+    <span class="muted">1 日 / 5 日 / 20 日 / 60 日 / 125 日</span>
+  </div>
+  <table class="table compact">
+    <thead><tr><th>題材</th><th>分類</th><th>成分股</th><th>1 日</th><th>5 日</th><th>20 日</th><th>60 日</th><th>125 日</th></tr></thead>
+    <tbody id="cmp-table-body">
+      <tr><td colspan="8" class="muted" style="padding:40px; text-align:center;">加入題材後顯示</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+window.TOPIC_SERIES = {{ topic_series_json|safe }};
+window.TOPIC_META = {{ topic_meta_json|safe }};
+</script>
+<script>
+(function(){
+  const input     = document.getElementById('cmp-search');
+  const dropdown  = document.getElementById('cmp-dropdown');
+  const selected  = document.getElementById('cmp-selected');
+  const clearBtn  = document.getElementById('cmp-clear');
+  const meta      = document.getElementById('cmp-meta');
+  const tbody     = document.getElementById('cmp-table-body');
+  const chartEl   = document.getElementById('cmp-chart');
+  const ALL_TOPICS = Object.keys(window.TOPIC_SERIES || {}).sort();
+
+  const state = new Set();  // 選中的題材
+  let chart = null;
+
+  // URL param ?topics=AI伺服器,CoWoS先進封裝
+  try {
+    const q = new URLSearchParams(location.search).get('topics');
+    if (q) q.split(',').forEach(t => { if (window.TOPIC_SERIES[t]) state.add(t); });
+  } catch (_) {}
+
+  function renderSelected() {
+    selected.innerHTML = '';
+    Array.from(state).forEach(t => {
+      const m = window.TOPIC_META[t] || {};
+      const chip = document.createElement('span');
+      chip.className = 'cmp-chip';
+      chip.style.borderColor = m.color || '#64748b';
+      chip.style.color = m.color || '#64748b';
+      chip.innerHTML = `${t} <button class="cmp-chip-x" data-t="${t}">×</button>`;
+      selected.appendChild(chip);
+    });
+    selected.querySelectorAll('.cmp-chip-x').forEach(b => {
+      b.addEventListener('click', () => { state.delete(b.dataset.t); update(); });
+    });
+  }
+
+  function renderDropdown(q) {
+    q = (q || '').toLowerCase().trim();
+    let results = ALL_TOPICS;
+    if (q) {
+      const tokens = q.split(/\s+/).filter(Boolean);
+      results = ALL_TOPICS.filter(t => {
+        const hay = (t + ' ' + (window.TOPIC_META[t]?.category || '')).toLowerCase();
+        return tokens.every(tok => hay.includes(tok));
+      });
+    }
+    results = results.filter(t => !state.has(t)).slice(0, 20);
+    if (!results.length) { dropdown.hidden = true; return; }
+    dropdown.innerHTML = results.map(t => {
+      const m = window.TOPIC_META[t] || {};
+      return `<a class="search-item" data-t="${t}"><strong style="color:${m.color||'inherit'}">${t}</strong><small>${m.category||''}</small></a>`;
+    }).join('');
+    dropdown.hidden = false;
+    dropdown.querySelectorAll('.search-item').forEach(el => {
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        if (state.size >= 5) { alert('最多同時對比 5 個題材'); return; }
+        state.add(el.dataset.t);
+        input.value = '';
+        dropdown.hidden = true;
+        update();
+      });
+    });
+  }
+
+  input.addEventListener('input', () => renderDropdown(input.value));
+  input.addEventListener('focus',  () => renderDropdown(input.value));
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.compare-pick')) dropdown.hidden = true;
+  });
+  clearBtn.addEventListener('click', () => { state.clear(); update(); });
+
+  function renderChart() {
+    if (typeof echarts === 'undefined') { setTimeout(renderChart, 120); return; }
+    if (!chart) chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+    if (!state.size) { chart.clear(); return; }
+    // 找最長的 dates 作為 x 軸
+    let maxDates = [];
+    state.forEach(t => {
+      const s = window.TOPIC_SERIES[t];
+      if (s && s.dates.length > maxDates.length) maxDates = s.dates;
+    });
+    const series = Array.from(state).map(t => {
+      const s = window.TOPIC_SERIES[t];
+      if (!s) return null;
+      const m = window.TOPIC_META[t] || {};
+      // 若該題材 dates 長度 < maxDates，前面補 null
+      const pad = maxDates.length - s.dates.length;
+      const values = Array(pad).fill(null).concat(s.values);
+      return {
+        name: t,
+        type: 'line',
+        data: values,
+        smooth: true,
+        symbol: 'none',
+        lineStyle: { color: m.color || '#ea580c', width: 2 },
+        itemStyle: { color: m.color || '#ea580c' },
+      };
+    }).filter(Boolean);
+
+    chart.setOption({
+      backgroundColor: 'transparent',
+      animation: false,
+      legend: { data: Array.from(state), top: 0, textStyle: { color: '#9ca3af' }, type: 'scroll' },
+      tooltip: { trigger: 'axis', backgroundColor: '#1f2937', borderColor: '#374151', textStyle: { color: '#e5e7eb' },
+        valueFormatter: v => (v == null) ? '—' : (v>=0?'+':'') + v.toFixed(2) + '%'
+      },
+      grid: { left: 50, right: 20, top: 40, bottom: 40 },
+      xAxis: { type: 'category', data: maxDates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af' } },
+      yAxis: { type: 'value', axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', formatter: '{value}%' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } } },
+      series: series,
+    }, true);
+    window.addEventListener('resize', () => chart.resize());
+  }
+
+  function renderTable() {
+    if (!state.size) {
+      tbody.innerHTML = '<tr><td colspan="8" class="muted" style="padding:40px; text-align:center;">加入題材後顯示</td></tr>';
+      return;
+    }
+    const rows = Array.from(state).map(t => {
+      const s = window.TOPIC_SERIES[t] || {};
+      const m = window.TOPIC_META[t] || {};
+      const cls = v => v == null ? '' : (v > 0 ? 'positive' : 'negative');
+      const fmt = v => v == null ? '—' : (v>=0?'+':'') + v.toFixed(2) + '%';
+      return `<tr>
+        <td><a href="topic/${encodeURIComponent(m.slug || t)}.html" style="color:${m.color||'inherit'}"><b>${t}</b></a></td>
+        <td class="muted">${m.category || '—'}</td>
+        <td class="muted">${m.n_stocks || '—'}</td>
+        <td class="${cls(s.ret_1d)}">${fmt(s.ret_1d)}</td>
+        <td class="${cls(s.ret_1w)}">${fmt(s.ret_1w)}</td>
+        <td class="${cls(s.ret_1m)}">${fmt(s.ret_1m)}</td>
+        <td class="${cls(s.ret_3m)}">${fmt(s.ret_3m)}</td>
+        <td class="${cls(s.ret_6m)}">${fmt(s.ret_6m)}</td>
+      </tr>`;
+    });
+    tbody.innerHTML = rows.join('');
+  }
+
+  function update() {
+    renderSelected();
+    renderChart();
+    renderTable();
+    if (state.size) meta.textContent = `已選 ${state.size} / 5 題材`;
+    else meta.textContent = '請在上方加入至少 1 個題材';
+  }
+
+  update();
+})();
+</script>
+{% endblock %}

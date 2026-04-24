@@ -71,6 +71,57 @@
 </section>
 {% endif %}
 
+{% if coverage_tabs %}
+<section class="panel coverage-panel">
+  <div class="panel-header">
+    <h2>個股深度資料</h2>
+  </div>
+  <div class="coverage-tabs" id="coverage_{{ symbol }}">
+    <div class="coverage-tab-bar" role="tablist">
+      {% for tab in coverage_tabs %}
+      <button type="button"
+              class="coverage-tab{% if loop.first %} active{% endif %}{% if not tab.has_content %} empty{% endif %}"
+              data-target="cov-{{ symbol }}-{{ loop.index0 }}"
+              role="tab"
+              aria-selected="{{ 'true' if loop.first else 'false' }}">
+        {{ tab.label }}{% if not tab.has_content %} <em class="cov-empty-dot">·</em>{% endif %}
+      </button>
+      {% endfor %}
+    </div>
+    {% for tab in coverage_tabs %}
+    <div class="coverage-panel-body{% if loop.first %} active{% endif %}"
+         id="cov-{{ symbol }}-{{ loop.index0 }}"
+         role="tabpanel">
+      {% if tab.has_content %}
+        {{ tab.html|safe }}
+      {% else %}
+        <p class="coverage-empty muted">此區塊尚未提供，待 My-TW-Coverage 研究補齊。</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+<script>
+(function(){
+  const root = document.getElementById('coverage_{{ symbol }}');
+  if (!root) return;
+  const tabs = root.querySelectorAll('.coverage-tab');
+  const panels = root.querySelectorAll('.coverage-panel-body');
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(b => {
+        const on = b === btn;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      const target = btn.dataset.target;
+      panels.forEach(p => p.classList.toggle('active', p.id === target));
+    });
+  });
+})();
+</script>
+{% endif %}
+
 <div class="analytics-tabs" id="analytics_{{ symbol }}">
   <div class="analytics-tab-bar">
     <button class="analytics-tab active" data-view="tech">技術分析</button>

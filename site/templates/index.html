@@ -62,19 +62,9 @@
 
     <div class="hero-search-quick">
       <span class="quick-label">熱門題材：</span>
-      
-      <a href="topic/2奈米先進製程.html" class="quick-chip">2奈米先進製程</a>
-      
-      <a href="topic/輝達概念股.html" class="quick-chip">輝達概念股</a>
-      
-      <a href="topic/GoogleTPU.html" class="quick-chip">Google TPU</a>
-      
-      <a href="topic/量子電腦.html" class="quick-chip">量子電腦</a>
-      
-      <a href="topic/Chiplet小晶片.html" class="quick-chip">Chiplet 小晶片</a>
-      
-      <a href="topic/CoWoS先進封裝.html" class="quick-chip">CoWoS先進封裝</a>
-      
+      {% for t in hot_topics %}
+      <a href="topic/{{ t.slug }}.html" class="quick-chip"{% if t.score %} title="熱度分數 {{ '%.1f' % t.score }}"{% endif %}>{{ t.name }}</a>
+      {% endfor %}
     </div>
 
     <div class="hero-search-meta">

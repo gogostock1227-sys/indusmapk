@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% set page = "rankings" %}
+{% block title %}排行榜 · 族群寶{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>排行榜 <small>{{ last_date }}</small></h1>
+  <p>籌碼、基本面、大戶變化多維度排行，快速定位強勢個股。所有排行都取 Top 20，點擊個股進入詳情頁。</p>
+</section>
+
+<div class="filter-bar" id="rank-tabs">
+  <button class="filter-chip active" data-tab="chips">籌碼 · 近 5 日法人</button>
+  <button class="filter-chip" data-tab="revenue">月營收 YoY</button>
+  <button class="filter-chip" data-tab="eps">EPS 年增</button>
+  <button class="filter-chip" data-tab="big">大戶佔比變化</button>
+</div>
+
+<!-- ───────── 籌碼 ───────── -->
+<div class="rank-tab-body" data-body="chips">
+  <div class="grid-2col">
+    <div class="panel">
+      <div class="panel-header"><h2>外資 近 5 日買超 Top 20</h2><span class="muted">單位：張</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>5日買超</th><th>今日</th><th>收盤</th></tr></thead>
+        <tbody>
+          {% for r in rankings.chips_foreign_buy %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="positive">{{ "{:+,.0f}".format(r.value) }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+            <td>{{ "%.2f"|format(r.close) if r.close is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h2>外資 近 5 日賣超 Top 20</h2><span class="muted">單位：張</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>5日賣超</th><th>今日</th><th>收盤</th></tr></thead>
+        <tbody>
+          {% for r in rankings.chips_foreign_sell %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="negative">{{ "{:+,.0f}".format(r.value) }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+            <td>{{ "%.2f"|format(r.close) if r.close is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid-2col">
+    <div class="panel">
+      <div class="panel-header"><h2>投信 近 5 日買超 Top 20</h2><span class="muted">單位：張</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>5日買超</th><th>今日</th><th>收盤</th></tr></thead>
+        <tbody>
+          {% for r in rankings.chips_trust_buy %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="positive">{{ "{:+,.0f}".format(r.value) }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+            <td>{{ "%.2f"|format(r.close) if r.close is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h2>投信 近 5 日賣超 Top 20</h2><span class="muted">單位：張</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>5日賣超</th><th>今日</th><th>收盤</th></tr></thead>
+        <tbody>
+          {% for r in rankings.chips_trust_sell %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="negative">{{ "{:+,.0f}".format(r.value) }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+            <td>{{ "%.2f"|format(r.close) if r.close is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── 月營收 YoY ───────── -->
+<div class="rank-tab-body" data-body="revenue" hidden>
+  <div class="grid-2col">
+    <div class="panel">
+      <div class="panel-header"><h2>月營收 YoY 成長 Top 20</h2><span class="muted">最新公佈月 vs 去年同月</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>月份</th><th>YoY</th><th>月營收(百萬)</th><th>今日</th></tr></thead>
+        <tbody>
+          {% for r in rankings.revenue_yoy_up %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="muted">{{ r.ym }}</td>
+            <td class="positive">{{ "{:+,.1f}%".format(r.value) }}</td>
+            <td>{{ "{:,.0f}".format(r.sub_value/1000) if r.sub_value else '—' }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h2>月營收 YoY 衰退 Top 20</h2><span class="muted">最弱勢個股</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>月份</th><th>YoY</th><th>月營收(百萬)</th><th>今日</th></tr></thead>
+        <tbody>
+          {% for r in rankings.revenue_yoy_down %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="muted">{{ r.ym }}</td>
+            <td class="negative">{{ "{:+,.1f}%".format(r.value) }}</td>
+            <td>{{ "{:,.0f}".format(r.sub_value/1000) if r.sub_value else '—' }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── EPS 年增 ───────── -->
+<div class="rank-tab-body" data-body="eps" hidden>
+  <div class="grid-2col">
+    <div class="panel">
+      <div class="panel-header"><h2>EPS 年增 Top 20</h2><span class="muted">最新季 vs 去年同季</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>季別</th><th>年增率</th><th>EPS(元)</th><th>今日</th></tr></thead>
+        <tbody>
+          {% for r in rankings.eps_growth_up %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="muted">{{ r.quarter }}</td>
+            <td class="positive">{{ "{:+,.1f}%".format(r.value) }}</td>
+            <td>{{ "%.2f"|format(r.sub_value) if r.sub_value is not none else '—' }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h2>EPS 年減 Top 20</h2><span class="muted">獲利惡化</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>季別</th><th>年減率</th><th>EPS(元)</th><th>今日</th></tr></thead>
+        <tbody>
+          {% for r in rankings.eps_growth_down %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="muted">{{ r.quarter }}</td>
+            <td class="negative">{{ "{:+,.1f}%".format(r.value) }}</td>
+            <td>{{ "%.2f"|format(r.sub_value) if r.sub_value is not none else '—' }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── 大戶變化 ───────── -->
+<div class="rank-tab-body" data-body="big" hidden>
+  <div class="grid-2col">
+    <div class="panel">
+      <div class="panel-header"><h2>大戶佔比增加 Top 20</h2><span class="muted">&gt;400 張集保分級 · 近 N 週變化</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>變化</th><th>目前佔比</th><th>週數</th><th>今日</th></tr></thead>
+        <tbody>
+          {% for r in rankings.big_holders_up %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="positive">{{ "{:+.2f} pp".format(r.value) }}</td>
+            <td>{{ "%.2f"|format(r.sub_value) }} %</td>
+            <td class="muted">{{ r.weeks }} 週</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h2>大戶佔比減少 Top 20</h2><span class="muted">大戶出貨、散戶承接</span></div>
+      <table class="table compact">
+        <thead><tr><th>#</th><th>股票</th><th>產業</th><th>變化</th><th>目前佔比</th><th>週數</th><th>今日</th></tr></thead>
+        <tbody>
+          {% for r in rankings.big_holders_down %}
+          <tr>
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td class="negative">{{ "{:+.2f} pp".format(r.value) }}</td>
+            <td>{{ "%.2f"|format(r.sub_value) }} %</td>
+            <td class="muted">{{ r.weeks }} 週</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const tabs = document.querySelectorAll('#rank-tabs .filter-chip');
+  const bodies = document.querySelectorAll('.rank-tab-body');
+  tabs.forEach(btn => btn.addEventListener('click', () => {
+    tabs.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const key = btn.dataset.tab;
+    bodies.forEach(b => b.hidden = (b.dataset.body !== key));
+  }));
+})();
+</script>
+{% endblock %}

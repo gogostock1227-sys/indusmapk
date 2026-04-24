@@ -57,6 +57,108 @@ except ImportError:
 
 RICH_PKL = SITE_DIR / ".company_rich.pkl"
 EXTRAS_JSON = SITE_DIR / ".cache_extras.json"
+TRENDING_JSON = SITE_DIR / ".cache_trending.json"
+NAME_OVERRIDES_JSON = SITE_DIR / "stock_name_overrides.json"
+COVERAGE_DIR = ROOT_DIR / "My-TW-Coverage" / "Pilot_Reports"
+
+# 個股深度資料六大分頁：(UI 顯示名稱, MD 標頭關鍵字)
+COVERAGE_TABS = [
+    ("公司簡介",           "業務簡介"),
+    ("供應鏈定位",         "供應鏈位置"),
+    ("營收來源",           "營收來源"),
+    ("近期營運狀況",       "近期營運狀況"),
+    ("未來營運展望",       "未來營運展望"),
+    ("產業趨勢與成長動能", "產業趨勢與成長動能"),
+]
+
+# 首頁熱門題材 chip 的最終 fallback（當 trending cache 完全不存在時使用）
+DEFAULT_HOT_TOPICS = [
+    "2奈米先進製程",
+    "輝達概念股",
+    "Google TPU",
+    "量子電腦",
+    "Chiplet 小晶片",
+    "CoWoS先進封裝",
+]
+
+
+def refresh_trending_topics() -> None:
+    """跑 fetch_trending_topics.py 抓當日熱門題材，寫入 .cache_trending.json。
+
+    採 subprocess 隔離，避免爬蟲失敗影響本行程。
+    任何異常都不中斷 build，load_hot_topics() 會降級到 cache 或 DEFAULT_HOT_TOPICS。
+    """
+    import subprocess
+    script = SITE_DIR / "fetch_trending_topics.py"
+    if not script.exists():
+        print(f"[trending] 跳過：找不到 {script.name}")
+        return
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script), "--top", "10"],
+            timeout=60,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        if proc.returncode == 0:
+            print(f"[trending] 已更新 {TRENDING_JSON.name}")
+            # 印 fetch 腳本最後幾行（top N 列表）
+            tail = [l for l in proc.stdout.splitlines() if l.strip()][-12:]
+            for l in tail:
+                print(f"  {l}")
+        else:
+            print(f"[trending] 抓取 exit {proc.returncode}（保留前次 cache，若有）")
+            if proc.stderr:
+                print(proc.stderr[-500:])
+    except subprocess.TimeoutExpired:
+        print("[trending] 抓取逾時 60s，沿用前次 cache")
+    except Exception as e:
+        print(f"[trending] 抓取例外：{e}（沿用前次 cache）")
+
+
+def load_hot_topics(top_n: int = 6) -> list[dict]:
+    """讀 .cache_trending.json，回傳 [{'name': ..., 'slug': ..., 'score': ...}, ...]。
+
+    降級順序：
+      1. cache 存在且有題材 → 取 top_n，過濾掉不在 CONCEPT_GROUPS 的
+      2. cache 不存在 / 解析失敗 → DEFAULT_HOT_TOPICS（固定題材）
+    """
+    fallback = [
+        {"name": n, "slug": slugify(n), "score": None}
+        for n in DEFAULT_HOT_TOPICS if n in CONCEPT_GROUPS
+    ][:top_n]
+
+    if not TRENDING_JSON.exists():
+        print(f"[hot_topics] 無 cache，使用預設題材 {[t['name'] for t in fallback]}")
+        return fallback
+    try:
+        d = json.loads(TRENDING_JSON.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[hot_topics] 讀 cache 失敗：{e}，使用預設")
+        return fallback
+
+    topics = d.get("topics") or []
+    picked: list[dict] = []
+    for t in topics:
+        name = t.get("name") if isinstance(t, dict) else None
+        if not name or name not in CONCEPT_GROUPS:
+            continue
+        picked.append({
+            "name": name,
+            "slug": slugify(name),
+            "score": t.get("score"),
+        })
+        if len(picked) >= top_n:
+            break
+
+    if not picked:
+        print("[hot_topics] cache 無可用題材，使用預設")
+        return fallback
+
+    gen = d.get("generated_at", "?")
+    print(f"[hot_topics] 從 cache 取 {len(picked)} 題材（@ {gen}）: {[t['name'] for t in picked]}")
+    return picked
 
 
 def load_extras() -> dict:
@@ -140,6 +242,141 @@ def load_company_rich() -> dict:
         rich = pickle.load(f)
     print(f"[rich] 載入公司資料：basic {len(rich.get('basic', {}))} / business {len(rich.get('business', {}))} / revenue {len(rich.get('revenue', {}))} / financials {len(rich.get('financials', {}))} / dividends {len(rich.get('dividends', {}))}")
     return rich
+
+
+# ─────── My-TW-Coverage 深度資料解析 ───────
+
+import re as _re
+import html as _html
+
+_META_LINE_RE = _re.compile(r"^\*\*(板塊|產業|市值|企業價值)[:：]\*\*")
+_BULLET_PREFIXES = ("- ", "* ", "• ", "・")
+_WIKILINK_RE = _re.compile(r"\[\[([^\[\]]+?)\]\]")
+_BOLD_RE = _re.compile(r"\*\*([^*\n]+?)\*\*")
+
+
+def _coverage_inline(text: str) -> str:
+    """Convert inline MD (wikilinks + bold) to HTML. Input may already contain raw chars."""
+    out = _html.escape(text)
+    out = _WIKILINK_RE.sub(lambda m: f'<span class="wiki-ref">{m.group(1)}</span>', out)
+    out = _BOLD_RE.sub(r"<strong>\1</strong>", out)
+    return out
+
+
+def _coverage_block_to_html(block: str) -> str:
+    """Convert a block of MD text (bullets / paragraphs / sub-headers) to HTML."""
+    lines = [l.rstrip() for l in block.splitlines()]
+    html_parts: list[str] = []
+    in_list = False
+    for raw in lines:
+        stripped = raw.strip()
+        if not stripped:
+            if in_list:
+                html_parts.append("</ul>")
+                in_list = False
+            continue
+        if _META_LINE_RE.match(stripped):
+            # 業務簡介區塊開頭的 metadata 列跳過（市值等已在別處顯示）
+            continue
+        if stripped.startswith("### "):
+            if in_list:
+                html_parts.append("</ul>")
+                in_list = False
+            html_parts.append(f'<h4 class="coverage-sub">{_coverage_inline(stripped[4:])}</h4>')
+            continue
+        is_bullet = False
+        body = stripped
+        for p in _BULLET_PREFIXES:
+            if body.startswith(p):
+                body = body[len(p):].lstrip()
+                is_bullet = True
+                break
+        if is_bullet:
+            if not in_list:
+                html_parts.append("<ul class=\"coverage-list\">")
+                in_list = True
+            html_parts.append(f"<li>{_coverage_inline(body)}</li>")
+        else:
+            if in_list:
+                html_parts.append("</ul>")
+                in_list = False
+            html_parts.append(f"<p>{_coverage_inline(stripped)}</p>")
+    if in_list:
+        html_parts.append("</ul>")
+    return "\n".join(html_parts)
+
+
+def _parse_coverage_md(content: str) -> dict:
+    """Split one MD file by '## ' headers → {header_prefix: html}."""
+    sections: dict[str, str] = {}
+    current_name: str | None = None
+    current_lines: list[str] = []
+    for line in content.splitlines():
+        if line.startswith("## "):
+            if current_name is not None:
+                sections[current_name] = _coverage_block_to_html("\n".join(current_lines).strip())
+            header = line[3:].strip()
+            # 只取 "(" 之前的標題主詞，例如 "財務概況 (單位:...)" → "財務概況"
+            m = _re.match(r"([^(（]+)", header)
+            current_name = (m.group(1).strip() if m else header)
+            current_lines = []
+        else:
+            if current_name is not None:
+                current_lines.append(line)
+    if current_name is not None:
+        sections[current_name] = _coverage_block_to_html("\n".join(current_lines).strip())
+    return sections
+
+
+def load_coverage() -> dict:
+    """掃描 My-TW-Coverage/Pilot_Reports/**/{sym}_*.md，回傳 {sym: {section_name: html}}。
+
+    六大分頁對應 MD 標頭由 COVERAGE_TABS 定義；檔案若沒有該標頭，UI 會顯示「尚未提供」。
+    """
+    coverage: dict[str, dict] = {}
+    if not COVERAGE_DIR.exists():
+        print(f"[coverage] 跳過：找不到 {COVERAGE_DIR}")
+        return coverage
+    n_files = 0
+    n_sections = 0
+    for md_file in COVERAGE_DIR.rglob("*.md"):
+        stem = md_file.stem  # e.g., "1717_長興"
+        m = _re.match(r"([0-9A-Za-z]+)_", stem)
+        if not m:
+            continue
+        sym = m.group(1)
+        try:
+            content = md_file.read_text(encoding="utf-8")
+        except Exception:
+            continue
+        secs = _parse_coverage_md(content)
+        if secs:
+            coverage[sym] = secs
+            n_files += 1
+            n_sections += len(secs)
+    print(f"[coverage] 載入 {n_files} 檔深度研究資料（共 {n_sections} 個章節）from {COVERAGE_DIR.name}")
+    return coverage
+
+
+def build_coverage_tabs(coverage_sections: dict | None) -> list[dict]:
+    """對應 COVERAGE_TABS 產生給 template 用的 tab list。
+
+    回傳 [{label, key, html, has_content}, ...]；若完全沒資料則回空 list。
+    """
+    if not coverage_sections:
+        return []
+    tabs = []
+    for label, src in COVERAGE_TABS:
+        html_body = coverage_sections.get(src, "")
+        tabs.append({
+            "label": label,
+            "key": src,
+            "html": html_body,
+            "has_content": bool(html_body and html_body.strip()),
+        })
+    if not any(t["has_content"] for t in tabs):
+        return []
+    return tabs
 
 
 # ═══════════════════════════════════════════
@@ -230,6 +467,29 @@ def _load_finlab_data():
     return d
 
 
+def _apply_name_overrides(d: dict) -> None:
+    """把 stock_name_overrides.json 的 ETF / 特別股 / KY 等名稱補進 name_map。
+    只會覆蓋『FinLab name_map 查不到或值等於代號本身』的條目，不動現有對應。"""
+    if not NAME_OVERRIDES_JSON.exists():
+        return
+    try:
+        overrides = json.loads(NAME_OVERRIDES_JSON.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[警告] 讀 {NAME_OVERRIDES_JSON.name} 失敗：{e}")
+        return
+    nm = d.get("name_map") or {}
+    added = 0
+    for sym, name in overrides.items():
+        if not (isinstance(name, str) and name.strip()):
+            continue
+        cur = nm.get(sym)
+        if not (isinstance(cur, str) and cur.strip()) or cur == sym:
+            nm[sym] = name
+            added += 1
+    d["name_map"] = nm
+    print(f"[name_overrides] 補上 {added} 檔名稱（候選 {len(overrides)} 筆）")
+
+
 def load_data(use_cache=False) -> dict:
     """載入資料（支援快取）"""
     if use_cache and CACHE_META.exists() and CACHE_FILE.exists():
@@ -248,9 +508,11 @@ def load_data(use_cache=False) -> dict:
         d["name_map"]     = meta.get("name_map", {})
         d["industry_map"] = meta.get("industry_map", {})
         d["market_map"]   = meta.get("market_map", {})
+        _apply_name_overrides(d)
         return d
 
     d = _load_finlab_data()
+    _apply_name_overrides(d)
 
     # 寫快取
     try:
@@ -470,6 +732,8 @@ def compute_topic_return_series(d: dict, members: list, days=125) -> dict | None
         "ret_1d":  round(float(port_rets.iloc[-1] * 100), 2) if len(port_rets) else None,
         "ret_1w":  round(trailing(5)  * 100, 2) if trailing(5)  is not None else None,
         "ret_1m":  round(trailing(20) * 100, 2) if trailing(20) is not None else None,
+        "ret_3m":  round(trailing(60) * 100, 2) if trailing(60) is not None else None,
+        "ret_6m":  round(trailing(125) * 100, 2) if trailing(125) is not None else None,
     }
 
 
@@ -727,9 +991,23 @@ def build_heatmap_data(stock_metrics: pd.DataFrame, name_map: dict, top_n_per_gr
     return data_by_tf
 
 
-def build_search_data(stock_metrics: pd.DataFrame, name_map: dict, industry_map: dict, company_topics: dict) -> list:
-    """搜尋用資料。[{type, label, sub, href}]
-    個股：所有 stock_metrics 中的 symbol 都納入（全上市櫃），有題材顯示題材、沒題材顯示產業類別。"""
+def build_search_data(
+    stock_metrics: pd.DataFrame,
+    name_map: dict,
+    industry_map: dict,
+    company_topics: dict,
+    disposal_map: dict | None = None,
+    market_map: dict | None = None,
+) -> list:
+    """搜尋用資料。[{type, label, sub, href, keywords}]
+
+    個股：全 stock_metrics symbol 都納入。keywords 多包一層「狀態 tag」
+    讓使用者打關鍵字能命中：
+      處置 / 處置股 / 處置中 / 注意股 / 漲停 / 跌停 / 大漲 / 大跌 /
+      上市 / 上櫃 / 興櫃 / ETF / 熱門 / 旗艦
+    """
+    disposal_map = disposal_map or {}
+    market_map = market_map or {}
     items = []
     for group in CONCEPT_GROUPS:
         meta = get_meta(group)
@@ -738,26 +1016,79 @@ def build_search_data(stock_metrics: pd.DataFrame, name_map: dict, industry_map:
             "label": group,
             "sub":   meta["desc"][:50] + ("..." if len(meta["desc"]) > 50 else ""),
             "href":  f"topic/{slugify(group)}.html",
-            "keywords": f"{group} {meta['en']} {meta['category']}",
+            "keywords": f"{group} {meta['en']} {meta['category']} 題材 族群 概念",
         })
+    market_label_map = {"sii": "上市", "otc": "上櫃", "rotc": "興櫃"}
     for sym in stock_metrics.index:
         name_raw = name_map.get(sym)
         name = name_raw if isinstance(name_raw, str) and name_raw.strip() else sym
         topics = company_topics.get(sym, [])
         industry = industry_map.get(sym, "")
-        # sub 優先顯示題材，fallback 顯示產業類別
+
+        # ── 狀態 tag 收集 ──
+        tags: list[str] = []
+        badges: list[str] = []
+
+        disp_info = get_disposal_info(disposal_map, sym)
+        if disp_info:
+            tags += ["處置", "處置股", "處置中", "警示"]
+            status = (disp_info.get("status") or "").strip()
+            if "注意" in status:
+                tags += ["注意股"]
+            badges.append("⚠處置中")
+
+        mkt_disp = market_label_map.get(market_map.get(sym, ""), "")
+        if mkt_disp:
+            tags.append(mkt_disp)
+
+        # ETF 判斷：名稱含 ETF 或代號 00 開頭 5~6 碼
+        name_upper = name.upper()
+        is_etf = ("ETF" in name_upper) or (sym.startswith("00") and len(sym) >= 4 and len(sym) <= 6)
+        if is_etf:
+            tags.append("ETF")
+
+        # 漲跌停/大漲大跌（依當日報酬）
+        ret1 = stock_metrics.loc[sym].get("ret_1d") if sym in stock_metrics.index else None
+        if ret1 is not None and pd.notna(ret1):
+            r = float(ret1)
+            if r >= 0.094:
+                tags.append("漲停")
+                badges.append("🔺漲停")
+            elif r <= -0.094:
+                tags.append("跌停")
+                badges.append("🔻跌停")
+            elif r >= 0.05:
+                tags.append("大漲")
+            elif r <= -0.05:
+                tags.append("大跌")
+
+        # 熱門個股（STOCK_HIGHLIGHTS 有登錄者）
+        hl = STOCK_HIGHLIGHTS.get(sym) if STOCK_HIGHLIGHTS else None
+        hl_extra = ""
+        if hl:
+            tags += ["熱門", "熱點"]
+            hl_extra = " ".join(
+                str(hl.get(k, "")) for k in ("ranking", "tech", "moat")
+            )
+
+        # ── sub 顯示：徽章 + 題材/產業 ──
         if topics:
-            sub = " / ".join(topics[:3])
+            sub_main = " / ".join(topics[:3])
         elif industry:
-            sub = industry
+            sub_main = industry
         else:
-            sub = ""
+            sub_main = ""
+        if badges:
+            sub = " · ".join(badges) + (" · " + sub_main if sub_main else "")
+        else:
+            sub = sub_main
+
         items.append({
             "type":  "company",
             "label": f"{name} ({sym})",
             "sub":   sub,
             "href":  f"company/{sym}.html",
-            "keywords": f"{name} {sym} {industry} {' '.join(topics)}",
+            "keywords": f"{name} {sym} {industry} {' '.join(topics)} {' '.join(tags)} {hl_extra}",
         })
     return items
 
@@ -810,10 +1141,177 @@ def build_env():
     return env
 
 
-def render_all(data, stock_metrics, group_metrics, related, company_topics, rich=None, extras=None):
+def compute_rankings(stock_metrics: pd.DataFrame, rich: dict, extras: dict,
+                     name_map: dict, industry_map: dict, company_topics: dict,
+                     top_n: int = 20) -> dict:
+    """產出四類排行榜資料供 rankings.html 使用。
+
+    返回 dict:
+      chips_foreign_buy / chips_foreign_sell  — 近 5 日外資 Top 20
+      chips_trust_buy   / chips_trust_sell    — 近 5 日投信 Top 20
+      revenue_yoy_up    / revenue_yoy_down    — 最新月營收 YoY Top/Bottom 20
+      eps_growth_up     / eps_growth_down     — EPS vs 去年同季成長 Top/Bottom 20
+      big_holders_up    / big_holders_down    — 近 N 週大戶佔比變化 Top/Bottom 20
+    每個 item = {sym, name, industry, topics_txt, value, sub_value, close, ret_1d}
+    """
+    def _has_valid_name(sym):
+        """過濾掉無正式名稱的證券（ETF、權證、已下市等）"""
+        name_raw = name_map.get(sym)
+        return isinstance(name_raw, str) and name_raw.strip() and name_raw.strip() != sym
+
+    def _base_row(sym):
+        name = name_map.get(sym, sym)
+        row = stock_metrics.loc[sym] if sym in stock_metrics.index else None
+        topics = company_topics.get(sym, [])
+        return {
+            "sym":        sym,
+            "name":       name,
+            "industry":   industry_map.get(sym, ""),
+            "topics":     topics[:3],
+            "close":      float(row["close"]) if row is not None and row["close"] == row["close"] else None,
+            "ret_1d":     float(row["ret_1d"]) if row is not None and row["ret_1d"] == row["ret_1d"] else None,
+        }
+
+    # ─── 籌碼排行 ───
+    syms = [s for s in stock_metrics.index if _has_valid_name(s)]
+    chips_foreign = [
+        {**_base_row(s), "value": float(stock_metrics.at[s, "foreign_5d"])}
+        for s in syms if "foreign_5d" in stock_metrics.columns
+        and pd.notna(stock_metrics.at[s, "foreign_5d"])
+    ]
+    chips_trust = [
+        {**_base_row(s), "value": float(stock_metrics.at[s, "trust_5d"])}
+        for s in syms if "trust_5d" in stock_metrics.columns
+        and pd.notna(stock_metrics.at[s, "trust_5d"])
+    ]
+    chips_foreign_buy = sorted(chips_foreign, key=lambda r: -r["value"])[:top_n]
+    chips_foreign_sell = sorted(chips_foreign, key=lambda r: r["value"])[:top_n]
+    chips_trust_buy = sorted(chips_trust, key=lambda r: -r["value"])[:top_n]
+    chips_trust_sell = sorted(chips_trust, key=lambda r: r["value"])[:top_n]
+
+    # ─── 月營收 YoY 排行（統一月份 + 基期過小濾除 + YoY 合理區間）───
+    rev_map = rich.get("revenue", {})
+    from collections import Counter as _C
+    _ym_count = _C()
+    for _s, _items in rev_map.items():
+        if _items and _has_valid_name(_s):
+            _ym_count[_items[-1]["ym"]] += 1
+    base_ym = _ym_count.most_common(1)[0][0] if _ym_count else None
+    REV_MIN_THOUSAND = 10000  # 千元 = 1000 萬元（當期&去年同期門檻）
+    rev_rows = []
+    for sym, items in rev_map.items():
+        if not items or not _has_valid_name(sym):
+            continue
+        last = items[-1]
+        if last.get("ym") != base_ym:                  # 非眾數月份 → 老資料
+            continue
+        yoy = last.get("yoy")
+        rev_now = last.get("rev")
+        if yoy is None or rev_now is None or rev_now < REV_MIN_THOUSAND:
+            continue
+        if yoy <= -99 or yoy > 300:                    # 極端值通常是基期扭曲
+            continue
+        rev_ly = rev_now / (1 + yoy / 100.0)
+        if rev_ly < REV_MIN_THOUSAND:
+            continue
+        rev_rows.append({
+            **_base_row(sym),
+            "value":     float(yoy),
+            "sub_value": float(rev_now),
+            "ym":        last["ym"],
+        })
+    revenue_yoy_up = sorted(rev_rows, key=lambda r: -r["value"])[:top_n]
+    revenue_yoy_down = sorted(rev_rows, key=lambda r: r["value"])[:top_n]
+
+    # ─── EPS 年增排行（最新季 vs 4 季前；基期 EPS 絕對值 >= 0.3 元 + YoY -200%~500%）───
+    fin_map = rich.get("financials", {})
+    # 統一季別：取眾數季作為 base_q
+    _q_count = _C()
+    for _s, _rows in fin_map.items():
+        if _rows and _has_valid_name(_s):
+            _q_count[_rows[-1].get("q")] += 1
+    base_q = _q_count.most_common(1)[0][0] if _q_count else None
+    EPS_BASE_MIN = 0.3  # 去年同期 |EPS| 至少 0.3 元才能算年增率
+    eps_rows = []
+    for sym, rows in fin_map.items():
+        if not rows or len(rows) < 5 or not _has_valid_name(sym):
+            continue
+        if rows[-1].get("q") != base_q:                # 非眾數季 → 舊資料
+            continue
+        eps_now = rows[-1].get("eps")
+        eps_yoy = rows[-5].get("eps")
+        if eps_now is None or eps_yoy is None:
+            continue
+        if abs(eps_yoy) < EPS_BASE_MIN:                # 基期太小，算出來扭曲
+            continue
+        growth = (eps_now - eps_yoy) / abs(eps_yoy) * 100
+        if growth < -200 or growth > 500:              # 合理區間
+            continue
+        eps_rows.append({
+            **_base_row(sym),
+            "value":     round(growth, 1),
+            "sub_value": eps_now,
+            "prev_eps":  eps_yoy,
+            "quarter":   rows[-1].get("q"),
+        })
+    eps_growth_up = sorted(eps_rows, key=lambda r: -r["value"])[:top_n]
+    eps_growth_down = sorted(eps_rows, key=lambda r: r["value"])[:top_n]
+
+    # ─── 大戶（>400 張）佔比變化排行 ───
+    holders_hist = extras.get("holders_history", {}) or {}
+    big_rows = []
+    for sym, by_date in holders_hist.items():
+        if not by_date or not _has_valid_name(sym):
+            continue
+        dates = sorted(by_date.keys())
+        if len(dates) < 2:
+            continue
+        first_pcts = by_date[dates[0]].get("p", [])
+        last_pcts = by_date[dates[-1]].get("p", [])
+        if len(first_pcts) < 15 or len(last_pcts) < 15:
+            continue
+        big_first = sum(first_pcts[11:15])
+        big_last = sum(last_pcts[11:15])
+        delta = big_last - big_first
+        big_rows.append({
+            **_base_row(sym),
+            "value":     round(delta, 2),
+            "sub_value": round(big_last, 2),
+            "weeks":     len(dates),
+        })
+    big_holders_up = sorted(big_rows, key=lambda r: -r["value"])[:top_n]
+    big_holders_down = sorted(big_rows, key=lambda r: r["value"])[:top_n]
+
+    return {
+        "chips_foreign_buy":  chips_foreign_buy,
+        "chips_foreign_sell": chips_foreign_sell,
+        "chips_trust_buy":    chips_trust_buy,
+        "chips_trust_sell":   chips_trust_sell,
+        "revenue_yoy_up":     revenue_yoy_up,
+        "revenue_yoy_down":   revenue_yoy_down,
+        "eps_growth_up":      eps_growth_up,
+        "eps_growth_down":    eps_growth_down,
+        "big_holders_up":     big_holders_up,
+        "big_holders_down":   big_holders_down,
+    }
+
+
+def load_ai_summaries() -> dict:
+    """AI 題材分析摘要（fetch by background agent）。"""
+    fp = SITE_DIR / ".ai_summaries.json"
+    if not fp.exists():
+        return {}
+    try:
+        return json.loads(fp.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def render_all(data, stock_metrics, group_metrics, related, company_topics, rich=None, extras=None, coverage=None):
     env = build_env()
     rich = rich or {"basic": {}, "business": {}, "revenue": {}, "financials": {}, "dividends": {}, "director": {}}
     extras = extras or {"disposal": {}, "holders": {}}
+    coverage = coverage or {}
     name_map = data["name_map"]
     last_date = data["close"].index[-1].strftime("%Y-%m-%d")
 
@@ -865,6 +1363,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     category_aggs = compute_category_aggregates(stock_metrics, group_metrics)
 
     total_stocks = len(stock_metrics)
+    hot_topics = load_hot_topics(top_n=6)
     index_html = env.get_template("index.html").render(
         **base_ctx,
         total_groups=total_groups,
@@ -873,6 +1372,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         total_limit_down=total_limit_down,
         top_flow=top_flow,
         category_aggs=category_aggs,
+        hot_topics=hot_topics,
     )
     (DIST_DIR / "index.html").write_text(index_html, encoding="utf-8")
 
@@ -985,10 +1485,15 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     )
     (DIST_DIR / "ai.html").write_text(ai_html, encoding="utf-8")
 
-    # 每個題材頁
+    # AI 題材摘要（背景 agent 產出）
+    ai_summaries = load_ai_summaries()
+
+    # 每個題材頁 + 快取 topic_series 供 compare 頁共用
     topic_dir = DIST_DIR / "topic"
     topic_dir.mkdir(exist_ok=True)
     tpl_topic = env.get_template("topic_detail.html")
+    all_topic_series = {}
+    all_topic_meta   = {}
     for group, members in CONCEPT_GROUPS.items():
         meta = get_meta(group)
         rows = stock_metrics.loc[stock_metrics.index.intersection(members)].copy()
@@ -998,6 +1503,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         ]
         rows_sorted = rows.sort_values("amount_mn", ascending=False)
         topic_series = compute_topic_return_series(data, members, days=125)
+        ai_sum = ai_summaries.get(group)
         html = tpl_topic.render(
             **base_ctx,
             group=group,
@@ -1008,8 +1514,36 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             name_map=name_map,
             company_topics=company_topics,
             topic_series_json=json.dumps(topic_series, ensure_ascii=False) if topic_series else "null",
+            ai_summary=ai_sum,
         )
         (topic_dir / f"{slugify(group)}.html").write_text(html, encoding="utf-8")
+        if topic_series:
+            all_topic_series[group] = topic_series
+            all_topic_meta[group] = {
+                "category": meta.get("category", ""),
+                "color":    meta.get("color", "#64748b"),
+                "slug":     slugify(group),
+                "n_stocks": len(rows),
+            }
+
+    # 題材對比頁（前端選 2-5 個題材疊加走勢）
+    compare_html = env.get_template("compare.html").render(
+        **base_ctx,
+        topic_series_json=json.dumps(all_topic_series, ensure_ascii=False),
+        topic_meta_json=json.dumps(all_topic_meta, ensure_ascii=False),
+    )
+    (DIST_DIR / "compare.html").write_text(compare_html, encoding="utf-8")
+
+    # 排行榜頁（籌碼 / 月營收 YoY / EPS 年增 / 大戶變化）
+    rankings = compute_rankings(
+        stock_metrics, rich, extras,
+        name_map, data["industry_map"], company_topics, top_n=20,
+    )
+    rankings_html = env.get_template("rankings.html").render(
+        **base_ctx,
+        rankings=rankings,
+    )
+    (DIST_DIR / "rankings.html").write_text(rankings_html, encoding="utf-8")
 
     # 公司資料庫頁（全上市櫃清單 + 前端搜尋/篩選/排序）
     industries_list = sorted({
@@ -1075,6 +1609,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         financials = rich["financials"].get(sym)
         dividends = rich["dividends"].get(sym)
         director_pct = rich["director"].get(sym)
+        coverage_tabs = build_coverage_tabs(coverage.get(sym))
         html = tpl_company.render(
             **base_ctx,
             symbol=sym,
@@ -1095,6 +1630,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             financials=financials,
             dividends=dividends,
             director_pct=director_pct,
+            coverage_tabs=coverage_tabs,
         )
         (company_dir / f"{sym}.html").write_text(html, encoding="utf-8")
         n_pages += 1
@@ -1107,6 +1643,120 @@ def copy_static():
     if dst.exists():
         shutil.rmtree(dst)
     shutil.copytree(STATIC_SRC, dst)
+
+
+ROBOTS_TXT_CONTENT = """# 族群寶 robots.txt
+# 允許：主流搜尋引擎（Google / Bing / DuckDuckGo 等）
+# 禁止：AI 訓練爬蟲與內容抓取機器人
+
+# ---- AI 訓練爬蟲（禁止） ----
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Perplexity-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Meta-ExternalFetcher
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: Omgili
+Disallow: /
+
+User-agent: YouBot
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+User-agent: MistralAI-User
+Disallow: /
+
+# ---- 一般資料抓取爬蟲（禁止） ----
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+# ---- 其他所有爬蟲（允許，給 Google / Bing 等） ----
+User-agent: *
+Allow: /
+Disallow: /data/
+Crawl-delay: 2
+
+Sitemap: https://indusmapk.com/sitemap.xml
+"""
+
+
+def write_robots_txt():
+    """寫入 robots.txt（禁止 AI 訓練爬蟲、允許搜尋引擎）"""
+    (DIST_DIR / "robots.txt").write_text(ROBOTS_TXT_CONTENT, encoding="utf-8")
 
 
 LIMIT_UP_REPORT_DIR = Path(r"C:/Users/user/Desktop/程式雜/AI股票網頁建構/reports")
@@ -1165,6 +1815,9 @@ def main():
 
     DIST_DIR.mkdir(parents=True, exist_ok=True)
 
+    print("\n[0/5] 更新首頁熱門題材（從 Yahoo 熱股 + 鉅亨關鍵字合成）...")
+    refresh_trending_topics()
+
     print("\n[1/5] 載入資料...")
     data = load_data(use_cache=args.skip_finlab)
 
@@ -1179,15 +1832,24 @@ def main():
     print(f"       ✓ {len(group_metrics)} 個族群")
 
     print("[4/5] 產生 JSON 資料（熱力圖 + 搜尋）...")
+    extras = load_extras()
     heatmap_data = build_heatmap_data(stock_metrics, data["name_map"])
-    search_data = build_search_data(stock_metrics, data["name_map"], data["industry_map"], company_topics)
+    search_data = build_search_data(
+        stock_metrics,
+        data["name_map"],
+        data["industry_map"],
+        company_topics,
+        disposal_map=extras.get("disposal", {}),
+        market_map=data.get("market_map", {}),
+    )
     write_json_data(heatmap_data, search_data)
 
     print("[5/5] 渲染 HTML...")
     copy_static()
+    write_robots_txt()
     rich = load_company_rich()
-    extras = load_extras()
-    render_all(data, stock_metrics, group_metrics, related, company_topics, rich=rich, extras=extras)
+    coverage = load_coverage()
+    render_all(data, stock_metrics, group_metrics, related, company_topics, rich=rich, extras=extras, coverage=coverage)
 
     idx = DIST_DIR / "index.html"
     print(f"\n✓ 建置完成！打開：{idx}")
