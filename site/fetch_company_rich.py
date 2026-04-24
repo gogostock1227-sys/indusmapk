@@ -158,14 +158,14 @@ def main():
             out["financials"][sym] = rows
     print(f"       ✓ {len(out['financials'])} 檔")
 
-    print("[5/6] 股利公告近 8 筆...")
+    print("[5/6] 股利公告近 20 筆...")
     da = data.get("dividend_announcement")
     da_sorted = da.sort_values("除息交易日")
     for sym, g in da_sorted.groupby("symbol"):
         sym = _safe_str(sym)
         if not sym:
             continue
-        tail = g.tail(8)
+        tail = g.tail(20)
         rows = []
         for _, r in tail.iterrows():
             cash = _safe_float(r.get("盈餘分配之股東現金股利(元/股)", 0)) or 0
@@ -183,13 +183,20 @@ def main():
             out["dividends"][sym] = rows
     print(f"       ✓ {len(out['dividends'])} 檔")
 
-    print("[6/6] 董監持股比例...")
-    dh = data.get("internal_equity_pledge:董監持股")
-    latest = dh.iloc[-1]
-    for sym, v in latest.items():
+    print("[6/6] 董監持股比例（%）...")
+    dh = data.get("internal_equity_changes:董監持有股數占比")
+    # 每檔取最後一筆非 NaN
+    for sym in dh.columns:
         sym = _safe_str(sym)
-        if sym and pd.notna(v):
-            out["director"][sym] = round(float(v), 2)
+        if not sym:
+            continue
+        s = dh[sym].dropna()
+        if s.empty:
+            continue
+        v = float(s.iloc[-1])
+        # 合理範圍檢查：0-100%；若超過 100 可能資料有誤，跳過
+        if 0 <= v <= 100:
+            out["director"][sym] = round(v, 2)
     print(f"       ✓ {len(out['director'])} 檔")
 
     with open(OUT, "wb") as f:
