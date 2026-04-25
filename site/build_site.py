@@ -62,7 +62,8 @@ TRENDING_JSON = SITE_DIR / ".cache_trending.json"
 FUTURES_JSON = SITE_DIR / ".cache_futures.json"
 RS_HISTORY = SITE_DIR / ".cache_rs_history.parquet"
 RS_HISTORY_QUARTER = SITE_DIR / ".cache_rs_history_quarter.parquet"
-TAIEX_CACHE = SITE_DIR / ".cache_taiex.parquet"
+TAIEX_CACHE = SITE_DIR / ".cache_taiex.parquet"  # 舊：只存加權指數，保留以利向後兼容
+INDICES_CACHE = SITE_DIR / ".cache_market_indices.parquet"  # 新：上市加權 + 櫃買
 NAME_OVERRIDES_JSON = SITE_DIR / "stock_name_overrides.json"
 COVERAGE_DIR = ROOT_DIR / "My-TW-Coverage" / "Pilot_Reports"
 
@@ -160,40 +161,54 @@ def refresh_futures_list(max_age_days: float = 7.0) -> None:
         print(f"[futures] 抓取例外：{e}（沿用前次 cache）")
 
 
-def load_taiex(use_cache: bool = True) -> pd.Series:
-    """載入加權指數 (^TWII) 收盤價序列。
+def load_market_indices(use_cache: bool = True) -> dict:
+    """載入台股兩大盤指數收盤價：上市加權 + 櫃買。
 
-    來源：FinLab 'world_index:close' 的 ^TWII 欄。
-    use_cache=True 且 cache 存在時直接讀；否則打 FinLab API 並覆寫 cache。
+    來源：FinLab 'stock_index_price:收盤指數'
+      - taiex: 上市加權股價指數（≈ ^TWII）
+      - tpex:  櫃買指數
+    回傳 {'taiex': pd.Series, 'tpex': pd.Series}。
     """
-    if use_cache and TAIEX_CACHE.exists():
+    if use_cache and INDICES_CACHE.exists():
         try:
-            df = pd.read_parquet(TAIEX_CACHE)
-            s = df.iloc[:, 0].dropna()
-            s.name = "taiex"
-            print(f"[taiex] 從 cache 讀取（{len(s)} 個交易日）")
-            return s
+            df = pd.read_parquet(INDICES_CACHE)
+            df.index = pd.to_datetime(df.index)
+            out = {col: df[col].dropna() for col in df.columns}
+            print(f"[indices] 從 cache 讀取（{len(df)} 個交易日，{list(out.keys())}）")
+            return out
         except Exception as e:
-            print(f"[taiex] cache 讀取失敗：{e}，改抓 FinLab")
+            print(f"[indices] cache 讀取失敗：{e}，改抓 FinLab")
+    out: dict = {}
     try:
         from finlab import data as _fl_data
-        d = _fl_data.get("world_index:close")
-        if "^TWII" not in d.columns:
-            print("[taiex] FinLab world_index:close 無 ^TWII 欄")
-            return pd.Series(dtype=float, name="taiex")
-        s = d["^TWII"].dropna()
-        s.name = "taiex"
-        try:
-            s.to_frame().to_parquet(TAIEX_CACHE)
-            print(f"[taiex] 抓取 + 寫入 cache：{len(s)} 個交易日")
-        except Exception as e:
-            print(f"[taiex] cache 寫入失敗：{e}")
-        return s
+        d = _fl_data.get("stock_index_price:收盤指數")
+        col_map = {"taiex": "上市發行量加權股價指數", "tpex": "上櫃櫃買指數:指數"}
+        for key, col in col_map.items():
+            if col in d.columns:
+                s = d[col].dropna()
+                s.name = key
+                out[key] = s
+        if out:
+            try:
+                pd.concat(list(out.values()), axis=1).to_parquet(INDICES_CACHE)
+                print(f"[indices] 抓取 + 寫入 cache：{ {k: len(v) for k,v in out.items()} }")
+            except Exception as e:
+                print(f"[indices] cache 寫入失敗：{e}")
+        else:
+            print("[indices] FinLab stock_index_price:收盤指數 無加權/櫃買欄位")
+        return out
     except Exception as e:
-        print(f"[taiex] FinLab 抓取失敗：{e}")
-        if TAIEX_CACHE.exists():
-            return pd.read_parquet(TAIEX_CACHE).iloc[:, 0].dropna()
-        return pd.Series(dtype=float, name="taiex")
+        print(f"[indices] FinLab 抓取失敗：{e}")
+        if INDICES_CACHE.exists():
+            df = pd.read_parquet(INDICES_CACHE)
+            return {col: df[col].dropna() for col in df.columns}
+        return {}
+
+
+def load_taiex(use_cache: bool = True) -> pd.Series:
+    """向後兼容：只回傳加權指數 Series。新呼叫請改用 load_market_indices()。"""
+    indices = load_market_indices(use_cache=use_cache)
+    return indices.get("taiex", pd.Series(dtype=float, name="taiex"))
 
 
 def load_futures_flags() -> dict:
@@ -1401,6 +1416,50 @@ def update_rs_history(rs_today: pd.Series, today, path: Path = None,
     return merged
 
 
+def compute_mansfield_rs(close: pd.DataFrame, index_series: pd.Series,
+                         lookback: int = 240, min_periods: int = 120) -> pd.DataFrame:
+    """Mansfield 風格相對強度：(個股/大盤比值) 對 N 日均值的 % 偏離。
+
+    - close: 收盤價 DataFrame, index=date, columns=symbol
+    - index_series: 大盤指數 Series（taiex 或 tpex）
+    - lookback: 移動平均窗口（240 日 ≈ 52 週，台股年線慣例）
+    - min_periods: 至少需要的資料點才算（避免新上市股噪音過大）
+
+    回傳 DataFrame: index=date, columns=symbol, values=% 偏離（保留 1 位小數）
+    > 0 表示個股 / 大盤比值高於 52 週均，個股贏大盤；< 0 反之。
+    """
+    if close is None or close.empty or index_series is None or len(index_series) == 0:
+        return pd.DataFrame()
+    common = close.index.intersection(index_series.index)
+    if len(common) < min_periods + 1:
+        return pd.DataFrame()
+    px = close.loc[common]
+    idx = index_series.loc[common]
+    ratio = px.div(idx, axis=0)
+    ma = ratio.rolling(window=lookback, min_periods=min_periods).mean()
+    mansfield = (ratio / ma - 1) * 100
+    return mansfield.round(1)
+
+
+def compute_ratio_with_sma(close: pd.DataFrame, index_series: pd.Series,
+                            lookback: int = 240,
+                            min_periods: int = 120) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """直接回傳 (個股/大盤) 比值與其 240 日 SMA，供「比值 + 均線」交叉視圖使用。
+
+    回傳 (ratio_df, sma_df)：兩個 DataFrame，shape 相同 (date × symbol)。
+    """
+    if close is None or close.empty or index_series is None or len(index_series) == 0:
+        return pd.DataFrame(), pd.DataFrame()
+    common = close.index.intersection(index_series.index)
+    if len(common) < min_periods + 1:
+        return pd.DataFrame(), pd.DataFrame()
+    px = close.loc[common]
+    idx = index_series.loc[common]
+    ratio = px.div(idx, axis=0)
+    sma = ratio.rolling(window=lookback, min_periods=min_periods).mean()
+    return ratio, sma
+
+
 def build_rs_rows(stock_metrics: pd.DataFrame, rs_today: pd.Series, close: pd.DataFrame,
                   name_map: dict, industry_map: dict, market_map: dict,
                   company_topics: dict, lookback: int = 240) -> list[dict]:
@@ -1790,8 +1849,19 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     # 兼容舊變數名稱（rs.html 使用 rs_today / rs_history）
     rs_today   = rs_year_today
     rs_history = rs_year_history
-    # 加權指數（從快取讀取；首次無 cache 時打 finlab）
-    taiex_series = load_taiex(use_cache=True)
+    # 大盤指數（上市加權 + 櫃買；從快取讀取，首次無 cache 時打 finlab）
+    market_indices = load_market_indices(use_cache=True)
+    taiex_series = market_indices.get("taiex", pd.Series(dtype=float))
+    tpex_series  = market_indices.get("tpex",  pd.Series(dtype=float))
+    # Mansfield 比值法：(個股/大盤) 對 240 日均值的 % 偏離；上揚 = 贏大盤
+    print("       · 計算 Mansfield 相對強度（個股/大盤比值對 240 日均偏離）...")
+    mansfield_taiex_df = compute_mansfield_rs(data["close"], taiex_series, lookback=240)
+    mansfield_tpex_df  = compute_mansfield_rs(data["close"], tpex_series,  lookback=240)
+    # 比值 + SMA（給 ratio 模式：兩條線交叉判讀，0 線不存在）
+    ratio_taiex_df, sma_taiex_df = compute_ratio_with_sma(data["close"], taiex_series, lookback=240)
+    ratio_tpex_df,  sma_tpex_df  = compute_ratio_with_sma(data["close"], tpex_series,  lookback=240)
+    print(f"         vs 加權覆蓋 {mansfield_taiex_df.shape[1] if not mansfield_taiex_df.empty else 0} 檔；"
+          f"vs 櫃買覆蓋 {mansfield_tpex_df.shape[1] if not mansfield_tpex_df.empty else 0} 檔")
 
     # 共用資料
     base_ctx = {
@@ -2317,15 +2387,43 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
                 if len(s) == 0:
                     return None
                 return [int(s.loc[d]) if d in s.index and pd.notna(s.loc[d]) else None for d in all_dates]
-            twii_aligned = None
-            if not taiex_series.empty:
-                t = taiex_series.reindex(pd.DatetimeIndex(all_dates), method="ffill")
-                twii_aligned = [None if pd.isna(v) else round(float(v), 2) for v in t.values]
+            def _align_index(series):
+                if series.empty:
+                    return None
+                t = series.reindex(pd.DatetimeIndex(all_dates), method="ffill")
+                return [None if pd.isna(v) else round(float(v), 2) for v in t.values]
+            def _align_mansfield(df):
+                if df is None or df.empty or sym not in df.columns:
+                    return None
+                s = df[sym].dropna()
+                if len(s) < 5:
+                    return None
+                t = s.reindex(pd.DatetimeIndex(all_dates))
+                return [None if pd.isna(v) else round(float(v), 1) for v in t.values]
+            def _align_ratio(df):
+                if df is None or df.empty or sym not in df.columns:
+                    return None
+                s = df[sym].dropna()
+                if len(s) < 5:
+                    return None
+                t = s.reindex(pd.DatetimeIndex(all_dates))
+                # 比值通常很小（如 0.0024），保留 8 位小數確保 ratio/sma 能精確區分
+                return [None if pd.isna(v) else round(float(v), 8) for v in t.values]
+            # 預設顯示哪個指數：上櫃 → 櫃買；其他 → 加權
+            default_idx = "tpex" if data["market_map"].get(sym) == "otc" else "taiex"
             rs_chart_payload = {
-                "dates":   [d.strftime("%y/%m/%d") for d in all_dates],
-                "year":    _align(year_s),
-                "quarter": _align(quarter_s),
-                "twii":    twii_aligned,
+                "dates":         [d.strftime("%y/%m/%d") for d in all_dates],
+                "year":          _align(year_s),
+                "quarter":       _align(quarter_s),
+                "ms_taiex":      _align_mansfield(mansfield_taiex_df),
+                "ms_tpex":       _align_mansfield(mansfield_tpex_df),
+                "ratio_taiex":   _align_ratio(ratio_taiex_df),
+                "sma_taiex":     _align_ratio(sma_taiex_df),
+                "ratio_tpex":    _align_ratio(ratio_tpex_df),
+                "sma_tpex":      _align_ratio(sma_tpex_df),
+                "twii":          _align_index(taiex_series),
+                "tpex":          _align_index(tpex_series),
+                "default_index": default_idx,
             }
         # 兼容舊 rs_history 變數（若舊模板仍引用）
         rs_history_data = None

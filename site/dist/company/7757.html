@@ -80,22 +80,28 @@
 <section class="panel rs-history-panel">
   <div class="panel-header">
     <h2>RS 評分走勢</h2>
-    <span class="muted">近 62 個交易日 · 綠虛線為強勢線 80</span>
+    <span class="muted">近 62 個交易日 · RS 強勢線 80 / 相對中性位 0 / 比值&均線交叉</span>
   </div>
   <div class="rs-chart-toolbar" id="rs_toolbar_7757">
-    <div class="rs-mode-group">
+    <div class="rs-mode-group" data-group="mode">
       <button type="button" class="rs-btn active" data-mode="year">年 RS（240 日）</button>
       <button type="button" class="rs-btn" data-mode="quarter">季 RS（60 日）</button>
+      <button type="button" class="rs-btn" data-mode="ms_taiex">vs 加權</button>
+      <button type="button" class="rs-btn" data-mode="ms_tpex">vs 櫃買</button>
+      <button type="button" class="rs-btn" data-mode="ratio_taiex">比值 vs 加權</button>
+      <button type="button" class="rs-btn" data-mode="ratio_tpex">比值 vs 櫃買</button>
     </div>
-    <label class="rs-twii-toggle">
-      <input type="checkbox" id="rs_twii_7757" checked>
-      <span>右軸疊加加權指數</span>
-    </label>
+    <span class="rs-toolbar-label">右軸疊加</span>
+    <div class="rs-mode-group rs-index-group" data-group="index">
+      <button type="button" class="rs-idx-btn" data-idx="none">無</button>
+      <button type="button" class="rs-idx-btn" data-idx="taiex">加權</button>
+      <button type="button" class="rs-idx-btn" data-idx="tpex">櫃買</button>
+    </div>
   </div>
   <div id="rs_chart_7757" style="height:280px; width:100%; padding:4px;"></div>
   <script>
   (function(){
-    const data = {"dates": ["26/01/15", "26/01/16", "26/01/19", "26/01/20", "26/01/21", "26/01/22", "26/01/23", "26/01/26", "26/01/27", "26/01/28", "26/01/29", "26/01/30", "26/02/02", "26/02/03", "26/02/04", "26/02/05", "26/02/06", "26/02/09", "26/02/10", "26/02/11", "26/02/23", "26/02/24", "26/02/25", "26/02/26", "26/03/02", "26/03/03", "26/03/04", "26/03/05", "26/03/06", "26/03/09", "26/03/10", "26/03/11", "26/03/12", "26/03/13", "26/03/16", "26/03/17", "26/03/18", "26/03/19", "26/03/20", "26/03/23", "26/03/24", "26/03/25", "26/03/26", "26/03/27", "26/03/30", "26/03/31", "26/04/01", "26/04/02", "26/04/07", "26/04/08", "26/04/09", "26/04/10", "26/04/13", "26/04/14", "26/04/15", "26/04/16", "26/04/17", "26/04/20", "26/04/21", "26/04/22", "26/04/23", "26/04/24"], "year": null, "quarter": [7, 6, 6, 7, 10, 15, 17, 16, 10, 12, 12, 18, 20, 10, 13, 13, 16, 13, 11, 9, 7, 6, 6, 6, 9, 12, 16, 15, 19, 17, 17, 17, 18, 19, 14, 13, 13, 16, 18, 19, 18, 20, 24, 23, 27, 33, 31, 33, 32, 30, 32, 34, 46, 52, 56, 35, 37, 30, 23, 26, 30, 34], "twii": [30810.58, 31408.7, 31639.29, 31759.99, 31246.37, 31746.08, 31961.51, 32064.52, 32317.92, 32803.82, 32536.27, 32063.75, 31624.03, 32195.36, 32289.81, 31801.27, 31782.92, 32404.62, 33072.97, 33605.71, 33773.26, 34700.82, 35413.07, 35414.49, 35095.09, 34323.65, 32828.88, 33672.94, 33599.54, 32110.42, 32771.87, 34114.19, 33581.86, 33400.32, 33342.51, 33836.57, 34348.58, 33689.68, 33543.88, 32722.5, 32612.24, 33439.11, 33337.62, 33112.59, 32518.16, 31722.99, 33174.82, 32572.43, 33229.82, 34761.38, 34861.16, 35417.83, 35457.29, 36296.12, 36722.14, 37132.02, 36804.34, 36958.8, 37605.11, 37878.47, 37714.15, 38932.4]};
+    const data = {"dates": ["26/01/15", "26/01/16", "26/01/19", "26/01/20", "26/01/21", "26/01/22", "26/01/23", "26/01/26", "26/01/27", "26/01/28", "26/01/29", "26/01/30", "26/02/02", "26/02/03", "26/02/04", "26/02/05", "26/02/06", "26/02/09", "26/02/10", "26/02/11", "26/02/23", "26/02/24", "26/02/25", "26/02/26", "26/03/02", "26/03/03", "26/03/04", "26/03/05", "26/03/06", "26/03/09", "26/03/10", "26/03/11", "26/03/12", "26/03/13", "26/03/16", "26/03/17", "26/03/18", "26/03/19", "26/03/20", "26/03/23", "26/03/24", "26/03/25", "26/03/26", "26/03/27", "26/03/30", "26/03/31", "26/04/01", "26/04/02", "26/04/07", "26/04/08", "26/04/09", "26/04/10", "26/04/13", "26/04/14", "26/04/15", "26/04/16", "26/04/17", "26/04/20", "26/04/21", "26/04/22", "26/04/23", "26/04/24"], "year": null, "quarter": [7, 6, 6, 7, 10, 15, 17, 16, 10, 12, 12, 18, 20, 10, 13, 13, 16, 13, 11, 9, 7, 6, 6, 6, 9, 12, 16, 15, 19, 17, 17, 17, 18, 19, 14, 13, 13, 16, 18, 19, 18, 20, 24, 23, 27, 33, 31, 33, 32, 30, 32, 34, 46, 52, 56, 35, 37, 30, 23, 26, 30, 34], "ms_taiex": null, "ms_tpex": null, "ratio_taiex": [0.00374871, 0.00364549, 0.00357151, 0.00358942, 0.00361642, 0.00368549, 0.00366065, 0.00360211, 0.00351198, 0.00345996, 0.00345768, 0.00350864, 0.00349418, 0.00338558, 0.00340665, 0.00349043, 0.00349244, 0.00339458, 0.00331086, 0.00322862, 0.0031978, 0.0030835, 0.00300736, 0.00300724, 0.00307735, 0.00317565, 0.00327456, 0.00320732, 0.00328874, 0.00336339, 0.00331077, 0.00320981, 0.00326069, 0.00324847, 0.00317912, 0.00311793, 0.00310056, 0.00313152, 0.00318985, 0.00322408, 0.00326565, 0.0032447, 0.00326958, 0.0032918, 0.0033366, 0.00343599, 0.00331577, 0.00336174, 0.00326514, 0.00315005, 0.00315537, 0.00307755, 0.00310232, 0.00303063, 0.0030227, 0.0030028, 0.00297519, 0.00298982, 0.00287195, 0.00283802, 0.00279736, 0.00272267], "sma_taiex": null, "ratio_tpex": [0.39668911, 0.39107863, 0.38290807, 0.38305164, 0.38545504, 0.39285474, 0.39096438, 0.38162894, 0.37181419, 0.36698138, 0.36827288, 0.37402753, 0.3754417, 0.36545296, 0.36481825, 0.37454447, 0.38181068, 0.37084485, 0.36928369, 0.36444862, 0.35546194, 0.34356537, 0.33999489, 0.33624854, 0.34176134, 0.35296784, 0.36589517, 0.35501792, 0.36053379, 0.37375415, 0.36466911, 0.35152488, 0.35142334, 0.34675615, 0.33418456, 0.32862972, 0.32331512, 0.31990054, 0.32582217, 0.33278657, 0.34053847, 0.33397975, 0.33767038, 0.33538462, 0.3386392, 0.35420661, 0.34247642, 0.34444794, 0.33322072, 0.32092614, 0.32110226, 0.31187411, 0.31229594, 0.30898876, 0.30845329, 0.30467811, 0.29408605, 0.28813559, 0.27651893, 0.27209679, 0.27667051, 0.27782146], "sma_tpex": null, "twii": [30810.58, 31408.7, 31639.29, 31759.99, 31246.37, 31746.08, 31961.51, 32064.52, 32317.92, 32803.82, 32536.27, 32063.75, 31624.03, 32195.36, 32289.81, 31801.27, 31782.92, 32404.62, 33072.97, 33605.71, 33773.26, 34700.82, 35413.07, 35414.49, 35095.09, 34323.65, 32828.88, 33672.94, 33599.54, 32110.42, 32771.87, 34114.19, 33581.86, 33400.32, 33342.51, 33836.57, 34348.58, 33689.68, 33543.88, 32722.5, 32612.24, 33439.11, 33337.62, 33112.59, 32518.16, 31722.99, 33174.82, 32572.43, 33229.82, 34761.38, 34861.16, 35417.83, 35457.29, 36296.12, 36722.14, 37132.02, 36804.34, 36958.8, 37605.11, 37878.47, 37714.15, 38932.4], "tpex": [291.16, 292.78, 295.11, 297.61, 293.16, 297.82, 299.26, 302.65, 305.26, 309.28, 305.48, 300.78, 294.32, 298.26, 301.52, 296.36, 290.72, 296.62, 296.52, 297.71, 303.83, 311.44, 313.24, 316.73, 316.01, 308.81, 293.8, 304.21, 306.49, 288.96, 297.53, 311.5, 311.59, 312.9, 317.19, 321.03, 329.4, 329.79, 328.4, 317.02, 312.74, 324.87, 322.8, 325.0, 320.4, 307.73, 321.19, 317.9, 325.61, 341.2, 342.57, 349.5, 352.23, 356.0, 359.86, 365.96, 372.34, 383.5, 390.57, 395.08, 381.32, 381.54], "default_index": "tpex"};
     if (!data) return;
     const symbol = "7757";
     function start(){
@@ -103,103 +109,161 @@
       const el = document.getElementById('rs_chart_' + symbol);
       const chart = echarts.init(el, null, { renderer: 'canvas' });
       let mode = 'year';
-      let showTwii = true;
+      // 預設右軸：上櫃股票配櫃買，其餘配加權；user 可改
+      let idxKey = data.default_index || 'taiex';
+      const IDX_META = {
+        taiex: { name: '加權指數', color: '#1e40af', data: data.twii },
+        tpex:  { name: '櫃買指數', color: '#7c3aed', data: data.tpex },
+      };
+      const MODE_META = {
+        year:        { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
+        quarter:     { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
+        ms_taiex:    { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
+        ms_tpex:     { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
+        ratio_taiex: { label: '個股/加權 比值',   type: 'ratio',     color: '#ea580c',
+                       smaColor: '#1e40af', ratioKey: 'ratio_taiex', smaKey: 'sma_taiex',
+                       smaLabel: '加權 240 日均線' },
+        ratio_tpex:  { label: '個股/櫃買 比值',   type: 'ratio',     color: '#db2777',
+                       smaColor: '#7c3aed', ratioKey: 'ratio_tpex', smaKey: 'sma_tpex',
+                       smaLabel: '櫃買 240 日均線' },
+      };
 
       function build() {
-        const rsValues = data[mode] || [];
-        const rsLabel = (mode === 'year') ? '年 RS' : '季 RS';
-        const last = rsValues.filter(v => v != null).slice(-1)[0];
-        const lineColor = last == null ? '#ff7847' : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : '#ff7847'));
+        const meta = MODE_META[mode];
+        const isRs        = (meta.type === 'rs');
+        const isMansfield = (meta.type === 'mansfield');
+        const isRatio     = (meta.type === 'ratio');
 
-        const series = [{
-          name: rsLabel,
-          type: 'line',
-          smooth: true,
-          symbol: 'none',
-          yAxisIndex: 0,
-          data: rsValues,
-          connectNulls: true,
-          areaStyle: { color: 'rgba(255,120,71,0.12)' },
-          lineStyle: { color: lineColor, width: 2 },
-          markLine: {
-            symbol: 'none', silent: true,
-            data: [{ yAxis: 80,
-              lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
-              label: {
-                formatter: '強勢 80',
-                color: '#10b981',
-                fontSize: 11,
-                fontWeight: 600,
-                position: 'insideEndTop',
-                distance: [4, 2],
-                backgroundColor: 'rgba(255,255,255,0.92)',
-                padding: [2, 5],
-                borderRadius: 3,
-              } }],
-          },
-        }];
+        // === 主線資料 + 線色 ===
+        let series = [];
+        let yAxisLeft;
 
-        const hasTwii = showTwii && Array.isArray(data.twii) && data.twii.length;
-        if (hasTwii) {
+        if (isRatio) {
+          // 比值 + 240 日均線兩條線：交叉判讀，Y 軸 auto-scale，無 markLine（0 不存在）
+          const ratioData = data[meta.ratioKey] || [];
+          const smaData   = data[meta.smaKey]   || [];
+          series = [
+            { name: meta.label, type: 'line', smooth: false, symbol: 'none',
+              yAxisIndex: 0, data: ratioData, connectNulls: true,
+              lineStyle: { color: meta.color, width: 1.5 } },
+            { name: meta.smaLabel, type: 'line', smooth: true, symbol: 'none',
+              yAxisIndex: 0, data: smaData, connectNulls: true,
+              lineStyle: { color: meta.smaColor, width: 1.8, type: 'dashed' } },
+          ];
+          yAxisLeft = {
+            type: 'value', scale: true, name: '比值', position: 'left',
+            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11,
+              formatter: v => v.toExponential(1) },  // 比值很小用科學記號
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          };
+        } else {
+          // RS / Mansfield：單線 + markLine
+          const values = data[mode] || [];
+          let lineColor = meta.color;
+          if (isRs) {
+            const last = values.filter(v => v != null).slice(-1)[0];
+            lineColor = last == null ? '#ff7847'
+                      : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
+          }
+          series = [{
+            name: meta.label, type: 'line', smooth: true, symbol: 'none',
+            yAxisIndex: 0, data: values, connectNulls: true,
+            areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
+            lineStyle: { color: lineColor, width: 2 },
+            markLine: {
+              symbol: 'none', silent: true,
+              data: [{
+                yAxis: isMansfield ? 0 : 80,
+                lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
+                label: {
+                  formatter: isMansfield ? '相對中性位' : '強勢 80',
+                  color: '#10b981',
+                  fontSize: 11, fontWeight: 600,
+                  position: 'insideEndTop', distance: [4, 2],
+                  backgroundColor: 'rgba(255,255,255,0.92)',
+                  padding: [2, 5], borderRadius: 3,
+                }
+              }]
+            },
+          }];
+          yAxisLeft = isMansfield ? {
+            type: 'value', scale: true, name: '相對強度 %', position: 'left',
+            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11,
+              formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          } : {
+            type: 'value', min: 0, max: 100, interval: 20,
+            name: 'RS', position: 'left',
+            nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11 },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          };
+        }
+
+        const idx = (idxKey !== 'none') ? IDX_META[idxKey] : null;
+        const hasIdx = !!(idx && Array.isArray(idx.data) && idx.data.length);
+        if (hasIdx) {
           series.push({
-            name: '加權指數',
-            type: 'line',
-            smooth: true,
-            symbol: 'none',
+            name: idx.name,
+            type: 'line', smooth: true, symbol: 'none',
             yAxisIndex: 1,
-            data: data.twii,
+            data: idx.data,
             connectNulls: true,
-            lineStyle: { color: '#1e40af', width: 1.6 },
+            lineStyle: { color: idx.color, width: 1.6 },
           });
         }
 
         chart.setOption({
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'cross', label: { backgroundColor: '#475569' } },
-          },
+          tooltip: { trigger: 'axis',
+            axisPointer: { type: 'cross', label: { backgroundColor: '#475569' } } },
           legend: { data: series.map(s => s.name), top: 4, textStyle: { fontSize: 12 } },
-          grid: { left: 50, right: hasTwii ? 64 : 20, top: 36, bottom: 32 },
+          grid: { left: 56, right: hasIdx ? 64 : 20, top: 36, bottom: 32 },
           xAxis: {
-            type: 'category',
-            data: data.dates,
-            boundaryGap: false,
+            type: 'category', data: data.dates, boundaryGap: false,
             axisLabel: { color: '#64748b', fontSize: 11 },
           },
           yAxis: [
+            yAxisLeft,
             {
-              type: 'value', min: 0, max: 100, interval: 20,
-              name: 'RS', position: 'left',
-              nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
-              axisLabel: { color: '#64748b', fontSize: 11 },
-              splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-            },
-            {
-              type: 'value', name: '加權指數', position: 'right',
-              show: hasTwii,
-              nameTextStyle: { color: '#1e40af', fontSize: 11, padding: [0,0,4,0] },
-              axisLabel: { color: '#1e40af', fontSize: 11,
+              type: 'value', name: hasIdx ? idx.name : '', position: 'right',
+              show: hasIdx, scale: true,
+              nameTextStyle: { color: hasIdx ? idx.color : '#999', fontSize: 11, padding: [0,0,4,0] },
+              axisLabel: { color: hasIdx ? idx.color : '#999', fontSize: 11,
                 formatter: v => (v >= 10000 ? (v/1000).toFixed(1)+'k' : v.toFixed(0)) },
               splitLine: { show: false },
-              scale: true,
             },
           ],
           series: series,
-        }, true);  // notMerge=true，避免 toggle 時殘留舊 series
+        }, true);
       }
-      build();
+
+      function updateIndexButtons() {
+        toolbar.querySelectorAll('.rs-idx-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.idx === idxKey);
+        });
+      }
 
       const toolbar = document.getElementById('rs_toolbar_' + symbol);
-      toolbar.querySelectorAll('.rs-btn').forEach(btn => {
+      toolbar.querySelectorAll('[data-group="mode"] .rs-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          toolbar.querySelectorAll('.rs-btn').forEach(b => b.classList.remove('active'));
+          toolbar.querySelectorAll('[data-group="mode"] .rs-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           mode = btn.dataset.mode;
           build();
         });
       });
-      const cb = document.getElementById('rs_twii_' + symbol);
-      cb.addEventListener('change', () => { showTwii = cb.checked; build(); });
+      toolbar.querySelectorAll('.rs-idx-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          idxKey = btn.dataset.idx;
+          updateIndexButtons();
+          build();
+        });
+      });
+      updateIndexButtons();
+      build();
+
       window.addEventListener('resize', () => chart.resize());
     }
     start();
@@ -1216,23 +1280,10 @@
 
 <section class="panel">
   <div class="panel-header">
-    <h2>所屬題材 <span class="muted">(1)</span></h2>
+    <h2>所屬題材 <span class="muted">(0)</span></h2>
   </div>
   
-  <div class="topic-grid compact">
-    
-    <a href="../topic/觀光餐旅.html" class="topic-card">
-      <div class="topic-card-accent" style="background:#ec4899;"></div>
-      <div class="topic-card-body">
-        <div class="topic-card-header">
-          <h3>觀光餐旅</h3>
-          <span class="pill" style="background:#ec489922; color:#ec4899;">傳產</span>
-        </div>
-        <p class="topic-card-desc">國旅、出境、餐飲回溫。2026 年運動賽事 + 日圓走勢影響。</p>
-      </div>
-    </a>
-    
-  </div>
+  <p class="muted" style="padding:16px 22px;">此股票尚未被任何題材收錄。</p>
   
 </section>
 

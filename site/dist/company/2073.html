@@ -80,22 +80,28 @@
 <section class="panel rs-history-panel">
   <div class="panel-header">
     <h2>RS 評分走勢</h2>
-    <span class="muted">近 106 個交易日 · 綠虛線為強勢線 80</span>
+    <span class="muted">近 106 個交易日 · RS 強勢線 80 / 相對中性位 0 / 比值&均線交叉</span>
   </div>
   <div class="rs-chart-toolbar" id="rs_toolbar_2073">
-    <div class="rs-mode-group">
+    <div class="rs-mode-group" data-group="mode">
       <button type="button" class="rs-btn active" data-mode="year">年 RS（240 日）</button>
       <button type="button" class="rs-btn" data-mode="quarter">季 RS（60 日）</button>
+      <button type="button" class="rs-btn" data-mode="ms_taiex">vs 加權</button>
+      <button type="button" class="rs-btn" data-mode="ms_tpex">vs 櫃買</button>
+      <button type="button" class="rs-btn" data-mode="ratio_taiex">比值 vs 加權</button>
+      <button type="button" class="rs-btn" data-mode="ratio_tpex">比值 vs 櫃買</button>
     </div>
-    <label class="rs-twii-toggle">
-      <input type="checkbox" id="rs_twii_2073" checked>
-      <span>右軸疊加加權指數</span>
-    </label>
+    <span class="rs-toolbar-label">右軸疊加</span>
+    <div class="rs-mode-group rs-index-group" data-group="index">
+      <button type="button" class="rs-idx-btn" data-idx="none">無</button>
+      <button type="button" class="rs-idx-btn" data-idx="taiex">加權</button>
+      <button type="button" class="rs-idx-btn" data-idx="tpex">櫃買</button>
+    </div>
   </div>
   <div id="rs_chart_2073" style="height:280px; width:100%; padding:4px;"></div>
   <script>
   (function(){
-    const data = {"dates": ["25/04/16", "25/04/17", "25/04/24", "25/04/25", "25/04/28", "25/05/21", "25/05/23", "25/05/27", "25/05/29", "25/06/02", "25/06/03", "25/06/05", "25/06/09", "25/06/13", "25/06/16", "25/06/17", "25/06/20", "25/06/23", "25/07/07", "25/07/10", "25/07/11", "25/07/15", "25/07/16", "25/07/18", "25/07/24", "25/07/25", "25/07/28", "25/07/31", "25/08/01", "25/08/04", "25/08/05", "25/08/07", "25/08/14", "25/08/18", "25/08/19", "25/08/21", "25/08/22", "25/08/27", "25/09/03", "25/09/05", "25/09/08", "25/09/09", "25/09/12", "25/09/19", "25/09/22", "25/09/23", "25/10/03", "25/10/07", "25/10/09", "25/10/13", "25/10/22", "25/10/23", "25/10/27", "25/10/28", "25/10/31", "25/11/03", "25/11/04", "25/11/06", "25/11/20", "25/11/21", "25/12/05", "25/12/08", "25/12/15", "25/12/19", "25/12/22", "25/12/23", "25/12/24", "25/12/31", "26/01/02", "26/01/05", "26/01/07", "26/01/08", "26/01/09", "26/01/12", "26/01/13", "26/01/16", "26/01/20", "26/01/22", "26/01/26", "26/01/28", "26/01/29", "26/02/03", "26/02/05", "26/02/10", "26/02/23", "26/02/25", "26/02/26", "26/03/02", "26/03/04", "26/03/06", "26/03/13", "26/03/17", "26/03/20", "26/03/25", "26/03/26", "26/03/27", "26/03/30", "26/04/01", "26/04/07", "26/04/10", "26/04/14", "26/04/15", "26/04/17", "26/04/20", "26/04/21", "26/04/23"], "year": [62, 74, 67, 71, 70, 63, 58, 57, 59, 60, 63, 61, 61, 77, 76, 71, 75, 70, 76, 71, 69, 76, 75, 73, 72, 77, 75, 68, 65, 59, 66, 69, 69, null, 66, 67, null, 66, 68, 60, 57, 60, 65, 65, 63, 63, 60, 61, null, null, null, 59, 65, 65, 73, 69, 62, 65, null, 65, 70, 66, 64, null, 65, 54, 57, 56, null, null, 53, null, 52, 56, 59, 58, null, 57, 56, null, null, null, 53, 59, 60, 56, null, null, 61, 66, null, 59, 64, 62, 57, 53, null, 47, 32, 34, 28, null, null, null, 30, 34], "quarter": [null, null, 91, null, null, null, 81, 82, 78, null, null, 73, 80, null, null, 86, 88, 82, 46, 39, 40, null, null, null, null, null, null, null, null, null, null, null, 61, 66, null, null, 66, null, null, 23, 21, 36, 33, null, null, null, 32, 39, 32, 33, 36, 23, null, null, 63, 45, null, 40, 62, null, 65, 54, null, 62, 47, null, null, null, 39, 44, 37, 36, 33, null, 30, null, 42, 26, null, 20, 34, 29, null, null, null, 14, 19, 18, null, null, 63, null, null, null, null, 42, 62, 63, null, 62, 54, 60, 56, 57, 49, 54], "twii": [19468.0, 19338.73, 19478.81, 19872.73, 20034.41, 21803.91, 21652.24, 21336.54, 21347.3, 21002.71, 21126.93, 21674.43, 21790.29, 22072.95, 22049.9, 22211.59, 22045.74, 21732.02, 22428.72, 22693.25, 22751.03, 22835.94, 23042.9, 23383.13, 23373.73, 23364.38, 23412.98, 23542.52, 23434.38, 23378.94, 23660.59, 24003.77, 24238.1, 24482.52, 24353.5, 23962.13, 23764.47, 24519.9, 24100.3, 24494.58, 24547.38, 24855.18, 25474.64, 25578.37, 25880.6, 26247.37, 26761.06, 27211.95, 27301.92, 26923.42, 27648.91, 27532.26, 27993.63, 27949.11, 28233.35, 28334.59, 28116.56, 27899.45, 27426.36, 26434.94, 27980.89, 28303.78, 27866.94, 27696.35, 28149.64, 28310.47, 28371.98, 28963.6, 29349.81, 30105.04, 30435.47, 30360.55, 30288.96, 30567.29, 30707.22, 31408.7, 31759.99, 31746.08, 32064.52, 32803.82, 32536.27, 32195.36, 31801.27, 33072.97, 33773.26, 35413.07, 35414.49, 35095.09, 32828.88, 33599.54, 33400.32, 33836.57, 33543.88, 33439.11, 33337.62, 33112.59, 32518.16, 33174.82, 33229.82, 35417.83, 36296.12, 36722.14, 36804.34, 36958.8, 37605.11, 37714.15]};
+    const data = {"dates": ["25/04/16", "25/04/17", "25/04/24", "25/04/25", "25/04/28", "25/05/21", "25/05/23", "25/05/27", "25/05/29", "25/06/02", "25/06/03", "25/06/05", "25/06/09", "25/06/13", "25/06/16", "25/06/17", "25/06/20", "25/06/23", "25/07/07", "25/07/10", "25/07/11", "25/07/15", "25/07/16", "25/07/18", "25/07/24", "25/07/25", "25/07/28", "25/07/31", "25/08/01", "25/08/04", "25/08/05", "25/08/07", "25/08/14", "25/08/18", "25/08/19", "25/08/21", "25/08/22", "25/08/27", "25/09/03", "25/09/05", "25/09/08", "25/09/09", "25/09/12", "25/09/19", "25/09/22", "25/09/23", "25/10/03", "25/10/07", "25/10/09", "25/10/13", "25/10/22", "25/10/23", "25/10/27", "25/10/28", "25/10/31", "25/11/03", "25/11/04", "25/11/06", "25/11/20", "25/11/21", "25/12/05", "25/12/08", "25/12/15", "25/12/19", "25/12/22", "25/12/23", "25/12/24", "25/12/31", "26/01/02", "26/01/05", "26/01/07", "26/01/08", "26/01/09", "26/01/12", "26/01/13", "26/01/16", "26/01/20", "26/01/22", "26/01/26", "26/01/28", "26/01/29", "26/02/03", "26/02/05", "26/02/10", "26/02/23", "26/02/25", "26/02/26", "26/03/02", "26/03/04", "26/03/06", "26/03/13", "26/03/17", "26/03/20", "26/03/25", "26/03/26", "26/03/27", "26/03/30", "26/04/01", "26/04/07", "26/04/10", "26/04/14", "26/04/15", "26/04/17", "26/04/20", "26/04/21", "26/04/23"], "year": [62, 74, 67, 71, 70, 63, 58, 57, 59, 60, 63, 61, 61, 77, 76, 71, 75, 70, 76, 71, 69, 76, 75, 73, 72, 77, 75, 68, 65, 59, 66, 69, 69, null, 66, 67, null, 66, 68, 60, 57, 60, 65, 65, 63, 63, 60, 61, null, null, null, 59, 65, 65, 73, 69, 62, 65, null, 65, 70, 66, 64, null, 65, 54, 57, 56, null, null, 53, null, 52, 56, 59, 58, null, 57, 56, null, null, null, 53, 59, 60, 56, null, null, 61, 66, null, 59, 64, 62, 57, 53, null, 47, 32, 34, 28, null, null, null, 30, 34], "quarter": [null, null, 91, null, null, null, 81, 82, 78, null, null, 73, 80, null, null, 86, 88, 82, 46, 39, 40, null, null, null, null, null, null, null, null, null, null, null, 61, 66, null, null, 66, null, null, 23, 21, 36, 33, null, null, null, 32, 39, 32, 33, 36, 23, null, null, 63, 45, null, 40, 62, null, 65, 54, null, 62, 47, null, null, null, 39, 44, 37, 36, 33, null, 30, null, 42, 26, null, 20, 34, 29, null, null, null, 14, 19, 18, null, null, 63, null, null, null, null, 42, 62, 63, null, 62, 54, 60, 56, 57, 49, 54], "ms_taiex": [8.5, 15.9, 12.7, 10.5, 9.6, 1.7, -0.8, -2.5, -1.0, -0.0, 1.3, -2.2, -2.6, 5.9, 5.1, 0.9, 2.0, -0.4, -0.4, -3.9, -5.3, -2.1, -3.0, -4.3, -4.1, -3.6, -4.2, -4.6, -4.1, -9.3, -5.0, -6.2, -6.9, -7.8, -9.1, -7.2, -6.2, -10.6, -5.1, -9.9, -11.2, -11.2, -12.5, -12.9, -14.6, -15.8, -18.9, -19.7, -18.5, -17.5, -17.9, -21.5, -18.9, -19.8, -19.0, -19.2, -22.5, -19.1, -16.1, -17.4, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, -28.6, null, -31.4, -32.8, -34.1, -35.2, -33.2, -26.7, -25.6, -21.6, -26.9, -23.0, -21.8, -21.3, -24.1, -21.4, -22.4, null, null, null, null, -28.2, -28.3, -30.4, -30.0], "ms_tpex": [15.3, 22.7, 19.5, 17.1, 15.8, 10.9, 8.0, 5.8, 6.9, 8.6, 10.3, 6.9, 6.6, 15.6, 14.6, 10.7, 13.3, 9.0, 11.0, 7.2, 5.1, 9.1, 8.7, 7.5, 8.4, 9.0, 8.0, 8.6, 7.6, 1.4, 5.9, 4.9, 2.3, 1.1, -0.5, 0.3, 1.1, -4.5, -0.9, -6.0, -7.9, -6.8, -5.5, -7.7, -9.5, -9.4, -10.8, -10.7, -9.3, -8.3, -7.7, -11.6, -8.0, -9.1, -7.5, -7.9, -10.9, -8.3, -3.7, -6.3, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, -21.3, null, -22.2, -24.2, -24.6, -26.7, -25.0, -17.5, -18.0, -16.2, -23.0, -21.7, -20.1, -19.3, -23.4, -21.0, -20.8, null, null, null, null, -30.2, -32.1, -34.2, -32.2], "ratio_taiex": [0.00143826, 0.00153578, 0.0014888, 0.00145929, 0.00144751, 0.00132774, 0.00129317, 0.00127012, 0.00128822, 0.00129983, 0.00131586, 0.00126878, 0.00126203, 0.00137046, 0.00136055, 0.00130562, 0.00131998, 0.00128842, 0.0012863, 0.00124046, 0.00122192, 0.00126336, 0.00125201, 0.0012338, 0.00123429, 0.00124121, 0.00123222, 0.00122544, 0.0012311, 0.00116344, 0.00121721, 0.00119981, 0.00118821, 0.00117635, 0.00115794, 0.00118103, 0.00119296, 0.00113581, 0.00120123, 0.00113903, 0.00112028, 0.00111848, 0.00109913, 0.00109077, 0.00106837, 0.00105153, 0.00100893, 0.00099772, 0.00101092, 0.00102142, 0.0010127, 0.00096614, 0.00099666, 0.00098393, 0.00099173, 0.00098819, 0.00094606, 0.00098568, 0.00101727, 0.00099868, 0.00098103, 0.00095394, 0.00098504, 0.00099111, 0.00093962, 0.00093605, 0.0009305, 0.00091149, 0.00087564, 0.00086032, 0.00085755, 0.00085967, 0.00086335, 0.00085876, 0.0008581, 0.00084849, 0.00082336, 0.000819, 0.00081087, 0.00079259, 0.00080218, 0.00081068, 0.00079242, 0.00077253, 0.00075207, 0.00073419, 0.00072004, 0.00074084, 0.00080722, 0.00081549, 0.00085329, 0.00079204, 0.00082877, 0.00083734, 0.00083989, 0.00080634, 0.00083338, 0.00081688, 0.00077641, 0.0007468, 0.00073286, 0.00073389, 0.00073089, 0.00072784, 0.00070203, 0.00069868], "sma_taiex": [0.00132541, 0.00132566, 0.00132074, 0.00132058, 0.00132049, 0.00130542, 0.00130397, 0.00130259, 0.00130102, 0.0013001, 0.00129942, 0.00129747, 0.00129596, 0.00129427, 0.0012943, 0.00129403, 0.00129373, 0.00129338, 0.00129126, 0.00129128, 0.00129083, 0.00129083, 0.00129055, 0.00128976, 0.00128773, 0.00128724, 0.00128665, 0.00128477, 0.00128358, 0.00128207, 0.00128075, 0.0012797, 0.00127663, 0.00127556, 0.00127423, 0.00127247, 0.0012719, 0.00127009, 0.00126616, 0.00126366, 0.00126153, 0.00125968, 0.00125593, 0.00125245, 0.00125062, 0.00124864, 0.00124426, 0.00124204, 0.00124013, 0.00123842, 0.0012331, 0.00123077, 0.00122862, 0.00122637, 0.0012245, 0.00122253, 0.00122029, 0.00121796, 0.00121197, 0.00120969, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0.00113603, null, 0.00112587, 0.00111947, 0.00111471, 0.00111144, 0.00110841, 0.00110197, 0.00109603, 0.00108892, 0.00108357, 0.00107683, 0.00107112, 0.00106676, 0.00106244, 0.00106054, 0.00105329, null, null, null, null, 0.00101752, 0.00101513, 0.00100863, 0.00099863], "ratio_tpex": [0.13153568, 0.14004149, 0.13631022, 0.13368984, 0.13217264, 0.12572744, 0.12238297, 0.11977371, 0.12100145, 0.12295082, 0.12494382, 0.12102275, 0.12066696, 0.13085042, 0.12975779, 0.12545966, 0.12844847, 0.1237077, 0.12601555, 0.12185092, 0.11957504, 0.12418216, 0.12389419, 0.12261465, 0.12385695, 0.1245865, 0.12358107, 0.12435345, 0.12327479, 0.11630393, 0.12150361, 0.12023044, 0.11729728, 0.11597004, 0.11418391, 0.11519049, 0.1161219, 0.1097191, 0.11404373, 0.10812696, 0.1058588, 0.10708783, 0.10848929, 0.10597083, 0.10392783, 0.10393914, 0.10240461, 0.10251086, 0.10409202, 0.10521886, 0.10587212, 0.10124848, 0.10539836, 0.10409175, 0.10593621, 0.10538994, 0.10191571, 0.10491778, 0.11029848, 0.10733016, 0.10531364, 0.10290811, 0.1035224, 0.10451569, 0.09911936, 0.09896923, 0.0978684, 0.09556907, 0.09243607, 0.09395632, 0.09273735, 0.09319432, 0.09344292, 0.09160066, 0.0923395, 0.09102398, 0.08786667, 0.08730105, 0.08590781, 0.08406622, 0.08543931, 0.08750754, 0.08503172, 0.08616619, 0.08359938, 0.08300345, 0.08051021, 0.08227588, 0.09019741, 0.08939933, 0.09108341, 0.08348129, 0.08465286, 0.08618832, 0.08674102, 0.08215385, 0.08458177, 0.08437374, 0.0792359, 0.07567954, 0.0747191, 0.07489024, 0.0722458, 0.07014342, 0.06759352, 0.06910207], "sma_tpex": [0.11404829, 0.11417222, 0.1140917, 0.11413112, 0.11416955, 0.11332495, 0.11326781, 0.11320566, 0.11315919, 0.11318361, 0.11322606, 0.11321139, 0.1131925, 0.11317156, 0.11325367, 0.11331886, 0.11338392, 0.11344506, 0.1135665, 0.11367199, 0.11373917, 0.11386599, 0.11396542, 0.11407787, 0.11425777, 0.11433189, 0.11439592, 0.11450505, 0.11459104, 0.11464609, 0.11471088, 0.11466387, 0.11470286, 0.11471619, 0.11473526, 0.1148046, 0.11481415, 0.11487407, 0.11502611, 0.11504387, 0.11498963, 0.11494646, 0.11483523, 0.11483108, 0.11478, 0.1147188, 0.11480804, 0.11475814, 0.11471675, 0.11468318, 0.11465121, 0.1145465, 0.11453152, 0.11450596, 0.11451376, 0.11448172, 0.11438355, 0.1144173, 0.11455939, 0.11453309, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0.11124012, null, 0.11070459, 0.11033416, 0.11015062, 0.10990566, 0.10967918, 0.10931769, 0.10898501, 0.10863546, 0.10838478, 0.1081037, 0.10780391, 0.10750679, 0.10719471, 0.10700783, 0.10651855, null, null, null, null, 0.10353117, 0.10325524, 0.10268733, 0.10190339], "twii": [19468.0, 19338.73, 19478.81, 19872.73, 20034.41, 21803.91, 21652.24, 21336.54, 21347.3, 21002.71, 21126.93, 21674.43, 21790.29, 22072.95, 22049.9, 22211.59, 22045.74, 21732.02, 22428.72, 22693.25, 22751.03, 22835.94, 23042.9, 23383.13, 23373.73, 23364.38, 23412.98, 23542.52, 23434.38, 23378.94, 23660.59, 24003.77, 24238.1, 24482.52, 24353.5, 23962.13, 23764.47, 24519.9, 24100.3, 24494.58, 24547.38, 24855.18, 25474.64, 25578.37, 25880.6, 26247.37, 26761.06, 27211.95, 27301.92, 26923.42, 27648.91, 27532.26, 27993.63, 27949.11, 28233.35, 28334.59, 28116.56, 27899.45, 27426.36, 26434.94, 27980.89, 28303.78, 27866.94, 27696.35, 28149.64, 28310.47, 28371.98, 28963.6, 29349.81, 30105.04, 30435.47, 30360.55, 30288.96, 30567.29, 30707.22, 31408.7, 31759.99, 31746.08, 32064.52, 32803.82, 32536.27, 32195.36, 31801.27, 33072.97, 33773.26, 35413.07, 35414.49, 35095.09, 32828.88, 33599.54, 33400.32, 33836.57, 33543.88, 33439.11, 33337.62, 33112.59, 32518.16, 33174.82, 33229.82, 35417.83, 36296.12, 36722.14, 36804.34, 36958.8, 37605.11, 37714.15], "tpex": [212.87, 212.08, 212.75, 216.92, 219.41, 230.26, 228.79, 226.26, 227.27, 222.04, 222.5, 227.23, 227.9, 231.18, 231.2, 231.15, 226.55, 226.34, 228.94, 231.02, 232.49, 232.32, 232.86, 235.29, 232.93, 232.77, 233.45, 232.0, 234.03, 233.87, 237.03, 239.54, 245.53, 248.34, 246.97, 245.68, 244.14, 253.83, 253.85, 258.03, 259.78, 259.6, 258.09, 263.28, 266.05, 265.54, 263.66, 264.85, 265.15, 261.36, 264.47, 262.72, 264.71, 264.19, 264.31, 265.68, 261.0, 262.11, 252.95, 245.97, 260.65, 262.37, 265.16, 262.64, 266.85, 267.76, 269.75, 276.24, 278.03, 275.66, 281.44, 280.06, 279.85, 286.57, 285.36, 292.78, 297.61, 297.82, 302.65, 309.28, 305.48, 298.26, 296.36, 296.52, 303.83, 313.24, 316.73, 316.01, 293.8, 306.49, 312.9, 321.03, 328.4, 324.87, 322.8, 325.0, 320.4, 321.19, 325.61, 349.5, 356.0, 359.86, 372.34, 383.5, 390.57, 381.32], "default_index": "tpex"};
     if (!data) return;
     const symbol = "2073";
     function start(){
@@ -103,103 +109,161 @@
       const el = document.getElementById('rs_chart_' + symbol);
       const chart = echarts.init(el, null, { renderer: 'canvas' });
       let mode = 'year';
-      let showTwii = true;
+      // 預設右軸：上櫃股票配櫃買，其餘配加權；user 可改
+      let idxKey = data.default_index || 'taiex';
+      const IDX_META = {
+        taiex: { name: '加權指數', color: '#1e40af', data: data.twii },
+        tpex:  { name: '櫃買指數', color: '#7c3aed', data: data.tpex },
+      };
+      const MODE_META = {
+        year:        { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
+        quarter:     { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
+        ms_taiex:    { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
+        ms_tpex:     { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
+        ratio_taiex: { label: '個股/加權 比值',   type: 'ratio',     color: '#ea580c',
+                       smaColor: '#1e40af', ratioKey: 'ratio_taiex', smaKey: 'sma_taiex',
+                       smaLabel: '加權 240 日均線' },
+        ratio_tpex:  { label: '個股/櫃買 比值',   type: 'ratio',     color: '#db2777',
+                       smaColor: '#7c3aed', ratioKey: 'ratio_tpex', smaKey: 'sma_tpex',
+                       smaLabel: '櫃買 240 日均線' },
+      };
 
       function build() {
-        const rsValues = data[mode] || [];
-        const rsLabel = (mode === 'year') ? '年 RS' : '季 RS';
-        const last = rsValues.filter(v => v != null).slice(-1)[0];
-        const lineColor = last == null ? '#ff7847' : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : '#ff7847'));
+        const meta = MODE_META[mode];
+        const isRs        = (meta.type === 'rs');
+        const isMansfield = (meta.type === 'mansfield');
+        const isRatio     = (meta.type === 'ratio');
 
-        const series = [{
-          name: rsLabel,
-          type: 'line',
-          smooth: true,
-          symbol: 'none',
-          yAxisIndex: 0,
-          data: rsValues,
-          connectNulls: true,
-          areaStyle: { color: 'rgba(255,120,71,0.12)' },
-          lineStyle: { color: lineColor, width: 2 },
-          markLine: {
-            symbol: 'none', silent: true,
-            data: [{ yAxis: 80,
-              lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
-              label: {
-                formatter: '強勢 80',
-                color: '#10b981',
-                fontSize: 11,
-                fontWeight: 600,
-                position: 'insideEndTop',
-                distance: [4, 2],
-                backgroundColor: 'rgba(255,255,255,0.92)',
-                padding: [2, 5],
-                borderRadius: 3,
-              } }],
-          },
-        }];
+        // === 主線資料 + 線色 ===
+        let series = [];
+        let yAxisLeft;
 
-        const hasTwii = showTwii && Array.isArray(data.twii) && data.twii.length;
-        if (hasTwii) {
+        if (isRatio) {
+          // 比值 + 240 日均線兩條線：交叉判讀，Y 軸 auto-scale，無 markLine（0 不存在）
+          const ratioData = data[meta.ratioKey] || [];
+          const smaData   = data[meta.smaKey]   || [];
+          series = [
+            { name: meta.label, type: 'line', smooth: false, symbol: 'none',
+              yAxisIndex: 0, data: ratioData, connectNulls: true,
+              lineStyle: { color: meta.color, width: 1.5 } },
+            { name: meta.smaLabel, type: 'line', smooth: true, symbol: 'none',
+              yAxisIndex: 0, data: smaData, connectNulls: true,
+              lineStyle: { color: meta.smaColor, width: 1.8, type: 'dashed' } },
+          ];
+          yAxisLeft = {
+            type: 'value', scale: true, name: '比值', position: 'left',
+            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11,
+              formatter: v => v.toExponential(1) },  // 比值很小用科學記號
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          };
+        } else {
+          // RS / Mansfield：單線 + markLine
+          const values = data[mode] || [];
+          let lineColor = meta.color;
+          if (isRs) {
+            const last = values.filter(v => v != null).slice(-1)[0];
+            lineColor = last == null ? '#ff7847'
+                      : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
+          }
+          series = [{
+            name: meta.label, type: 'line', smooth: true, symbol: 'none',
+            yAxisIndex: 0, data: values, connectNulls: true,
+            areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
+            lineStyle: { color: lineColor, width: 2 },
+            markLine: {
+              symbol: 'none', silent: true,
+              data: [{
+                yAxis: isMansfield ? 0 : 80,
+                lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
+                label: {
+                  formatter: isMansfield ? '相對中性位' : '強勢 80',
+                  color: '#10b981',
+                  fontSize: 11, fontWeight: 600,
+                  position: 'insideEndTop', distance: [4, 2],
+                  backgroundColor: 'rgba(255,255,255,0.92)',
+                  padding: [2, 5], borderRadius: 3,
+                }
+              }]
+            },
+          }];
+          yAxisLeft = isMansfield ? {
+            type: 'value', scale: true, name: '相對強度 %', position: 'left',
+            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11,
+              formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          } : {
+            type: 'value', min: 0, max: 100, interval: 20,
+            name: 'RS', position: 'left',
+            nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11 },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          };
+        }
+
+        const idx = (idxKey !== 'none') ? IDX_META[idxKey] : null;
+        const hasIdx = !!(idx && Array.isArray(idx.data) && idx.data.length);
+        if (hasIdx) {
           series.push({
-            name: '加權指數',
-            type: 'line',
-            smooth: true,
-            symbol: 'none',
+            name: idx.name,
+            type: 'line', smooth: true, symbol: 'none',
             yAxisIndex: 1,
-            data: data.twii,
+            data: idx.data,
             connectNulls: true,
-            lineStyle: { color: '#1e40af', width: 1.6 },
+            lineStyle: { color: idx.color, width: 1.6 },
           });
         }
 
         chart.setOption({
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'cross', label: { backgroundColor: '#475569' } },
-          },
+          tooltip: { trigger: 'axis',
+            axisPointer: { type: 'cross', label: { backgroundColor: '#475569' } } },
           legend: { data: series.map(s => s.name), top: 4, textStyle: { fontSize: 12 } },
-          grid: { left: 50, right: hasTwii ? 64 : 20, top: 36, bottom: 32 },
+          grid: { left: 56, right: hasIdx ? 64 : 20, top: 36, bottom: 32 },
           xAxis: {
-            type: 'category',
-            data: data.dates,
-            boundaryGap: false,
+            type: 'category', data: data.dates, boundaryGap: false,
             axisLabel: { color: '#64748b', fontSize: 11 },
           },
           yAxis: [
+            yAxisLeft,
             {
-              type: 'value', min: 0, max: 100, interval: 20,
-              name: 'RS', position: 'left',
-              nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
-              axisLabel: { color: '#64748b', fontSize: 11 },
-              splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-            },
-            {
-              type: 'value', name: '加權指數', position: 'right',
-              show: hasTwii,
-              nameTextStyle: { color: '#1e40af', fontSize: 11, padding: [0,0,4,0] },
-              axisLabel: { color: '#1e40af', fontSize: 11,
+              type: 'value', name: hasIdx ? idx.name : '', position: 'right',
+              show: hasIdx, scale: true,
+              nameTextStyle: { color: hasIdx ? idx.color : '#999', fontSize: 11, padding: [0,0,4,0] },
+              axisLabel: { color: hasIdx ? idx.color : '#999', fontSize: 11,
                 formatter: v => (v >= 10000 ? (v/1000).toFixed(1)+'k' : v.toFixed(0)) },
               splitLine: { show: false },
-              scale: true,
             },
           ],
           series: series,
-        }, true);  // notMerge=true，避免 toggle 時殘留舊 series
+        }, true);
       }
-      build();
+
+      function updateIndexButtons() {
+        toolbar.querySelectorAll('.rs-idx-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.idx === idxKey);
+        });
+      }
 
       const toolbar = document.getElementById('rs_toolbar_' + symbol);
-      toolbar.querySelectorAll('.rs-btn').forEach(btn => {
+      toolbar.querySelectorAll('[data-group="mode"] .rs-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          toolbar.querySelectorAll('.rs-btn').forEach(b => b.classList.remove('active'));
+          toolbar.querySelectorAll('[data-group="mode"] .rs-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           mode = btn.dataset.mode;
           build();
         });
       });
-      const cb = document.getElementById('rs_twii_' + symbol);
-      cb.addEventListener('change', () => { showTwii = cb.checked; build(); });
+      toolbar.querySelectorAll('.rs-idx-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          idxKey = btn.dataset.idx;
+          updateIndexButtons();
+          build();
+        });
+      });
+      updateIndexButtons();
+      build();
+
       window.addEventListener('resize', () => chart.resize());
     }
     start();
