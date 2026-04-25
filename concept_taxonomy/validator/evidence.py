@@ -188,7 +188,9 @@ TWSE_TO_SEGMENT = {
     "運動休閒": "CONSUMER",
     "貿易百貨": "CONSUMER",
     "建材營造": "MATERIALS",
-    "其他": "MATERIALS",        # finlab "其他" 多為傳產（化工/食品/雜貨）→ 給 MATERIALS 兜底
+    # "其他" / "其他業" 故意 mapping 為 None → 強制走 Coverage industry_folder 二次推論
+    # （金融租賃/保全/殯葬/教育 等都會被 finlab 標「其他」，不能用 MATERIALS 兜底）
+    "其他": None,
     # 車用
     "汽車工業": "EV_AUTO",
     # 軍工 / 國防
@@ -202,7 +204,7 @@ TWSE_TO_SEGMENT = {
     "食品工業": "CONSUMER",
     "貿易百貨業": "CONSUMER",
     "觀光餐旅": "CONSUMER",
-    "其他業": "MATERIALS",      # 多數為傳統製造/化工
+    "其他業": None,             # 同上，走 Coverage 二次推論
     # 原物料
     "塑膠工業": "MATERIALS",
     "化學工業": "MATERIALS",
@@ -233,3 +235,123 @@ TWSE_TO_SEGMENT = {
 def infer_segment_from_twse(twse_industry: str) -> Optional[str]:
     """從 finlab 產業類別粗估 industry_segment。回 None 表示需 Coverage / LLM 細分。"""
     return TWSE_TO_SEGMENT.get(twse_industry)
+
+
+# Coverage industry_folder（My-TW-Coverage 自身英文分類）→ INDUSTRY_SEGMENTS
+COVERAGE_FOLDER_TO_SEGMENT = {
+    "Semiconductors": "AI_SEMI",
+    "Semiconductor Equipment": "AI_SEMI",
+    "Communication Equipment": "NETCOM",
+    "Computer Hardware": "COMP_HW",
+    "Electronic Components": "ELEC_COMP",
+    "Electronics & Computer Distribution": "ELEC_COMP",
+    "Information Technology Services": "SOFTWARE",
+    "Software—Application": "SOFTWARE",
+    "Software—Infrastructure": "SOFTWARE",
+    "Internet Content & Information": "SOFTWARE",
+    "Banks—Regional": "FIN",
+    "Banks—Diversified": "FIN",
+    "Capital Markets": "FIN",
+    "Insurance—Diversified": "FIN",
+    "Insurance—Life": "FIN",
+    "Insurance—Property & Casualty": "FIN",
+    "Credit Services": "FIN",
+    "Asset Management": "FIN",
+    "Financial Conglomerates": "FIN",
+    "Conglomerates": "FIN",
+    "Auto Manufacturers": "EV_AUTO",
+    "Auto Parts": "EV_AUTO",
+    "Auto & Truck Dealerships": "EV_AUTO",
+    "Aerospace & Defense": "DEFENSE",
+    "Biotechnology": "MED_BIO",
+    "Drug Manufacturers—General": "MED_BIO",
+    "Drug Manufacturers—Specialty & Generic": "MED_BIO",
+    "Medical Devices": "MED_BIO",
+    "Medical Distribution": "MED_BIO",
+    "Diagnostics & Research": "MED_BIO",
+    "Healthcare Plans": "MED_BIO",
+    "Medical Care Facilities": "MED_BIO",
+    "Pharmaceutical Retailers": "MED_BIO",
+    "Marine Shipping": "LOGISTICS",
+    "Airlines": "LOGISTICS",
+    "Trucking": "LOGISTICS",
+    "Integrated Freight & Logistics": "LOGISTICS",
+    "Railroads": "LOGISTICS",
+    "Steel": "MATERIALS",
+    "Aluminum": "MATERIALS",
+    "Copper": "MATERIALS",
+    "Other Industrial Metals & Mining": "MATERIALS",
+    "Specialty Chemicals": "MATERIALS",
+    "Chemicals": "MATERIALS",
+    "Paper & Paper Products": "MATERIALS",
+    "Building Products & Equipment": "MATERIALS",
+    "Building Materials": "MATERIALS",
+    "Lumber & Wood Production": "MATERIALS",
+    "Packaging & Containers": "MATERIALS",
+    "Rubber & Plastics": "MATERIALS",
+    "Textile Manufacturing": "MATERIALS",
+    "Apparel Manufacturing": "CONSUMER",
+    "Footwear & Accessories": "CONSUMER",
+    "Apparel Retail": "CONSUMER",
+    "Consumer Electronics": "COMP_HW",
+    "Electronic Gaming & Multimedia": "SOFTWARE",
+    "Personal Services": "CONSUMER",
+    "Specialty Retail": "CONSUMER",
+    "Department Stores": "CONSUMER",
+    "Grocery Stores": "CONSUMER",
+    "Restaurants": "CONSUMER",
+    "Lodging": "CONSUMER",
+    "Travel Services": "CONSUMER",
+    "Leisure": "CONSUMER",
+    "Furnishings, Fixtures & Appliances": "CONSUMER",
+    "Household & Personal Products": "CONSUMER",
+    "Education & Training Services": "CONSUMER",
+    "Real Estate Services": "MATERIALS",
+    "Real Estate—Diversified": "MATERIALS",
+    "Real Estate—Development": "MATERIALS",
+    "REIT—Diversified": "FIN",
+    "Engineering & Construction": "MATERIALS",
+    "Specialty Industrial Machinery": "ELEC_COMP",
+    "Farm & Heavy Construction Machinery": "MATERIALS",
+    "Industrial Distribution": "ELEC_COMP",
+    "Tools & Accessories": "MATERIALS",
+    "Metal Fabrication": "MATERIALS",
+    "Pollution & Treatment Controls": "POWER_GREEN",
+    "Waste Management": "POWER_GREEN",
+    "Utilities—Regulated Electric": "POWER_GREEN",
+    "Utilities—Independent Power Producers": "POWER_GREEN",
+    "Utilities—Renewable": "POWER_GREEN",
+    "Utilities—Diversified": "POWER_GREEN",
+    "Solar": "POWER_GREEN",
+    "Oil & Gas Integrated": "POWER_GREEN",
+    "Oil & Gas E&P": "POWER_GREEN",
+    "Oil & Gas Refining & Marketing": "POWER_GREEN",
+    "Oil & Gas Equipment & Services": "POWER_GREEN",
+    "Coking Coal": "MATERIALS",
+    "Security & Protection Services": "SOFTWARE",
+    "Staffing & Employment Services": "SOFTWARE",
+    "Specialty Business Services": "SOFTWARE",
+    "Consulting Services": "SOFTWARE",
+    "Rental & Leasing Services": "FIN",
+    "Beverages—Wineries & Distilleries": "CONSUMER",
+    "Beverages—Non-Alcoholic": "CONSUMER",
+    "Confectioners": "CONSUMER",
+    "Packaged Foods": "CONSUMER",
+    "Farm Products": "CONSUMER",
+    "Tobacco": "CONSUMER",
+    "Recreational Vehicles": "CONSUMER",
+}
+
+
+def infer_segment_with_coverage(
+    twse_industry: str,
+    coverage_folder: str = "",
+) -> Optional[str]:
+    """雙來源推論 segment：finlab 主，Coverage industry_folder 為次（finlab 落空時兜底）。"""
+    primary = TWSE_TO_SEGMENT.get(twse_industry)
+    if primary:
+        return primary
+    # 落空 → 用 Coverage folder
+    if coverage_folder:
+        return COVERAGE_FOLDER_TO_SEGMENT.get(coverage_folder)
+    return None

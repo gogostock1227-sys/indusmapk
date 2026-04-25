@@ -30,6 +30,7 @@ from validator.evidence import (  # noqa: E402
     extract_coverage,
     find_coverage_file,
     infer_segment_from_twse,
+    infer_segment_with_coverage,
     load_finlab_snapshot,
     lookup_finlab,
 )
@@ -43,7 +44,27 @@ from validator.schema import (  # noqa: E402
 # Coverage 關鍵字 → 位階 / 題材對應
 # ─────────────────────────────────────────────────────────────────────────────
 POSITION_KEYWORDS: list[tuple[str, str]] = [
-    # 半導體位階（特化詞放前）
+    # ═══════════════════════════════════════════════════════════
+    # 第一層：高特異性 / 反模式優先（先 match 才能 override 後面通用詞）
+    # ═══════════════════════════════════════════════════════════
+    # 矽晶圓必須在「晶圓代工」之前（否則 6488 環球晶 / 3532 台勝科會被誤判）
+    ("12 吋拋光晶圓", "MAT_WAFER"), ("12 吋晶圓", "MAT_WAFER"), ("拋光晶圓", "MAT_WAFER"),
+    ("矽晶圓供應", "MAT_WAFER"), ("矽晶圓 廠", "MAT_WAFER"), ("矽晶圓上游", "MAT_WAFER"),
+    ("大尺寸晶圓", "MAT_WAFER"), ("magnaboard", "MAT_WAFER"), ("Wafer 代理", "DISTRIB"),
+    # 服務業必須在「品牌」「ODM」之前（否則 5871 中租 / 9917 中保科會被誤判）
+    ("金融租賃", "END_USER"), ("融資租賃", "END_USER"), ("汽車金融", "END_USER"), ("汽車融資", "END_USER"),
+    ("房屋仲介", "END_USER"), ("房地產仲介", "END_USER"), ("不動產仲介", "END_USER"),
+    ("保全服務", "END_USER"), ("保全集團", "END_USER"), ("物業管理", "END_USER"),
+    ("殯葬服務", "END_USER"), ("殯葬業", "END_USER"), ("生前契約", "END_USER"),
+    ("補教", "END_USER"), ("補習班", "END_USER"), ("教育機構", "END_USER"),
+    ("飯店", "END_USER"), ("旅館", "END_USER"), ("觀光", "END_USER"), ("郵輪", "END_USER"),
+    ("印刷業", "BRAND"), ("商業印刷", "BRAND"),
+    ("無人機系統整合", "ODM_SYS"), ("無人機整合", "ODM_SYS"), ("國防電子整合", "ODM_SYS"),
+    ("系統整合服務", "SVC_SAAS"), ("系統整合 (SI)", "SVC_SAAS"), ("資訊服務", "SVC_SAAS"),
+    ("控股公司", "END_USER"), ("投資控股", "END_USER"),
+    # ═══════════════════════════════════════════════════════════
+    # 第二層：半導體核心位階
+    # ═══════════════════════════════════════════════════════════
     ("矽智財", "IP"), ("Silicon IP", "IP"), ("IP 廠", "IP"),
     ("ASIC 設計服務", "ASIC_SVC"), ("Design Service", "ASIC_SVC"),
     ("晶圓代工", "FOUNDRY"), ("Foundry", "FOUNDRY"),
@@ -54,27 +75,41 @@ POSITION_KEYWORDS: list[tuple[str, str]] = [
     ("探針卡", "TEST_INTF"), ("測試介面", "TEST_INTF"), ("測試座", "TEST_INTF"),
     ("測試代工", "TEST_SVC"),
     ("半導體設備", "EQUIP"), ("濕製程設備", "EQUIP"), ("微影設備", "EQUIP"),
-    ("矽晶圓", "MAT_WAFER"), ("拋光晶圓", "MAT_WAFER"),
+    ("矽晶圓", "MAT_WAFER"),  # 兜底（前面特化詞已先 match）
     ("特用氣體", "MAT_CHEM"), ("光阻液", "MAT_CHEM"), ("研磨液", "MAT_CHEM"),
+    ("半導體化學品", "MAT_CHEM"),
     ("ABF 載板", "SUBSTRATE"), ("BT 載板", "SUBSTRATE"), ("IC 載板", "SUBSTRATE"),
     ("IC 設計", "IC_DESIGN"), ("Fabless", "IC_DESIGN"),
-    # 電子零組件
+    # ═══════════════════════════════════════════════════════════
+    # 第三層：電子零組件
+    # ═══════════════════════════════════════════════════════════
     ("連接器", "CONNECTOR"), ("Socket", "CONNECTOR"), ("UQD", "CONNECTOR"),
     ("MLCC", "PASSIVE"), ("被動元件", "PASSIVE"), ("晶振", "PASSIVE"),
     ("HDI PCB", "PCB_HDI"), ("高階 PCB", "PCB_HDI"), ("CCL", "PCB_HDI"),
     ("軟板", "PCB_FPC"), ("FPC", "PCB_FPC"),
     ("散熱模組", "THERMAL"), ("液冷", "THERMAL"), ("CDU", "THERMAL"), ("熱交換器", "THERMAL"),
     ("機構件", "CHASSIS"), ("機殼", "CHASSIS"),
-    # 系統 / 應用
+    # ═══════════════════════════════════════════════════════════
+    # 第四層：系統/應用/通路
+    # ═══════════════════════════════════════════════════════════
     ("ODM", "ODM_SYS"), ("代工組裝", "ODM_SYS"), ("EMS", "ODM_SYS"),
-    ("品牌", "BRAND"),
+    ("品牌商", "BRAND"), ("自有品牌", "BRAND"),
     ("POS", "END_USER"), ("Kiosk", "END_USER"), ("整機廠", "END_USER"),
+    ("零售終端", "END_USER"), ("實體門市", "END_USER"),
     ("通路代理", "DISTRIB"), ("半導體通路", "DISTRIB"), ("代理商", "DISTRIB"),
-    # 電源 / 光通訊
+    ("電子通路", "DISTRIB"),
+    # ═══════════════════════════════════════════════════════════
+    # 第五層：電源 / 光通訊 / 軟體
+    # ═══════════════════════════════════════════════════════════
     ("電源供應", "POWER_MOD"), ("BBU", "POWER_MOD"), ("HVDC", "POWER_MOD"), ("UPS", "POWER_MOD"),
     ("光收發模組", "OPTIC_MOD"), ("光模組", "OPTIC_MOD"),
     ("光通訊元件", "OPTIC_COMP"), ("光被動元件", "OPTIC_COMP"),
-    ("SaaS", "SVC_SAAS"), ("軟體服務", "SVC_SAAS"),
+    ("SaaS", "SVC_SAAS"), ("軟體服務", "SVC_SAAS"), ("雲端服務", "SVC_SAAS"),
+    # ═══════════════════════════════════════════════════════════
+    # 第六層：通用詞兜底（避免落空）
+    # ═══════════════════════════════════════════════════════════
+    ("品牌", "BRAND"),
+    ("代工", "ODM_SYS"),
 ]
 
 THEME_KEYWORDS: list[tuple[str, str]] = [
@@ -216,11 +251,13 @@ def build_profile(
             "_skip_reason": "finlab_not_found",
         }
 
-    seg = infer_segment_from_twse(fl["twse_industry"]) or ""
-
-    # 3. Coverage 抽全文
+    # 3. Coverage 抽全文（先抓，後面 segment 推論用得到）
     cov_path = find_coverage_file(ticker)
     cov_text = cov_path.read_text(encoding="utf-8") if cov_path else ""
+    coverage_folder = cov_path.parent.name if cov_path else ""
+
+    # finlab 主、Coverage industry_folder 次（金融/服務業 finlab 標「其他」走這條）
+    seg = infer_segment_with_coverage(fl["twse_industry"], coverage_folder) or ""
 
     # 4. Position 推論
     pos, kw_pos = detect_position(cov_text)

@@ -1,6 +1,6 @@
 # 智慧醫療/AI醫學 — 驗證報告 v2
 
-> 生成於 2026-04-25 17:07 UTC
+> 生成於 2026-04-25 21:54 UTC
 > 三維 spec：allowed_segments=['MED_BIO', 'SOFTWARE'] / allowed_positions=['END_USER', 'SVC_SAAS'] / required_themes_any=['CDMO_BIO']
 
 ## 小結
@@ -32,4 +32,4 @@
 
 | 代號 | 公司 | 移除原因 | 信心 |
 |---|---|---|---:|
-| 6781 | AES-KY | 產業板塊不匹配（個股 ELEC_COMP vs 族群允許 ['MED_BIO', 'SOFTWARE']）；未命中任何必要題材（個股題材 ['ASIC_TRAI | 0.00 |
+| 6781 | AES-KY | 產業板塊不匹配（個股 ELEC_COMP vs 族群允許 ['MED_BIO', 'SOFTWARE']）；未命中任何必要題材（個股題材 ['ASIC_TRAI | 0.10 |

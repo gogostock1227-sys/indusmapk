@@ -1,6 +1,6 @@
 # CDMO/生技製造服務 — 驗證報告 v2
 
-> 生成於 2026-04-25 17:07 UTC
+> 生成於 2026-04-25 21:54 UTC
 > 三維 spec：allowed_segments=['MED_BIO'] / allowed_positions=['END_USER'] / required_themes_any=['CDMO_BIO']
 
 ## 小結
