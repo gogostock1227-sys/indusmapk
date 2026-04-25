@@ -59,6 +59,8 @@ except ImportError:
 RICH_PKL = SITE_DIR / ".company_rich.pkl"
 EXTRAS_JSON = SITE_DIR / ".cache_extras.json"
 TRENDING_JSON = SITE_DIR / ".cache_trending.json"
+FUTURES_JSON = SITE_DIR / ".cache_futures.json"
+RS_HISTORY = SITE_DIR / ".cache_rs_history.parquet"
 NAME_OVERRIDES_JSON = SITE_DIR / "stock_name_overrides.json"
 COVERAGE_DIR = ROOT_DIR / "My-TW-Coverage" / "Pilot_Reports"
 
@@ -116,6 +118,68 @@ def refresh_trending_topics() -> None:
         print("[trending] 抓取逾時 60s，沿用前次 cache")
     except Exception as e:
         print(f"[trending] 抓取例外：{e}（沿用前次 cache）")
+
+
+def refresh_futures_list(max_age_days: float = 7.0) -> None:
+    """跑 fetch_futures_list.py 抓期交所個股期貨清單。
+
+    cache 在 max_age_days 內不重抓（期交所清單變動慢，週更即可）。
+    任何異常都不中斷 build。
+    """
+    import subprocess, time
+    if FUTURES_JSON.exists():
+        age = (time.time() - FUTURES_JSON.stat().st_mtime) / 86400
+        if age < max_age_days:
+            print(f"[futures] cache {age:.1f} 日內，跳過抓取（{FUTURES_JSON.name}）")
+            return
+    script = SITE_DIR / "fetch_futures_list.py"
+    if not script.exists():
+        print(f"[futures] 跳過：找不到 {script.name}")
+        return
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script)],
+            timeout=60,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        if proc.returncode == 0:
+            tail = [l for l in proc.stdout.splitlines() if l.strip()][-6:]
+            for l in tail:
+                print(f"  {l}")
+        else:
+            print(f"[futures] exit {proc.returncode}（沿用前次 cache）")
+            if proc.stderr:
+                print(proc.stderr[-300:])
+    except subprocess.TimeoutExpired:
+        print("[futures] 抓取逾時 60s，沿用前次 cache")
+    except Exception as e:
+        print(f"[futures] 抓取例外：{e}（沿用前次 cache）")
+
+
+def load_futures_flags() -> dict:
+    """讀 .cache_futures.json，回傳 {symbol: {'stock':True, 'mini':True, 'etf':True, 'mini_etf':True}}。
+    四個 key 任一為 True 即代表該證券有對應的期貨商品。
+    """
+    if not FUTURES_JSON.exists():
+        return {}
+    try:
+        raw = json.loads(FUTURES_JSON.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[futures] 讀取 cache 失敗：{e}")
+        return {}
+    flags: dict[str, dict] = {}
+    for sym in raw.get("stock_futures", []):
+        flags.setdefault(sym, {})["stock"] = True
+    for sym in raw.get("mini_stock_futures", []):
+        flags.setdefault(sym, {})["mini"] = True
+    for sym in raw.get("etf_futures", []):
+        flags.setdefault(sym, {})["etf"] = True
+    for sym in raw.get("mini_etf_futures", []):
+        flags.setdefault(sym, {})["mini_etf"] = True
+    print(f"[futures] 載入 {len(flags)} 檔有期貨之證券（as_of={raw.get('as_of','?')}）")
+    return flags
 
 
 def load_hot_topics(top_n: int = 6) -> list[dict]:
@@ -1221,6 +1285,131 @@ def build_env():
     return env
 
 
+# ─────── RS 評分（仿 EJFQ 相對強度）───────
+
+def compute_rs_scores(close: pd.DataFrame, name_map: dict, market_map: dict,
+                      min_history: int = 50, lookback: int = 252) -> pd.Series:
+    """EJFQ 風格 RS：12 個月報酬 → 全市場 percentile rank (1-99 整數)。
+
+    - close: 收盤價 DataFrame, index=date, columns=symbol
+    - 篩選：有公司簡稱、有市場別、且 dropna 後資料 >= min_history（排除新上市未滿 50 個交易日）
+    - 用 252 個交易日近似 12 個月，若資料不足則自動降回可用最大窗口
+    """
+    if close is None or close.empty:
+        return pd.Series(dtype=int)
+
+    valid = []
+    for s in close.columns:
+        nm = name_map.get(s)
+        if not (isinstance(nm, str) and nm.strip() and nm.strip() != s):
+            continue
+        if not market_map.get(s):
+            continue
+        if close[s].dropna().shape[0] < min_history:
+            continue
+        valid.append(s)
+    if not valid:
+        return pd.Series(dtype=int)
+
+    if len(close) < lookback + 1:
+        lookback = len(close) - 1
+    px_now = close[valid].iloc[-1]
+    px_old = close[valid].iloc[-lookback - 1]
+    ret_12m = (px_now / px_old - 1).dropna()
+    if ret_12m.empty:
+        return pd.Series(dtype=int)
+
+    pct = ret_12m.rank(pct=True) * 98 + 1
+    return pct.round(0).astype(int)
+
+
+def update_rs_history(rs_today: pd.Series, today) -> pd.DataFrame:
+    """把今日 RS 寫入 .cache_rs_history.parquet（若該日已存在則覆蓋）。
+    保留近 500 個交易日（約 2 年）。回傳完整歷史 DataFrame。
+    """
+    if RS_HISTORY.exists():
+        try:
+            hist = pd.read_parquet(RS_HISTORY)
+            hist.index = pd.to_datetime(hist.index)
+        except Exception as e:
+            print(f"[rs] 讀取歷史 cache 失敗：{e}，將從零開始")
+            hist = pd.DataFrame()
+    else:
+        hist = pd.DataFrame()
+
+    today_ts = pd.Timestamp(today).normalize()
+    today_df = pd.DataFrame(
+        [rs_today.astype("Int64").values],
+        index=[today_ts],
+        columns=rs_today.index,
+    )
+    if hist.empty:
+        merged = today_df
+    else:
+        keep = hist[~hist.index.isin([today_ts])]
+        merged = pd.concat([keep, today_df]).sort_index()
+    merged = merged.tail(500)
+
+    try:
+        merged.to_parquet(RS_HISTORY)
+        print(f"[rs] 歷史 cache：{len(merged)} 個交易日 × {merged.shape[1]} 檔")
+    except Exception as e:
+        print(f"[rs] 寫入歷史 cache 失敗：{e}")
+    return merged
+
+
+def build_rs_rows(stock_metrics: pd.DataFrame, rs_today: pd.Series, close: pd.DataFrame,
+                  name_map: dict, industry_map: dict, market_map: dict,
+                  company_topics: dict, lookback: int = 252) -> list[dict]:
+    """RS 排名表 row dict list（依 RS 由高到低）。"""
+    if rs_today.empty:
+        return []
+    if len(close) < lookback + 1:
+        lookback = len(close) - 1
+    px_old = close.iloc[-lookback - 1]
+    px_now = close.iloc[-1]
+    market_disp_map = {"sii": "上市", "otc": "上櫃", "rotc": "興櫃"}
+
+    rows = []
+    for sym in rs_today.index:
+        rs = int(rs_today[sym])
+        nm = name_map.get(sym, sym)
+        if sym in stock_metrics.index:
+            m = stock_metrics.loc[sym]
+            close_v = float(m["close"]) if m["close"] == m["close"] else None
+            ret_1d  = float(m["ret_1d"])  if m["ret_1d"]  == m["ret_1d"]  else None
+            ret_5d  = float(m["ret_5d"])  if m["ret_5d"]  == m["ret_5d"]  else None
+            ret_20d = float(m["ret_20d"]) if m["ret_20d"] == m["ret_20d"] else None
+        else:
+            close_v = ret_1d = ret_5d = ret_20d = None
+
+        try:
+            old_v = float(px_old[sym])
+            new_v = float(px_now[sym])
+            r12 = new_v / old_v - 1 if old_v else None
+        except (KeyError, TypeError, ZeroDivisionError):
+            r12 = None
+        if r12 is not None and r12 != r12:
+            r12 = None
+
+        m_code = market_map.get(sym, "")
+        rows.append({
+            "sym": sym,
+            "name": nm,
+            "industry": industry_map.get(sym, ""),
+            "market": market_disp_map.get(m_code, m_code or ""),
+            "rs": rs,
+            "ret_12m": r12,
+            "ret_20d": ret_20d,
+            "ret_5d": ret_5d,
+            "ret_1d": ret_1d,
+            "close": close_v,
+            "topics_txt": "、".join(company_topics.get(sym, [])[:3]) if company_topics.get(sym) else "",
+        })
+    rows.sort(key=lambda r: -r["rs"])
+    return rows
+
+
 def compute_rankings(stock_metrics: pd.DataFrame, rich: dict, extras: dict,
                      name_map: dict, industry_map: dict, company_topics: dict,
                      top_n: int = 20) -> dict:
@@ -1546,6 +1735,13 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     latest_lu_date = limit_up_dates[-1] if limit_up_dates else None
     limit_up_data = limit_up_by_date.get(latest_lu_date) if latest_lu_date else None
 
+    # 期貨清單 + RS 評分（在所有頁面渲染前算好，再供 RS 頁、公司頁共用）
+    futures_flags = load_futures_flags()
+    print("       · 計算 RS 評分（過去 12 個月相對全市場 percentile）...")
+    rs_today = compute_rs_scores(data["close"], name_map, data["market_map"])
+    print(f"         覆蓋 {len(rs_today)} 檔有效股票")
+    rs_history = update_rs_history(rs_today, data["close"].index[-1])
+
     # 共用資料
     base_ctx = {
         "now": datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -1587,6 +1783,14 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     ]
     movers_up = movers.sort_values("ret_1d", ascending=False).head(20)
     movers_down = movers.sort_values("ret_1d", ascending=True).head(20)
+
+    # 成值分析（今日成交值前 30 名個股 + 所屬題材）
+    top_value = stock_metrics.dropna(subset=["amount_mn"]).copy()
+    top_value["display_name"] = [
+        (name_map.get(s) if isinstance(name_map.get(s), str) and name_map.get(s).strip() else s)
+        for s in top_value.index
+    ]
+    top_value = top_value.sort_values("amount_mn", ascending=False).head(30)
 
     category_aggs = compute_category_aggregates(stock_metrics, group_metrics)
 
@@ -1682,11 +1886,48 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         top_limit=top_limit,
         movers_up=movers_up,
         movers_down=movers_down,
+        top_value=top_value,                       # 新增：成值分析（成交值前30）
         name_map=name_map,
         company_topics=company_topics,
         industry_map=data["industry_map"],
     )
     (DIST_DIR / "today.html").write_text(today_html, encoding="utf-8")
+
+    # 系統指標題材（每日動態：成交值前20 / 漲停 / 跌停）
+    SYSTEM_TOPIC_DEFS = [
+        ("每日成交值前20", "system-top-value-20", "#3b82f6", "市場資金最集中的 20 檔個股，反映當日主力進場焦點。"),
+        ("每日漲停",       "system-limit-up",     "#ef4444", "當日漲停板個股清單，掌握強勢族群輪動領頭羊。"),
+        ("每日跌停",       "system-limit-down",   "#22c55e", "當日跌停板個股清單，警惕弱勢族群與風險訊號。"),
+    ]
+    top_value_syms = stock_metrics.sort_values("amount_mn", ascending=False).head(20).index.tolist()
+    if "limit_up" in stock_metrics.columns:
+        limit_up_syms = stock_metrics.index[stock_metrics["limit_up"].fillna(False).astype(bool)].tolist()
+    else:
+        limit_up_syms = []
+    if "limit_down" in stock_metrics.columns:
+        limit_down_syms = stock_metrics.index[stock_metrics["limit_down"].fillna(False).astype(bool)].tolist()
+    else:
+        limit_down_syms = []
+    SYSTEM_MEMBERS = {
+        "每日成交值前20": top_value_syms,
+        "每日漲停":        limit_up_syms,
+        "每日跌停":        limit_down_syms,
+    }
+    system_topics = []
+    for sname, slug, color, desc in SYSTEM_TOPIC_DEFS:
+        members = SYSTEM_MEMBERS[sname]
+        rows = stock_metrics.loc[stock_metrics.index.intersection(members)]
+        amt_sum = float(rows["amount_mn"].sum()) if len(rows) else 0.0
+        ret_mean = float(rows["ret_1d"].mean()) if len(rows) and rows["ret_1d"].notna().any() else 0.0
+        system_topics.append({
+            "name":           sname,
+            "slug":           slug,
+            "color":          color,
+            "desc":           desc,
+            "n_stocks":       len(rows),
+            "amount_sum_mn":  amt_sum,
+            "ret_1d_mean":    ret_mean,
+        })
 
     # Topics overview
     topics_html = env.get_template("topics.html").render(
@@ -1701,6 +1942,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         group_metrics=group_metrics,
         get_meta=get_meta,
         categories=sorted({get_meta(g)["category"] for g in CONCEPT_GROUPS}),
+        system_topics=system_topics,                # 新增：總覽區塊系統指標
     )
     (DIST_DIR / "topics.html").write_text(topics_html, encoding="utf-8")
 
@@ -1779,11 +2021,99 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
                 "n_stocks": len(rows),
             }
 
-    # 題材對比頁（前端選 2-5 個題材疊加走勢）
+    # 系統指標題材詳情頁（複用 topic_detail.html）
+    sys_topic_count = 0
+    for sname, slug, color, desc in SYSTEM_TOPIC_DEFS:
+        members = SYSTEM_MEMBERS[sname]
+        if not members:
+            continue
+        rows = stock_metrics.loc[stock_metrics.index.intersection(members)].copy()
+        if not len(rows):
+            continue
+        rows["display_name"] = [
+            (name_map.get(s) if isinstance(name_map.get(s), str) and name_map.get(s).strip() else s)
+            for s in rows.index
+        ]
+        rows_sorted = rows.sort_values("amount_mn", ascending=False)
+        sys_meta = {
+            "category":    "系統指標",
+            "color":       color,
+            "en":          "",
+            "desc":        desc,
+            "cagr":        "—",
+            "market_size": "—",
+            "indicators":  [],
+        }
+        sys_summary = {
+            "n_stocks":      len(rows),
+            "ret_1d_mean":   float(rows["ret_1d"].mean())  if rows["ret_1d"].notna().any()  else 0.0,
+            "ret_5d_mean":   float(rows["ret_5d"].mean())  if rows["ret_5d"].notna().any()  else 0.0,
+            "ret_20d_mean":  float(rows["ret_20d"].mean()) if rows["ret_20d"].notna().any() else 0.0,
+            "amount_sum_mn": float(rows["amount_mn"].sum()),
+            "n_limit_up":    int(rows["limit_up"].sum())   if "limit_up"  in rows.columns else 0,
+            "n_limit_down":  int(rows["limit_down"].sum()) if "limit_down" in rows.columns else 0,
+            "n_foreign_buy": int((rows.get("foreign_1d", pd.Series(dtype=float)) > 0).sum()),
+            "n_trust_buy":   int((rows.get("trust_1d",   pd.Series(dtype=float)) > 0).sum()),
+            "top_stock":     rows_sorted.index[0] if len(rows_sorted) else "",
+        }
+        sys_series = compute_topic_return_series(data, members, days=125)
+        html = tpl_topic.render(
+            **base_ctx,
+            group=sname,
+            meta=sys_meta,
+            stocks=rows_sorted,
+            summary=sys_summary,
+            related=[],
+            name_map=name_map,
+            company_topics=company_topics,
+            topic_series_json=json.dumps(sys_series, ensure_ascii=False) if sys_series else "null",
+            ai_summary=None,
+        )
+        (topic_dir / f"{slug}.html").write_text(html, encoding="utf-8")
+        sys_topic_count += 1
+        # 也加入 compare 來源池（系統指標也可被選來對比）
+        if sys_series:
+            all_topic_series[sname] = sys_series
+            all_topic_meta[sname] = {
+                "category": "系統指標",
+                "color":    color,
+                "slug":     slug,
+                "n_stocks": len(rows),
+            }
+    print(f"       ✓ 系統指標題材詳情頁 {sys_topic_count} 頁（成交值前20 / 漲停 / 跌停）")
+
+    # 個股 6 個月累積報酬 series（compare 頁異步加載用）
+    stock_data_dir = DIST_DIR / "data" / "stock_series"
+    stock_data_dir.mkdir(parents=True, exist_ok=True)
+    stock_index = []
+    stock_series_count = 0
+    close_cols = set(data["close"].columns)
+    for sym in stock_metrics.index:
+        if sym not in close_cols:
+            continue
+        series = compute_topic_return_series(data, [sym], days=125)
+        if not series:
+            continue
+        (stock_data_dir / f"{sym}.json").write_text(
+            json.dumps(series, ensure_ascii=False), encoding="utf-8"
+        )
+        nm = name_map.get(sym)
+        nm = nm if isinstance(nm, str) and nm.strip() else sym
+        stock_index.append({
+            "sym":      sym,
+            "name":     nm,
+            "industry": data["industry_map"].get(sym, ""),
+            "topics":   (company_topics.get(sym) or [])[:2],
+        })
+        stock_series_count += 1
+    print(f"       ✓ 個股累積報酬 series {stock_series_count} 檔（dist/data/stock_series/）")
+
+    # 題材對比頁（前端選 2-5 個題材或個股疊加走勢）
     compare_html = env.get_template("compare.html").render(
         **base_ctx,
         topic_series_json=json.dumps(all_topic_series, ensure_ascii=False),
         topic_meta_json=json.dumps(all_topic_meta, ensure_ascii=False),
+        stock_index_json=json.dumps(stock_index, ensure_ascii=False),
     )
     (DIST_DIR / "compare.html").write_text(compare_html, encoding="utf-8")
 
@@ -1797,6 +2127,32 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         rankings=rankings,
     )
     (DIST_DIR / "rankings.html").write_text(rankings_html, encoding="utf-8")
+
+    # RS 評分頁（全市場 RS 排名 + 強勢股精選）
+    rs_rows = build_rs_rows(
+        stock_metrics, rs_today, data["close"],
+        name_map, data["industry_map"], data["market_map"],
+        company_topics,
+    )
+    strong_by_industry: dict[str, list] = defaultdict(list)
+    for row in rs_rows:
+        if row["rs"] >= 80 and row["industry"]:
+            strong_by_industry[row["industry"]].append(row)
+    strong_groups = sorted(
+        [(ind, rs_list[:5]) for ind, rs_list in strong_by_industry.items()],
+        key=lambda x: (-len(strong_by_industry[x[0]]), x[0]),
+    )
+    industries_for_rs = sorted({r["industry"] for r in rs_rows if r["industry"]})
+    rs_html = env.get_template("rs.html").render(
+        **base_ctx,
+        rs_rows=rs_rows,
+        strong_groups=strong_groups,
+        industries=industries_for_rs,
+        total_count=len(rs_rows),
+        strong_count=sum(1 for r in rs_rows if r["rs"] >= 80),
+    )
+    (DIST_DIR / "rs.html").write_text(rs_html, encoding="utf-8")
+    print(f"       ✓ RS 評分頁：{len(rs_rows)} 檔 / 強勢股 {sum(1 for r in rs_rows if r['rs']>=80)} 檔 / 強勢產業 {len(strong_groups)} 個")
 
     # 公司資料庫頁（全上市櫃清單 + 前端搜尋/篩選/排序）
     industries_list = sorted({
@@ -1894,6 +2250,17 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         dividends = rich["dividends"].get(sym)
         director_pct = rich["director"].get(sym)
         coverage_tabs = build_coverage_tabs(coverage.get(sym))
+        # 期貨標示與 RS 評分
+        futures = futures_flags.get(sym, {})
+        rs_score = int(rs_today[sym]) if sym in rs_today.index else None
+        rs_history_data = None
+        if sym in rs_history.columns:
+            hist_series = rs_history[sym].dropna().tail(250)
+            if len(hist_series) >= 2:
+                rs_history_data = {
+                    "dates":  [d.strftime("%m/%d") for d in hist_series.index],
+                    "values": [int(v) for v in hist_series.values],
+                }
         html = tpl_company.render(
             **base_ctx,
             symbol=sym,
@@ -1915,6 +2282,10 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             dividends=dividends,
             director_pct=director_pct,
             coverage_tabs=coverage_tabs,
+            futures=futures,
+            rs_score=rs_score,
+            rs_history=rs_history_data,
+            rs_history_json=json.dumps(rs_history_data, ensure_ascii=False) if rs_history_data else "null",
         )
         (company_dir / f"{sym}.html").write_text(html, encoding="utf-8")
         n_pages += 1
@@ -2143,6 +2514,9 @@ def main():
 
     print("\n[0/5] 更新首頁熱門題材（從 Yahoo 熱股 + 鉅亨關鍵字合成）...")
     refresh_trending_topics()
+
+    print("\n[0/5] 更新個股期貨清單（期交所，週更）...")
+    refresh_futures_list()
 
     print("\n[1/5] 載入資料...")
     data = load_data(use_cache=args.skip_finlab)

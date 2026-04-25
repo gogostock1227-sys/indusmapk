@@ -1,52 +1,10 @@
-<!doctype html>
-<html lang="zh-Hant">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>今日焦點 · 族群寶</title>
-<meta name="description" content="族群寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" href="static/logo.png">
-<link rel="apple-touch-icon" href="static/logo.png">
-<link rel="stylesheet" href="static/style.css">
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
-</head>
-<body>
+{% extends "base.html" %}
+{% set page = "today" %}
+{% block title %}今日焦點 · 台股產業寶{% endblock %}
 
-<header class="site-header">
-  <div class="header-inner">
-    <a href="index.html" class="logo">
-      <img class="logo-mark" src="static/logo.png" alt="族群寶 IndusMap">
-      <span class="logo-text">
-        <strong>族群寶</strong>
-        <em>Taiwan Industry Intelligence</em>
-      </span>
-    </a>
-
-    <nav class="primary-nav">
-      <a href="index.html" class="">首頁</a>
-      <a href="today.html" class="active">今日焦點</a>
-      <a href="limit-up.html" class="">漲停分析</a>
-      <a href="topics.html" class="">題材列表</a>
-      <a href="heatmap.html" class="">產業地圖</a>
-      <a href="database.html" class="">公司資料庫</a>
-      <a href="ai.html" class="">市場觀察</a>
-    </nav>
-
-    <div class="search-box">
-      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
-      <div class="search-dropdown" id="search-dropdown" hidden></div>
-    </div>
-  </div>
-</header>
-
-<main class="site-main">
-  
+{% block content %}
 <section class="hero">
-  <h1>今日焦點 <small>2026-04-24</small></h1>
+  <h1>今日焦點 <small>{{ last_date }}</small></h1>
   <p>當日強弱族群、資金集中度、漲停家數與個股漲跌幅榜。點擊題材或個股可深入查看詳情。</p>
 </section>
 
@@ -65,97 +23,16 @@
       <table class="table compact">
         <thead><tr><th>題材</th><th>今日</th><th>5日</th><th>20日</th><th>資金</th></tr></thead>
         <tbody>
-          
-          
+          {% for g, m in top_gain[:10] %}
+          {% set meta = get_meta(g) %}
           <tr>
-            <td><a href="topic/ABF載板.html" class="topic-chip" style="border-color:#dc2626; color:#dc2626;">ABF載板</a></td>
-            <td class="positive">+9.42%</td>
-            <td class="positive">+25.98%</td>
-            <td class="positive">+55.87%</td>
-            <td>570.8 億</td>
+            <td><a href="topic/{{ g|slugify }}.html" class="topic-chip" style="border-color:{{ meta.color }}; color:{{ meta.color }};">{{ g }}</a></td>
+            <td class="{% if m.ret_1d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_1d_mean|pct }}</td>
+            <td class="{% if m.ret_5d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_5d_mean|pct }}</td>
+            <td class="{% if m.ret_20d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_20d_mean|pct }}</td>
+            <td>{{ m.amount_sum_mn|fmt_amount }}</td>
           </tr>
-          
-          
-          <tr>
-            <td><a href="topic/量子電腦.html" class="topic-chip" style="border-color:#312e81; color:#312e81;">量子電腦</a></td>
-            <td class="positive">+6.30%</td>
-            <td class="positive">+17.97%</td>
-            <td class="positive">+43.73%</td>
-            <td>2121.0 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/2奈米先進製程.html" class="topic-chip" style="border-color:#dc2626; color:#dc2626;">2奈米先進製程</a></td>
-            <td class="positive">+4.72%</td>
-            <td class="positive">+16.28%</td>
-            <td class="positive">+40.68%</td>
-            <td>2652.2 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/熱交換器_散熱器.html" class="topic-chip" style="border-color:#0891b2; color:#0891b2;">熱交換器/散熱器</a></td>
-            <td class="positive">+4.48%</td>
-            <td class="positive">+11.60%</td>
-            <td class="positive">+24.25%</td>
-            <td>481.5 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/輝達概念股.html" class="topic-chip" style="border-color:#76b900; color:#76b900;">輝達概念股</a></td>
-            <td class="positive">+4.47%</td>
-            <td class="positive">+11.30%</td>
-            <td class="positive">+25.86%</td>
-            <td>2652.1 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/高階PCB_HDI.html" class="topic-chip" style="border-color:#dc2626; color:#dc2626;">高階 PCB/HDI</a></td>
-            <td class="positive">+4.46%</td>
-            <td class="positive">+9.76%</td>
-            <td class="positive">+39.99%</td>
-            <td>1240.7 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/Chiplet小晶片.html" class="topic-chip" style="border-color:#f59e0b; color:#f59e0b;">Chiplet 小晶片</a></td>
-            <td class="positive">+4.14%</td>
-            <td class="positive">+15.15%</td>
-            <td class="positive">+39.61%</td>
-            <td>2099.3 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/散熱_液冷.html" class="topic-chip" style="border-color:#0ea5e9; color:#0ea5e9;">散熱/液冷</a></td>
-            <td class="positive">+3.92%</td>
-            <td class="positive">+10.32%</td>
-            <td class="positive">+21.37%</td>
-            <td>722.8 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/ASIC_IP矽智財.html" class="topic-chip" style="border-color:#ff7847; color:#ff7847;">ASIC/IP矽智財</a></td>
-            <td class="positive">+3.88%</td>
-            <td class="positive">+14.11%</td>
-            <td class="positive">+35.75%</td>
-            <td>826.6 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/半導體類比IC.html" class="topic-chip" style="border-color:#5b8def; color:#5b8def;">半導體類比IC</a></td>
-            <td class="positive">+3.49%</td>
-            <td class="positive">+4.08%</td>
-            <td class="positive">+8.95%</td>
-            <td>32.2 億</td>
-          </tr>
-          
+          {% endfor %}
         </tbody>
       </table>
     </div>
@@ -168,97 +45,16 @@
       <table class="table compact">
         <thead><tr><th>題材</th><th>今日</th><th>5日</th><th>20日</th><th>資金</th></tr></thead>
         <tbody>
-          
-          
+          {% for g, m in top_loss[:10] %}
+          {% set meta = get_meta(g) %}
           <tr>
-            <td><a href="topic/光通訊_CPO.html" class="topic-chip" style="border-color:#10b981; color:#10b981;">光通訊/CPO</a></td>
-            <td class="negative">-4.86%</td>
-            <td class="negative">-6.60%</td>
-            <td class="positive">+29.89%</td>
-            <td>557.1 億</td>
+            <td><a href="topic/{{ g|slugify }}.html" class="topic-chip" style="border-color:{{ meta.color }}; color:{{ meta.color }};">{{ g }}</a></td>
+            <td class="{% if m.ret_1d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_1d_mean|pct }}</td>
+            <td class="{% if m.ret_5d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_5d_mean|pct }}</td>
+            <td class="{% if m.ret_20d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_20d_mean|pct }}</td>
+            <td>{{ m.amount_sum_mn|fmt_amount }}</td>
           </tr>
-          
-          
-          <tr>
-            <td><a href="topic/砷化鎵_GaAs.html" class="topic-chip" style="border-color:#eab308; color:#eab308;">砷化鎵/GaAs</a></td>
-            <td class="negative">-3.26%</td>
-            <td class="positive">+2.10%</td>
-            <td class="positive">+35.49%</td>
-            <td>500.4 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/資安.html" class="topic-chip" style="border-color:#dc2626; color:#dc2626;">資安</a></td>
-            <td class="negative">-3.02%</td>
-            <td class="negative">-5.50%</td>
-            <td class="positive">+7.74%</td>
-            <td>19.7 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/被動元件.html" class="topic-chip" style="border-color:#8b5cf6; color:#8b5cf6;">被動元件</a></td>
-            <td class="negative">-2.74%</td>
-            <td class="negative">-6.88%</td>
-            <td class="positive">+19.50%</td>
-            <td>189.3 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/影音串流_OTT.html" class="topic-chip" style="border-color:#7c3aed; color:#7c3aed;">影音串流/OTT</a></td>
-            <td class="negative">-2.70%</td>
-            <td class="negative">-6.69%</td>
-            <td class="negative">-5.54%</td>
-            <td>62.3 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/LED_光電.html" class="topic-chip" style="border-color:#ea580c; color:#ea580c;">LED/光電</a></td>
-            <td class="negative">-2.69%</td>
-            <td class="negative">-7.67%</td>
-            <td class="positive">+10.37%</td>
-            <td>29.3 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/航太.html" class="topic-chip" style="border-color:#b91c1c; color:#b91c1c;">航太</a></td>
-            <td class="negative">-2.60%</td>
-            <td class="negative">-4.31%</td>
-            <td class="positive">+2.57%</td>
-            <td>25.8 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/光學薄膜.html" class="topic-chip" style="border-color:#7e22ce; color:#7e22ce;">光學薄膜</a></td>
-            <td class="negative">-2.51%</td>
-            <td class="negative">-6.26%</td>
-            <td class="positive">+2.25%</td>
-            <td>7.3 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/手術機器人_智慧醫療器材.html" class="topic-chip" style="border-color:#9d174d; color:#9d174d;">手術機器人/智慧醫療器材</a></td>
-            <td class="negative">-2.34%</td>
-            <td class="negative">-4.69%</td>
-            <td class="positive">+7.32%</td>
-            <td>28.0 億</td>
-          </tr>
-          
-          
-          <tr>
-            <td><a href="topic/氫能_燃料電池.html" class="topic-chip" style="border-color:#06b6d4; color:#06b6d4;">氫能/燃料電池</a></td>
-            <td class="negative">-2.28%</td>
-            <td class="negative">-4.08%</td>
-            <td class="negative">-0.91%</td>
-            <td>60.6 億</td>
-          </tr>
-          
+          {% endfor %}
         </tbody>
       </table>
     </div>
@@ -268,220 +64,92 @@
     <div class="panel">
       <div class="panel-header"><h2>資金集中排行</h2><span class="muted">當日題材成交額</span></div>
       <div class="bar-list">
-        
-        
-        
-        <a class="bar-row" href="topic/2奈米先進製程.html">
-          <span class="bar-label">2奈米先進製程</span>
+        {% set max_amt = top_flow[0][1].amount_sum_mn if top_flow else 1 %}
+        {% for g, m in top_flow[:12] %}
+        {% set meta = get_meta(g) %}
+        <a class="bar-row" href="topic/{{ g|slugify }}.html">
+          <span class="bar-label">{{ g }}</span>
           <span class="bar-track">
-            <span class="bar-fill" style="width:100.0%; background:#dc2626;"></span>
+            <span class="bar-fill" style="width:{{ (m.amount_sum_mn/max_amt*100)|round(1) }}%; background:{{ meta.color }};"></span>
           </span>
-          <span class="bar-value">2652.2 億</span>
+          <span class="bar-value">{{ m.amount_sum_mn|fmt_amount }}</span>
         </a>
-        
-        
-        <a class="bar-row" href="topic/輝達概念股.html">
-          <span class="bar-label">輝達概念股</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:100.0%; background:#76b900;"></span>
-          </span>
-          <span class="bar-value">2652.1 億</span>
-        </a>
-        
-        
-        <a class="bar-row" href="topic/GoogleTPU.html">
-          <span class="bar-label">Google TPU</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:81.5%; background:#4285f4;"></span>
-          </span>
-          <span class="bar-value">2160.8 億</span>
-        </a>
-        
-        
-        <a class="bar-row" href="topic/量子電腦.html">
-          <span class="bar-label">量子電腦</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:80.0%; background:#312e81;"></span>
-          </span>
-          <span class="bar-value">2121.0 億</span>
-        </a>
-        
-        
-        <a class="bar-row" href="topic/Chiplet小晶片.html">
-          <span class="bar-label">Chiplet 小晶片</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:79.2%; background:#f59e0b;"></span>
-          </span>
-          <span class="bar-value">2099.3 億</span>
-        </a>
-        
-        
-        <a class="bar-row" href="topic/CoWoS先進封裝.html">
-          <span class="bar-label">CoWoS先進封裝</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:77.1%; background:#f97316;"></span>
-          </span>
-          <span class="bar-value">2044.2 億</span>
-        </a>
-        
-        
-        <a class="bar-row" href="topic/台積電供應鏈.html">
-          <span class="bar-label">台積電供應鏈</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:64.1%; background:#ff7847;"></span>
-          </span>
-          <span class="bar-value">1701.2 億</span>
-        </a>
-        
-        
-        <a class="bar-row" href="topic/美國製造回流_晶片法案.html">
-          <span class="bar-label">美國製造回流/晶片法案</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:61.2%; background:#1e40af;"></span>
-          </span>
-          <span class="bar-value">1622.9 億</span>
-        </a>
-        
-        
-        <a class="bar-row" href="topic/矽光子.html">
-          <span class="bar-label">矽光子</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:58.7%; background:#059669;"></span>
-          </span>
-          <span class="bar-value">1557.2 億</span>
-        </a>
-        
-        
-        <a class="bar-row" href="topic/IC設計.html">
-          <span class="bar-label">IC設計</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:56.5%; background:#5b8def;"></span>
-          </span>
-          <span class="bar-value">1499.2 億</span>
-        </a>
-        
+        {% endfor %}
       </div>
     </div>
 
     <div class="panel">
       <div class="panel-header"><h2>漲停家數最多</h2><span class="muted">族群輪動領頭</span></div>
       <div class="bar-list">
-        
-        
-        
-        
-        <a class="bar-row" href="topic/電子零組件_一般.html">
-          <span class="bar-label">電子零組件/一般</span>
+        {% set max_lu = top_limit[0][1].n_limit_up if top_limit and top_limit[0][1].n_limit_up > 0 else 1 %}
+        {% for g, m in top_limit[:12] %}
+        {% if m.n_limit_up > 0 %}
+        {% set meta = get_meta(g) %}
+        <a class="bar-row" href="topic/{{ g|slugify }}.html">
+          <span class="bar-label">{{ g }}</span>
           <span class="bar-track">
-            <span class="bar-fill" style="width:100.0%; background:#dc2626;"></span>
+            <span class="bar-fill" style="width:{{ (m.n_limit_up/max_lu*100)|round(1) }}%; background:#dc2626;"></span>
           </span>
-          <span class="bar-value">7 檔</span>
+          <span class="bar-value">{{ m.n_limit_up }} 檔</span>
         </a>
-        
-        
-        
-        
-        <a class="bar-row" href="topic/輝達概念股.html">
-          <span class="bar-label">輝達概念股</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:57.1%; background:#dc2626;"></span>
-          </span>
-          <span class="bar-value">4 檔</span>
-        </a>
-        
-        
-        
-        
-        <a class="bar-row" href="topic/IC設計.html">
-          <span class="bar-label">IC設計</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:57.1%; background:#dc2626;"></span>
-          </span>
-          <span class="bar-value">4 檔</span>
-        </a>
-        
-        
-        
-        
-        <a class="bar-row" href="topic/半導體設備.html">
-          <span class="bar-label">半導體設備</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:57.1%; background:#dc2626;"></span>
-          </span>
-          <span class="bar-value">4 檔</span>
-        </a>
-        
-        
-        
-        
-        <a class="bar-row" href="topic/PCB_銅箔基板.html">
-          <span class="bar-label">PCB/銅箔基板</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:57.1%; background:#dc2626;"></span>
-          </span>
-          <span class="bar-value">4 檔</span>
-        </a>
-        
-        
-        
-        
-        <a class="bar-row" href="topic/高階PCB_HDI.html">
-          <span class="bar-label">高階 PCB/HDI</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:57.1%; background:#dc2626;"></span>
-          </span>
-          <span class="bar-value">4 檔</span>
-        </a>
-        
-        
-        
-        
-        <a class="bar-row" href="topic/其他電子_工控.html">
-          <span class="bar-label">其他電子/工控</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:57.1%; background:#dc2626;"></span>
-          </span>
-          <span class="bar-value">4 檔</span>
-        </a>
-        
-        
-        
-        
-        <a class="bar-row" href="topic/AI基礎設施_資料中心.html">
-          <span class="bar-label">AI基礎設施/資料中心</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:57.1%; background:#dc2626;"></span>
-          </span>
-          <span class="bar-value">4 檔</span>
-        </a>
-        
-        
-        
-        
-        <a class="bar-row" href="topic/AI伺服器.html">
-          <span class="bar-label">AI伺服器</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:42.9%; background:#dc2626;"></span>
-          </span>
-          <span class="bar-value">3 檔</span>
-        </a>
-        
-        
-        
-        
-        <a class="bar-row" href="topic/散熱_液冷.html">
-          <span class="bar-label">散熱/液冷</span>
-          <span class="bar-track">
-            <span class="bar-fill" style="width:42.9%; background:#dc2626;"></span>
-          </span>
-          <span class="bar-value">3 檔</span>
-        </a>
-        
-        
+        {% endif %}
+        {% endfor %}
       </div>
     </div>
   </div>
 </section>
+
+{% if top_value is defined and top_value is not none %}
+<section class="section-block" id="value-analysis">
+  <header class="section-head">
+    <h2 class="section-title">成值分析</h2>
+    <p class="section-sub">當日成交值前 30 名個股 + 所屬題材，掌握主力資金真實去向</p>
+  </header>
+  <div class="panel">
+    <div class="panel-header">
+      <h2>個股成交值排行</h2>
+      <span class="muted">點擊個股查看詳情，點擊題材跳轉題材頁</span>
+    </div>
+    <div class="table-scroll">
+    <table class="table compact">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>股票</th>
+          <th>成交值</th>
+          <th>漲跌</th>
+          <th>5日</th>
+          <th>所屬題材</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sym, row in top_value.iterrows() %}
+        <tr>
+          <td class="muted">{{ loop.index }}</td>
+          <td><a href="company/{{ sym }}.html">{{ row.display_name }} <span class="muted">({{ sym }})</span></a></td>
+          <td>{{ row.amount_mn|fmt_amount }}</td>
+          <td class="{% if row.ret_1d == row.ret_1d and row.ret_1d > 0 %}positive{% elif row.ret_1d == row.ret_1d %}negative{% endif %}">{{ row.ret_1d|pct }}</td>
+          <td class="{% if row.ret_5d == row.ret_5d and row.ret_5d > 0 %}positive{% elif row.ret_5d == row.ret_5d %}negative{% endif %}">{{ row.ret_5d|pct }}</td>
+          <td>
+            {% set tp = company_topics.get(sym, []) %}
+            {% if tp %}
+              {% for t in tp[:3] %}<a href="topic/{{ t|slugify }}.html" class="tag">{{ t }}</a>{% endfor %}
+              {% if tp|length > 3 %}
+                <span class="tag tag-more" data-tip="{{ tp[3:]|join('、') }}" title="{{ tp[3:]|join('、') }}">+{{ tp|length - 3 }}</span>
+              {% endif %}
+            {% else %}
+              {% set ind = industry_map.get(sym) %}
+              {% if ind %}<span class="tag tag-industry">{{ ind }}</span>{% else %}<span class="muted">—</span>{% endif %}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <section class="section-block">
   <header class="section-head">
@@ -495,297 +163,26 @@
       <table class="table compact">
         <thead><tr><th>股票</th><th>漲幅</th><th>5日</th><th>收盤</th><th>所屬題材</th></tr></thead>
         <tbody>
-          
+          {% for sym, row in movers_up.iterrows() %}
           <tr>
-            <td><a href="company/6743.html">安普新 <span class="muted">(6743)</span></a></td>
-            <td class="positive">+10.00%</td>
-            <td class="positive">+10.48%</td>
-            <td>25.30</td>
+            <td><a href="company/{{ sym }}.html">{{ row.display_name }} <span class="muted">({{ sym }})</span></a></td>
+            <td class="positive">{{ row.ret_1d|pct }}</td>
+            <td class="{% if row.ret_5d > 0 %}positive{% else %}negative{% endif %}">{{ row.ret_5d|pct }}</td>
+            <td>{{ "%.2f"|format(row.close) }}</td>
             <td>
-              
-              
-                <span class="tag">其他電子/工控</span>
-                
-              
+              {% set tp = company_topics.get(sym, []) %}
+              {% if tp %}
+                {% for t in tp[:2] %}<span class="tag">{{ t }}</span>{% endfor %}
+                {% if tp|length > 2 %}
+                  <span class="tag tag-more" data-tip="{{ tp[2:]|join('、') }}" title="{{ tp[2:]|join('、') }}">+{{ tp|length-2 }}</span>
+                {% endif %}
+              {% else %}
+                {% set ind = industry_map.get(sym) %}
+                {% if ind %}<span class="tag tag-industry">{{ ind }}</span>{% else %}<span class="muted">—</span>{% endif %}
+              {% endif %}
             </td>
           </tr>
-          
-          <tr>
-            <td><a href="company/3122.html">笙泉 <span class="muted">(3122)</span></a></td>
-            <td class="positive">+10.00%</td>
-            <td class="positive">+27.41%</td>
-            <td>33.00</td>
-            <td>
-              
-              
-                <span class="tag">半導體設備</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/8210.html">勤誠 <span class="muted">(8210)</span></a></td>
-            <td class="positive">+10.00%</td>
-            <td class="positive">+18.63%</td>
-            <td>1210.00</td>
-            <td>
-              
-              
-                <span class="tag">AI伺服器</span><span class="tag">輝達概念股</span>
-                
-                  <span class="tag tag-more" data-tip="伺服器準系統、AI基礎設施/資料中心" title="伺服器準系統、AI基礎設施/資料中心">+2</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/8028.html">昇陽半導體 <span class="muted">(8028)</span></a></td>
-            <td class="positive">+10.00%</td>
-            <td class="positive">+29.41%</td>
-            <td>242.00</td>
-            <td>
-              
-              
-                <span class="tag">半導體設備</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6274.html">台燿 <span class="muted">(6274)</span></a></td>
-            <td class="positive">+10.00%</td>
-            <td class="positive">+10.47%</td>
-            <td>1045.00</td>
-            <td>
-              
-              
-                <span class="tag">PCB/銅箔基板</span><span class="tag">低軌衛星</span>
-                
-                  <span class="tag tag-more" data-tip="高階 PCB/HDI" title="高階 PCB/HDI">+1</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/3432.html">台端 <span class="muted">(3432)</span></a></td>
-            <td class="positive">+10.00%</td>
-            <td class="positive">+15.08%</td>
-            <td>18.70</td>
-            <td>
-              
-              
-                <span class="tag">電子零組件/一般</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/3209.html">全科 <span class="muted">(3209)</span></a></td>
-            <td class="positive">+9.99%</td>
-            <td class="positive">+14.86%</td>
-            <td>54.50</td>
-            <td>
-              
-              
-                <span class="tag">電子通路</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6861.html">睿生光電 <span class="muted">(6861)</span></a></td>
-            <td class="positive">+9.98%</td>
-            <td class="positive">+60.37%</td>
-            <td>259.00</td>
-            <td>
-              
-              
-                <span class="tag">中小型生技</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/1454.html">台富 <span class="muted">(1454)</span></a></td>
-            <td class="positive">+9.96%</td>
-            <td class="positive">+3.76%</td>
-            <td>13.80</td>
-            <td>
-              
-              
-                <span class="tag">紡織/機能布</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6735.html">美達科技 <span class="muted">(6735)</span></a></td>
-            <td class="positive">+9.95%</td>
-            <td class="positive">+60.08%</td>
-            <td>121.50</td>
-            <td>
-              
-              
-                <span class="tag">其他電子/工控</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/3324.html">雙鴻 <span class="muted">(3324)</span></a></td>
-            <td class="positive">+9.95%</td>
-            <td class="positive">+17.39%</td>
-            <td>1215.00</td>
-            <td>
-              
-              
-                <span class="tag">輝達概念股</span><span class="tag">散熱/液冷</span>
-                
-                  <span class="tag tag-more" data-tip="熱交換器/散熱器、AI基礎設施/資料中心" title="熱交換器/散熱器、AI基礎設施/資料中心">+2</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/1727.html">中華化 <span class="muted">(1727)</span></a></td>
-            <td class="positive">+9.95%</td>
-            <td class="positive">+25.58%</td>
-            <td>70.70</td>
-            <td>
-              
-              
-                <span class="tag">化工/染料/特化</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6658.html">聯策 <span class="muted">(6658)</span></a></td>
-            <td class="positive">+9.95%</td>
-            <td class="positive">+38.47%</td>
-            <td>110.50</td>
-            <td>
-              
-              
-                <span class="tag">其他電子/工控</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/2399.html">映泰 <span class="muted">(2399)</span></a></td>
-            <td class="positive">+9.95%</td>
-            <td class="positive">+23.83%</td>
-            <td>43.65</td>
-            <td>
-              
-              
-                <span class="tag">電腦週邊/配件</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6108.html">競國 <span class="muted">(6108)</span></a></td>
-            <td class="positive">+9.94%</td>
-            <td class="positive">+8.10%</td>
-            <td>19.35</td>
-            <td>
-              
-              
-                <span class="tag">連接器</span><span class="tag">電子零組件/一般</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/3390.html">旭軟 <span class="muted">(3390)</span></a></td>
-            <td class="positive">+9.94%</td>
-            <td class="positive">+18.56%</td>
-            <td>28.75</td>
-            <td>
-              
-              
-                <span class="tag">電子零組件/一般</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/8046.html">南電 <span class="muted">(8046)</span></a></td>
-            <td class="positive">+9.94%</td>
-            <td class="positive">+20.72%</td>
-            <td>874.00</td>
-            <td>
-              
-              
-                <span class="tag">CoWoS先進封裝</span><span class="tag">PCB/銅箔基板</span>
-                
-                  <span class="tag tag-more" data-tip="ABF載板、2奈米先進製程、量子電腦、Chiplet 小晶片、高階 PCB/HDI" title="ABF載板、2奈米先進製程、量子電腦、Chiplet 小晶片、高階 PCB/HDI">+5</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/4529.html">淳紳 <span class="muted">(4529)</span></a></td>
-            <td class="positive">+9.93%</td>
-            <td class="positive">+60.65%</td>
-            <td>4.98</td>
-            <td>
-              
-              
-                <span class="tag">其他（多元族群）</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/4951.html">精拓科 <span class="muted">(4951)</span></a></td>
-            <td class="positive">+9.93%</td>
-            <td class="positive">+13.28%</td>
-            <td>81.90</td>
-            <td>
-              
-              
-                <span class="tag">半導體/晶片代工次族</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/2454.html">聯發科 <span class="muted">(2454)</span></a></td>
-            <td class="positive">+9.93%</td>
-            <td class="positive">+26.49%</td>
-            <td>2435.00</td>
-            <td>
-              
-              
-                <span class="tag">Google TPU</span><span class="tag">ASIC/IP矽智財</span>
-                
-                  <span class="tag tag-more" data-tip="IC設計、AI PC/邊緣AI、網通、2奈米先進製程、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、射頻 RF/PA" title="IC設計、AI PC/邊緣AI、網通、2奈米先進製程、穿戴/智慧眼鏡、AI 眼鏡 / Meta Ray-Ban、射頻 RF/PA">+7</span>
-                
-              
-            </td>
-          </tr>
-          
+          {% endfor %}
         </tbody>
       </table>
     </div>
@@ -795,311 +192,29 @@
       <table class="table compact">
         <thead><tr><th>股票</th><th>跌幅</th><th>5日</th><th>收盤</th><th>所屬題材</th></tr></thead>
         <tbody>
-          
+          {% for sym, row in movers_down.iterrows() %}
           <tr>
-            <td><a href="company/009819.html">009819 <span class="muted">(009819)</span></a></td>
-            <td class="negative">-13.16%</td>
-            <td class="negative">—</td>
-            <td>10.89</td>
+            <td><a href="company/{{ sym }}.html">{{ row.display_name }} <span class="muted">({{ sym }})</span></a></td>
+            <td class="negative">{{ row.ret_1d|pct }}</td>
+            <td class="{% if row.ret_5d > 0 %}positive{% else %}negative{% endif %}">{{ row.ret_5d|pct }}</td>
+            <td>{{ "%.2f"|format(row.close) }}</td>
             <td>
-              
-              
-                
-                <span class="muted">—</span>
-              
+              {% set tp = company_topics.get(sym, []) %}
+              {% if tp %}
+                {% for t in tp[:2] %}<span class="tag">{{ t }}</span>{% endfor %}
+                {% if tp|length > 2 %}
+                  <span class="tag tag-more" data-tip="{{ tp[2:]|join('、') }}" title="{{ tp[2:]|join('、') }}">+{{ tp|length-2 }}</span>
+                {% endif %}
+              {% else %}
+                {% set ind = industry_map.get(sym) %}
+                {% if ind %}<span class="tag tag-industry">{{ ind }}</span>{% else %}<span class="muted">—</span>{% endif %}
+              {% endif %}
             </td>
           </tr>
-          
-          <tr>
-            <td><a href="company/7782.html">光速火箭 <span class="muted">(7782)</span></a></td>
-            <td class="negative">-12.01%</td>
-            <td class="negative">-7.98%</td>
-            <td>27.10</td>
-            <td>
-              
-              
-                <span class="tag">居家修繕/家居用品</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6821.html">聯寶 <span class="muted">(6821)</span></a></td>
-            <td class="negative">-10.87%</td>
-            <td class="negative">-14.96%</td>
-            <td>57.40</td>
-            <td>
-              
-              
-                <span class="tag">被動元件</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/1441.html">大東 <span class="muted">(1441)</span></a></td>
-            <td class="negative">-10.00%</td>
-            <td class="positive">+28.57%</td>
-            <td>12.60</td>
-            <td>
-              
-              
-                <span class="tag">紡織/機能布</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/3339.html">泰谷 <span class="muted">(3339)</span></a></td>
-            <td class="negative">-9.97%</td>
-            <td class="negative">-19.19%</td>
-            <td>56.00</td>
-            <td>
-              
-              
-                <span class="tag">LED/光電</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6451.html">訊芯-KY <span class="muted">(6451)</span></a></td>
-            <td class="negative">-9.97%</td>
-            <td class="negative">-20.40%</td>
-            <td>402.00</td>
-            <td>
-              
-              
-                <span class="tag">光通訊/CPO</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6830.html">汎銓 <span class="muted">(6830)</span></a></td>
-            <td class="negative">-9.96%</td>
-            <td class="negative">-18.31%</td>
-            <td>723.00</td>
-            <td>
-              
-              
-                <span class="tag">檢測/設備服務</span><span class="tag">航太</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/4739.html">康普 <span class="muted">(4739)</span></a></td>
-            <td class="negative">-9.95%</td>
-            <td class="positive">+0.11%</td>
-            <td>90.50</td>
-            <td>
-              
-              
-                <span class="tag">固態電池</span><span class="tag">鋰電池材料</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/9949.html">琉園 <span class="muted">(9949)</span></a></td>
-            <td class="negative">-9.95%</td>
-            <td class="negative">-6.90%</td>
-            <td>33.05</td>
-            <td>
-              
-              
-                
-                <span class="tag tag-industry">文化創意業</span>
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/4741.html">泓瀚 <span class="muted">(4741)</span></a></td>
-            <td class="negative">-9.92%</td>
-            <td class="negative">-4.97%</td>
-            <td>55.40</td>
-            <td>
-              
-              
-                <span class="tag">化工/染料/特化</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/1711.html">永光 <span class="muted">(1711)</span></a></td>
-            <td class="negative">-9.91%</td>
-            <td class="positive">+6.15%</td>
-            <td>50.90</td>
-            <td>
-              
-              
-                <span class="tag">化工/染料/特化</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/8271.html">宇瞻 <span class="muted">(8271)</span></a></td>
-            <td class="negative">-9.91%</td>
-            <td class="positive">+11.42%</td>
-            <td>200.00</td>
-            <td>
-              
-              
-                <span class="tag">記憶體</span><span class="tag">DDR5/LPDDR5 記憶體</span>
-                
-                  <span class="tag tag-more" data-tip="NAND Flash/SSD 控制" title="NAND Flash/SSD 控制">+1</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/3363.html">上詮 <span class="muted">(3363)</span></a></td>
-            <td class="negative">-9.88%</td>
-            <td class="negative">-8.68%</td>
-            <td>821.00</td>
-            <td>
-              
-              
-                <span class="tag">Google TPU</span><span class="tag">光通訊/CPO</span>
-                
-                  <span class="tag tag-more" data-tip="砷化鎵/GaAs" title="砷化鎵/GaAs">+1</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6426.html">統新 <span class="muted">(6426)</span></a></td>
-            <td class="negative">-9.81%</td>
-            <td class="negative">-4.85%</td>
-            <td>216.00</td>
-            <td>
-              
-              
-                <span class="tag">光通訊/CPO</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6465.html">威潤 <span class="muted">(6465)</span></a></td>
-            <td class="negative">-9.63%</td>
-            <td class="negative">-6.22%</td>
-            <td>46.00</td>
-            <td>
-              
-              
-                <span class="tag">網通</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6588.html">東典光電 <span class="muted">(6588)</span></a></td>
-            <td class="negative">-9.59%</td>
-            <td class="negative">-20.97%</td>
-            <td>122.50</td>
-            <td>
-              
-              
-                <span class="tag">網通</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/6423.html">億而得 <span class="muted">(6423)</span></a></td>
-            <td class="negative">-9.56%</td>
-            <td class="positive">+15.93%</td>
-            <td>113.50</td>
-            <td>
-              
-              
-                <span class="tag">IC設計</span><span class="tag">半導體/晶片代工次族</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/3138.html">耀登 <span class="muted">(3138)</span></a></td>
-            <td class="negative">-9.51%</td>
-            <td class="negative">-14.67%</td>
-            <td>157.00</td>
-            <td>
-              
-              
-                <span class="tag">航太</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/7717.html">萊德光電-KY <span class="muted">(7717)</span></a></td>
-            <td class="negative">-9.42%</td>
-            <td class="negative">-17.60%</td>
-            <td>721.00</td>
-            <td>
-              
-              
-                <span class="tag">光通訊/CPO</span>
-                
-              
-            </td>
-          </tr>
-          
-          <tr>
-            <td><a href="company/2477.html">美隆電 <span class="muted">(2477)</span></a></td>
-            <td class="negative">-9.18%</td>
-            <td class="negative">-7.48%</td>
-            <td>22.25</td>
-            <td>
-              
-              
-                <span class="tag">其他電子/工控</span>
-                
-              
-            </td>
-          </tr>
-          
+          {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
 </section>
-
-</main>
-
-<footer class="site-footer">
-  <div class="footer-inner">
-    <span>© 2026 族群寶 · 僅供研究參考，非投資建議</span>
-    <span>最後更新：2026-04-24</span>
-  </div>
-</footer>
-
-<script>
-  window.STATIC_PREFIX = "";
-</script>
-<script src="data/search-data.js" defer></script>
-<script src="static/app.js" defer></script>
-
-</body>
-</html>
+{% endblock %}

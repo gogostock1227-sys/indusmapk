@@ -4,14 +4,14 @@
 
 {% block content %}
 <section class="hero">
-  <h1>題材對比 <small>多題材疊加走勢</small></h1>
-  <p>選擇 2-5 個題材，疊加近 6 個月累積報酬曲線，快速判讀強弱輪動。資料：等權重持有該題材全部成分股。</p>
+  <h1>題材對比 <small>多題材 / 個股疊加走勢</small></h1>
+  <p>選擇 2-5 個題材或個股，疊加近 6 個月累積報酬曲線，快速判讀強弱輪動。資料：題材＝等權重持有成分股；個股＝該股票自身報酬。</p>
 </section>
 
 <div class="compare-toolbar">
   <div class="compare-pick">
-    <label>加入題材：</label>
-    <input type="text" id="cmp-search" placeholder="輸入題材關鍵字（例：AI、CPO、CoWoS）" autocomplete="off">
+    <label>加入：</label>
+    <input type="text" id="cmp-search" placeholder="輸入題材或個股（例：CPO、台積電、2330）" autocomplete="off">
     <div class="search-dropdown" id="cmp-dropdown" hidden></div>
   </div>
   <button class="filter-chip" id="cmp-clear">清空</button>
@@ -21,7 +21,7 @@
 <div class="panel">
   <div class="panel-header">
     <h2>累積報酬對比</h2>
-    <span class="muted" id="cmp-meta">請在上方加入至少 1 個題材</span>
+    <span class="muted" id="cmp-meta">請在上方加入至少 1 個題材或個股</span>
   </div>
   <div id="cmp-chart" style="height:480px; width:100%; padding:8px;"></div>
 </div>
@@ -32,75 +32,161 @@
     <span class="muted">1 日 / 5 日 / 20 日 / 60 日 / 125 日</span>
   </div>
   <table class="table compact">
-    <thead><tr><th>題材</th><th>分類</th><th>成分股</th><th>1 日</th><th>5 日</th><th>20 日</th><th>60 日</th><th>125 日</th></tr></thead>
+    <thead><tr><th>類型</th><th>名稱</th><th>分類 / 產業</th><th>成分股</th><th>1 日</th><th>5 日</th><th>20 日</th><th>60 日</th><th>125 日</th></tr></thead>
     <tbody id="cmp-table-body">
-      <tr><td colspan="8" class="muted" style="padding:40px; text-align:center;">加入題材後顯示</td></tr>
+      <tr><td colspan="9" class="muted" style="padding:40px; text-align:center;">加入後顯示</td></tr>
     </tbody>
   </table>
 </div>
 
 <script>
 window.TOPIC_SERIES = {{ topic_series_json|safe }};
-window.TOPIC_META = {{ topic_meta_json|safe }};
+window.TOPIC_META   = {{ topic_meta_json|safe }};
+window.STOCK_INDEX  = {{ stock_index_json|safe }};
+window.STOCK_SERIES = {};   // 懶加載快取
 </script>
 <script>
 (function(){
-  const input     = document.getElementById('cmp-search');
-  const dropdown  = document.getElementById('cmp-dropdown');
-  const selected  = document.getElementById('cmp-selected');
-  const clearBtn  = document.getElementById('cmp-clear');
-  const meta      = document.getElementById('cmp-meta');
-  const tbody     = document.getElementById('cmp-table-body');
-  const chartEl   = document.getElementById('cmp-chart');
-  const ALL_TOPICS = Object.keys(window.TOPIC_SERIES || {}).sort();
+  const input    = document.getElementById('cmp-search');
+  const dropdown = document.getElementById('cmp-dropdown');
+  const selected = document.getElementById('cmp-selected');
+  const clearBtn = document.getElementById('cmp-clear');
+  const meta     = document.getElementById('cmp-meta');
+  const tbody    = document.getElementById('cmp-table-body');
+  const chartEl  = document.getElementById('cmp-chart');
 
-  const state = new Set();  // 選中的題材
+  const ALL_TOPICS = Object.keys(window.TOPIC_SERIES || {}).sort();
+  const STOCK_INDEX = window.STOCK_INDEX || [];
+  const STOCK_BY_SYM = {};
+  STOCK_INDEX.forEach(s => { STOCK_BY_SYM[s.sym] = s; });
+
+  // 個股顏色調色板（灰階 + 暖中性）
+  const STOCK_PALETTE = ['#94a3b8', '#cbd5e1', '#a3a3a3', '#fbbf24', '#f97316'];
+
+  // state: Map<key, {kind:'topic'|'stock', key, name}>
+  const state = new Map();
   let chart = null;
 
-  // URL param ?topics=AI伺服器,CoWoS先進封裝
-  try {
-    const q = new URLSearchParams(location.search).get('topics');
-    if (q) q.split(',').forEach(t => { if (window.TOPIC_SERIES[t]) state.add(t); });
-  } catch (_) {}
+  // URL 解析：?topics=A,B&stocks=2330,2454
+  function parseUrl() {
+    try {
+      const p = new URLSearchParams(location.search);
+      const t = p.get('topics');
+      const s = p.get('stocks');
+      if (t) t.split(',').forEach(name => {
+        if (window.TOPIC_SERIES[name]) state.set('topic:' + name, {kind:'topic', key:name, name});
+      });
+      if (s) s.split(',').forEach(sym => {
+        const idx = STOCK_BY_SYM[sym];
+        if (idx) state.set('stock:' + sym, {kind:'stock', key:sym, name: idx.name + ' (' + sym + ')'});
+      });
+    } catch (_) {}
+  }
+
+  function syncUrl() {
+    const topics = [], stocks = [];
+    state.forEach(v => { if (v.kind === 'topic') topics.push(v.key); else stocks.push(v.key); });
+    const params = new URLSearchParams();
+    if (topics.length) params.set('topics', topics.join(','));
+    if (stocks.length) params.set('stocks', stocks.join(','));
+    const qs = params.toString();
+    history.replaceState(null, '', qs ? ('?' + qs) : location.pathname);
+  }
+
+  async function ensureStockSeries(sym) {
+    if (window.STOCK_SERIES[sym]) return window.STOCK_SERIES[sym];
+    try {
+      const r = await fetch('data/stock_series/' + encodeURIComponent(sym) + '.json');
+      if (!r.ok) return null;
+      const j = await r.json();
+      window.STOCK_SERIES[sym] = j;
+      return j;
+    } catch (_) { return null; }
+  }
+
+  function chipFor(item) {
+    const chip = document.createElement('span');
+    if (item.kind === 'topic') {
+      const m = window.TOPIC_META[item.key] || {};
+      chip.className = 'cmp-chip cmp-chip-topic';
+      chip.style.borderColor = m.color || '#64748b';
+      chip.style.color = m.color || '#64748b';
+      chip.innerHTML = item.name + ' <button class="cmp-chip-x" data-k="' + item.kind + ':' + item.key + '">×</button>';
+    } else {
+      chip.className = 'cmp-chip cmp-chip-stock';
+      chip.innerHTML = '<span class="cmp-sym">#' + item.key + '</span> ' + (STOCK_BY_SYM[item.key] ? STOCK_BY_SYM[item.key].name : item.key)
+        + ' <button class="cmp-chip-x" data-k="' + item.kind + ':' + item.key + '">×</button>';
+    }
+    return chip;
+  }
 
   function renderSelected() {
     selected.innerHTML = '';
-    Array.from(state).forEach(t => {
-      const m = window.TOPIC_META[t] || {};
-      const chip = document.createElement('span');
-      chip.className = 'cmp-chip';
-      chip.style.borderColor = m.color || '#64748b';
-      chip.style.color = m.color || '#64748b';
-      chip.innerHTML = `${t} <button class="cmp-chip-x" data-t="${t}">×</button>`;
-      selected.appendChild(chip);
-    });
+    state.forEach(item => selected.appendChild(chipFor(item)));
     selected.querySelectorAll('.cmp-chip-x').forEach(b => {
-      b.addEventListener('click', () => { state.delete(b.dataset.t); update(); });
+      b.addEventListener('click', () => { state.delete(b.dataset.k); update(); });
     });
   }
 
   function renderDropdown(q) {
     q = (q || '').toLowerCase().trim();
-    let results = ALL_TOPICS;
-    if (q) {
-      const tokens = q.split(/\s+/).filter(Boolean);
-      results = ALL_TOPICS.filter(t => {
+    const tokens = q ? q.split(/\s+/).filter(Boolean) : [];
+
+    let topics = ALL_TOPICS.filter(t => !state.has('topic:' + t));
+    if (tokens.length) {
+      topics = topics.filter(t => {
         const hay = (t + ' ' + (window.TOPIC_META[t]?.category || '')).toLowerCase();
         return tokens.every(tok => hay.includes(tok));
       });
     }
-    results = results.filter(t => !state.has(t)).slice(0, 20);
-    if (!results.length) { dropdown.hidden = true; return; }
-    dropdown.innerHTML = results.map(t => {
-      const m = window.TOPIC_META[t] || {};
-      return `<a class="search-item" data-t="${t}"><strong style="color:${m.color||'inherit'}">${t}</strong><small>${m.category||''}</small></a>`;
-    }).join('');
+    topics = topics.slice(0, 12);
+
+    let stocks = STOCK_INDEX.filter(s => !state.has('stock:' + s.sym));
+    if (tokens.length) {
+      stocks = stocks.filter(s => {
+        const hay = ((s.name || '') + ' ' + s.sym + ' ' + (s.industry || '') + ' ' + (s.topics || []).join(' ')).toLowerCase();
+        return tokens.every(tok => hay.includes(tok));
+      });
+    }
+    stocks = stocks.slice(0, 12);
+
+    if (!topics.length && !stocks.length) { dropdown.hidden = true; return; }
+
+    let html = '';
+    if (topics.length) {
+      html += '<div class="search-section-head">題材</div>';
+      html += topics.map(t => {
+        const m = window.TOPIC_META[t] || {};
+        return '<a class="search-item" data-kind="topic" data-key="' + t + '">'
+             + '<strong style="color:' + (m.color || 'inherit') + '">' + t + '</strong>'
+             + '<small>' + (m.category || '') + '</small></a>';
+      }).join('');
+    }
+    if (stocks.length) {
+      html += '<div class="search-section-head">個股</div>';
+      html += stocks.map(s => {
+        const tagsTxt = (s.topics || []).slice(0, 2).join('、');
+        return '<a class="search-item" data-kind="stock" data-key="' + s.sym + '">'
+             + '<strong>' + s.name + ' <span class="muted">(' + s.sym + ')</span></strong>'
+             + '<small>' + (tagsTxt || s.industry || '—') + '</small></a>';
+      }).join('');
+    }
+    dropdown.innerHTML = html;
     dropdown.hidden = false;
     dropdown.querySelectorAll('.search-item').forEach(el => {
-      el.addEventListener('mousedown', (e) => {
+      el.addEventListener('mousedown', async (e) => {
         e.preventDefault();
-        if (state.size >= 5) { alert('最多同時對比 5 個題材'); return; }
-        state.add(el.dataset.t);
+        if (state.size >= 5) { alert('最多同時對比 5 個題材或個股'); return; }
+        const kind = el.dataset.kind;
+        const key  = el.dataset.key;
+        if (kind === 'stock') {
+          const series = await ensureStockSeries(key);
+          if (!series) { alert('無法載入 ' + key + ' 的歷史資料'); return; }
+          const idx = STOCK_BY_SYM[key];
+          state.set('stock:' + key, {kind:'stock', key, name: (idx ? idx.name : key) + ' (' + key + ')'});
+        } else {
+          state.set('topic:' + key, {kind:'topic', key, name: key});
+        }
         input.value = '';
         dropdown.hidden = true;
         update();
@@ -115,82 +201,117 @@ window.TOPIC_META = {{ topic_meta_json|safe }};
   });
   clearBtn.addEventListener('click', () => { state.clear(); update(); });
 
+  function getSeries(item) {
+    if (item.kind === 'topic') return window.TOPIC_SERIES[item.key] || null;
+    return window.STOCK_SERIES[item.key] || null;
+  }
+  function getColor(item, idx) {
+    if (item.kind === 'topic') return (window.TOPIC_META[item.key] || {}).color || '#ea580c';
+    return STOCK_PALETTE[idx % STOCK_PALETTE.length];
+  }
+
   function renderChart() {
     if (typeof echarts === 'undefined') { setTimeout(renderChart, 120); return; }
     if (!chart) chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
     if (!state.size) { chart.clear(); return; }
-    // 找最長的 dates 作為 x 軸
     let maxDates = [];
-    state.forEach(t => {
-      const s = window.TOPIC_SERIES[t];
-      if (s && s.dates.length > maxDates.length) maxDates = s.dates;
+    let stockIdx = 0;
+    const items = Array.from(state.values());
+    items.forEach(it => {
+      const s = getSeries(it);
+      if (s && s.dates && s.dates.length > maxDates.length) maxDates = s.dates;
     });
-    const series = Array.from(state).map(t => {
-      const s = window.TOPIC_SERIES[t];
+    const series = items.map((it, i) => {
+      const s = getSeries(it);
       if (!s) return null;
-      const m = window.TOPIC_META[t] || {};
-      // 若該題材 dates 長度 < maxDates，前面補 null
       const pad = maxDates.length - s.dates.length;
       const values = Array(pad).fill(null).concat(s.values);
+      const color = getColor(it, it.kind === 'stock' ? stockIdx++ : i);
+      const isStock = it.kind === 'stock';
       return {
-        name: t,
+        name: it.name,
         type: 'line',
         data: values,
         smooth: true,
         symbol: 'none',
-        lineStyle: { color: m.color || '#ea580c', width: 2 },
-        itemStyle: { color: m.color || '#ea580c' },
+        lineStyle: { color, width: 2, type: isStock ? 'dashed' : 'solid' },
+        itemStyle: { color },
       };
     }).filter(Boolean);
 
     chart.setOption({
       backgroundColor: 'transparent',
       animation: false,
-      legend: { data: Array.from(state), top: 0, textStyle: { color: '#9ca3af' }, type: 'scroll' },
+      legend: { data: items.map(it => it.name), top: 0, textStyle: { color: '#9ca3af' }, type: 'scroll' },
       tooltip: { trigger: 'axis', backgroundColor: '#1f2937', borderColor: '#374151', textStyle: { color: '#e5e7eb' },
-        valueFormatter: v => (v == null) ? '—' : (v>=0?'+':'') + v.toFixed(2) + '%'
+        valueFormatter: v => (v == null) ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2) + '%'
       },
       grid: { left: 50, right: 20, top: 40, bottom: 40 },
       xAxis: { type: 'category', data: maxDates, axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af' } },
       yAxis: { type: 'value', axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', formatter: '{value}%' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } } },
-      series: series,
+      series,
     }, true);
     window.addEventListener('resize', () => chart.resize());
   }
 
   function renderTable() {
     if (!state.size) {
-      tbody.innerHTML = '<tr><td colspan="8" class="muted" style="padding:40px; text-align:center;">加入題材後顯示</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" class="muted" style="padding:40px; text-align:center;">加入後顯示</td></tr>';
       return;
     }
-    const rows = Array.from(state).map(t => {
-      const s = window.TOPIC_SERIES[t] || {};
-      const m = window.TOPIC_META[t] || {};
-      const cls = v => v == null ? '' : (v > 0 ? 'positive' : 'negative');
-      const fmt = v => v == null ? '—' : (v>=0?'+':'') + v.toFixed(2) + '%';
-      return `<tr>
-        <td><a href="topic/${encodeURIComponent(m.slug || t)}.html" style="color:${m.color||'inherit'}"><b>${t}</b></a></td>
-        <td class="muted">${m.category || '—'}</td>
-        <td class="muted">${m.n_stocks || '—'}</td>
-        <td class="${cls(s.ret_1d)}">${fmt(s.ret_1d)}</td>
-        <td class="${cls(s.ret_1w)}">${fmt(s.ret_1w)}</td>
-        <td class="${cls(s.ret_1m)}">${fmt(s.ret_1m)}</td>
-        <td class="${cls(s.ret_3m)}">${fmt(s.ret_3m)}</td>
-        <td class="${cls(s.ret_6m)}">${fmt(s.ret_6m)}</td>
-      </tr>`;
+    const cls = v => v == null ? '' : (v > 0 ? 'positive' : 'negative');
+    const fmt = v => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+    const rows = Array.from(state.values()).map(it => {
+      const s = getSeries(it) || {};
+      if (it.kind === 'topic') {
+        const m = window.TOPIC_META[it.key] || {};
+        return `<tr>
+          <td><span class="cmp-type-pill cmp-type-topic" style="background:${(m.color||'#64748b')}22; color:${m.color||'#64748b'};">題材</span></td>
+          <td><a href="topic/${encodeURIComponent(m.slug || it.key)}.html" style="color:${m.color || 'inherit'}"><b>${it.key}</b></a></td>
+          <td class="muted">${m.category || '—'}</td>
+          <td class="muted">${m.n_stocks || '—'}</td>
+          <td class="${cls(s.ret_1d)}">${fmt(s.ret_1d)}</td>
+          <td class="${cls(s.ret_1w)}">${fmt(s.ret_1w)}</td>
+          <td class="${cls(s.ret_1m)}">${fmt(s.ret_1m)}</td>
+          <td class="${cls(s.ret_3m)}">${fmt(s.ret_3m)}</td>
+          <td class="${cls(s.ret_6m)}">${fmt(s.ret_6m)}</td>
+        </tr>`;
+      } else {
+        const idx = STOCK_BY_SYM[it.key] || {};
+        const dispName = idx.name || it.key;
+        const indTxt = idx.industry || (idx.topics && idx.topics[0]) || '—';
+        return `<tr>
+          <td><span class="cmp-type-pill cmp-type-stock">個股</span></td>
+          <td><a href="company/${it.key}.html"><b>${dispName}</b> <span class="muted">(${it.key})</span></a></td>
+          <td class="muted">${indTxt}</td>
+          <td class="muted">—</td>
+          <td class="${cls(s.ret_1d)}">${fmt(s.ret_1d)}</td>
+          <td class="${cls(s.ret_1w)}">${fmt(s.ret_1w)}</td>
+          <td class="${cls(s.ret_1m)}">${fmt(s.ret_1m)}</td>
+          <td class="${cls(s.ret_3m)}">${fmt(s.ret_3m)}</td>
+          <td class="${cls(s.ret_6m)}">${fmt(s.ret_6m)}</td>
+        </tr>`;
+      }
     });
     tbody.innerHTML = rows.join('');
   }
 
   function update() {
+    syncUrl();
     renderSelected();
     renderChart();
     renderTable();
-    if (state.size) meta.textContent = `已選 ${state.size} / 5 題材`;
-    else meta.textContent = '請在上方加入至少 1 個題材';
+    if (state.size) meta.textContent = `已選 ${state.size} / 5（題材 + 個股）`;
+    else meta.textContent = '請在上方加入至少 1 個題材或個股';
   }
 
-  update();
+  // 初始載入：URL 帶有 stocks 時需先異步加載
+  (async function init() {
+    parseUrl();
+    const stockSyms = Array.from(state.values()).filter(v => v.kind === 'stock').map(v => v.key);
+    await Promise.all(stockSyms.map(ensureStockSeries));
+    update();
+  })();
 })();
 </script>
 {% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% set page = "rs" %}
+{% block title %}RS 評分 · 族群寶{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>RS 相對強度評分 <small>{{ last_date }}</small></h1>
+  <p>仿 EJFQ 風格 RS Score：以個股近 12 個月相對全市場的價格表現算出 1-99 percentile rank。
+    <strong>RS = 96</strong> 表示該股表現優於市場 96% 的股票；<strong>RS ≥ 80</strong> 視為強勢股。
+    本日有效樣本 <strong>{{ total_count }}</strong> 檔，其中強勢股 <strong>{{ strong_count }}</strong> 檔。
+    新上市未滿 50 個交易日的股票不納入計算。</p>
+</section>
+
+<div class="filter-bar" id="rs-tabs">
+  <button class="filter-chip active" data-tab="all">全市場 RS 排名</button>
+  <button class="filter-chip" data-tab="strong">強勢股精選 (RS ≥ 80)</button>
+</div>
+
+<div class="rs-tab-body" data-body="all">
+  <div class="panel">
+    <div class="panel-header">
+      <h2>全市場 RS 排名</h2>
+      <span class="muted">依 RS 由高到低排序，RS≥80 標紅、RS&lt;30 標灰</span>
+    </div>
+    <div class="rs-filter-row">
+      <select id="rs-market" aria-label="市場別">
+        <option value="">全部市場</option>
+        <option value="上市">上市</option>
+        <option value="上櫃">上櫃</option>
+        <option value="興櫃">興櫃</option>
+      </select>
+      <select id="rs-range" aria-label="RS 區間">
+        <option value="">全部 RS</option>
+        <option value="90+">RS ≥ 90</option>
+        <option value="80-89">RS 80-89</option>
+        <option value="70-79">RS 70-79</option>
+        <option value="lt70">RS &lt; 70</option>
+      </select>
+      <select id="rs-industry" aria-label="產業">
+        <option value="">全部產業</option>
+        {% for ind in industries %}
+        <option value="{{ ind }}">{{ ind }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" id="rs-search" placeholder="搜尋股號 / 名稱"/>
+      <span class="muted" id="rs-count">{{ rs_rows|length }} 檔</span>
+    </div>
+    <div class="table-scroll" style="max-height:720px; overflow-y:auto;">
+      <table class="table compact" id="rs-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>股票</th>
+            <th>市場</th>
+            <th>產業</th>
+            <th>RS</th>
+            <th>12M 漲跌</th>
+            <th>20日</th>
+            <th>5日</th>
+            <th>今日</th>
+            <th>收盤</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rs_rows %}
+          <tr data-market="{{ r.market }}" data-industry="{{ r.industry }}" data-rs="{{ r.rs }}" data-key="{{ (r.sym ~ ' ' ~ r.name)|lower }}">
+            <td class="rank-no">{{ loop.index }}</td>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td class="muted">{{ r.market or '—' }}</td>
+            <td class="muted">{{ r.industry or '—' }}</td>
+            <td><strong class="rs-cell rs-{% if r.rs >= 80 %}strong{% elif r.rs < 30 %}weak{% else %}mid{% endif %}">{{ r.rs }}</strong></td>
+            <td class="{% if r.ret_12m and r.ret_12m > 0 %}positive{% elif r.ret_12m %}negative{% endif %}">{{ "{:+.1f}%".format(r.ret_12m*100) if r.ret_12m is not none else '—' }}</td>
+            <td class="{% if r.ret_20d and r.ret_20d > 0 %}positive{% elif r.ret_20d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_20d*100) if r.ret_20d is not none else '—' }}</td>
+            <td class="{% if r.ret_5d and r.ret_5d > 0 %}positive{% elif r.ret_5d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_5d*100) if r.ret_5d is not none else '—' }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+            <td>{{ "%.2f"|format(r.close) if r.close is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="rs-tab-body" data-body="strong" hidden>
+  <p class="muted" style="margin:8px 4px 16px;">RS ≥ 80 強勢個股按產業分組，每組最多 5 檔；產業排序依強勢股檔數由多到少。</p>
+  <div class="grid-2col">
+    {% for industry, stocks in strong_groups %}
+    <div class="panel">
+      <div class="panel-header">
+        <h2>{{ industry }} <span class="muted" style="font-size:13px;">{{ stocks|length }} 檔</span></h2>
+      </div>
+      <table class="table compact">
+        <thead><tr><th>股票</th><th>RS</th><th>12M</th><th>20日</th><th>今日</th></tr></thead>
+        <tbody>
+          {% for r in stocks %}
+          <tr>
+            <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+            <td><strong class="rs-cell rs-strong">{{ r.rs }}</strong></td>
+            <td class="{% if r.ret_12m and r.ret_12m > 0 %}positive{% elif r.ret_12m %}negative{% endif %}">{{ "{:+.1f}%".format(r.ret_12m*100) if r.ret_12m is not none else '—' }}</td>
+            <td class="{% if r.ret_20d and r.ret_20d > 0 %}positive{% elif r.ret_20d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_20d*100) if r.ret_20d is not none else '—' }}</td>
+            <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+(function(){
+  const tabs = document.querySelectorAll('#rs-tabs .filter-chip');
+  const bodies = document.querySelectorAll('.rs-tab-body');
+  tabs.forEach(btn => btn.addEventListener('click', () => {
+    tabs.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const key = btn.dataset.tab;
+    bodies.forEach(b => b.hidden = (b.dataset.body !== key));
+  }));
+
+  const market   = document.getElementById('rs-market');
+  const range    = document.getElementById('rs-range');
+  const industry = document.getElementById('rs-industry');
+  const search   = document.getElementById('rs-search');
+  const count    = document.getElementById('rs-count');
+  const rows     = document.querySelectorAll('#rs-table tbody tr');
+
+  function inRange(rs, key) {
+    rs = +rs;
+    if (key === '90+')   return rs >= 90;
+    if (key === '80-89') return rs >= 80 && rs < 90;
+    if (key === '70-79') return rs >= 70 && rs < 80;
+    if (key === 'lt70')  return rs < 70;
+    return true;
+  }
+  function apply() {
+    const m = market.value, rg = range.value, ind = industry.value;
+    const s = search.value.trim().toLowerCase();
+    let n = 0;
+    rows.forEach(row => {
+      let show = true;
+      if (m   && row.dataset.market   !== m)   show = false;
+      if (ind && row.dataset.industry !== ind) show = false;
+      if (rg  && !inRange(row.dataset.rs, rg)) show = false;
+      if (s   && !row.dataset.key.includes(s)) show = false;
+      row.hidden = !show;
+      if (show) {
+        n++;
+        const cell = row.querySelector('.rank-no');
+        if (cell) cell.textContent = n;
+      }
+    });
+    count.textContent = n + ' 檔';
+  }
+  [market, range, industry].forEach(el => el.addEventListener('change', apply));
+  search.addEventListener('input', apply);
+})();
+</script>
+{% endblock %}
