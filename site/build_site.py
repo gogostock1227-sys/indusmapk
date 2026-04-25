@@ -457,6 +457,41 @@ def _parse_coverage_md(content: str) -> dict:
     return sections
 
 
+def load_stock_profiles() -> dict:
+    """載入 concept_taxonomy/stock_profiles.json（三維畫像，用於個股頁的供應鏈位階徽章）。
+
+    Schema 詳見 concept_taxonomy/validator/schema.py::StockProfile。
+    缺檔 fallback {} —— 不影響網站建置。
+    """
+    path = ROOT_DIR / "concept_taxonomy" / "stock_profiles.json"
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"  [warn] load_stock_profiles 失敗：{e}")
+        return {}
+
+
+# 27 位階 enum → 中文標籤（對應 concept_taxonomy/validator/schema.py::SUPPLY_CHAIN_POSITIONS）
+SUPPLY_CHAIN_POSITION_LABELS = {
+    "IP": "IP / 矽智財", "IC_DESIGN": "IC 設計 / Fabless",
+    "ASIC_SVC": "ASIC 設計服務", "FOUNDRY": "晶圓代工",
+    "IDM_DRAM": "DRAM 製造 / IDM", "IDM_NAND": "NAND Flash 製造",
+    "OSAT_ADV": "先進封裝 (OSAT)", "OSAT_TRAD": "一般封測",
+    "TEST_INTF": "測試介面 / 探針卡", "TEST_SVC": "測試代工",
+    "EQUIP": "半導體設備", "MAT_WAFER": "矽晶圓 / 上游材料",
+    "MAT_CHEM": "半導體化學品 / 特用氣體", "SUBSTRATE": "載板 / 基板",
+    "CONNECTOR": "連接器 / Socket", "PASSIVE": "被動元件",
+    "PCB_HDI": "高階 PCB / HDI", "PCB_FPC": "軟板 FPC",
+    "THERMAL": "散熱模組", "CHASSIS": "機構件 / 機殼",
+    "ODM_SYS": "系統組裝 / ODM", "BRAND": "品牌商 / OEM",
+    "END_USER": "終端應用商", "DISTRIB": "通路 / 代理",
+    "POWER_MOD": "電源模組 / BBU", "OPTIC_MOD": "光通訊模組",
+    "OPTIC_COMP": "光通訊元件", "SVC_SAAS": "軟體 / SaaS",
+}
+
+
 def load_coverage() -> dict:
     """掃描 My-TW-Coverage/Pilot_Reports/**/{sym}_*.md，回傳 {sym: {section_name: html}}。
 
@@ -1118,14 +1153,14 @@ def ret_to_color(ret_pct: float | None, tf: str = "daily") -> str:
 
 
 def build_heatmap_data(stock_metrics: pd.DataFrame, name_map: dict, top_n_per_group=15) -> dict:
-    """產生 ECharts treemap 格式。分三層：category > group > stock。
+    """產生 ECharts treemap 格式。兩層：group > stock。
+    第一層直接鋪 190 族群（依當期成交額降序），點擊下鑽看個股。
     每個節點的顏色 Python 端就算好塞進 itemStyle.color，繞開 ECharts 多層 color mapping 的坑。"""
     data_by_tf = {}
     for tf, col in [("daily", "ret_1d"), ("weekly", "ret_5d"), ("monthly", "ret_20d")]:
-        cat_nodes = defaultdict(list)
+        group_nodes = []
         for group, members in CONCEPT_GROUPS.items():
             meta = get_meta(group)
-            category = meta["category"]
             rows = stock_metrics.loc[stock_metrics.index.intersection(members)].copy()
             if rows.empty:
                 continue
@@ -1147,44 +1182,16 @@ def build_heatmap_data(stock_metrics: pd.DataFrame, name_map: dict, top_n_per_gr
                 continue
             avg_ret_pct = float(rows[col].mean(skipna=True) or 0) * 100
             total_amt_group = sum(s["value"][0] for s in stock_leaves)
-            cat_nodes[category].append({
+            group_nodes.append({
                 "name":      group,
                 "value":     [total_amt_group, avg_ret_pct],
+                "category":  meta["category"],
                 "children":  stock_leaves,
                 "itemStyle": {"color": ret_to_color(avg_ret_pct, tf)},
             })
-        # Category 層去重：同一個股在 category 下多個 group 都有時只算一次成交額
-        result = []
-        cat_stats = {}
-        for cat, groups in cat_nodes.items():
-            unique_stocks = {}  # sym -> (amt_mn, ret_pct)
-            for g_node in groups:
-                for leaf in g_node["children"]:
-                    sym = leaf["symbol"]
-                    if sym not in unique_stocks:
-                        unique_stocks[sym] = (leaf["value"][0], leaf["value"][1])
-            unique_amt = sum(v[0] for v in unique_stocks.values())
-            # 以成交額加權平均報酬
-            cat_ret = (
-                sum(v[1] * v[0] for v in unique_stocks.values()) / unique_amt
-                if unique_amt > 0 else 0
-            )
-            cat_stats[cat] = (unique_amt, cat_ret)
-
-        # 依 unique 成交額大→小排序 category
-        for cat in sorted(cat_stats, key=lambda c: -cat_stats[c][0]):
-            groups = cat_nodes[cat]
-            if not groups:
-                continue
-            groups = sorted(groups, key=lambda g: -g["value"][0])
-            unique_amt, cat_ret = cat_stats[cat]
-            result.append({
-                "name":      cat,
-                "value":     [unique_amt, cat_ret],
-                "children":  groups,
-                "itemStyle": {"color": ret_to_color(cat_ret, tf)},
-            })
-        data_by_tf[tf] = result
+        # 依族群成交額大→小排序
+        group_nodes.sort(key=lambda g: -g["value"][0])
+        data_by_tf[tf] = group_nodes
     return data_by_tf
 
 
@@ -1439,25 +1446,6 @@ def compute_mansfield_rs(close: pd.DataFrame, index_series: pd.Series,
     ma = ratio.rolling(window=lookback, min_periods=min_periods).mean()
     mansfield = (ratio / ma - 1) * 100
     return mansfield.round(1)
-
-
-def compute_ratio_with_sma(close: pd.DataFrame, index_series: pd.Series,
-                            lookback: int = 240,
-                            min_periods: int = 120) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """直接回傳 (個股/大盤) 比值與其 240 日 SMA，供「比值 + 均線」交叉視圖使用。
-
-    回傳 (ratio_df, sma_df)：兩個 DataFrame，shape 相同 (date × symbol)。
-    """
-    if close is None or close.empty or index_series is None or len(index_series) == 0:
-        return pd.DataFrame(), pd.DataFrame()
-    common = close.index.intersection(index_series.index)
-    if len(common) < min_periods + 1:
-        return pd.DataFrame(), pd.DataFrame()
-    px = close.loc[common]
-    idx = index_series.loc[common]
-    ratio = px.div(idx, axis=0)
-    sma = ratio.rolling(window=lookback, min_periods=min_periods).mean()
-    return ratio, sma
 
 
 def build_rs_rows(stock_metrics: pd.DataFrame, rs_today: pd.Series, close: pd.DataFrame,
@@ -1823,11 +1811,12 @@ def compute_limit_up_stats(limit_up_by_date: dict, close_df) -> dict:
     }
 
 
-def render_all(data, stock_metrics, group_metrics, related, company_topics, rich=None, extras=None, coverage=None):
+def render_all(data, stock_metrics, group_metrics, related, company_topics, rich=None, extras=None, coverage=None, stock_profiles=None):
     env = build_env()
     rich = rich or {"basic": {}, "business": {}, "revenue": {}, "financials": {}, "dividends": {}, "director": {}}
     extras = extras or {"disposal": {}, "holders": {}}
     coverage = coverage or {}
+    stock_profiles = stock_profiles or {}
     name_map = data["name_map"]
     last_date = data["close"].index[-1].strftime("%Y-%m-%d")
 
@@ -1857,9 +1846,6 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     print("       · 計算 Mansfield 相對強度（個股/大盤比值對 240 日均偏離）...")
     mansfield_taiex_df = compute_mansfield_rs(data["close"], taiex_series, lookback=240)
     mansfield_tpex_df  = compute_mansfield_rs(data["close"], tpex_series,  lookback=240)
-    # 比值 + SMA（給 ratio 模式：兩條線交叉判讀，0 線不存在）
-    ratio_taiex_df, sma_taiex_df = compute_ratio_with_sma(data["close"], taiex_series, lookback=240)
-    ratio_tpex_df,  sma_tpex_df  = compute_ratio_with_sma(data["close"], tpex_series,  lookback=240)
     print(f"         vs 加權覆蓋 {mansfield_taiex_df.shape[1] if not mansfield_taiex_df.empty else 0} 檔；"
           f"vs 櫃買覆蓋 {mansfield_tpex_df.shape[1] if not mansfield_tpex_df.empty else 0} 檔")
 
@@ -2364,6 +2350,10 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             sym,
         )
         topics = company_topics.get(sym, [])
+        # 三維畫像：取 supply_chain_position + 中文標籤（族群驗證系統 v2 產出）
+        taxonomy_profile = stock_profiles.get(sym, {})
+        taxonomy_position = taxonomy_profile.get("supply_chain_position", "")
+        taxonomy_position_label = SUPPLY_CHAIN_POSITION_LABELS.get(taxonomy_position, "")
         basic = rich["basic"].get(sym)
         business = rich["business"].get(sym)
         revenue = rich["revenue"].get(sym)
@@ -2400,15 +2390,6 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
                     return None
                 t = s.reindex(pd.DatetimeIndex(all_dates))
                 return [None if pd.isna(v) else round(float(v), 1) for v in t.values]
-            def _align_ratio(df):
-                if df is None or df.empty or sym not in df.columns:
-                    return None
-                s = df[sym].dropna()
-                if len(s) < 5:
-                    return None
-                t = s.reindex(pd.DatetimeIndex(all_dates))
-                # 比值通常很小（如 0.0024），保留 8 位小數確保 ratio/sma 能精確區分
-                return [None if pd.isna(v) else round(float(v), 8) for v in t.values]
             # 預設顯示哪個指數：上櫃 → 櫃買；其他 → 加權
             default_idx = "tpex" if data["market_map"].get(sym) == "otc" else "taiex"
             rs_chart_payload = {
@@ -2417,10 +2398,6 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
                 "quarter":       _align(quarter_s),
                 "ms_taiex":      _align_mansfield(mansfield_taiex_df),
                 "ms_tpex":       _align_mansfield(mansfield_tpex_df),
-                "ratio_taiex":   _align_ratio(ratio_taiex_df),
-                "sma_taiex":     _align_ratio(sma_taiex_df),
-                "ratio_tpex":    _align_ratio(ratio_tpex_df),
-                "sma_tpex":      _align_ratio(sma_tpex_df),
                 "twii":          _align_index(taiex_series),
                 "tpex":          _align_index(tpex_series),
                 "default_index": default_idx,
@@ -2435,6 +2412,8 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             market=market_disp,
             row=row,
             topics=[(t, get_meta(t)) for t in topics],
+            taxonomy_position=taxonomy_position,
+            taxonomy_position_label=taxonomy_position_label,
             chart_json=json.dumps(chart_data, ensure_ascii=False) if chart_data else "null",
             chip_json=json.dumps(chip_data, ensure_ascii=False) if chip_data else "null",
             holder=holder,
@@ -2717,7 +2696,8 @@ def main():
     write_robots_txt()
     rich = load_company_rich()
     coverage = load_coverage()
-    render_all(data, stock_metrics, group_metrics, related, company_topics, rich=rich, extras=extras, coverage=coverage)
+    stock_profiles = load_stock_profiles()
+    render_all(data, stock_metrics, group_metrics, related, company_topics, rich=rich, extras=extras, coverage=coverage, stock_profiles=stock_profiles)
 
     idx = DIST_DIR / "index.html"
     print(f"\n✓ 建置完成！打開：{idx}")

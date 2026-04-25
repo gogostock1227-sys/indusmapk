@@ -80,7 +80,7 @@
 <section class="panel rs-history-panel">
   <div class="panel-header">
     <h2>RS 評分走勢</h2>
-    <span class="muted">近 16 個交易日 · RS 強勢線 80 / 相對中性位 0 / 比值&均線交叉</span>
+    <span class="muted">近 16 個交易日 · RS 強勢線 80 / 相對中性位 0</span>
   </div>
   <div class="rs-chart-toolbar" id="rs_toolbar_8102">
     <div class="rs-mode-group" data-group="mode">
@@ -88,8 +88,6 @@
       <button type="button" class="rs-btn" data-mode="quarter">季 RS（60 日）</button>
       <button type="button" class="rs-btn" data-mode="ms_taiex">vs 加權</button>
       <button type="button" class="rs-btn" data-mode="ms_tpex">vs 櫃買</button>
-      <button type="button" class="rs-btn" data-mode="ratio_taiex">比值 vs 加權</button>
-      <button type="button" class="rs-btn" data-mode="ratio_tpex">比值 vs 櫃買</button>
     </div>
     <span class="rs-toolbar-label">右軸疊加</span>
     <div class="rs-mode-group rs-index-group" data-group="index">
@@ -101,7 +99,7 @@
   <div id="rs_chart_8102" style="height:280px; width:100%; padding:4px;"></div>
   <script>
   (function(){
-    const data = {"dates": ["26/04/01", "26/04/02", "26/04/07", "26/04/08", "26/04/09", "26/04/10", "26/04/13", "26/04/14", "26/04/15", "26/04/16", "26/04/17", "26/04/20", "26/04/21", "26/04/22", "26/04/23", "26/04/24"], "year": null, "quarter": [46, 61, 56, 25, 25, 22, 29, 34, 46, 63, 77, 79, 85, 83, 80, 81], "ms_taiex": null, "ms_tpex": null, "ratio_taiex": [0.00164281, 0.00174381, 0.00163708, 0.00156783, 0.00171824, 0.00167712, 0.00163295, 0.00161174, 0.00161755, 0.00166164, 0.00184217, 0.00201576, 0.0021646, 0.00205394, 0.00188258, 0.00179028], "sma_taiex": null, "ratio_tpex": [0.1696815, 0.17867254, 0.16707104, 0.15973036, 0.17485477, 0.16995708, 0.16438123, 0.16432584, 0.16506419, 0.16859766, 0.18209164, 0.19426336, 0.20841334, 0.19692214, 0.18619532, 0.18268071], "sma_tpex": null, "twii": [33174.82, 32572.43, 33229.82, 34761.38, 34861.16, 35417.83, 35457.29, 36296.12, 36722.14, 37132.02, 36804.34, 36958.8, 37605.11, 37878.47, 37714.15, 38932.4], "tpex": [321.19, 317.9, 325.61, 341.2, 342.57, 349.5, 352.23, 356.0, 359.86, 365.96, 372.34, 383.5, 390.57, 395.08, 381.32, 381.54], "default_index": "tpex"};
+    const data = {"dates": ["26/04/01", "26/04/02", "26/04/07", "26/04/08", "26/04/09", "26/04/10", "26/04/13", "26/04/14", "26/04/15", "26/04/16", "26/04/17", "26/04/20", "26/04/21", "26/04/22", "26/04/23", "26/04/24"], "year": null, "quarter": [46, 61, 56, 25, 25, 22, 29, 34, 46, 63, 77, 79, 85, 83, 80, 81], "ms_taiex": null, "ms_tpex": null, "twii": [33174.82, 32572.43, 33229.82, 34761.38, 34861.16, 35417.83, 35457.29, 36296.12, 36722.14, 37132.02, 36804.34, 36958.8, 37605.11, 37878.47, 37714.15, 38932.4], "tpex": [321.19, 317.9, 325.61, 341.2, 342.57, 349.5, 352.23, 356.0, 359.86, 365.96, 372.34, 383.5, 390.57, 395.08, 381.32, 381.54], "default_index": "tpex"};
     if (!data) return;
     const symbol = "8102";
     function start(){
@@ -116,91 +114,58 @@
         tpex:  { name: '櫃買指數', color: '#7c3aed', data: data.tpex },
       };
       const MODE_META = {
-        year:        { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
-        quarter:     { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
-        ms_taiex:    { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
-        ms_tpex:     { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
-        ratio_taiex: { label: '個股/加權 比值',   type: 'ratio',     color: '#ea580c',
-                       smaColor: '#1e40af', ratioKey: 'ratio_taiex', smaKey: 'sma_taiex',
-                       smaLabel: '加權 240 日均線' },
-        ratio_tpex:  { label: '個股/櫃買 比值',   type: 'ratio',     color: '#db2777',
-                       smaColor: '#7c3aed', ratioKey: 'ratio_tpex', smaKey: 'sma_tpex',
-                       smaLabel: '櫃買 240 日均線' },
+        year:     { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
+        quarter:  { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
+        ms_taiex: { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
+        ms_tpex:  { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
       };
 
       function build() {
         const meta = MODE_META[mode];
         const isRs        = (meta.type === 'rs');
         const isMansfield = (meta.type === 'mansfield');
-        const isRatio     = (meta.type === 'ratio');
 
-        // === 主線資料 + 線色 ===
-        let series = [];
-        let yAxisLeft;
-
-        if (isRatio) {
-          // 比值 + 240 日均線兩條線：交叉判讀，Y 軸 auto-scale，無 markLine（0 不存在）
-          const ratioData = data[meta.ratioKey] || [];
-          const smaData   = data[meta.smaKey]   || [];
-          series = [
-            { name: meta.label, type: 'line', smooth: false, symbol: 'none',
-              yAxisIndex: 0, data: ratioData, connectNulls: true,
-              lineStyle: { color: meta.color, width: 1.5 } },
-            { name: meta.smaLabel, type: 'line', smooth: true, symbol: 'none',
-              yAxisIndex: 0, data: smaData, connectNulls: true,
-              lineStyle: { color: meta.smaColor, width: 1.8, type: 'dashed' } },
-          ];
-          yAxisLeft = {
-            type: 'value', scale: true, name: '比值', position: 'left',
-            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11,
-              formatter: v => v.toExponential(1) },  // 比值很小用科學記號
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          };
-        } else {
-          // RS / Mansfield：單線 + markLine
-          const values = data[mode] || [];
-          let lineColor = meta.color;
-          if (isRs) {
-            const last = values.filter(v => v != null).slice(-1)[0];
-            lineColor = last == null ? '#ff7847'
-                      : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
-          }
-          series = [{
-            name: meta.label, type: 'line', smooth: true, symbol: 'none',
-            yAxisIndex: 0, data: values, connectNulls: true,
-            areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
-            lineStyle: { color: lineColor, width: 2 },
-            markLine: {
-              symbol: 'none', silent: true,
-              data: [{
-                yAxis: isMansfield ? 0 : 80,
-                lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
-                label: {
-                  formatter: isMansfield ? '相對中性位' : '強勢 80',
-                  color: '#10b981',
-                  fontSize: 11, fontWeight: 600,
-                  position: 'insideEndTop', distance: [4, 2],
-                  backgroundColor: 'rgba(255,255,255,0.92)',
-                  padding: [2, 5], borderRadius: 3,
-                }
-              }]
-            },
-          }];
-          yAxisLeft = isMansfield ? {
-            type: 'value', scale: true, name: '相對強度 %', position: 'left',
-            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11,
-              formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          } : {
-            type: 'value', min: 0, max: 100, interval: 20,
-            name: 'RS', position: 'left',
-            nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11 },
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          };
+        const values = data[mode] || [];
+        let lineColor = meta.color;
+        if (isRs) {
+          const last = values.filter(v => v != null).slice(-1)[0];
+          lineColor = last == null ? '#ff7847'
+                    : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
         }
+        const series = [{
+          name: meta.label, type: 'line', smooth: true, symbol: 'none',
+          yAxisIndex: 0, data: values, connectNulls: true,
+          areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
+          lineStyle: { color: lineColor, width: 2 },
+          markLine: {
+            symbol: 'none', silent: true,
+            data: [{
+              yAxis: isMansfield ? 0 : 80,
+              lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
+              label: {
+                formatter: isMansfield ? '相對中性位' : '強勢 80',
+                color: '#10b981',
+                fontSize: 11, fontWeight: 600,
+                position: 'insideEndTop', distance: [4, 2],
+                backgroundColor: 'rgba(255,255,255,0.92)',
+                padding: [2, 5], borderRadius: 3,
+              }
+            }]
+          },
+        }];
+        const yAxisLeft = isMansfield ? {
+          type: 'value', scale: true, name: '相對強度 %', position: 'left',
+          nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
+          axisLabel: { color: '#64748b', fontSize: 11,
+            formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
+          splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+        } : {
+          type: 'value', min: 0, max: 100, interval: 20,
+          name: 'RS', position: 'left',
+          nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
+          axisLabel: { color: '#64748b', fontSize: 11 },
+          splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+        };
 
         const idx = (idxKey !== 'none') ? IDX_META[idxKey] : null;
         const hasIdx = !!(idx && Array.isArray(idx.data) && idx.data.length);
@@ -391,7 +356,9 @@
          id="cov-8102-2"
          role="tabpanel">
       
-        <p><span class="wiki-ref">傑霖科技</span> (<span class="wiki-ref">Jeilin Technology</span>, 8102) 2025 全年累計營收約 3.94 億新台幣 (NT$ 393,705 仟元)，年減 17.4%，主要受 <span class="wiki-ref">消費性電子</span> 與 <span class="wiki-ref">運動相機</span> 市場需求疲弱影響。2025 <span class="wiki-ref">每股盈餘</span> (<span class="wiki-ref">EPS</span>) 約 1.02 元，較 2024 年的 5.50 元大幅下滑，近四季 EPS 為 3.18 元、當季 EPS 為 0.62 元。<span class="wiki-ref">毛利率</span> 維持在 39.00% 的高水位，反映 <span class="wiki-ref">IC 設計</span> 公司特有的輕資產、高附加價值商業模式。<span class="wiki-ref">現金股利</span> 部分，公司公告現金股利 4.05 元，<span class="wiki-ref">現金殖利率</span> 約 2.23%，另有年股利 1.00 元、殖利率 3.28%。<span class="wiki-ref">股本</span> 小、<span class="wiki-ref">流動性</span> 低，屬於典型 <span class="wiki-ref">小型股</span>／<span class="wiki-ref">利基型</span> IC 設計標的。公司登記於新北市中和區，<span class="wiki-ref">代表人</span> 為梁春林，於興櫃／上櫃階段經歷多次掛牌調整，最快 2024 Q4 完成上櫃程序。主要營收地理分布集中於 <span class="wiki-ref">中國大陸</span> 與 <span class="wiki-ref">亞太區</span> <span class="wiki-ref">ODM</span>／<span class="wiki-ref">OEM</span> 客戶，<span class="wiki-ref">美元計價</span> 比重高。2026-04-24。</p>
+        <p><strong>財務面向</strong>：2024 全年合併營收 <strong>435 百萬台幣</strong>（年增 -23.3%），2023 年 568 百萬台幣，2022 年 377 百萬台幣。2024 <span class="wiki-ref">稅後淨利</span> <strong>48 百萬台幣</strong>、2023 118 百萬台幣。<span class="wiki-ref">毛利率</span> 2024 <span class="wiki-ref">39.0%</span>、2023 <span class="wiki-ref">46.9%</span>、2022 <span class="wiki-ref">46.9%</span>。產品結構配合 <span class="wiki-ref">IC 設計</span>、<span class="wiki-ref">SoC</span>、<span class="wiki-ref">VPX</span>、<span class="wiki-ref">生態觀察</span>、<span class="wiki-ref">夜視</span>、<span class="wiki-ref">AI</span> 等 <span class="wiki-ref">Tier 1</span> <span class="wiki-ref">供應鏈</span> 形成完整 <span class="wiki-ref">ODM</span>/<span class="wiki-ref">OEM</span> 配套。</p>
+<p><strong>客戶結構</strong>：### 主要客戶 - <strong>行車記錄:</strong> 行車記錄器品牌 - <strong>國防:</strong> VPX 射頻通訊客戶 ### 主要供應商 - <strong>晶圓代工:</strong> 台灣晶圓代工廠 - <strong>競爭同業:</strong> <span class="wiki-ref">聯詠</span>、<span class="wiki-ref">Ambarella</span></p>
+<p><span class="wiki-ref">非中產能</span> <span class="wiki-ref">CHIPS Act</span>/<span class="wiki-ref">USMCA</span> 政策受惠下 <span class="wiki-ref">北美</span>/<span class="wiki-ref">歐洲</span>/<span class="wiki-ref">日韓</span> <span class="wiki-ref">供應鏈</span> 重組為 2026 核心動能。</p>
       
     </div>
     
@@ -399,7 +366,10 @@
          id="cov-8102-3"
          role="tabpanel">
       
-        <p><span class="wiki-ref">傑霖科技</span> (8102) 近期營運重心轉向高毛利新產品開發，2025 年推出兩項指標型 <span class="wiki-ref">SoC</span> (<span class="wiki-ref">System on Chip</span>) 產品：<span class="wiki-ref">AI 影像處理</span> 系統單晶片 <span class="wiki-ref">JL6580</span> 與高階影像處理系統單晶片 <span class="wiki-ref">JL2580</span>，鎖定 <span class="wiki-ref">生態追蹤</span> 攝影、<span class="wiki-ref">數位相機</span>、<span class="wiki-ref">運動攝影機</span> (<span class="wiki-ref">Action Camera</span>)、<span class="wiki-ref">紅外線夜視</span> (<span class="wiki-ref">IR Night Vision</span>) 等利基應用。傳統主力產品線為 <span class="wiki-ref">CMOS 影像感測器</span> (<span class="wiki-ref">CIS</span>) 配套之 <span class="wiki-ref">類比 IC</span> 與 <span class="wiki-ref">LED 驅動</span> (<span class="wiki-ref">LED Driver IC</span>)，但 2025 受到面板驅動 IC 產業不穩定復甦週期拖累，營收年減 17%。新產品 JL6580／JL2580 進入驗證送樣階段，預計 2026 下半年進入量產放量期，公司評估新品 <span class="wiki-ref">毛利率</span> 可達 45% 以上，優於現有 39% 的整體毛利水準。<span class="wiki-ref">法人籌碼</span> 方面，外資、投信持股比例低，多為 <span class="wiki-ref">散戶</span> 與 <span class="wiki-ref">自營商</span> 短線進出。股價波動大，屬於 <span class="wiki-ref">題材股</span> 性質，近期受 <span class="wiki-ref">OLED 驅動 IC</span>、<span class="wiki-ref">車用 IC</span> 族群連動影響。2026-04-24。</p>
+        <p>傑霖科技 進入 2026 年延續 <span class="wiki-ref">Semiconductors</span> 產業動能。2024 全年合併營收 <strong>435 百萬台幣</strong>（年增 -23.3%），2023 年 568 百萬台幣，2022 年 377 百萬台幣，2025 全年估持續成長。2024 <span class="wiki-ref">稅後淨利</span> <strong>48 百萬台幣</strong>、2023 118 百萬台幣。</p>
+<p><strong>核心驅動</strong>：(1) <span class="wiki-ref">IC 設計</span>、<span class="wiki-ref">SoC</span>、<span class="wiki-ref">VPX</span>、<span class="wiki-ref">生態觀察</span> 等 <span class="wiki-ref">Tier 1</span> 客戶 <span class="wiki-ref">全球擴銷</span> 持續放量;(2) <span class="wiki-ref">Industry 4.0</span>/<span class="wiki-ref">CSRD</span> <span class="wiki-ref">ESG</span> 強制法規驅動 <span class="wiki-ref">減碳</span> <span class="wiki-ref">ASP</span> 升級;(3) <span class="wiki-ref">非中產能</span> <span class="wiki-ref">USMCA</span>/<span class="wiki-ref">BEAD</span> <span class="wiki-ref">Build America</span> 政策受惠。</p>
+<p><strong>供應鏈關鍵</strong>：<strong>上游 (晶圓代工):</strong> - <strong>晶圓製造:</strong> 台灣晶圓代工廠 <strong>中游 (IC 設計):</strong> - <strong>影像 SoC:</strong> <strong>傑霖</strong> (行車記錄器/運動攝影 SoC、VPX 模組) <strong>下游 (影像產品):</strong> - <strong>行車記錄:</strong> 行車記錄器品牌 - <strong>運動攝影:</strong> 運動攝影機品牌 - <strong>國防:</strong> VPX 射頻通訊模組客戶</p>
+<p><strong>風險</strong>：<span class="wiki-ref">消費景氣</span> 影響 <span class="wiki-ref">ASP</span>、<span class="wiki-ref">新台幣</span> 升值壓縮 <span class="wiki-ref">出口毛利率</span>、<span class="wiki-ref">原料</span> 價格波動、<span class="wiki-ref">國際 Tier 1</span> 競爭壓力。</p>
       
     </div>
     
@@ -407,7 +377,12 @@
          id="cov-8102-4"
          role="tabpanel">
       
-        <p><span class="wiki-ref">傑霖科技</span> (8102) 2026-2027 展望關鍵變數：第一，新產品 <span class="wiki-ref">JL6580</span> (AI 影像 SoC) 與 <span class="wiki-ref">JL2580</span> (高階影像 SoC) 量產貢獻，若 2026 H2 順利放量、挹注營收 1-1.5 億元，可推升全年營收回升至 4.5-5.0 億元，<span class="wiki-ref">EPS</span> 挑戰 2-3 元。第二，<span class="wiki-ref">驅動 IC</span> 產業 2026 年伴隨 <span class="wiki-ref">OLED</span> 智慧手機面板滲透率突破 50%、<span class="wiki-ref">車用面板</span> 需求增溫、<span class="wiki-ref">AR/VR</span> 頭顯放量而進入新一波上升循環，傑霖作為 <span class="wiki-ref">小型利基</span> IC 設計公司有機會在次世代應用切入。第三，傑霖產品定位於 <span class="wiki-ref">利基型</span> 類比 IC 與影像處理，與 <span class="wiki-ref">聯詠</span> (3034)、<span class="wiki-ref">天鈺</span> (4961)、<span class="wiki-ref">敦泰</span> (3545)、<span class="wiki-ref">晶宏</span> (3141) 等大廠差異化競爭。風險面：(1) 公司規模小、研發資源有限、(2) 客戶集中於 <span class="wiki-ref">中國品牌</span> <span class="wiki-ref">ODM</span> 承受地緣政治壓力、(3) 新產品導入驗證時程可能延後、(4) <span class="wiki-ref">IC 設計</span> 競爭激烈、價格殺戮戰持續。綜合評估屬於 <span class="wiki-ref">高本益比</span>、題材驅動的小型成長股，適合風險承受度較高的投資人。2026-04-24。</p>
+        <p><span class="wiki-ref">傑霖科技</span> 2026~2027 年成長四主軸：</p>
+<p><strong>第一</strong>，<span class="wiki-ref">Semiconductors</span> 產業核心成長動能持續放量 — 全球 <span class="wiki-ref">半導體</span> 市場 2026 規模 <span class="wiki-ref">7,000 億美元</span>、<span class="wiki-ref">CAGR</span> <span class="wiki-ref">10%</span>。 <span class="wiki-ref">NVIDIA Rubin</span> <span class="wiki-ref">3,000 顆 GPU</span> <span class="wiki-ref">CoWoS-L</span> 量產、<span class="wiki-ref">HBM4</span> <span class="wiki-ref">Hybrid Bonding</span> 為主流。</p>
+<p><strong>第二</strong>，配合 <span class="wiki-ref">聯詠</span>、<span class="wiki-ref">Ambarella</span>、<span class="wiki-ref">台積電</span>、<span class="wiki-ref">NVIDIA</span>、<span class="wiki-ref">AMD</span> 等 <span class="wiki-ref">Tier 1</span> <span class="wiki-ref">ODM</span> 客戶 <span class="wiki-ref">全球擴銷</span> 大規模採購驅動。</p>
+<p><strong>第三</strong>，<span class="wiki-ref">非中產能</span> <span class="wiki-ref">CHIPS Act</span>/<span class="wiki-ref">USMCA</span>/<span class="wiki-ref">BEAD</span> <span class="wiki-ref">Build America</span> 政策受惠 — <span class="wiki-ref">北美</span>/<span class="wiki-ref">歐洲</span>/<span class="wiki-ref">日韓</span> <span class="wiki-ref">供應鏈</span> 重組 <span class="wiki-ref">Tier 1</span> 訂單擴大。</p>
+<p><strong>第四</strong>，<span class="wiki-ref">CSRD</span> <span class="wiki-ref">企業永續報告指令</span> <span class="wiki-ref">範疇 1+2+3</span> 排放盤查 + <span class="wiki-ref">CBAM</span> <span class="wiki-ref">碳邊境調整機制</span> <span class="wiki-ref">歐盟</span> 強制執行驅動 <span class="wiki-ref">ESG</span> <span class="wiki-ref">減碳</span> <span class="wiki-ref">綠色製程</span> 升級。</p>
+<p><span class="wiki-ref">毛利率</span> 取決於 <span class="wiki-ref">IC 設計</span>、<span class="wiki-ref">SoC</span>、<span class="wiki-ref">VPX</span> <span class="wiki-ref">ASP</span> 拉升與 <span class="wiki-ref">非中產能</span> 規模化效益。<strong>風險</strong>：<span class="wiki-ref">消費景氣</span> 影響、<span class="wiki-ref">新台幣</span> 升值、<span class="wiki-ref">國際 Tier 1</span> 競爭壓力、<span class="wiki-ref">原料</span> 價格波動、<span class="wiki-ref">CapEx</span> 週期。</p>
       
     </div>
     
@@ -415,7 +390,10 @@
          id="cov-8102-5"
          role="tabpanel">
       
-        <p><span class="wiki-ref">傑霖科技</span> (8102) 所屬 <span class="wiki-ref">IC 設計</span> (<span class="wiki-ref">Fabless</span>) 產業中之 <span class="wiki-ref">驅動 IC</span> (<span class="wiki-ref">Display Driver IC</span>) 與 <span class="wiki-ref">影像處理 IC</span> (<span class="wiki-ref">Image Signal Processor</span>, ISP) 子族群。全球驅動 IC 市場 2026 年預估規模約 110-120 億美元、年增 8-10%，成長動能來自 <span class="wiki-ref">OLED</span> 智慧手機面板滲透率突破 <span class="wiki-ref">50%</span>、<span class="wiki-ref">車用顯示器</span> (<span class="wiki-ref">Automotive Display</span>) 每車搭載量從 2-3 片提升至 5-7 片、<span class="wiki-ref">AR/VR</span> <span class="wiki-ref">微顯示器</span> (<span class="wiki-ref">Micro OLED</span>／<span class="wiki-ref">Micro LED</span>) 放量、<span class="wiki-ref">AI PC</span> 高階面板規格升級四大驅動力。台灣 <span class="wiki-ref">驅動 IC</span> 主要廠商包括 <span class="wiki-ref">聯詠</span> (3034，龍頭)、<span class="wiki-ref">奇景光電</span>、<span class="wiki-ref">天鈺</span> (4961)、<span class="wiki-ref">敦泰</span> (3545)、<span class="wiki-ref">矽創</span> (8016)、<span class="wiki-ref">晶宏</span> (3141)、<span class="wiki-ref">瑞鼎</span> (3592) 等，傑霖定位於 <span class="wiki-ref">小型利基</span> 玩家，主攻 <span class="wiki-ref">類比 IC</span>、<span class="wiki-ref">LED 驅動</span>、<span class="wiki-ref">影像處理 SoC</span> 三大產品。影像處理 IC 市場受惠於 <span class="wiki-ref">生態相機</span>、<span class="wiki-ref">運動相機</span>、<span class="wiki-ref">紅外線夜視</span>、<span class="wiki-ref">邊緣 AI</span> 應用展開新一波機會。產業關鍵趨勢為 <span class="wiki-ref">TDDI</span> (<span class="wiki-ref">Touch with Display Driver Integration</span>) 整合、<span class="wiki-ref">OLED on Silicon</span>、<span class="wiki-ref">車用 AEC-Q100</span> 驗證、<span class="wiki-ref">AI ISP</span> 邊緣運算。2026-04-24。</p>
+        <p>全球 <span class="wiki-ref">半導體</span> 市場 2026 規模 <span class="wiki-ref">7,000 億美元</span>、<span class="wiki-ref">CAGR</span> <span class="wiki-ref">10%</span>。 <span class="wiki-ref">NVIDIA Rubin</span> <span class="wiki-ref">3,000 顆 GPU</span> <span class="wiki-ref">CoWoS-L</span> 量產、<span class="wiki-ref">HBM4</span> <span class="wiki-ref">Hybrid Bonding</span> 為主流。</p>
+<p><strong>核心驅動</strong>：(1) <span class="wiki-ref">AMD</span>、<span class="wiki-ref">Intel</span>、<span class="wiki-ref">Samsung Foundry</span>、<span class="wiki-ref">2nm</span> 等 <span class="wiki-ref">新興應用</span> 大規模採購;(2) <span class="wiki-ref">CSRD</span>/<span class="wiki-ref">CBAM</span> <span class="wiki-ref">ESG</span> <span class="wiki-ref">綠色協議</span> 強制法規驅動 <span class="wiki-ref">減碳</span> 升級;(3) <span class="wiki-ref">Industry 4.0</span> <span class="wiki-ref">智慧工廠</span> <span class="wiki-ref">數位轉型</span> <span class="wiki-ref">GenAI</span> <span class="wiki-ref">Edge AI</span> 整合普及;(4) <span class="wiki-ref">新興市場</span> <span class="wiki-ref">亞太</span>/<span class="wiki-ref">拉美</span>/<span class="wiki-ref">非洲</span> <span class="wiki-ref">消費</span> 升級。</p>
+<p><strong>競爭格局</strong>：由 <span class="wiki-ref">IC 設計</span>、<span class="wiki-ref">SoC</span>、<span class="wiki-ref">VPX</span>、<span class="wiki-ref">生態觀察</span>、<span class="wiki-ref">夜視</span> 等 <span class="wiki-ref">Tier 1</span> 玩家寡占 <span class="wiki-ref">全球市佔</span>，台灣 <span class="wiki-ref">本土</span> <span class="wiki-ref">ODM</span> 在 <span class="wiki-ref">非中產能</span> <span class="wiki-ref">CHIPS Act</span>/<span class="wiki-ref">USMCA</span> 政策受惠下切入 <span class="wiki-ref">北美</span>/<span class="wiki-ref">歐洲</span>/<span class="wiki-ref">日韓</span> <span class="wiki-ref">Tier 1</span> 配套擴大。</p>
+<p><strong>新藍海</strong>：<span class="wiki-ref">電動車</span> <span class="wiki-ref">全球擴產潮</span> <span class="wiki-ref">CATL</span>/<span class="wiki-ref">BYD</span>/<span class="wiki-ref">Tesla</span> 大規模量產、<span class="wiki-ref">人形機器人</span> <span class="wiki-ref">Tesla Optimus</span> 2026 量產 <span class="wiki-ref">10,000+</span> 台、<span class="wiki-ref">低軌衛星</span> <span class="wiki-ref">Starlink V2</span>/<span class="wiki-ref">Kuiper</span> 全球部署、<span class="wiki-ref">綠氫</span> <span class="wiki-ref">儲能 BESS</span> 為 2026~2030 重大新興市場。</p>
       
     </div>
     
@@ -1456,6 +1434,7 @@
 <section class="panel">
   <div class="panel-header">
     <h2>所屬題材 <span class="muted">(0)</span></h2>
+    
   </div>
   
   <p class="muted" style="padding:16px 22px;">此股票尚未被任何題材收錄。</p>

@@ -59,7 +59,7 @@
 <section class="panel rs-history-panel">
   <div class="panel-header">
     <h2>RS 評分走勢</h2>
-    <span class="muted">近 {{ rs_chart.dates|length }} 個交易日 · RS 強勢線 80 / 相對中性位 0 / 比值&均線交叉</span>
+    <span class="muted">近 {{ rs_chart.dates|length }} 個交易日 · RS 強勢線 80 / 相對中性位 0</span>
   </div>
   <div class="rs-chart-toolbar" id="rs_toolbar_{{ symbol }}">
     <div class="rs-mode-group" data-group="mode">
@@ -67,8 +67,6 @@
       <button type="button" class="rs-btn" data-mode="quarter">季 RS（60 日）</button>
       <button type="button" class="rs-btn" data-mode="ms_taiex">vs 加權</button>
       <button type="button" class="rs-btn" data-mode="ms_tpex">vs 櫃買</button>
-      <button type="button" class="rs-btn" data-mode="ratio_taiex">比值 vs 加權</button>
-      <button type="button" class="rs-btn" data-mode="ratio_tpex">比值 vs 櫃買</button>
     </div>
     <span class="rs-toolbar-label">右軸疊加</span>
     <div class="rs-mode-group rs-index-group" data-group="index">
@@ -95,91 +93,58 @@
         tpex:  { name: '櫃買指數', color: '#7c3aed', data: data.tpex },
       };
       const MODE_META = {
-        year:        { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
-        quarter:     { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
-        ms_taiex:    { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
-        ms_tpex:     { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
-        ratio_taiex: { label: '個股/加權 比值',   type: 'ratio',     color: '#ea580c',
-                       smaColor: '#1e40af', ratioKey: 'ratio_taiex', smaKey: 'sma_taiex',
-                       smaLabel: '加權 240 日均線' },
-        ratio_tpex:  { label: '個股/櫃買 比值',   type: 'ratio',     color: '#db2777',
-                       smaColor: '#7c3aed', ratioKey: 'ratio_tpex', smaKey: 'sma_tpex',
-                       smaLabel: '櫃買 240 日均線' },
+        year:     { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
+        quarter:  { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
+        ms_taiex: { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
+        ms_tpex:  { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
       };
 
       function build() {
         const meta = MODE_META[mode];
         const isRs        = (meta.type === 'rs');
         const isMansfield = (meta.type === 'mansfield');
-        const isRatio     = (meta.type === 'ratio');
 
-        // === 主線資料 + 線色 ===
-        let series = [];
-        let yAxisLeft;
-
-        if (isRatio) {
-          // 比值 + 240 日均線兩條線：交叉判讀，Y 軸 auto-scale，無 markLine（0 不存在）
-          const ratioData = data[meta.ratioKey] || [];
-          const smaData   = data[meta.smaKey]   || [];
-          series = [
-            { name: meta.label, type: 'line', smooth: false, symbol: 'none',
-              yAxisIndex: 0, data: ratioData, connectNulls: true,
-              lineStyle: { color: meta.color, width: 1.5 } },
-            { name: meta.smaLabel, type: 'line', smooth: true, symbol: 'none',
-              yAxisIndex: 0, data: smaData, connectNulls: true,
-              lineStyle: { color: meta.smaColor, width: 1.8, type: 'dashed' } },
-          ];
-          yAxisLeft = {
-            type: 'value', scale: true, name: '比值', position: 'left',
-            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11,
-              formatter: v => v.toExponential(1) },  // 比值很小用科學記號
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          };
-        } else {
-          // RS / Mansfield：單線 + markLine
-          const values = data[mode] || [];
-          let lineColor = meta.color;
-          if (isRs) {
-            const last = values.filter(v => v != null).slice(-1)[0];
-            lineColor = last == null ? '#ff7847'
-                      : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
-          }
-          series = [{
-            name: meta.label, type: 'line', smooth: true, symbol: 'none',
-            yAxisIndex: 0, data: values, connectNulls: true,
-            areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
-            lineStyle: { color: lineColor, width: 2 },
-            markLine: {
-              symbol: 'none', silent: true,
-              data: [{
-                yAxis: isMansfield ? 0 : 80,
-                lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
-                label: {
-                  formatter: isMansfield ? '相對中性位' : '強勢 80',
-                  color: '#10b981',
-                  fontSize: 11, fontWeight: 600,
-                  position: 'insideEndTop', distance: [4, 2],
-                  backgroundColor: 'rgba(255,255,255,0.92)',
-                  padding: [2, 5], borderRadius: 3,
-                }
-              }]
-            },
-          }];
-          yAxisLeft = isMansfield ? {
-            type: 'value', scale: true, name: '相對強度 %', position: 'left',
-            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11,
-              formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          } : {
-            type: 'value', min: 0, max: 100, interval: 20,
-            name: 'RS', position: 'left',
-            nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11 },
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          };
+        const values = data[mode] || [];
+        let lineColor = meta.color;
+        if (isRs) {
+          const last = values.filter(v => v != null).slice(-1)[0];
+          lineColor = last == null ? '#ff7847'
+                    : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
         }
+        const series = [{
+          name: meta.label, type: 'line', smooth: true, symbol: 'none',
+          yAxisIndex: 0, data: values, connectNulls: true,
+          areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
+          lineStyle: { color: lineColor, width: 2 },
+          markLine: {
+            symbol: 'none', silent: true,
+            data: [{
+              yAxis: isMansfield ? 0 : 80,
+              lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
+              label: {
+                formatter: isMansfield ? '相對中性位' : '強勢 80',
+                color: '#10b981',
+                fontSize: 11, fontWeight: 600,
+                position: 'insideEndTop', distance: [4, 2],
+                backgroundColor: 'rgba(255,255,255,0.92)',
+                padding: [2, 5], borderRadius: 3,
+              }
+            }]
+          },
+        }];
+        const yAxisLeft = isMansfield ? {
+          type: 'value', scale: true, name: '相對強度 %', position: 'left',
+          nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
+          axisLabel: { color: '#64748b', fontSize: 11,
+            formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
+          splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+        } : {
+          type: 'value', min: 0, max: 100, interval: 20,
+          name: 'RS', position: 'left',
+          nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
+          axisLabel: { color: '#64748b', fontSize: 11 },
+          splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+        };
 
         const idx = (idxKey !== 'none') ? IDX_META[idxKey] : null;
         const hasIdx = !!(idx && Array.isArray(idx.data) && idx.data.length);
@@ -1252,6 +1217,13 @@
 <section class="panel">
   <div class="panel-header">
     <h2>所屬題材 <span class="muted">({{ topics|length }})</span></h2>
+    {% if taxonomy_position_label %}
+    <span class="taxonomy-position-badge"
+          title="供應鏈位階：{{ taxonomy_position_label }}（依三維分類體系驗證）"
+          data-position="{{ taxonomy_position }}">
+      📍 {{ taxonomy_position_label }}
+    </span>
+    {% endif %}
   </div>
   {% if topics %}
   <div class="topic-grid compact">

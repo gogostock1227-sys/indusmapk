@@ -695,8 +695,9 @@ a:hover { color: var(--accent); }
 }
 @media (max-width: 960px) {
   .grid-2col, .stat-grid, .indicator-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
+  .grid-2col > *, .stat-grid > *, .indicator-grid > * { min-width: 0; }
   .header-inner { grid-template-columns: auto auto; row-gap: 12px; }
   .primary-nav { grid-column: 1 / -1; justify-self: stretch; overflow-x: auto; }
   .search-box { grid-column: 1 / -1; min-width: 0; }
@@ -722,6 +723,37 @@ a:hover { color: var(--accent); }
   border-bottom: 1px solid var(--border-soft);
   display: flex; align-items: center; justify-content: space-between;
   background: linear-gradient(90deg, var(--bg) 0%, var(--bg-elev) 100%);
+}
+/* 三維分類體系 — 供應鏈位階徽章（concept_taxonomy/validator v2 產出） */
+.taxonomy-position-badge {
+  display: inline-flex; align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  background: linear-gradient(90deg, #1e40af11, #2c5aa011);
+  color: #2c5282;
+  border: 1px solid #2c528233;
+  cursor: help;
+  letter-spacing: 0.02em;
+}
+.taxonomy-position-badge[data-position^="OSAT"],
+.taxonomy-position-badge[data-position="FOUNDRY"],
+.taxonomy-position-badge[data-position="IDM_DRAM"],
+.taxonomy-position-badge[data-position="IDM_NAND"] {
+  background: linear-gradient(90deg, #7c3aed14, #6d28d914); color: #6d28d9; border-color: #6d28d933;
+}
+.taxonomy-position-badge[data-position="CONNECTOR"],
+.taxonomy-position-badge[data-position="PASSIVE"],
+.taxonomy-position-badge[data-position="THERMAL"],
+.taxonomy-position-badge[data-position^="PCB"],
+.taxonomy-position-badge[data-position="SUBSTRATE"] {
+  background: linear-gradient(90deg, #ea580c14, #c2410c14); color: #c2410c; border-color: #c2410c33;
+}
+.taxonomy-position-badge[data-position="ODM_SYS"],
+.taxonomy-position-badge[data-position="BRAND"],
+.taxonomy-position-badge[data-position="END_USER"] {
+  background: linear-gradient(90deg, #05966914, #04785714); color: #047857; border-color: #04785733;
 }
 .panel-header h2 {
   position: relative;
@@ -2280,5 +2312,159 @@ a:hover { color: var(--accent); }
 .cmp-type-stock {
   background: #e2e8f0;
   color: #475569;
+}
+
+/* ═══════════════════════════════════════════
+   P0 手機適配補強（≤720px）
+   - 標題縮小避免溢框
+   - toolbar 直立 / 換行避免按鈕重疊
+   - 觸控目標統一 ≥40px
+   ═══════════════════════════════════════════ */
+@media (max-width: 720px) {
+  /* ── 個股 / 題材標題縮小 ── */
+  .topic-hero { padding: 28px 0 22px; }
+  .topic-hero h1 { font-size: 24px; line-height: 1.3; }
+  .topic-hero h1 small { font-size: 13px; margin-left: 6px; display: inline-block; }
+  .topic-hero .topic-en { font-size: 11.5px; letter-spacing: 0.6px; margin-bottom: 10px; }
+  .hero h1 { font-size: 24px; line-height: 1.3; }
+  .hero h1 small { font-size: 13px; margin-left: 8px; display: block; margin-top: 4px; }
+
+  /* ── KPI 列字級縮小 + gap 收緊 ── */
+  .topic-kpis { gap: 14px 18px; padding-top: 12px; }
+  .topic-kpis em { font-size: 11px; }
+  .topic-kpis strong { font-size: 16px; }
+
+  /* ── 個股期貨徽章換行 ── */
+  .futures-badges { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-left: 6px; }
+  .badge-futures, .badge-futures-mini { font-size: 11px; padding: 2px 7px; }
+
+  /* ── 技術分析 toolbar / RS toolbar / Compare toolbar ── */
+  .tech-toolbar {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 6px 8px 0;
+  }
+  .tech-toolbar .tf-btn {
+    flex: 1 1 calc(20% - 6px);
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: 12.5px;
+  }
+
+  .tech-indicator-bar {
+    padding: 8px 4px 4px !important;
+    gap: 6px 8px !important;
+  }
+  .tech-indicator-bar .ind-chip {
+    min-height: 32px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+  }
+
+  .rs-chart-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .rs-chart-toolbar .rs-mode-group { width: 100%; flex-wrap: wrap; }
+  .rs-chart-toolbar .rs-btn,
+  .rs-chart-toolbar .rs-idx-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 38px;
+    padding: 8px 6px;
+    font-size: 11.5px;
+    text-align: center;
+  }
+  .rs-toolbar-label { margin-left: 0; font-size: 12px; }
+
+  .compare-toolbar { padding: 12px 14px; gap: 10px; }
+  .compare-pick { flex: 1 1 100%; }
+  .compare-selected { flex: 1 1 100%; }
+
+  /* ── 觸控目標統一加大 ── */
+  .filter-chip {
+    min-height: 38px;
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+  .tab-btn {
+    min-height: 40px;
+    padding: 10px 14px;
+  }
+  .hm-btn {
+    min-height: 36px;
+    padding: 8px 14px;
+  }
+  .coverage-tab {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ── 首頁 / hero-search 4 欄指標小手機改 1 欄 ── */
+  .landing-meta { gap: 14px; }
+  .hero-search-meta { gap: 14px; }
+
+  /* ── compare 內 toolbar 子元件加大觸控 ── */
+  .compare-pick input { min-height: 40px; font-size: 15px; }
+
+  /* ── RS 篩選列 ── */
+  .rs-filter-row select,
+  .rs-filter-row input[type="text"] { min-height: 40px; font-size: 14px; }
+
+  /* ── database toolbar 防止擠壓 ── */
+  .database-toolbar { padding: 12px 14px; gap: 10px; }
+
+  /* ── heatmap legend swatch 列換行 ── */
+  .heatmap-toolbar { padding: 10px 12px; gap: 8px; }
+  .heatmap-legend {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+  .swatch-row {
+    flex-wrap: wrap;
+    border-radius: 4px;
+    overflow: visible;
+    gap: 1px;
+  }
+  .swatch {
+    min-width: 28px;
+    height: 22px;
+    padding: 0 2px;
+    font-size: 10px;
+  }
+
+  /* ── 主搜尋區頁面整體左右 padding 修正 ── */
+  .hero-search { padding: 28px 0 24px; }
+  .hero-search-inner { padding: 0 14px; }
+  .hero-search-quick { gap: 6px; margin-bottom: 24px; }
+  .hero-search-quick .quick-chip { padding: 6px 12px; font-size: 13px; }
+
+  /* ── panel 內未包 .table-scroll 的表格也要能橫滑 ── */
+  .panel > .table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  .panel > .table thead,
+  .panel > .table tbody {
+    display: table;
+    width: 100%;
+    min-width: 600px;
+  }
+}
+
+/* ── 小手機（≤375px）再壓一檔字級 ── */
+@media (max-width: 375px) {
+  .topic-hero h1 { font-size: 22px; }
+  .hero h1 { font-size: 22px; }
+  .landing-meta, .hero-search-meta { grid-template-columns: 1fr 1fr; }
+  .topic-kpis strong { font-size: 15px; }
+  .stat-value { font-size: 22px; }
 }
 

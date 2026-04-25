@@ -80,7 +80,7 @@
 <section class="panel rs-history-panel">
   <div class="panel-header">
     <h2>RS 評分走勢</h2>
-    <span class="muted">近 13 個交易日 · RS 強勢線 80 / 相對中性位 0 / 比值&均線交叉</span>
+    <span class="muted">近 13 個交易日 · RS 強勢線 80 / 相對中性位 0</span>
   </div>
   <div class="rs-chart-toolbar" id="rs_toolbar_6725">
     <div class="rs-mode-group" data-group="mode">
@@ -88,8 +88,6 @@
       <button type="button" class="rs-btn" data-mode="quarter">季 RS（60 日）</button>
       <button type="button" class="rs-btn" data-mode="ms_taiex">vs 加權</button>
       <button type="button" class="rs-btn" data-mode="ms_tpex">vs 櫃買</button>
-      <button type="button" class="rs-btn" data-mode="ratio_taiex">比值 vs 加權</button>
-      <button type="button" class="rs-btn" data-mode="ratio_tpex">比值 vs 櫃買</button>
     </div>
     <span class="rs-toolbar-label">右軸疊加</span>
     <div class="rs-mode-group rs-index-group" data-group="index">
@@ -101,7 +99,7 @@
   <div id="rs_chart_6725" style="height:280px; width:100%; padding:4px;"></div>
   <script>
   (function(){
-    const data = {"dates": ["26/04/08", "26/04/09", "26/04/10", "26/04/13", "26/04/14", "26/04/15", "26/04/16", "26/04/17", "26/04/20", "26/04/21", "26/04/22", "26/04/23", "26/04/24"], "year": null, "quarter": [22, 69, 83, 80, 81, 88, 90, 91, 92, 86, 85, 86, 86], "ms_taiex": null, "ms_tpex": null, "ratio_taiex": [0.00811245, 0.00889242, 0.00962792, 0.00963131, 0.00918831, 0.00998036, 0.01011257, 0.01061016, 0.01106638, 0.01030445, 0.00996608, 0.00946594, 0.00911837], "sma_taiex": null, "ratio_tpex": [0.82649472, 0.90492454, 0.97567954, 0.96953695, 0.93679775, 1.01845162, 1.02606842, 1.04877263, 1.06649283, 0.99213969, 0.95550268, 0.93622155, 0.9304398], "sma_tpex": null, "twii": [34761.38, 34861.16, 35417.83, 35457.29, 36296.12, 36722.14, 37132.02, 36804.34, 36958.8, 37605.11, 37878.47, 37714.15, 38932.4], "tpex": [341.2, 342.57, 349.5, 352.23, 356.0, 359.86, 365.96, 372.34, 383.5, 390.57, 395.08, 381.32, 381.54], "default_index": "tpex"};
+    const data = {"dates": ["26/04/08", "26/04/09", "26/04/10", "26/04/13", "26/04/14", "26/04/15", "26/04/16", "26/04/17", "26/04/20", "26/04/21", "26/04/22", "26/04/23", "26/04/24"], "year": null, "quarter": [22, 69, 83, 80, 81, 88, 90, 91, 92, 86, 85, 86, 86], "ms_taiex": null, "ms_tpex": null, "twii": [34761.38, 34861.16, 35417.83, 35457.29, 36296.12, 36722.14, 37132.02, 36804.34, 36958.8, 37605.11, 37878.47, 37714.15, 38932.4], "tpex": [341.2, 342.57, 349.5, 352.23, 356.0, 359.86, 365.96, 372.34, 383.5, 390.57, 395.08, 381.32, 381.54], "default_index": "tpex"};
     if (!data) return;
     const symbol = "6725";
     function start(){
@@ -116,91 +114,58 @@
         tpex:  { name: '櫃買指數', color: '#7c3aed', data: data.tpex },
       };
       const MODE_META = {
-        year:        { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
-        quarter:     { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
-        ms_taiex:    { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
-        ms_tpex:     { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
-        ratio_taiex: { label: '個股/加權 比值',   type: 'ratio',     color: '#ea580c',
-                       smaColor: '#1e40af', ratioKey: 'ratio_taiex', smaKey: 'sma_taiex',
-                       smaLabel: '加權 240 日均線' },
-        ratio_tpex:  { label: '個股/櫃買 比值',   type: 'ratio',     color: '#db2777',
-                       smaColor: '#7c3aed', ratioKey: 'ratio_tpex', smaKey: 'sma_tpex',
-                       smaLabel: '櫃買 240 日均線' },
+        year:     { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
+        quarter:  { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
+        ms_taiex: { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
+        ms_tpex:  { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
       };
 
       function build() {
         const meta = MODE_META[mode];
         const isRs        = (meta.type === 'rs');
         const isMansfield = (meta.type === 'mansfield');
-        const isRatio     = (meta.type === 'ratio');
 
-        // === 主線資料 + 線色 ===
-        let series = [];
-        let yAxisLeft;
-
-        if (isRatio) {
-          // 比值 + 240 日均線兩條線：交叉判讀，Y 軸 auto-scale，無 markLine（0 不存在）
-          const ratioData = data[meta.ratioKey] || [];
-          const smaData   = data[meta.smaKey]   || [];
-          series = [
-            { name: meta.label, type: 'line', smooth: false, symbol: 'none',
-              yAxisIndex: 0, data: ratioData, connectNulls: true,
-              lineStyle: { color: meta.color, width: 1.5 } },
-            { name: meta.smaLabel, type: 'line', smooth: true, symbol: 'none',
-              yAxisIndex: 0, data: smaData, connectNulls: true,
-              lineStyle: { color: meta.smaColor, width: 1.8, type: 'dashed' } },
-          ];
-          yAxisLeft = {
-            type: 'value', scale: true, name: '比值', position: 'left',
-            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11,
-              formatter: v => v.toExponential(1) },  // 比值很小用科學記號
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          };
-        } else {
-          // RS / Mansfield：單線 + markLine
-          const values = data[mode] || [];
-          let lineColor = meta.color;
-          if (isRs) {
-            const last = values.filter(v => v != null).slice(-1)[0];
-            lineColor = last == null ? '#ff7847'
-                      : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
-          }
-          series = [{
-            name: meta.label, type: 'line', smooth: true, symbol: 'none',
-            yAxisIndex: 0, data: values, connectNulls: true,
-            areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
-            lineStyle: { color: lineColor, width: 2 },
-            markLine: {
-              symbol: 'none', silent: true,
-              data: [{
-                yAxis: isMansfield ? 0 : 80,
-                lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
-                label: {
-                  formatter: isMansfield ? '相對中性位' : '強勢 80',
-                  color: '#10b981',
-                  fontSize: 11, fontWeight: 600,
-                  position: 'insideEndTop', distance: [4, 2],
-                  backgroundColor: 'rgba(255,255,255,0.92)',
-                  padding: [2, 5], borderRadius: 3,
-                }
-              }]
-            },
-          }];
-          yAxisLeft = isMansfield ? {
-            type: 'value', scale: true, name: '相對強度 %', position: 'left',
-            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11,
-              formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          } : {
-            type: 'value', min: 0, max: 100, interval: 20,
-            name: 'RS', position: 'left',
-            nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11 },
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          };
+        const values = data[mode] || [];
+        let lineColor = meta.color;
+        if (isRs) {
+          const last = values.filter(v => v != null).slice(-1)[0];
+          lineColor = last == null ? '#ff7847'
+                    : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
         }
+        const series = [{
+          name: meta.label, type: 'line', smooth: true, symbol: 'none',
+          yAxisIndex: 0, data: values, connectNulls: true,
+          areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
+          lineStyle: { color: lineColor, width: 2 },
+          markLine: {
+            symbol: 'none', silent: true,
+            data: [{
+              yAxis: isMansfield ? 0 : 80,
+              lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
+              label: {
+                formatter: isMansfield ? '相對中性位' : '強勢 80',
+                color: '#10b981',
+                fontSize: 11, fontWeight: 600,
+                position: 'insideEndTop', distance: [4, 2],
+                backgroundColor: 'rgba(255,255,255,0.92)',
+                padding: [2, 5], borderRadius: 3,
+              }
+            }]
+          },
+        }];
+        const yAxisLeft = isMansfield ? {
+          type: 'value', scale: true, name: '相對強度 %', position: 'left',
+          nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
+          axisLabel: { color: '#64748b', fontSize: 11,
+            formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
+          splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+        } : {
+          type: 'value', min: 0, max: 100, interval: 20,
+          name: 'RS', position: 'left',
+          nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
+          axisLabel: { color: '#64748b', fontSize: 11 },
+          splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+        };
 
         const idx = (idxKey !== 'none') ? IDX_META[idxKey] : null;
         const hasIdx = !!(idx && Array.isArray(idx.data) && idx.data.length);
@@ -325,35 +290,35 @@
       </button>
       
       <button type="button"
-              class="coverage-tab empty"
+              class="coverage-tab"
               data-target="cov-6725-2"
               role="tab"
               aria-selected="false">
-        營收來源 <em class="cov-empty-dot">·</em>
+        營收來源
       </button>
       
       <button type="button"
-              class="coverage-tab empty"
+              class="coverage-tab"
               data-target="cov-6725-3"
               role="tab"
               aria-selected="false">
-        近期營運狀況 <em class="cov-empty-dot">·</em>
+        近期營運狀況
       </button>
       
       <button type="button"
-              class="coverage-tab empty"
+              class="coverage-tab"
               data-target="cov-6725-4"
               role="tab"
               aria-selected="false">
-        未來營運展望 <em class="cov-empty-dot">·</em>
+        未來營運展望
       </button>
       
       <button type="button"
-              class="coverage-tab empty"
+              class="coverage-tab"
               data-target="cov-6725-5"
               role="tab"
               aria-selected="false">
-        產業趨勢與成長動能 <em class="cov-empty-dot">·</em>
+        產業趨勢與成長動能
       </button>
       
     </div>
@@ -384,7 +349,7 @@
          id="cov-6725-2"
          role="tabpanel">
       
-        <p class="coverage-empty muted">此區塊尚未提供，待 My-TW-Coverage 研究補齊。</p>
+        <p><span class="wiki-ref">矽科宏晟</span>（6725）為日本 <span class="wiki-ref">關東化學</span> <span class="wiki-ref">Kanto Chemical</span> 與台灣 <span class="wiki-ref">宏晟</span> 合資，專為 <span class="wiki-ref">晶圓廠</span> 提供 <strong><span class="wiki-ref">電子級化學品</span> 供應系統</strong> <span class="wiki-ref">CDS</span> <span class="wiki-ref">Chemical Distribution System</span>。產品結構分為三大主軸：（1）<span class="wiki-ref">CDS</span> <span class="wiki-ref">電子級化學品</span> 供應系統 —— 主力線、<strong>亞太逾 3,000 套</strong> 實績（涵蓋 <span class="wiki-ref">3nm</span>/<span class="wiki-ref">5nm</span>/<span class="wiki-ref">7nm</span>/<span class="wiki-ref">10nm</span> 製程）；（2）<span class="wiki-ref">全面化學品管理</span> <span class="wiki-ref">TCM</span> <span class="wiki-ref">Total Chemical Management</span> <span class="wiki-ref">駐廠服務</span>;（3）<span class="wiki-ref">特殊化學品</span> <span class="wiki-ref">High-Purity</span> 配送與調配。 2025 全年合併營收估約 <strong>15~20 億元</strong> 區間，市值 <strong>109 億元</strong>。 <span class="wiki-ref">毛利率</span> 約 <strong>30~35%</strong>（<span class="wiki-ref">電子級化學品</span> <span class="wiki-ref">利基</span> <span class="wiki-ref">ASP</span> 加值 + <span class="wiki-ref">TCM</span> <span class="wiki-ref">駐廠服務</span> <span class="wiki-ref">經常性收入</span> 加值）。客戶涵蓋 <span class="wiki-ref">台積電</span> <span class="wiki-ref">2330</span>（<strong>隨赴美日建廠</strong> <span class="wiki-ref">Arizona</span>/<span class="wiki-ref">熊本 JASM</span>）、<span class="wiki-ref">世界先進</span> <span class="wiki-ref">5347</span>、<span class="wiki-ref">友達</span> <span class="wiki-ref">2409</span>、<span class="wiki-ref">群創</span> <span class="wiki-ref">3481</span>。 <span class="wiki-ref">關東化學</span> <span class="wiki-ref">母集團</span> 提供 <span class="wiki-ref">技術</span> 上游，<span class="wiki-ref">高潔淨管材</span>、<span class="wiki-ref">泵浦</span>、<span class="wiki-ref">流量計</span> 為 <span class="wiki-ref">BOM</span> 上游。</p>
       
     </div>
     
@@ -392,7 +357,8 @@
          id="cov-6725-3"
          role="tabpanel">
       
-        <p class="coverage-empty muted">此區塊尚未提供，待 My-TW-Coverage 研究補齊。</p>
+        <p><span class="wiki-ref">矽科宏晟</span> 進入 2026 年動能爆發。動能來自：（1）<span class="wiki-ref">台積電</span> <span class="wiki-ref">CHIPS Act</span> <span class="wiki-ref">Arizona</span>、<span class="wiki-ref">熊本 JASM</span>、<span class="wiki-ref">德國 Dresden</span> <span class="wiki-ref">ESMC</span> <strong>隨赴擴廠</strong> <span class="wiki-ref">CDS</span> <span class="wiki-ref">電子級化學品</span> 供應系統大規模採購；（2）<span class="wiki-ref">英特爾 Ohio/Arizona</span>、<span class="wiki-ref">Samsung Texas</span>、<span class="wiki-ref">Micron 紐約</span> <span class="wiki-ref">CHIPS Act</span> <span class="wiki-ref">非中料</span> 政策驅動採購；（3）<span class="wiki-ref">Rapidus 北海道</span> 2nm 量產配套。</p>
+<p>業務動能：（1）<span class="wiki-ref">台積電 Arizona</span> <span class="wiki-ref">Phase 2</span> <span class="wiki-ref">Phase 3</span> 持續擴產，<span class="wiki-ref">電子級化學品</span> <span class="wiki-ref">CDS</span> 大規模配套；（2）<span class="wiki-ref">CHIPS Act</span> <span class="wiki-ref">Build America</span>/<span class="wiki-ref">Buy America</span> <span class="wiki-ref">非中料</span> 政策驅動 <span class="wiki-ref">Micron 470 億美元</span>、<span class="wiki-ref">Intel 290 億美元</span>、<span class="wiki-ref">Samsung 250 億美元</span> <span class="wiki-ref">新廠</span> <span class="wiki-ref">CDS</span> 採購；（3）<span class="wiki-ref">TCM</span> <span class="wiki-ref">駐廠服務</span> <span class="wiki-ref">經常性收入</span> <span class="wiki-ref">ARR</span> <span class="wiki-ref">年化經常性收入</span> 持續穩定增長；（4）<span class="wiki-ref">8.6 代 OLED</span> <span class="wiki-ref">Samsung</span>/<span class="wiki-ref">BOE</span>/<span class="wiki-ref">群創 3481</span> 量產 <span class="wiki-ref">電子級化學品</span> <span class="wiki-ref">CDS</span> 配套。風險：<span class="wiki-ref">半導體</span> <span class="wiki-ref">CapEx</span> 週期、<span class="wiki-ref">新台幣</span> 升值、<span class="wiki-ref">CSC 6422</span>/<span class="wiki-ref">Air Liquide</span> <span class="wiki-ref">國際 Tier 1</span> 競爭。</p>
       
     </div>
     
@@ -400,7 +366,8 @@
          id="cov-6725-4"
          role="tabpanel">
       
-        <p class="coverage-empty muted">此區塊尚未提供，待 My-TW-Coverage 研究補齊。</p>
+        <p><span class="wiki-ref">矽科宏晟</span> 2026~2027 年成長四主軸：第一，<span class="wiki-ref">台積電</span> <span class="wiki-ref">全球擴廠潮</span> <span class="wiki-ref">隨赴</span> <span class="wiki-ref">CDS</span> <span class="wiki-ref">電子級化學品</span> 供應 — <span class="wiki-ref">台積電 Arizona</span> <span class="wiki-ref">650 億美元</span>、<span class="wiki-ref">熊本 JASM 二廠</span> <span class="wiki-ref">100 億美元</span>、<span class="wiki-ref">德國 Dresden ESMC</span> <span class="wiki-ref">100 億歐元</span> <span class="wiki-ref">新廠</span> <span class="wiki-ref">CDS</span> 大規模採購；第二，<span class="wiki-ref">CHIPS Act</span> <span class="wiki-ref">Build America</span>/<span class="wiki-ref">Buy America</span> <span class="wiki-ref">非中料</span> 政策驅動 <span class="wiki-ref">Micron</span>/<span class="wiki-ref">Intel</span>/<span class="wiki-ref">Samsung</span>/<span class="wiki-ref">Rapidus</span> <span class="wiki-ref">新廠</span> <span class="wiki-ref">CDS</span> 採購。</p>
+<p>第三，<span class="wiki-ref">TCM</span> <span class="wiki-ref">Total Chemical Management</span> <span class="wiki-ref">駐廠服務</span> <span class="wiki-ref">經常性收入</span> <span class="wiki-ref">ARR</span> 商業模式拉升 <span class="wiki-ref">毛利率</span>;第四，<span class="wiki-ref">8.6 代 OLED</span> <span class="wiki-ref">Samsung</span>/<span class="wiki-ref">BOE</span>/<span class="wiki-ref">群創 3481</span>/<span class="wiki-ref">LG Display</span> <span class="wiki-ref">電子級化學品</span> <span class="wiki-ref">CDS</span> 配套大規模量產。 <span class="wiki-ref">毛利率</span> <span class="wiki-ref">CHIPS Act</span>/<span class="wiki-ref">TCM ARR</span> <span class="wiki-ref">ASP</span> 拉升至 <strong>35%]]+ 為 2026~2027 主要看點。風險：<span class="wiki-ref">半導體</span> <span class="wiki-ref">CapEx</span> 週期、<span class="wiki-ref">新台幣</span> 升值、<span class="wiki-ref">Air Liquide</span>/<span class="wiki-ref">Linde</span> <span class="wiki-ref">國際 Tier 1</span> 競爭、<span class="wiki-ref">關東化學</span> <span class="wiki-ref">母集團</span> 整合議題。整體 <span class="wiki-ref">6725</span> 為 </strong>CDS 全球擴廠 + CHIPS Act + TCM 駐廠 + 8.6 代 OLED** 四引擎中型 <span class="wiki-ref">電子級化學品</span> <span class="wiki-ref">利基</span> 龍頭。</p>
       
     </div>
     
@@ -408,7 +375,8 @@
          id="cov-6725-5"
          role="tabpanel">
       
-        <p class="coverage-empty muted">此區塊尚未提供，待 My-TW-Coverage 研究補齊。</p>
+        <p>全球 <span class="wiki-ref">電子級化學品</span> <span class="wiki-ref">Electronic Chemicals</span> 市場 2026 年規模約 <strong>150 億美元</strong>，<span class="wiki-ref">CAGR</span> <strong>10%</strong>，主要驅動為 <span class="wiki-ref">半導體</span> <span class="wiki-ref">FAB</span> <span class="wiki-ref">全球擴廠潮</span>、<span class="wiki-ref">CHIPS Act</span> <span class="wiki-ref">非中料</span> 政策、<span class="wiki-ref">8.6 代 OLED</span> 量產、<span class="wiki-ref">車用半導體</span> <span class="wiki-ref">氮化鎵</span>/<span class="wiki-ref">碳化矽</span> 擴產。 <span class="wiki-ref">電子級</span> <span class="wiki-ref">硫酸</span> <span class="wiki-ref">H2SO4</span>、<span class="wiki-ref">硝酸</span> <span class="wiki-ref">HNO3</span>、<span class="wiki-ref">氨水</span> <span class="wiki-ref">NH3</span>、<span class="wiki-ref">雙氧水</span> <span class="wiki-ref">H2O2</span>、<span class="wiki-ref">NMP</span>、<span class="wiki-ref">IPA</span>、<span class="wiki-ref">光阻液</span> <span class="wiki-ref">Photoresist</span>、<span class="wiki-ref">研磨液</span> <span class="wiki-ref">CMP Slurry</span> 為主要採購化學品。市場由 <span class="wiki-ref">BASF</span>、<span class="wiki-ref">Linde</span>、<span class="wiki-ref">Air Liquide</span>、<span class="wiki-ref">Air Products</span>、<span class="wiki-ref">KMG Chemicals</span>、<span class="wiki-ref">Honeywell</span>、<span class="wiki-ref">關東化學 Kanto Chemical</span>/<span class="wiki-ref">矽科宏晟 6725</span>、<span class="wiki-ref">李長榮 1704</span>、<span class="wiki-ref">達興材料 5234</span>、<span class="wiki-ref">勝一 1773</span> 等競逐。</p>
+<p><span class="wiki-ref">CDS</span> <span class="wiki-ref">Chemical Distribution System</span> <span class="wiki-ref">供應系統</span> 為 <span class="wiki-ref">半導體</span> <span class="wiki-ref">FAB</span> <span class="wiki-ref">超高純化學品</span> 配送核心系統，<span class="wiki-ref">亞太</span> <span class="wiki-ref">3,000+ 套</span> <span class="wiki-ref">實績</span> 涵蓋 <span class="wiki-ref">3nm</span>/<span class="wiki-ref">5nm</span>/<span class="wiki-ref">7nm</span>/<span class="wiki-ref">10nm</span> 製程，<span class="wiki-ref">矽科宏晟 6725</span> 為 <span class="wiki-ref">亞洲</span> 重要 <span class="wiki-ref">CDS</span> <span class="wiki-ref">ODM</span> 玩家。 <span class="wiki-ref">TCM</span> <span class="wiki-ref">Total Chemical Management</span> <span class="wiki-ref">駐廠服務</span> 為 <span class="wiki-ref">經常性收入</span> <span class="wiki-ref">ARR</span> 商業模式，<span class="wiki-ref">毛利率</span> <span class="wiki-ref">40%</span>+ 高於 <span class="wiki-ref">一次性</span> <span class="wiki-ref">硬體</span> 銷售。 <span class="wiki-ref">CHIPS Act</span> <span class="wiki-ref">Build America</span>/<span class="wiki-ref">Buy America</span> <span class="wiki-ref">非中料</span> 政策驅動 <span class="wiki-ref">Micron 470 億美元</span>、<span class="wiki-ref">Intel 290 億美元</span> 等大規模建廠驅動 <span class="wiki-ref">CDS</span> 大規模採購。 <span class="wiki-ref">CSRD</span> <span class="wiki-ref">範疇 1+2+3</span> 排放盤查驅動 <span class="wiki-ref">綠色製程</span> <span class="wiki-ref">減碳</span> 升級。</p>
       
     </div>
     
@@ -1428,6 +1396,13 @@
 <section class="panel">
   <div class="panel-header">
     <h2>所屬題材 <span class="muted">(1)</span></h2>
+    
+    <span class="taxonomy-position-badge"
+          title="供應鏈位階：半導體化學品 / 特用氣體（依三維分類體系驗證）"
+          data-position="MAT_CHEM">
+      📍 半導體化學品 / 特用氣體
+    </span>
+    
   </div>
   
   <div class="topic-grid compact">

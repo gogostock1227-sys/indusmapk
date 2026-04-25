@@ -1,0 +1,284 @@
+# 已知誤分類回歸測試 fixture
+#
+# 來源：concept_taxonomy/_FINAL_REPORT.md 段落「關鍵誤分類修正示例」+ HBM.md
+# + 使用者於 Plan 中明確點名的反模式案例（嘉澤不可標「高速傳輸」）。
+#
+# 每筆寫法：
+#   - id: 案例編號，唯一
+#     group: 族群名（必須與 concept_groups.py / group_specs.json 的 key 一致）
+#     ticker: 股票代號
+#     name: 公司名（人類辨識用）
+#     expected_verdict: core | satellite | remove
+#     expected_reason_contains: 列出至少一個必須出現在判決理由的關鍵字
+#     expected_position?: 可選，限定 supply_chain_position
+#     expected_themes_must_include?: 可選，必須在 core_themes 內
+#     expected_themes_must_exclude?: 可選，禁止出現在 core_themes（反模式）
+
+# ════════════════════════════════════════════════
+# 群 1：HBM 高頻寬記憶體（樣本，來自 HBM.md）
+# ════════════════════════════════════════════════
+
+- id: HBM_8299
+  group: HBM 高頻寬記憶體
+  ticker: "8299"
+  name: 群聯
+  expected_verdict: remove
+  expected_reason_contains: ["aiDAPTIV"]
+  note: NAND Flash 控制器；aiDAPTIV+ 是把 NAND 模擬成 DRAM 的 HBM 替代品（競品）
+
+- id: HBM_6206
+  group: HBM 高頻寬記憶體
+  ticker: "6206"
+  name: 飛捷
+  expected_verdict: remove
+  expected_reason_contains: ["END_USER"]
+  note: POS / Kiosk 系統商，與 HBM 零關聯
+
+- id: HBM_2444
+  group: HBM 高頻寬記憶體
+  ticker: "2444"
+  name: 兆勁
+  expected_verdict: remove
+  expected_reason_contains: ["NETCOM"]
+  note: Wi-Fi ODM；產業板塊 NETCOM 不在 HBM allowed_segments=[AI_SEMI]
+
+- id: HBM_7711
+  group: HBM 高頻寬記憶體
+  ticker: "7711"
+  name: 永擎
+  expected_verdict: remove
+  expected_reason_contains: ["END_USER"]
+  note: AI 伺服器整機廠（END_USER 在 forbidden_positions）
+
+- id: HBM_3533
+  group: HBM 高頻寬記憶體
+  ticker: "3533"
+  name: 嘉澤
+  expected_verdict: remove
+  expected_reason_contains: ["ELEC_COMP"]
+  note: 連接器廠，產業板塊 ELEC_COMP 不在 HBM allowed_segments
+
+- id: HBM_6239
+  group: HBM 高頻寬記憶體
+  ticker: "6239"
+  name: 力成
+  expected_verdict: core
+  expected_reason_contains: ["HBM3E_HBM4"]
+  note: Micron HBM 獨家封測；OSAT_ADV 在白名單
+
+- id: HBM_6770
+  group: HBM 高頻寬記憶體
+  ticker: "6770"
+  name: 力積電
+  expected_verdict: core
+  expected_reason_contains: ["HBM3E_HBM4"]
+  note: HBM 後段晶圓代工；FOUNDRY 在白名單
+
+- id: HBM_2408
+  group: HBM 高頻寬記憶體
+  ticker: "2408"
+  name: 南亞科
+  expected_verdict: satellite
+  note: DRAM IDM，題材強度中等（DDR5_RISE + HBM3E_HBM4 但無 COWOS / FOPLP）
+
+# ════════════════════════════════════════════════
+# 群 2：AI伺服器（來自 batch_1.md）
+# ════════════════════════════════════════════════
+
+- id: AISERVER_2618
+  group: AI伺服器
+  ticker: "2618"
+  name: 長榮航
+  expected_verdict: remove
+  expected_reason_contains: ["LOGISTICS"]
+  note: 航空運輸；產業板塊 LOGISTICS 不在 AI伺服器 allowed_segments
+
+- id: AISERVER_4543
+  group: AI伺服器
+  ticker: "4543"
+  name: 萬在
+  expected_verdict: remove
+  expected_reason_contains: ["MATERIALS"]
+  note: 紡織機械，產業板塊 MATERIALS 不在白名單
+
+- id: AISERVER_2317
+  group: AI伺服器
+  ticker: "2317"
+  name: 鴻海
+  expected_verdict: core
+  expected_reason_contains: ["GB300_RUBIN"]
+  note: 全球 EMS #1，GB200/GB300 主供應
+
+- id: AISERVER_2382
+  group: AI伺服器
+  ticker: "2382"
+  name: 廣達
+  expected_verdict: core
+  expected_reason_contains: ["GB300_RUBIN"]
+  note: 全球 ODM #1，DGX/HGX 獨家組裝
+
+# ════════════════════════════════════════════════
+# 群 3：散熱/液冷（來自 _FINAL_REPORT.md 與 Plan 抽樣）
+# ════════════════════════════════════════════════
+
+- id: THERMAL_2308
+  group: 散熱/液冷
+  ticker: "2308"
+  name: 台達電
+  expected_verdict: remove
+  expected_reason_contains: ["POWER_MOD"]
+  note: 主業電源（POWER_MOD），雖兼營散熱但不該在 THERMAL 族群
+
+- id: THERMAL_3017
+  group: 散熱/液冷
+  ticker: "3017"
+  name: 奇鋐
+  expected_verdict: core
+  expected_reason_contains: ["LIQUID_COOL"]
+  note: 散熱模組全球 #1，NVIDIA 獨家液冷
+
+- id: THERMAL_3324
+  group: 散熱/液冷
+  ticker: "3324"
+  name: 雙鴻
+  expected_verdict: core
+  expected_reason_contains: ["LIQUID_COOL"]
+
+# ════════════════════════════════════════════════
+# 群 4：矽光子
+# ════════════════════════════════════════════════
+
+- id: SIPHO_2330
+  group: 矽光子
+  ticker: "2330"
+  name: 台積電
+  expected_verdict: satellite
+  note: FOUNDRY 為 CPO 代工方，applied downstream_demote → 強制 satellite
+
+- id: SIPHO_3081
+  group: 矽光子
+  ticker: "3081"
+  name: 聯亞
+  expected_verdict: core
+  expected_reason_contains: ["CPO_PHOTONIC"]
+
+# ════════════════════════════════════════════════
+# 群 5：連接器（使用者明確紅線：嘉澤不可標「高速傳輸」）
+# ════════════════════════════════════════════════
+
+- id: CONN_3533
+  group: 連接器
+  ticker: "3533"
+  name: 嘉澤
+  expected_verdict: core
+  expected_position: CONNECTOR
+  expected_themes_must_include: ["GB300_RUBIN", "LIQUID_COOL", "SERDES_224G"]
+  expected_themes_must_exclude: ["高速傳輸"]
+  note: 使用者明確紅線——物理元件嚴禁標抽象技術詞
+
+# ════════════════════════════════════════════════
+# 群 6：PCB/銅箔基板
+# ════════════════════════════════════════════════
+
+- id: PCB_6213
+  group: PCB/銅箔基板
+  ticker: "6213"
+  name: 聯茂
+  expected_verdict: remove
+  expected_reason_contains: ["PCB_FPC"]
+  note: 軟板廠，position=PCB_FPC 在 forbidden_positions
+
+- id: PCB_8046
+  group: PCB/銅箔基板
+  ticker: "8046"
+  name: 南電
+  expected_verdict: core
+  expected_reason_contains: ["COWOS"]
+  note: ABF 載板，CoWoS 直接受惠
+
+# ════════════════════════════════════════════════
+# 群 7：ABF載板（使用者 2026-04-26 紅線案例）
+# 載板三雄 = 3037 / 8046 / 3189；其餘均為其供應商（鑽孔墊板/設備/通路），不應在此群
+# 證據：My-TW-Coverage/Pilot_Reports/Electronic Components/8074_鉅橡.md
+#       「鉅橡為多家 ABF 載板廠鑽孔用板之唯一供應商」
+# ════════════════════════════════════════════════
+
+- id: ABF_3037
+  group: ABF載板
+  ticker: "3037"
+  name: 欣興
+  expected_verdict: core
+  expected_position: SUBSTRATE
+  expected_reason_contains: ["COWOS"]
+  note: 載板三雄之一
+
+- id: ABF_8046
+  group: ABF載板
+  ticker: "8046"
+  name: 南電
+  expected_verdict: core
+  expected_position: SUBSTRATE
+  note: 載板三雄之一
+
+- id: ABF_3189
+  group: ABF載板
+  ticker: "3189"
+  name: 景碩
+  expected_verdict: core
+  expected_position: SUBSTRATE
+  note: 載板三雄之一
+
+- id: ABF_3114
+  group: ABF載板
+  ticker: "3114"
+  name: 好德
+  expected_verdict: remove
+  expected_reason_contains: ["DISTRIB"]
+  note: 工業電子通路代理（DISTRIB 在 forbidden_positions）
+
+- id: ABF_3485
+  group: ABF載板
+  ticker: "3485"
+  name: 敘豐
+  expected_verdict: remove
+  expected_reason_contains: ["EQUIP"]
+  note: 光電 / 載板加工設備（EQUIP 在 forbidden_positions）
+
+- id: ABF_7795
+  group: ABF載板
+  ticker: "7795"
+  name: 長廣
+  expected_verdict: remove
+  expected_reason_contains: ["EQUIP"]
+  note: 半導體 / 載板加工設備（EQUIP 在 forbidden_positions）
+
+- id: ABF_8074
+  group: ABF載板
+  ticker: "8074"
+  name: 鉅橡
+  expected_verdict: remove
+  expected_reason_contains: ["MAT_CHEM"]
+  note: PCB / ABF 載板鑽孔墊板供應商，是載板廠的耗材上游而非載板廠本身（MAT_CHEM 在 forbidden_positions）
+
+# ════════════════════════════════════════════════
+# 結構問題（不是 pair 驗證，是族群層級）
+# ════════════════════════════════════════════════
+
+- id: STRUCT_GAOSU_DEPRECATED
+  group: 高速傳輸
+  ticker: __GROUP_LEVEL__
+  expected_group_deprecated: true
+  expected_members_reclassify_to: ["連接器", "CoWoS先進封裝", "網通"]
+  note: 抽象族群應廢除（使用者紅線）
+
+- id: STRUCT_PAPER_MERGE
+  group: 造紙
+  ticker: __GROUP_LEVEL__
+  expected_group_merge_into: 造紙/紙業
+  note: 100% 重疊，合併
+
+- id: STRUCT_COVID_DEPRECATED
+  group: 防疫/口罩
+  ticker: __GROUP_LEVEL__
+  expected_group_deprecated: true
+  note: 疫情題材已過時 4 年

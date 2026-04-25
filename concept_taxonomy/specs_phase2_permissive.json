@@ -1,0 +1,605 @@
+{
+  "_meta": {
+    "purpose": "Phase 2 — 把 85 個 permissive 群升級到嚴格 spec",
+    "owner": "hand_refined_v2",
+    "created": "2026-04-26",
+    "method": "依族群名 + 產業常識 + _TAXONOMY_SCHEMA.md enum 直接寫",
+    "merge_strategy": "每群覆蓋 group_specs.json 中同名 key（保留結構問題群與手寫精修群）"
+  },
+
+  "重電": {
+    "allowed_segments": ["POWER_GREEN","ELEC_COMP"],
+    "allowed_positions": ["POWER_MOD","CHASSIS","MAT_CHEM"],
+    "required_themes_any": ["HVDC_800V","DATACENTER_POWER","BBU"],
+    "required_themes_strong": ["HVDC_800V"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","SVC_SAAS"],
+    "core_keywords": ["重電","變壓器","配電盤","開關"],
+    "exclusion_keywords": ["POS","紡織"]
+  },
+  "面板/顯示器": {
+    "allowed_segments": ["ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["IC_DESIGN","OPTIC_COMP","MAT_CHEM","EQUIP","CHASSIS"],
+    "required_themes_any": ["GLASS_GCS"],
+    "forbidden_positions": ["FOUNDRY","ODM_SYS","BRAND","END_USER","SVC_SAAS","DISTRIB"],
+    "core_keywords": ["面板","顯示器","LCD","TFT"]
+  },
+  "LED/光電": {
+    "allowed_segments": ["ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["OPTIC_COMP","IC_DESIGN","FOUNDRY","MAT_WAFER"],
+    "required_themes_any": ["VCSEL"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","SVC_SAAS","DISTRIB","CONNECTOR","PASSIVE"],
+    "core_keywords": ["LED","光電","Mini LED","Micro LED"]
+  },
+  "檢測/設備服務": {
+    "allowed_segments": ["AI_SEMI","ELEC_COMP"],
+    "allowed_positions": ["EQUIP","TEST_SVC","MAT_CHEM"],
+    "required_themes_any": ["N2_2NM","N3_3NM","EUV_RISE"],
+    "forbidden_positions": ["IC_DESIGN","ODM_SYS","BRAND","END_USER","SVC_SAAS"],
+    "core_keywords": ["檢測","設備","測試","Inspection"]
+  },
+  "營建/資產": {
+    "allowed_segments": ["MATERIALS","CONSUMER","FIN"],
+    "allowed_positions": ["END_USER","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","ASIC_SVC","IP","OSAT_ADV","TEST_INTF","CONNECTOR","PASSIVE","PCB_HDI","PCB_FPC","SUBSTRATE","THERMAL"],
+    "core_keywords": ["建設","營建","建商","資產"]
+  },
+  "碳化矽/SiC": {
+    "allowed_segments": ["AI_SEMI","EV_AUTO","POWER_GREEN"],
+    "allowed_positions": ["FOUNDRY","IC_DESIGN","MAT_WAFER","IDM_DRAM","OSAT_ADV","TEST_INTF"],
+    "required_themes_any": ["EV_BATTERY","HVDC_800V"],
+    "required_themes_strong": ["EV_BATTERY","HVDC_800V"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","THERMAL","CONNECTOR","PASSIVE"],
+    "core_keywords": ["SiC","碳化矽","Silicon Carbide"]
+  },
+  "砷化鎵/GaAs": {
+    "allowed_segments": ["AI_SEMI","NETCOM"],
+    "allowed_positions": ["FOUNDRY","IC_DESIGN","MAT_WAFER","OSAT_ADV"],
+    "required_themes_any": ["VCSEL","CPO_PHOTONIC","5G_6G"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","THERMAL","CONNECTOR","PASSIVE","PCB_HDI"],
+    "core_keywords": ["GaAs","砷化鎵","MMIC"]
+  },
+  "石英元件": {
+    "allowed_segments": ["ELEC_COMP"],
+    "allowed_positions": ["PASSIVE"],
+    "required_themes_any": ["WIFI7","5G_6G","SERDES_224G"],
+    "forbidden_positions": ["IC_DESIGN","ODM_SYS","BRAND","FOUNDRY","CONNECTOR","PCB_HDI","PCB_FPC","THERMAL","SUBSTRATE","SVC_SAAS"],
+    "core_keywords": ["石英","Crystal","晶振","TCXO"]
+  },
+  "工具機": {
+    "allowed_segments": ["MATERIALS","ELEC_COMP"],
+    "allowed_positions": ["EQUIP","CHASSIS","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","ASIC_SVC","IP","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","PCB_FPC","SUBSTRATE","SVC_SAAS"],
+    "core_keywords": ["工具機","CNC","機床"]
+  },
+  "航太": {
+    "allowed_segments": ["DEFENSE","MATERIALS","ELEC_COMP"],
+    "allowed_positions": ["CHASSIS","ODM_SYS","BRAND","MAT_CHEM"],
+    "required_themes_any": ["DEFENSE_DRONE","MILITARY_SAT"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","SVC_SAAS"],
+    "core_keywords": ["航太","Aerospace","航空","太空"]
+  },
+  "碳權/ESG": {
+    "allowed_segments": ["POWER_GREEN","FIN","SOFTWARE"],
+    "allowed_positions": ["SVC_SAAS","BRAND","END_USER"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["碳權","ESG","減碳"]
+  },
+  "海底電纜": {
+    "allowed_segments": ["NETCOM","ELEC_COMP","MATERIALS"],
+    "allowed_positions": ["MAT_CHEM","CONNECTOR","CHASSIS"],
+    "required_themes_any": ["LEO_SAT"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","SVC_SAAS"],
+    "core_keywords": ["海底電纜","海纜","Submarine Cable"]
+  },
+  "銅纜/銅加工": {
+    "allowed_segments": ["MATERIALS","ELEC_COMP"],
+    "allowed_positions": ["MAT_CHEM","CONNECTOR"],
+    "required_themes_any": ["GB300_RUBIN","SERDES_224G","HVDC_800V"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","SVC_SAAS","ODM_SYS","BRAND"],
+    "core_keywords": ["銅","銅纜","銅箔","CCL"]
+  },
+  "稀土/關鍵金屬": {
+    "allowed_segments": ["MATERIALS"],
+    "allowed_positions": ["MAT_CHEM","MAT_WAFER"],
+    "required_themes_any": ["ROBOTICS","EV_BATTERY","DEFENSE_DRONE"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","SVC_SAAS","ODM_SYS","BRAND","END_USER"],
+    "core_keywords": ["稀土","關鍵金屬","Rare Earth"]
+  },
+  "影音串流/OTT": {
+    "allowed_segments": ["SOFTWARE","CONSUMER"],
+    "allowed_positions": ["SVC_SAAS","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["OTT","串流","影音","Streaming"]
+  },
+  "新南向/東南亞產能": {
+    "allowed_segments": ["COMP_HW","ELEC_COMP","MATERIALS","CONSUMER"],
+    "allowed_positions": ["ODM_SYS","BRAND","END_USER","CHASSIS","MAT_CHEM"],
+    "required_themes_any": [],
+    "core_keywords": ["越南","印尼","泰國","東南亞","新南向"]
+  },
+  "氮化鎵/GaN": {
+    "allowed_segments": ["AI_SEMI","POWER_GREEN","EV_AUTO"],
+    "allowed_positions": ["FOUNDRY","IC_DESIGN","MAT_WAFER","OSAT_ADV"],
+    "required_themes_any": ["HVDC_800V","EV_BATTERY","DATACENTER_POWER"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","THERMAL","CONNECTOR","PASSIVE","PCB_HDI"],
+    "core_keywords": ["GaN","氮化鎵"]
+  },
+  "水資源/環保": {
+    "allowed_segments": ["POWER_GREEN","MATERIALS"],
+    "allowed_positions": ["MAT_CHEM","EQUIP","END_USER","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","SVC_SAAS"],
+    "core_keywords": ["水資源","水處理","環保"]
+  },
+  "穿戴/智慧眼鏡": {
+    "allowed_segments": ["COMP_HW","ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["ODM_SYS","BRAND","IC_DESIGN","OPTIC_COMP","CHASSIS","CONNECTOR","PASSIVE","PCB_FPC"],
+    "required_themes_any": ["VCSEL","WIFI7"],
+    "core_keywords": ["穿戴","智慧眼鏡","Smart Glasses","Wearable"]
+  },
+  "功率半導體 IC": {
+    "allowed_segments": ["AI_SEMI","POWER_GREEN","EV_AUTO"],
+    "allowed_positions": ["IC_DESIGN","FOUNDRY","IDM_DRAM","OSAT_ADV"],
+    "required_themes_any": ["HVDC_800V","EV_BATTERY","ADAS","DATACENTER_POWER"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","SVC_SAAS","CONNECTOR","PASSIVE","PCB_HDI","THERMAL"],
+    "core_keywords": ["功率半導體","Power IC","MOSFET","IGBT"]
+  },
+  "AI 眼鏡 / Meta Ray-Ban": {
+    "allowed_segments": ["COMP_HW","ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["ODM_SYS","BRAND","IC_DESIGN","OPTIC_COMP","CHASSIS","PCB_FPC","PASSIVE"],
+    "required_themes_any": ["VCSEL","WIFI7"],
+    "core_keywords": ["AI 眼鏡","Ray-Ban","Smart Glasses","Meta"]
+  },
+  "射頻 RF/PA": {
+    "allowed_segments": ["AI_SEMI","NETCOM"],
+    "allowed_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","TEST_INTF"],
+    "required_themes_any": ["5G_6G","WIFI7","LEO_SAT"],
+    "required_themes_strong": ["5G_6G","WIFI7"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","CONNECTOR","PASSIVE","PCB_HDI"],
+    "core_keywords": ["RF","射頻","PA","Power Amplifier"]
+  },
+  "智慧家庭/Matter": {
+    "allowed_segments": ["NETCOM","COMP_HW","AI_SEMI"],
+    "allowed_positions": ["IC_DESIGN","ODM_SYS","BRAND"],
+    "required_themes_any": ["WIFI7","5G_6G"],
+    "forbidden_positions": ["FOUNDRY","OSAT_ADV","DISTRIB","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["智慧家庭","Matter","Smart Home"]
+  },
+  "智慧電錶/AMI": {
+    "allowed_segments": ["POWER_GREEN","ELEC_COMP","NETCOM"],
+    "allowed_positions": ["ODM_SYS","IC_DESIGN","BRAND","END_USER"],
+    "required_themes_any": ["DATACENTER_POWER","HVDC_800V"],
+    "forbidden_positions": ["FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["智慧電錶","AMI","Smart Meter"]
+  },
+  "美國製造回流/晶片法案": {
+    "allowed_segments": ["AI_SEMI","ELEC_COMP","COMP_HW"],
+    "allowed_positions": ["FOUNDRY","OSAT_ADV","EQUIP","MAT_WAFER","MAT_CHEM","ODM_SYS","SUBSTRATE","IC_DESIGN"],
+    "required_themes_any": ["N2_2NM","N3_3NM","COWOS","HBM3E_HBM4"],
+    "core_keywords": ["美國製造","CHIPS Act","Reshoring","回流"]
+  },
+  "印度產能/印度概念": {
+    "allowed_segments": ["COMP_HW","ELEC_COMP","CONSUMER"],
+    "allowed_positions": ["ODM_SYS","BRAND","END_USER","CHASSIS"],
+    "required_themes_any": [],
+    "core_keywords": ["印度","India"]
+  },
+  "特殊氣體/半導體化學品": {
+    "allowed_segments": ["AI_SEMI","MATERIALS"],
+    "allowed_positions": ["MAT_CHEM"],
+    "required_themes_any": ["N2_2NM","N3_3NM","EUV_RISE","COWOS"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","CONNECTOR","PASSIVE"],
+    "core_keywords": ["特殊氣體","化學品","光阻液","研磨液","CMP"]
+  },
+  "安全監控/影像監控": {
+    "allowed_segments": ["AI_SEMI","COMP_HW","ELEC_COMP"],
+    "allowed_positions": ["IC_DESIGN","ODM_SYS","BRAND","END_USER"],
+    "required_themes_any": ["ADAS"],
+    "forbidden_positions": ["FOUNDRY","OSAT_ADV","DISTRIB","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["監控","CCTV","Surveillance"]
+  },
+  "自行車零件": {
+    "allowed_segments": ["MATERIALS","CONSUMER"],
+    "allowed_positions": ["MAT_CHEM","CHASSIS","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS"],
+    "core_keywords": ["自行車","Bicycle","單車"]
+  },
+  "螺絲/螺帽/緊固件": {
+    "allowed_segments": ["MATERIALS"],
+    "allowed_positions": ["MAT_CHEM","CHASSIS"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND"],
+    "core_keywords": ["螺絲","螺帽","緊固件","Fastener"]
+  },
+  "手工具/電動工具": {
+    "allowed_segments": ["MATERIALS","CONSUMER"],
+    "allowed_positions": ["BRAND","CHASSIS","MAT_CHEM"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS"],
+    "core_keywords": ["手工具","電動工具","Power Tool"]
+  },
+  "軸承/精密機構": {
+    "allowed_segments": ["MATERIALS","ELEC_COMP"],
+    "allowed_positions": ["MAT_CHEM","CHASSIS","EQUIP"],
+    "required_themes_any": ["ROBOTICS","ADAS"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND"],
+    "core_keywords": ["軸承","精密機構","Bearing"]
+  },
+  "光學鏡片/鏡頭": {
+    "allowed_segments": ["ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["OPTIC_COMP","MAT_CHEM"],
+    "required_themes_any": ["ADAS","VCSEL"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND","END_USER","THERMAL"],
+    "core_keywords": ["光學鏡片","鏡頭","Lens"]
+  },
+  "光學薄膜": {
+    "allowed_segments": ["ELEC_COMP","MATERIALS"],
+    "allowed_positions": ["OPTIC_COMP","MAT_CHEM"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND","END_USER","THERMAL"],
+    "core_keywords": ["光學薄膜","Optical Film"]
+  },
+  "塑膠射出/模具": {
+    "allowed_segments": ["MATERIALS","ELEC_COMP"],
+    "allowed_positions": ["MAT_CHEM","CHASSIS"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND"],
+    "core_keywords": ["塑膠","射出","模具"]
+  },
+  "齒輪/減速機": {
+    "allowed_segments": ["MATERIALS","ELEC_COMP"],
+    "allowed_positions": ["MAT_CHEM","CHASSIS"],
+    "required_themes_any": ["ROBOTICS"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND"],
+    "core_keywords": ["齒輪","減速機","Gear"]
+  },
+  "金屬粉末/3D 列印": {
+    "allowed_segments": ["MATERIALS","ELEC_COMP"],
+    "allowed_positions": ["MAT_CHEM","EQUIP"],
+    "required_themes_any": ["ROBOTICS"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","SVC_SAAS"],
+    "core_keywords": ["金屬粉末","3D 列印","3D Printing","Metal Powder"]
+  },
+  "真空設備": {
+    "allowed_segments": ["AI_SEMI","ELEC_COMP","MATERIALS"],
+    "allowed_positions": ["EQUIP","MAT_CHEM","CHASSIS"],
+    "required_themes_any": ["N2_2NM","EUV_RISE","COWOS"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SVC_SAAS","ODM_SYS","BRAND","END_USER"],
+    "core_keywords": ["真空","Vacuum","Pump"]
+  },
+  "碳纖維/輕量材料": {
+    "allowed_segments": ["MATERIALS"],
+    "allowed_positions": ["MAT_CHEM"],
+    "required_themes_any": ["EV_BATTERY","DEFENSE_DRONE"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND"],
+    "core_keywords": ["碳纖維","Carbon Fiber"]
+  },
+  "閥門管材": {
+    "allowed_segments": ["MATERIALS"],
+    "allowed_positions": ["MAT_CHEM","CHASSIS"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND"],
+    "core_keywords": ["閥門","管材","Valve","Pipe"]
+  },
+  "細胞治療": {
+    "allowed_segments": ["MED_BIO"],
+    "allowed_positions": ["END_USER","BRAND"],
+    "required_themes_any": ["CDMO_BIO"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["細胞治療","Cell Therapy","CAR-T"]
+  },
+  "精準診斷/體外診斷": {
+    "allowed_segments": ["MED_BIO"],
+    "allowed_positions": ["END_USER","BRAND","SVC_SAAS"],
+    "required_themes_any": ["CDMO_BIO"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","ODM_SYS"],
+    "core_keywords": ["精準診斷","IVD","體外診斷"]
+  },
+  "醫美/雷射": {
+    "allowed_segments": ["MED_BIO","CONSUMER"],
+    "allowed_positions": ["END_USER","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","ODM_SYS"],
+    "core_keywords": ["醫美","雷射","美容"]
+  },
+  "農業科技/植物工廠": {
+    "allowed_segments": ["MED_BIO","CONSUMER","MATERIALS"],
+    "allowed_positions": ["END_USER","BRAND","MAT_CHEM"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["農業","植物工廠","AgTech"]
+  },
+  "旅遊/廉航/郵輪": {
+    "allowed_segments": ["LOGISTICS","CONSUMER"],
+    "allowed_positions": ["END_USER","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","ODM_SYS"],
+    "core_keywords": ["旅遊","廉航","郵輪","觀光"]
+  },
+  "植物肉/替代蛋白": {
+    "allowed_segments": ["CONSUMER","MED_BIO"],
+    "allowed_positions": ["END_USER","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","ODM_SYS"],
+    "core_keywords": ["植物肉","替代蛋白"]
+  },
+  "智慧城市/V2X": {
+    "allowed_segments": ["AI_SEMI","NETCOM","EV_AUTO"],
+    "allowed_positions": ["IC_DESIGN","ODM_SYS","BRAND"],
+    "required_themes_any": ["ADAS","5G_6G","WIFI7"],
+    "forbidden_positions": ["FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["智慧城市","V2X","Smart City"]
+  },
+  "川普概念/關稅戰": {
+    "allowed_segments": ["MATERIALS","COMP_HW","ELEC_COMP","CONSUMER"],
+    "allowed_positions": ["ODM_SYS","BRAND","END_USER","MAT_CHEM"],
+    "required_themes_any": [],
+    "core_keywords": ["川普","關稅","Trump","Tariff"]
+  },
+  "日圓貶值受惠/台日合作": {
+    "allowed_segments": ["AI_SEMI","ELEC_COMP","COMP_HW","CONSUMER"],
+    "allowed_positions": ["FOUNDRY","ODM_SYS","BRAND","END_USER","DISTRIB"],
+    "required_themes_any": [],
+    "core_keywords": ["日圓","日本","台日"]
+  },
+  "重建/災後/基礎建設": {
+    "allowed_segments": ["MATERIALS","POWER_GREEN"],
+    "allowed_positions": ["MAT_CHEM","END_USER","BRAND","POWER_MOD"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["重建","基礎建設","Infrastructure"]
+  },
+  "資訊服務/IT服務": {
+    "allowed_segments": ["SOFTWARE"],
+    "allowed_positions": ["SVC_SAAS","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","ODM_SYS"],
+    "core_keywords": ["資訊服務","IT服務","SI"]
+  },
+  "雲端服務/SaaS": {
+    "allowed_segments": ["SOFTWARE","COMP_HW","NETCOM"],
+    "allowed_positions": ["SVC_SAAS","BRAND","ODM_SYS"],
+    "required_themes_any": ["DATACENTER_POWER"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE"],
+    "core_keywords": ["雲端","SaaS","Cloud"]
+  },
+  "製鞋/運動鞋代工": {
+    "allowed_segments": ["CONSUMER","MATERIALS"],
+    "allowed_positions": ["ODM_SYS","BRAND","MAT_CHEM"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["製鞋","運動鞋","Footwear"]
+  },
+  "燃氣/天然氣": {
+    "allowed_segments": ["POWER_GREEN","MATERIALS"],
+    "allowed_positions": ["END_USER","BRAND","MAT_CHEM"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS","ODM_SYS"],
+    "core_keywords": ["燃氣","天然氣","LNG"]
+  },
+  "廢棄物處理/環保": {
+    "allowed_segments": ["POWER_GREEN","MATERIALS"],
+    "allowed_positions": ["END_USER","BRAND","MAT_CHEM","EQUIP"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS","ODM_SYS"],
+    "core_keywords": ["廢棄物","回收","環保"]
+  },
+  "貿易百貨/消費": {
+    "allowed_segments": ["CONSUMER"],
+    "allowed_positions": ["BRAND","END_USER","DISTRIB"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["貿易","百貨","消費","零售"]
+  },
+  "精密機械/自動化": {
+    "allowed_segments": ["MATERIALS","ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["EQUIP","CHASSIS"],
+    "required_themes_any": ["ROBOTICS"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND"],
+    "core_keywords": ["精密機械","自動化","Automation"]
+  },
+  "植栽/有機/飼料": {
+    "allowed_segments": ["CONSUMER","MATERIALS"],
+    "allowed_positions": ["BRAND","END_USER","MAT_CHEM"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["植栽","有機","飼料"]
+  },
+  "文化傳媒/出版": {
+    "allowed_segments": ["SOFTWARE","CONSUMER"],
+    "allowed_positions": ["BRAND","END_USER","SVC_SAAS"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["文化","傳媒","出版","媒體"]
+  },
+  "原料藥/化學藥": {
+    "allowed_segments": ["MED_BIO","MATERIALS"],
+    "allowed_positions": ["END_USER","BRAND","MAT_CHEM"],
+    "required_themes_any": ["CDMO_BIO"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["原料藥","API","化學藥"]
+  },
+  "電子零組件/一般": {
+    "allowed_segments": ["ELEC_COMP","AI_SEMI","COMP_HW"],
+    "allowed_positions": ["CONNECTOR","PASSIVE","PCB_HDI","PCB_FPC","CHASSIS","THERMAL","SUBSTRATE"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","ASIC_SVC","IP","SVC_SAAS"],
+    "core_keywords": ["電子零組件"]
+  },
+  "光學精密元件": {
+    "allowed_segments": ["ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["OPTIC_COMP","MAT_CHEM"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND","END_USER","THERMAL"],
+    "core_keywords": ["光學","精密元件"]
+  },
+  "半導體類比IC": {
+    "allowed_segments": ["AI_SEMI"],
+    "allowed_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV"],
+    "required_themes_any": ["HVDC_800V","ADAS","DDR5_RISE"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","DISTRIB","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","THERMAL"],
+    "core_keywords": ["類比IC","Analog IC","PMIC"]
+  },
+  "老年長照/銀髮醫療": {
+    "allowed_segments": ["MED_BIO","CONSUMER"],
+    "allowed_positions": ["END_USER","BRAND","SVC_SAAS"],
+    "required_themes_any": ["MED_GLP1","CDMO_BIO"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["長照","銀髮"]
+  },
+  "美容保健/個人護理": {
+    "allowed_segments": ["CONSUMER","MED_BIO"],
+    "allowed_positions": ["BRAND","END_USER"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS","ODM_SYS"],
+    "core_keywords": ["美容","保健","個人護理"]
+  },
+  "半導體/晶片代工次族": {
+    "allowed_segments": ["AI_SEMI"],
+    "allowed_positions": ["FOUNDRY","ASIC_SVC","IC_DESIGN","OSAT_ADV","TEST_INTF","TEST_SVC","EQUIP","MAT_WAFER","MAT_CHEM","SUBSTRATE","IP"],
+    "required_themes_any": ["N2_2NM","N3_3NM","COWOS","HBM3E_HBM4"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","CONNECTOR","PASSIVE","PCB_HDI","PCB_FPC","THERMAL","CHASSIS"],
+    "core_keywords": ["半導體","晶片代工"]
+  },
+  "其他電子/工控": {
+    "allowed_segments": ["COMP_HW","ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["ODM_SYS","BRAND","END_USER","CHASSIS","IC_DESIGN"],
+    "required_themes_any": ["ROBOTICS","ADAS"],
+    "forbidden_positions": ["FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["工控","工業電腦"]
+  },
+  "居家修繕/家居用品": {
+    "allowed_segments": ["CONSUMER","MATERIALS"],
+    "allowed_positions": ["BRAND","END_USER","MAT_CHEM"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS","ODM_SYS"],
+    "core_keywords": ["家居","居家","修繕"]
+  },
+  "模具/金屬加工": {
+    "allowed_segments": ["MATERIALS","ELEC_COMP"],
+    "allowed_positions": ["MAT_CHEM","CHASSIS"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND"],
+    "core_keywords": ["模具","金屬加工"]
+  },
+  "投資控股/租賃": {
+    "allowed_segments": ["FIN"],
+    "allowed_positions": ["SVC_SAAS","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["投資","控股","租賃"]
+  },
+  "OLED/Micro LED": {
+    "allowed_segments": ["ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["OPTIC_COMP","IC_DESIGN","MAT_CHEM","FOUNDRY","EQUIP"],
+    "required_themes_any": ["VCSEL"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","CONNECTOR","PASSIVE","SUBSTRATE","THERMAL"],
+    "core_keywords": ["OLED","Micro LED","Mini LED"]
+  },
+  "台積電供應鏈": {
+    "allowed_segments": ["AI_SEMI","ELEC_COMP","MATERIALS"],
+    "allowed_positions": ["MAT_WAFER","MAT_CHEM","EQUIP","SUBSTRATE","OSAT_ADV","TEST_INTF","ASIC_SVC","IP"],
+    "required_themes_any": ["N2_2NM","N3_3NM","EUV_RISE","COWOS"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","SVC_SAAS","DISTRIB","CONNECTOR","PASSIVE","PCB_FPC","THERMAL","CHASSIS"],
+    "core_keywords": ["台積電","TSMC"]
+  },
+  "無塵室/廠務工程": {
+    "allowed_segments": ["AI_SEMI","ELEC_COMP","MATERIALS"],
+    "allowed_positions": ["EQUIP","MAT_CHEM","CHASSIS"],
+    "required_themes_any": ["N2_2NM","COWOS"],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","SVC_SAAS","ODM_SYS","BRAND","END_USER"],
+    "core_keywords": ["無塵室","廠務","Cleanroom"]
+  },
+  "環境設備/空汙": {
+    "allowed_segments": ["POWER_GREEN","MATERIALS"],
+    "allowed_positions": ["EQUIP","MAT_CHEM","END_USER","BRAND"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["環保設備","空汙"]
+  },
+  "交通運輸/物流": {
+    "allowed_segments": ["LOGISTICS"],
+    "allowed_positions": ["END_USER","BRAND","SVC_SAAS"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","ODM_SYS"],
+    "core_keywords": ["運輸","物流"]
+  },
+  "能源服務/石油燃料": {
+    "allowed_segments": ["POWER_GREEN","MATERIALS"],
+    "allowed_positions": ["END_USER","BRAND","MAT_CHEM"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS","ODM_SYS"],
+    "core_keywords": ["能源","石油","燃料"]
+  },
+  "電腦週邊/配件": {
+    "allowed_segments": ["COMP_HW","ELEC_COMP"],
+    "allowed_positions": ["ODM_SYS","BRAND","END_USER","CHASSIS","CONNECTOR"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","SVC_SAAS","DISTRIB","SUBSTRATE","THERMAL"],
+    "core_keywords": ["電腦週邊","配件","Peripheral"]
+  },
+  "利基光電": {
+    "allowed_segments": ["ELEC_COMP","AI_SEMI","NETCOM"],
+    "allowed_positions": ["OPTIC_COMP","OPTIC_MOD","IC_DESIGN"],
+    "required_themes_any": ["VCSEL","CPO_PHOTONIC","OPTIC_800G_1.6T"],
+    "forbidden_positions": ["FOUNDRY","ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["利基光電","光電"]
+  },
+  "小型通信網路": {
+    "allowed_segments": ["NETCOM","ELEC_COMP","AI_SEMI"],
+    "allowed_positions": ["IC_DESIGN","ODM_SYS","BRAND"],
+    "required_themes_any": ["WIFI7","5G_6G","LEO_SAT"],
+    "forbidden_positions": ["FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["通信","網路"]
+  },
+  "運動休閒": {
+    "allowed_segments": ["CONSUMER","MATERIALS"],
+    "allowed_positions": ["BRAND","END_USER"],
+    "required_themes_any": [],
+    "forbidden_positions": ["IC_DESIGN","FOUNDRY","OSAT_ADV","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL","SVC_SAAS"],
+    "core_keywords": ["運動","休閒","Sports"]
+  },
+  "其他（多元族群）": {
+    "allowed_segments": ["AI_SEMI","ELEC_COMP","COMP_HW","NETCOM","POWER_GREEN","EV_AUTO","DEFENSE","MED_BIO","FIN","CONSUMER","MATERIALS","LOGISTICS","SOFTWARE"],
+    "allowed_positions": [],
+    "required_themes_any": [],
+    "core_keywords": [],
+    "rationale_override": "雜類大族群，後續應深拆。本期保留所有 position（permissive）。"
+  },
+  "EUV 極紫外光微影": {
+    "allowed_segments": ["AI_SEMI"],
+    "allowed_positions": ["EQUIP","MAT_CHEM","FOUNDRY"],
+    "required_themes_any": ["EUV_RISE","N2_2NM","N3_3NM"],
+    "required_themes_strong": ["EUV_RISE"],
+    "forbidden_positions": ["IC_DESIGN","ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["EUV","極紫外光","微影"]
+  },
+  "特斯拉概念股": {
+    "allowed_segments": ["EV_AUTO","ELEC_COMP","COMP_HW","AI_SEMI","POWER_GREEN"],
+    "allowed_positions": ["IC_DESIGN","CONNECTOR","PASSIVE","PCB_HDI","CHASSIS","ODM_SYS","BRAND","POWER_MOD","MAT_CHEM"],
+    "required_themes_any": ["EV_BATTERY","ADAS","ROBOTICS"],
+    "forbidden_positions": ["FOUNDRY","OSAT_ADV","SVC_SAAS","DISTRIB","SUBSTRATE","THERMAL"],
+    "core_keywords": ["特斯拉","Tesla"]
+  },
+  "VCSEL 雷射": {
+    "allowed_segments": ["AI_SEMI","ELEC_COMP","NETCOM"],
+    "allowed_positions": ["IC_DESIGN","FOUNDRY","OPTIC_COMP","MAT_WAFER","OSAT_ADV","TEST_INTF"],
+    "required_themes_any": ["VCSEL","CPO_PHOTONIC"],
+    "required_themes_strong": ["VCSEL"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["VCSEL","雷射"]
+  },
+  "磷化銦/InP": {
+    "allowed_segments": ["AI_SEMI","NETCOM"],
+    "allowed_positions": ["IC_DESIGN","FOUNDRY","MAT_WAFER","OPTIC_COMP","OSAT_ADV"],
+    "required_themes_any": ["CPO_PHOTONIC","OPTIC_800G_1.6T"],
+    "required_themes_strong": ["CPO_PHOTONIC"],
+    "forbidden_positions": ["ODM_SYS","BRAND","END_USER","DISTRIB","SVC_SAAS","CONNECTOR","PASSIVE","PCB_HDI","SUBSTRATE","THERMAL"],
+    "core_keywords": ["InP","磷化銦"]
+  }
+}
