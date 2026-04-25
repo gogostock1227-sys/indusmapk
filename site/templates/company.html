@@ -30,7 +30,8 @@
         <span class="kpi"><em>今日</em><strong class="{% if row.ret_1d == row.ret_1d and row.ret_1d > 0 %}positive{% elif row.ret_1d == row.ret_1d %}negative{% endif %}">{{ row.ret_1d|pct }}</strong></span>
         <span class="kpi"><em>5日</em><strong class="{% if row.ret_5d == row.ret_5d and row.ret_5d > 0 %}positive{% elif row.ret_5d == row.ret_5d %}negative{% endif %}">{{ row.ret_5d|pct }}</strong></span>
         <span class="kpi"><em>20日</em><strong class="{% if row.ret_20d == row.ret_20d and row.ret_20d > 0 %}positive{% elif row.ret_20d == row.ret_20d %}negative{% endif %}">{{ row.ret_20d|pct }}</strong></span>
-        {% if rs_score is not none %}<span class="kpi"><em>RS 評分</em><strong class="rs-kpi rs-{% if rs_score >= 80 %}strong{% elif rs_score < 30 %}weak{% else %}mid{% endif %}">{{ rs_score }}</strong></span>{% endif %}
+        {% if rs_year_score is not none %}<span class="kpi"><em>RS 年</em><strong class="rs-kpi rs-{% if rs_year_score >= 80 %}strong{% elif rs_year_score < 30 %}weak{% else %}mid{% endif %}">{{ rs_year_score }}</strong></span>{% endif %}
+        {% if rs_quarter_score is not none %}<span class="kpi"><em>RS 季</em><strong class="rs-kpi rs-{% if rs_quarter_score >= 80 %}strong{% elif rs_quarter_score < 30 %}weak{% else %}mid{% endif %}">{{ rs_quarter_score }}</strong></span>{% endif %}
         <span class="kpi"><em>成交金額</em><strong>{{ row.amount_mn|fmt_amount }}</strong></span>
       </div>
     </div>
@@ -54,60 +55,130 @@
   </div>
 </section>
 
-{% if rs_history %}
+{% if rs_chart %}
 <section class="panel rs-history-panel">
   <div class="panel-header">
     <h2>RS 評分走勢</h2>
-    <span class="muted">近 {{ rs_history.values|length }} 個交易日 · 綠虛線為強勢線 80</span>
+    <span class="muted">近 {{ rs_chart.dates|length }} 個交易日 · 綠虛線為強勢線 80</span>
   </div>
-  <div id="rs_chart_{{ symbol }}" style="height:240px; width:100%; padding:4px;"></div>
+  <div class="rs-chart-toolbar" id="rs_toolbar_{{ symbol }}">
+    <div class="rs-mode-group">
+      <button type="button" class="rs-btn active" data-mode="year">年 RS（240 日）</button>
+      <button type="button" class="rs-btn" data-mode="quarter">季 RS（60 日）</button>
+    </div>
+    <label class="rs-twii-toggle">
+      <input type="checkbox" id="rs_twii_{{ symbol }}" checked>
+      <span>右軸疊加加權指數</span>
+    </label>
+  </div>
+  <div id="rs_chart_{{ symbol }}" style="height:280px; width:100%; padding:4px;"></div>
   <script>
   (function(){
-    const data = {{ rs_history_json|safe }};
-    if (!data || !data.values || !data.values.length) return;
+    const data = {{ rs_chart_json|safe }};
+    if (!data) return;
+    const symbol = "{{ symbol }}";
     function start(){
       if (typeof echarts === 'undefined') return setTimeout(start, 120);
-      const el = document.getElementById('rs_chart_{{ symbol }}');
+      const el = document.getElementById('rs_chart_' + symbol);
       const chart = echarts.init(el, null, { renderer: 'canvas' });
-      const last = data.values[data.values.length - 1];
-      const lineColor = last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : '#ff7847');
-      chart.setOption({
-        grid: { left: 44, right: 16, top: 24, bottom: 30 },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'cross', label: { backgroundColor: '#475569' } },
-          formatter: p => p[0].axisValue + '<br/>RS: <strong>' + p[0].data + '</strong>'
-        },
-        xAxis: {
-          type: 'category',
-          data: data.dates,
-          boundaryGap: false,
-          axisLabel: { color: '#64748b', fontSize: 11 },
-        },
-        yAxis: {
-          type: 'value',
-          min: 0, max: 100, interval: 20,
-          axisLabel: { color: '#64748b', fontSize: 11 },
-          splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-        },
-        series: [{
+      let mode = 'year';
+      let showTwii = true;
+
+      function build() {
+        const rsValues = data[mode] || [];
+        const rsLabel = (mode === 'year') ? '年 RS' : '季 RS';
+        const last = rsValues.filter(v => v != null).slice(-1)[0];
+        const lineColor = last == null ? '#ff7847' : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : '#ff7847'));
+
+        const series = [{
+          name: rsLabel,
           type: 'line',
           smooth: true,
           symbol: 'none',
-          data: data.values,
+          yAxisIndex: 0,
+          data: rsValues,
+          connectNulls: true,
           areaStyle: { color: 'rgba(255,120,71,0.12)' },
           lineStyle: { color: lineColor, width: 2 },
           markLine: {
-            symbol: 'none',
-            silent: true,
-            data: [{
-              yAxis: 80,
+            symbol: 'none', silent: true,
+            data: [{ yAxis: 80,
               lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
-              label: { formatter: '強勢線 80', color: '#10b981', fontSize: 11 },
-            }],
+              label: {
+                formatter: '強勢 80',
+                color: '#10b981',
+                fontSize: 11,
+                fontWeight: 600,
+                position: 'insideEndTop',
+                distance: [4, 2],
+                backgroundColor: 'rgba(255,255,255,0.92)',
+                padding: [2, 5],
+                borderRadius: 3,
+              } }],
           },
-        }],
+        }];
+
+        const hasTwii = showTwii && Array.isArray(data.twii) && data.twii.length;
+        if (hasTwii) {
+          series.push({
+            name: '加權指數',
+            type: 'line',
+            smooth: true,
+            symbol: 'none',
+            yAxisIndex: 1,
+            data: data.twii,
+            connectNulls: true,
+            lineStyle: { color: '#1e40af', width: 1.6 },
+          });
+        }
+
+        chart.setOption({
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'cross', label: { backgroundColor: '#475569' } },
+          },
+          legend: { data: series.map(s => s.name), top: 4, textStyle: { fontSize: 12 } },
+          grid: { left: 50, right: hasTwii ? 64 : 20, top: 36, bottom: 32 },
+          xAxis: {
+            type: 'category',
+            data: data.dates,
+            boundaryGap: false,
+            axisLabel: { color: '#64748b', fontSize: 11 },
+          },
+          yAxis: [
+            {
+              type: 'value', min: 0, max: 100, interval: 20,
+              name: 'RS', position: 'left',
+              nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
+              axisLabel: { color: '#64748b', fontSize: 11 },
+              splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+            },
+            {
+              type: 'value', name: '加權指數', position: 'right',
+              show: hasTwii,
+              nameTextStyle: { color: '#1e40af', fontSize: 11, padding: [0,0,4,0] },
+              axisLabel: { color: '#1e40af', fontSize: 11,
+                formatter: v => (v >= 10000 ? (v/1000).toFixed(1)+'k' : v.toFixed(0)) },
+              splitLine: { show: false },
+              scale: true,
+            },
+          ],
+          series: series,
+        }, true);  // notMerge=true，避免 toggle 時殘留舊 series
+      }
+      build();
+
+      const toolbar = document.getElementById('rs_toolbar_' + symbol);
+      toolbar.querySelectorAll('.rs-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          toolbar.querySelectorAll('.rs-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          mode = btn.dataset.mode;
+          build();
+        });
       });
+      const cb = document.getElementById('rs_twii_' + symbol);
+      cb.addEventListener('change', () => { showTwii = cb.checked; build(); });
       window.addEventListener('resize', () => chart.resize());
     }
     start();

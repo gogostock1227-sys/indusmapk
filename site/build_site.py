@@ -61,6 +61,8 @@ EXTRAS_JSON = SITE_DIR / ".cache_extras.json"
 TRENDING_JSON = SITE_DIR / ".cache_trending.json"
 FUTURES_JSON = SITE_DIR / ".cache_futures.json"
 RS_HISTORY = SITE_DIR / ".cache_rs_history.parquet"
+RS_HISTORY_QUARTER = SITE_DIR / ".cache_rs_history_quarter.parquet"
+TAIEX_CACHE = SITE_DIR / ".cache_taiex.parquet"
 NAME_OVERRIDES_JSON = SITE_DIR / "stock_name_overrides.json"
 COVERAGE_DIR = ROOT_DIR / "My-TW-Coverage" / "Pilot_Reports"
 
@@ -156,6 +158,42 @@ def refresh_futures_list(max_age_days: float = 7.0) -> None:
         print("[futures] 抓取逾時 60s，沿用前次 cache")
     except Exception as e:
         print(f"[futures] 抓取例外：{e}（沿用前次 cache）")
+
+
+def load_taiex(use_cache: bool = True) -> pd.Series:
+    """載入加權指數 (^TWII) 收盤價序列。
+
+    來源：FinLab 'world_index:close' 的 ^TWII 欄。
+    use_cache=True 且 cache 存在時直接讀；否則打 FinLab API 並覆寫 cache。
+    """
+    if use_cache and TAIEX_CACHE.exists():
+        try:
+            df = pd.read_parquet(TAIEX_CACHE)
+            s = df.iloc[:, 0].dropna()
+            s.name = "taiex"
+            print(f"[taiex] 從 cache 讀取（{len(s)} 個交易日）")
+            return s
+        except Exception as e:
+            print(f"[taiex] cache 讀取失敗：{e}，改抓 FinLab")
+    try:
+        from finlab import data as _fl_data
+        d = _fl_data.get("world_index:close")
+        if "^TWII" not in d.columns:
+            print("[taiex] FinLab world_index:close 無 ^TWII 欄")
+            return pd.Series(dtype=float, name="taiex")
+        s = d["^TWII"].dropna()
+        s.name = "taiex"
+        try:
+            s.to_frame().to_parquet(TAIEX_CACHE)
+            print(f"[taiex] 抓取 + 寫入 cache：{len(s)} 個交易日")
+        except Exception as e:
+            print(f"[taiex] cache 寫入失敗：{e}")
+        return s
+    except Exception as e:
+        print(f"[taiex] FinLab 抓取失敗：{e}")
+        if TAIEX_CACHE.exists():
+            return pd.read_parquet(TAIEX_CACHE).iloc[:, 0].dropna()
+        return pd.Series(dtype=float, name="taiex")
 
 
 def load_futures_flags() -> dict:
@@ -1288,12 +1326,12 @@ def build_env():
 # ─────── RS 評分（仿 EJFQ 相對強度）───────
 
 def compute_rs_scores(close: pd.DataFrame, name_map: dict, market_map: dict,
-                      min_history: int = 50, lookback: int = 252) -> pd.Series:
-    """EJFQ 風格 RS：12 個月報酬 → 全市場 percentile rank (1-99 整數)。
+                      min_history: int = 50, lookback: int = 240) -> pd.Series:
+    """RS 評分：相對全市場過去 N 個交易日的價格報酬 percentile rank (1-99 整數)。
 
     - close: 收盤價 DataFrame, index=date, columns=symbol
     - 篩選：有公司簡稱、有市場別、且 dropna 後資料 >= min_history（排除新上市未滿 50 個交易日）
-    - 用 252 個交易日近似 12 個月，若資料不足則自動降回可用最大窗口
+    - lookback 預設 240 (台股年線慣例 ≈ 12 個月)；季 RS 傳入 60。資料不足時自動降回可用最大窗口
     """
     if close is None or close.empty:
         return pd.Series(dtype=int)
@@ -1323,16 +1361,21 @@ def compute_rs_scores(close: pd.DataFrame, name_map: dict, market_map: dict,
     return pct.round(0).astype(int)
 
 
-def update_rs_history(rs_today: pd.Series, today) -> pd.DataFrame:
-    """把今日 RS 寫入 .cache_rs_history.parquet（若該日已存在則覆蓋）。
+def update_rs_history(rs_today: pd.Series, today, path: Path = None,
+                      label: str = "year") -> pd.DataFrame:
+    """把今日 RS 寫入指定 parquet（若該日已存在則覆蓋）。
     保留近 500 個交易日（約 2 年）。回傳完整歷史 DataFrame。
+
+    - path: 預設為年 RS 的 RS_HISTORY；季 RS 傳入 RS_HISTORY_QUARTER
+    - label: 純粹用於 log 訊息，標示這是 year 還是 quarter
     """
-    if RS_HISTORY.exists():
+    cache_path = path or RS_HISTORY
+    if cache_path.exists():
         try:
-            hist = pd.read_parquet(RS_HISTORY)
+            hist = pd.read_parquet(cache_path)
             hist.index = pd.to_datetime(hist.index)
         except Exception as e:
-            print(f"[rs] 讀取歷史 cache 失敗：{e}，將從零開始")
+            print(f"[rs/{label}] 讀取歷史 cache 失敗：{e}，將從零開始")
             hist = pd.DataFrame()
     else:
         hist = pd.DataFrame()
@@ -1351,16 +1394,16 @@ def update_rs_history(rs_today: pd.Series, today) -> pd.DataFrame:
     merged = merged.tail(500)
 
     try:
-        merged.to_parquet(RS_HISTORY)
-        print(f"[rs] 歷史 cache：{len(merged)} 個交易日 × {merged.shape[1]} 檔")
+        merged.to_parquet(cache_path)
+        print(f"[rs/{label}] 歷史 cache：{len(merged)} 個交易日 × {merged.shape[1]} 檔")
     except Exception as e:
-        print(f"[rs] 寫入歷史 cache 失敗：{e}")
+        print(f"[rs/{label}] 寫入歷史 cache 失敗：{e}")
     return merged
 
 
 def build_rs_rows(stock_metrics: pd.DataFrame, rs_today: pd.Series, close: pd.DataFrame,
                   name_map: dict, industry_map: dict, market_map: dict,
-                  company_topics: dict, lookback: int = 252) -> list[dict]:
+                  company_topics: dict, lookback: int = 240) -> list[dict]:
     """RS 排名表 row dict list（依 RS 由高到低）。"""
     if rs_today.empty:
         return []
@@ -1735,12 +1778,20 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     latest_lu_date = limit_up_dates[-1] if limit_up_dates else None
     limit_up_data = limit_up_by_date.get(latest_lu_date) if latest_lu_date else None
 
-    # 期貨清單 + RS 評分（在所有頁面渲染前算好，再供 RS 頁、公司頁共用）
+    # 期貨清單 + RS 評分（年/季）+ 加權指數（在所有頁面渲染前算好，再供 RS 頁、公司頁共用）
     futures_flags = load_futures_flags()
-    print("       · 計算 RS 評分（過去 12 個月相對全市場 percentile）...")
-    rs_today = compute_rs_scores(data["close"], name_map, data["market_map"])
-    print(f"         覆蓋 {len(rs_today)} 檔有效股票")
-    rs_history = update_rs_history(rs_today, data["close"].index[-1])
+    print("       · 計算 RS 評分（台股慣例：年=240 日、季=60 日 percentile）...")
+    last_close_ts = data["close"].index[-1]
+    rs_year_today    = compute_rs_scores(data["close"], name_map, data["market_map"], lookback=240)
+    rs_quarter_today = compute_rs_scores(data["close"], name_map, data["market_map"], lookback=60)
+    print(f"         年 RS 覆蓋 {len(rs_year_today)} 檔；季 RS 覆蓋 {len(rs_quarter_today)} 檔")
+    rs_year_history    = update_rs_history(rs_year_today,    last_close_ts, RS_HISTORY,        label="year")
+    rs_quarter_history = update_rs_history(rs_quarter_today, last_close_ts, RS_HISTORY_QUARTER, label="quarter")
+    # 兼容舊變數名稱（rs.html 使用 rs_today / rs_history）
+    rs_today   = rs_year_today
+    rs_history = rs_year_history
+    # 加權指數（從快取讀取；首次無 cache 時打 finlab）
+    taiex_series = load_taiex(use_cache=True)
 
     # 共用資料
     base_ctx = {
@@ -2252,15 +2303,32 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         coverage_tabs = build_coverage_tabs(coverage.get(sym))
         # 期貨標示與 RS 評分
         futures = futures_flags.get(sym, {})
-        rs_score = int(rs_today[sym]) if sym in rs_today.index else None
+        rs_year_score    = int(rs_year_today[sym])    if sym in rs_year_today.index    else None
+        rs_quarter_score = int(rs_quarter_today[sym]) if sym in rs_quarter_today.index else None
+        # 同時相容舊變數名（其它模板若引用）
+        rs_score = rs_year_score
+        # 走勢圖 payload：年 RS / 季 RS / 加權指數，以聯集日期軸對齊
+        rs_chart_payload = None
+        year_s    = rs_year_history[sym].dropna().tail(250)    if sym in rs_year_history.columns    else pd.Series(dtype=float)
+        quarter_s = rs_quarter_history[sym].dropna().tail(250) if sym in rs_quarter_history.columns else pd.Series(dtype=float)
+        if len(year_s) >= 2 or len(quarter_s) >= 2:
+            all_dates = sorted(set(year_s.index) | set(quarter_s.index))
+            def _align(s):
+                if len(s) == 0:
+                    return None
+                return [int(s.loc[d]) if d in s.index and pd.notna(s.loc[d]) else None for d in all_dates]
+            twii_aligned = None
+            if not taiex_series.empty:
+                t = taiex_series.reindex(pd.DatetimeIndex(all_dates), method="ffill")
+                twii_aligned = [None if pd.isna(v) else round(float(v), 2) for v in t.values]
+            rs_chart_payload = {
+                "dates":   [d.strftime("%y/%m/%d") for d in all_dates],
+                "year":    _align(year_s),
+                "quarter": _align(quarter_s),
+                "twii":    twii_aligned,
+            }
+        # 兼容舊 rs_history 變數（若舊模板仍引用）
         rs_history_data = None
-        if sym in rs_history.columns:
-            hist_series = rs_history[sym].dropna().tail(250)
-            if len(hist_series) >= 2:
-                rs_history_data = {
-                    "dates":  [d.strftime("%m/%d") for d in hist_series.index],
-                    "values": [int(v) for v in hist_series.values],
-                }
         html = tpl_company.render(
             **base_ctx,
             symbol=sym,
@@ -2284,8 +2352,10 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             coverage_tabs=coverage_tabs,
             futures=futures,
             rs_score=rs_score,
-            rs_history=rs_history_data,
-            rs_history_json=json.dumps(rs_history_data, ensure_ascii=False) if rs_history_data else "null",
+            rs_year_score=rs_year_score,
+            rs_quarter_score=rs_quarter_score,
+            rs_chart=rs_chart_payload,
+            rs_chart_json=json.dumps(rs_chart_payload, ensure_ascii=False) if rs_chart_payload else "null",
         )
         (company_dir / f"{sym}.html").write_text(html, encoding="utf-8")
         n_pages += 1
