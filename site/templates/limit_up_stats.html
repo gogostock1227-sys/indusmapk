@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% set page = "limit_up_stats" %}
+{% block title %}漲停統計 · 族群寶{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>漲停隔日趨勢 & 族群輪動 <small>{{ stats.overall.date_range }}</small></h1>
+  <p>統計近 {{ stats.overall.n_days }} 個交易日的漲停個股隔日表現，與族群輪動熱力圖。點擊圖表可深入交叉分析。</p>
+</section>
+
+<!-- 頁內導覽：切回當日明細 -->
+<div class="filter-bar">
+  <a class="filter-chip" href="limit-up.html">← 回漲停分析（{{ stats.daily_summary[-1].date if stats.daily_summary else '' }}）</a>
+</div>
+
+<!-- 總體統計卡 -->
+<section class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">統計期間</div>
+    <div class="stat-value">{{ stats.overall.n_days }} <small>天</small></div>
+    <div class="stat-sub">{{ stats.overall.date_range }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">總漲停次數</div>
+    <div class="stat-value">{{ stats.overall.total_limit_up }}</div>
+    <div class="stat-sub">可計算隔日：{{ stats.overall.total_scored }} 檔次</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">隔日平均報酬</div>
+    <div class="stat-value {% if stats.overall.avg_next and stats.overall.avg_next > 0 %}positive{% elif stats.overall.avg_next %}negative{% endif %}">
+      {{ "%+.2f"|format(stats.overall.avg_next) }}%
+    </div>
+    <div class="stat-sub">中位數 {{ "%+.2f"|format(stats.overall.median_next) }}%</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">隔日正報酬率</div>
+    <div class="stat-value">{{ "%.1f"|format(stats.overall.pos_rate) }}<small>%</small></div>
+    <div class="stat-sub">{{ stats.overall.total_scored }} 檔次中</div>
+  </div>
+</section>
+
+<!-- 漲停隔日趨勢圖 -->
+<section class="panel">
+  <div class="panel-header">
+    <h2>漲停隔日趨勢</h2>
+    <span class="muted">淺紅：當日漲停家數 · 淺橘：續漲停（與前一交易日重疊）· 藍線：隔日平均報酬 %</span>
+  </div>
+  <div id="lu_trend_chart" style="height:380px; width:100%; padding:8px;"></div>
+</section>
+
+<!-- 隔日報酬分佈 -->
+<section class="panel">
+  <div class="panel-header">
+    <h2>隔日報酬分佈</h2>
+    <span class="muted">共 {{ stats.overall.total_scored }} 檔次 · 金黃柱 = 隔日續鎖漲停（≥ +9.5%）· 受台股 ±10% 限制右尾堆積</span>
+  </div>
+  <div id="lu_dist_chart" style="height:320px; width:100%; padding:8px;"></div>
+</section>
+
+<!-- 族群輪動熱力圖 -->
+<section class="panel">
+  <div class="panel-header">
+    <h2>族群輪動熱力圖</h2>
+    <span class="muted">近 40 個交易日 × Top 30 活躍族群 · 顏色深淺 = 當日該族群漲停家數</span>
+  </div>
+  <div id="lu_heatmap" style="height:680px; width:100%; padding:8px;"></div>
+</section>
+
+<!-- 族群統計表 -->
+<section class="panel">
+  <div class="panel-header">
+    <h2>族群漲停統計 Top 40</h2>
+    <span class="muted">依總漲停次數排序</span>
+  </div>
+  <div class="scroll-table">
+    <table class="table compact">
+      <thead><tr><th>#</th><th>族群</th><th>總漲停次數</th><th>隔日平均</th><th>隔日正報酬率</th></tr></thead>
+      <tbody>
+        {% for g in stats.group_stats %}
+        <tr>
+          <td class="rank-no">{{ loop.index }}</td>
+          <td>{{ g.group }}</td>
+          <td>{{ g.count }}</td>
+          <td class="{% if g.avg_next and g.avg_next > 0 %}positive{% elif g.avg_next %}negative{% endif %}">
+            {{ "%+.2f%%"|format(g.avg_next) if g.avg_next is not none else '—' }}
+          </td>
+          <td>{{ "%.1f%%"|format(g.pos_rate) if g.pos_rate is not none else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 近期明細 -->
+<section class="panel">
+  <div class="panel-header">
+    <h2>近期逐檔明細</h2>
+    <span class="muted">最近 300 筆 · 依日期新→舊</span>
+  </div>
+  <div class="scroll-table">
+    <table class="table compact">
+      <thead><tr><th>日期</th><th>代號</th><th>名稱</th><th>族群</th><th>隔日報酬</th></tr></thead>
+      <tbody>
+        {% for r in stats.recent_detail %}
+        <tr>
+          <td class="muted">{{ r.date }}</td>
+          <td class="muted">{{ r.sym }}</td>
+          <td><a href="company/{{ r.sym }}.html">{{ r.name }}</a></td>
+          <td class="muted">{{ r.group or '—' }}</td>
+          <td class="{% if r.next_ret > 0 %}positive{% elif r.next_ret < 0 %}negative{% endif %}">
+            {{ "%+.2f%%"|format(r.next_ret) }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+window.LU_STATS = {
+  daily:    {{ stats_daily_json|safe }},
+  returns:  {{ stats_returns_json|safe }},
+  heatmap:  {{ stats_heatmap_json|safe }},
+  groups:   {{ stats_groups_json|safe }},
+  dates:    {{ stats_dates_json|safe }},
+};
+</script>
+
+<script>
+(function(){
+  function start(){
+    if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+
+    // ── 1. 趨勢圖（重疊柱：淺紅底 + 淺橘覆蓋）──
+    const daily = window.LU_STATS.daily;
+    echarts.init(document.getElementById('lu_trend_chart'), 'dark', {renderer:'canvas'}).setOption({
+      backgroundColor:'transparent', animation:false,
+      legend:{ data:['當日漲停','續漲停（與前一交易日重疊）','隔日平均報酬 %'], top:0, textStyle:{color:'#9ca3af'} },
+      tooltip:{ trigger:'axis', backgroundColor:'#1f2937', borderColor:'#374151', textStyle:{color:'#e5e7eb'} },
+      grid:{ left:50, right:50, top:40, bottom:50 },
+      xAxis:{ type:'category', data:daily.map(d=>d.date), axisLabel:{color:'#9ca3af', rotate:45}, axisLine:{lineStyle:{color:'#374151'}} },
+      yAxis:[
+        {type:'value', name:'家數', nameTextStyle:{color:'#9ca3af'}, axisLabel:{color:'#9ca3af'}, splitLine:{lineStyle:{color:'rgba(255,255,255,0.04)'}}},
+        {type:'value', name:'隔日 %', nameTextStyle:{color:'#9ca3af'}, axisLabel:{color:'#9ca3af', formatter:'{value}%'}, splitLine:{show:false}},
+      ],
+      series:[
+        // 底層：當日漲停總數（淺紅）
+        {name:'當日漲停', type:'bar', data:daily.map(d=>d.n_limit_up),
+          itemStyle:{color:'#fca5a5'}},
+        // 上層：續漲停（淺橘，barGap -100% 讓同 x 完全重疊）
+        {name:'續漲停（與前一交易日重疊）', type:'bar', barGap:'-100%',
+          data:daily.map(d=>d.n_continued || 0),
+          itemStyle:{color:'#fdba74'}, z:3},
+        {name:'隔日平均報酬 %', type:'line', yAxisIndex:1, smooth:true, data:daily.map(d=>d.next_avg),
+          lineStyle:{color:'#2563eb', width:2}, symbol:'circle', symbolSize:5, z:5,
+          markLine:{silent:true, symbol:'none', data:[{yAxis:0, lineStyle:{color:'#6b7280', type:'dashed'}}]}},
+      ]
+    });
+
+    // ── 2. 分佈直方圖：把 9~10% 拆成「9~9.5%」與「9.5~10% 續漲停」兩個 bin，
+    //    讓台股漲停限制 +10% 造成的右尾堆積清楚可讀 ──
+    const returns = window.LU_STATS.returns;
+    const bins = [];
+    // 常規 1% bin：[-10, -9), [-9, -8), ..., [8, 9)
+    for (let b = -10; b < 9; b++) {
+      bins.push({label: b + '~' + (b+1) + '%', lo: b, hi: b+1, count: 0});
+    }
+    // 9~9.5% 一般高漲
+    bins.push({label: '9~9.5%', lo: 9, hi: 9.5, count: 0});
+    // 9.5%~10%+ 續漲停（台股單日漲幅上限 10%）
+    bins.push({label: '9.5~10% 續漲停', lo: 9.5, hi: 999, count: 0, isLimit: true});
+
+    returns.forEach(r => {
+      const clipped = Math.max(-10, r);
+      const b = bins.find(bn => clipped >= bn.lo && clipped < bn.hi);
+      if (b) b.count++;
+    });
+
+    echarts.init(document.getElementById('lu_dist_chart'), 'dark', {renderer:'canvas'}).setOption({
+      backgroundColor:'transparent', animation:false,
+      tooltip:{ trigger:'axis', backgroundColor:'#1f2937', borderColor:'#374151', textStyle:{color:'#e5e7eb'},
+        formatter: p => {
+          const b = bins[p[0].dataIndex];
+          const extra = b.isLimit ? '<br><small style="color:#fbbf24">↑ 續漲停（隔日再鎖 +10%）</small>' : '';
+          return `${b.label}<br><b>${p[0].data}</b> 檔次${extra}`;
+        }},
+      grid:{ left:50, right:20, top:20, bottom:60 },
+      xAxis:{
+        type:'category',
+        data: bins.map(b=>b.label),
+        axisLabel:{color:'#9ca3af', rotate:40, fontSize:10, interval:0},
+        axisLine:{lineStyle:{color:'#374151'}}
+      },
+      yAxis:{ type:'value', axisLabel:{color:'#9ca3af'}, splitLine:{lineStyle:{color:'rgba(255,255,255,0.04)'}}},
+      series:[{
+        type:'bar', data:bins.map(b=>b.count),
+        itemStyle:{
+          color: (p) => {
+            const b = bins[p.dataIndex];
+            if (b.isLimit)  return '#fbbf24';    // 續漲停用金黃標記
+            if (b.lo >= 0)  return '#dc2626';    // 正報酬紅
+            return '#10b981';                    // 負報酬綠
+          }
+        }
+      }]
+    });
+
+    // ── 3. 族群輪動熱力圖 ──
+    const H = window.LU_STATS.heatmap;
+    const groups = window.LU_STATS.groups;
+    const dates  = window.LU_STATS.dates;
+    const dateIdx = Object.fromEntries(dates.map((d,i)=>[d,i]));
+    const groupIdx = Object.fromEntries(groups.map((g,i)=>[g,i]));
+    const heat = H.filter(h => dateIdx[h.date] !== undefined && groupIdx[h.group] !== undefined)
+                  .map(h => [dateIdx[h.date], groupIdx[h.group], h.n]);
+    const maxN = heat.length ? Math.max(...heat.map(h=>h[2])) : 1;
+
+    echarts.init(document.getElementById('lu_heatmap'), 'dark', {renderer:'canvas'}).setOption({
+      backgroundColor:'transparent', animation:false,
+      tooltip:{ position:'top', backgroundColor:'#1f2937', borderColor:'#374151', textStyle:{color:'#e5e7eb'},
+        formatter: p => `${dates[p.data[0]]} · ${groups[p.data[1]]}<br><b>${p.data[2]}</b> 檔漲停`},
+      grid:{ left:120, right:40, top:30, bottom:70 },
+      xAxis:{ type:'category', data:dates, axisLabel:{color:'#9ca3af', rotate:60, fontSize:10}, axisLine:{lineStyle:{color:'#374151'}}, splitArea:{show:true, areaStyle:{color:['transparent','rgba(255,255,255,0.02)']}}},
+      yAxis:{ type:'category', data:groups, axisLabel:{color:'#9ca3af', fontSize:11}, axisLine:{lineStyle:{color:'#374151'}}, splitArea:{show:true, areaStyle:{color:['transparent','rgba(255,255,255,0.02)']}}},
+      visualMap:{ min:0, max:maxN, calculable:true, orient:'horizontal', left:'center', bottom:10,
+        textStyle:{color:'#9ca3af'}, inRange:{color:['#1f2937','#fff1e3','#f59e0b','#ea580c','#c2410c']}},
+      series:[{ type:'heatmap', data:heat, progressive:400,
+        label:{ show:true, color:'#fff', fontSize:10, formatter: p => p.data[2] || '' },
+        emphasis:{ itemStyle:{ shadowBlur:10, shadowColor:'rgba(0,0,0,0.5)' }}
+      }]
+    });
+  }
+  start();
+})();
+</script>
+{% endblock %}

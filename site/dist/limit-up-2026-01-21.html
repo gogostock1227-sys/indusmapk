@@ -1,0 +1,1638 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>漲停分析 · 族群寶</title>
+<meta name="description" content="族群寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="static/logo.png">
+<link rel="apple-touch-icon" href="static/logo.png">
+<link rel="stylesheet" href="static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="static/logo.png" alt="族群寶 IndusMap">
+      <span class="logo-text">
+        <strong>族群寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="index.html" class="">首頁</a>
+      <a href="today.html" class="">今日焦點</a>
+      <a href="limit-up.html" class="active">漲停分析</a>
+      <a href="topics.html" class="">題材列表</a>
+      <a href="compare.html" class="">題材對比</a>
+      <a href="rankings.html" class="">排行榜</a>
+      <a href="heatmap.html" class="">產業地圖</a>
+      <a href="database.html" class="">公司資料庫</a>
+      <a href="ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<section class="hero">
+  <h1>漲停分析 <small>2026-01-21</small></h1>
+  <p>
+    當日共 <strong class="positive">39</strong> 檔漲停、橫跨 <strong>21</strong> 個精細族群。
+    點族群標籤可跳族群寶題材頁、點個股名稱可進個股詳情。
+  </p>
+</section>
+
+
+<div class="lu-date-bar">
+  <label for="lu-date-picker">選擇交易日：</label>
+  <select id="lu-date-picker" onchange="
+    var d = this.value;
+    if (!d) return;
+    location.href = d === '2026-04-24' ? 'limit-up.html' : 'limit-up-' + d + '.html';
+  ">
+    
+    <option value="2026-04-24" >2026-04-24 · 最新</option>
+    
+    <option value="2026-04-23" >2026-04-23</option>
+    
+    <option value="2026-04-22" >2026-04-22</option>
+    
+    <option value="2026-04-21" >2026-04-21</option>
+    
+    <option value="2026-04-20" >2026-04-20</option>
+    
+    <option value="2026-04-17" >2026-04-17</option>
+    
+    <option value="2026-04-16" >2026-04-16</option>
+    
+    <option value="2026-04-15" >2026-04-15</option>
+    
+    <option value="2026-04-14" >2026-04-14</option>
+    
+    <option value="2026-04-13" >2026-04-13</option>
+    
+    <option value="2026-04-10" >2026-04-10</option>
+    
+    <option value="2026-04-09" >2026-04-09</option>
+    
+    <option value="2026-04-08" >2026-04-08</option>
+    
+    <option value="2026-04-07" >2026-04-07</option>
+    
+    <option value="2026-04-02" >2026-04-02</option>
+    
+    <option value="2026-04-01" >2026-04-01</option>
+    
+    <option value="2026-03-31" >2026-03-31</option>
+    
+    <option value="2026-03-30" >2026-03-30</option>
+    
+    <option value="2026-03-27" >2026-03-27</option>
+    
+    <option value="2026-03-26" >2026-03-26</option>
+    
+    <option value="2026-03-25" >2026-03-25</option>
+    
+    <option value="2026-03-24" >2026-03-24</option>
+    
+    <option value="2026-03-23" >2026-03-23</option>
+    
+    <option value="2026-03-20" >2026-03-20</option>
+    
+    <option value="2026-03-19" >2026-03-19</option>
+    
+    <option value="2026-03-18" >2026-03-18</option>
+    
+    <option value="2026-03-17" >2026-03-17</option>
+    
+    <option value="2026-03-16" >2026-03-16</option>
+    
+    <option value="2026-03-13" >2026-03-13</option>
+    
+    <option value="2026-03-12" >2026-03-12</option>
+    
+    <option value="2026-03-11" >2026-03-11</option>
+    
+    <option value="2026-03-10" >2026-03-10</option>
+    
+    <option value="2026-03-09" >2026-03-09</option>
+    
+    <option value="2026-03-06" >2026-03-06</option>
+    
+    <option value="2026-03-05" >2026-03-05</option>
+    
+    <option value="2026-03-04" >2026-03-04</option>
+    
+    <option value="2026-03-03" >2026-03-03</option>
+    
+    <option value="2026-03-02" >2026-03-02</option>
+    
+    <option value="2026-02-26" >2026-02-26</option>
+    
+    <option value="2026-02-25" >2026-02-25</option>
+    
+    <option value="2026-02-24" >2026-02-24</option>
+    
+    <option value="2026-02-23" >2026-02-23</option>
+    
+    <option value="2026-02-11" >2026-02-11</option>
+    
+    <option value="2026-02-10" >2026-02-10</option>
+    
+    <option value="2026-02-09" >2026-02-09</option>
+    
+    <option value="2026-02-06" >2026-02-06</option>
+    
+    <option value="2026-02-05" >2026-02-05</option>
+    
+    <option value="2026-02-04" >2026-02-04</option>
+    
+    <option value="2026-02-03" >2026-02-03</option>
+    
+    <option value="2026-02-02" >2026-02-02</option>
+    
+    <option value="2026-01-30" >2026-01-30</option>
+    
+    <option value="2026-01-29" >2026-01-29</option>
+    
+    <option value="2026-01-28" >2026-01-28</option>
+    
+    <option value="2026-01-27" >2026-01-27</option>
+    
+    <option value="2026-01-26" >2026-01-26</option>
+    
+    <option value="2026-01-23" >2026-01-23</option>
+    
+    <option value="2026-01-22" >2026-01-22</option>
+    
+    <option value="2026-01-21" selected>2026-01-21</option>
+    
+    <option value="2026-01-20" >2026-01-20</option>
+    
+    <option value="2026-01-19" >2026-01-19</option>
+    
+    <option value="2026-01-16" >2026-01-16</option>
+    
+    <option value="2026-01-15" >2026-01-15</option>
+    
+    <option value="2026-01-14" >2026-01-14</option>
+    
+    <option value="2026-01-13" >2026-01-13</option>
+    
+    <option value="2026-01-12" >2026-01-12</option>
+    
+    <option value="2026-01-09" >2026-01-09</option>
+    
+    <option value="2026-01-08" >2026-01-08</option>
+    
+    <option value="2026-01-07" >2026-01-07</option>
+    
+    <option value="2026-01-06" >2026-01-06</option>
+    
+    <option value="2026-01-05" >2026-01-05</option>
+    
+    <option value="2026-01-02" >2026-01-02</option>
+    
+  </select>
+  <span class="lu-date-nav">
+    
+    
+      <a class="lu-nav-btn" href="limit-up-2026-01-20.html">‹ 前一天 2026-01-20</a>
+    
+    
+      <a class="lu-nav-btn" href="limit-up-2026-01-22.html">後一天 2026-01-22 ›</a>
+    
+  </span>
+  <span class="muted lu-date-total">共 71 個交易日</span>
+  <a class="lu-nav-btn" href="limit-up-stats.html" style="margin-left:12px; background:var(--accent-soft); color:var(--accent-dark); border-color:var(--accent);">歷史統計 →</a>
+</div>
+
+
+
+<section class="section-block">
+  <header class="section-head">
+    <h2 class="section-title">族群主力與籌碼觀察</h2>
+    <p class="section-sub">今日漲停的主力族群分析與三大法人籌碼動向</p>
+  </header>
+
+  <div class="grid-2col">
+    
+    <div class="panel">
+      <div class="panel-header">
+        <h2>主力族群分析</h2>
+        <span class="muted">3 檔以上族群</span>
+      </div>
+      <div class="lu-analysis-list">
+        
+        <article class="lu-analysis-item">
+          <h3 class="lu-analysis-title">國防軍工（2 檔）</h3>
+          <p class="lu-analysis-text">1.25兆國防特別預算效應持續發酵！龍德造船連二日漲停，千艘無人艦艇訂單規模遠超市場預期。長榮航太受惠航太MRO與國防零件雙重需求，投信買超 +121 張，法人持續佈局。</p>
+        </article>
+        
+        <article class="lu-analysis-item">
+          <h3 class="lu-analysis-title">PCB材料（2 檔）</h3>
+          <p class="lu-analysis-text">德宏連三日漲停，PCB玻纖布缺貨持續延燒。竑騰PCB微鑽針受惠AI伺服器高層數板，連續漲停。PCB上游材料是AI基建的關鍵瓶頸，供需失衡預計延續至下半年。</p>
+        </article>
+        
+        <article class="lu-analysis-item">
+          <h3 class="lu-analysis-title">電源模組（3 檔）</h3>
+          <p class="lu-analysis-text">飛宏連二日漲停但外資反手賣超 -4,919 張，成交量達7萬張呈分歧。科風UPS受惠資料中心電力保護需求。泓瀚電源適配器連續漲停鎖住籌碼。</p>
+        </article>
+        
+        <article class="lu-analysis-item">
+          <h3 class="lu-analysis-title">網通設備（3 檔）</h3>
+          <p class="lu-analysis-text">合勤控爆量漲停，成交5萬張，WiFi 7升級與資安設備換機潮同步啟動。兆勁受惠智慧家庭需求，柏騰則受惠企業資安防護需求增加。</p>
+        </article>
+        
+        <article class="lu-analysis-item">
+          <h3 class="lu-analysis-title">半導體設備（5 檔）</h3>
+          <p class="lu-analysis-text">群翊AI載板設備連續漲停但外資賣超 -121 張。由田AOI檢測、日揚與上亞真空設備同步維持漲停。惠特LED與半導體檢測設備需求持續。</p>
+        </article>
+        
+      </div>
+    </div>
+
+    
+    <div class="panel">
+      <div class="panel-header">
+        <h2>三大法人籌碼</h2>
+        <span class="muted">漲停個股買賣超</span>
+      </div>
+
+      
+      
+      <h3 class="lu-chip-subtitle">外資大買超</h3>
+      <div class="bar-list">
+        
+        
+        <div class="bar-row">
+          <span class="bar-label">亞力</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:100.0%; background:#dc2626;"></span>
+          </span>
+          <span class="bar-value positive">+2,218</span>
+        </div>
+        
+        <div class="bar-row">
+          <span class="bar-label">龍德造船</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:89.0%; background:#dc2626;"></span>
+          </span>
+          <span class="bar-value positive">+1,973</span>
+        </div>
+        
+        <div class="bar-row">
+          <span class="bar-label">精金</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:37.7%; background:#dc2626;"></span>
+          </span>
+          <span class="bar-value positive">+836</span>
+        </div>
+        
+        <div class="bar-row">
+          <span class="bar-label">德宏</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:17.9%; background:#dc2626;"></span>
+          </span>
+          <span class="bar-value positive">+397</span>
+        </div>
+        
+        <div class="bar-row">
+          <span class="bar-label">瑞軒</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:18.0%; background:#dc2626;"></span>
+          </span>
+          <span class="bar-value positive">+399</span>
+        </div>
+        
+      </div>
+      
+
+      
+      
+      <h3 class="lu-chip-subtitle">投信買超</h3>
+      <div class="bar-list">
+        
+        
+        <div class="bar-row">
+          <span class="bar-label">龍德造船</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:100.0%; background:#0891b2;"></span>
+          </span>
+          <span class="bar-value positive">+254</span>
+        </div>
+        
+        <div class="bar-row">
+          <span class="bar-label">璟德</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:48.8%; background:#0891b2;"></span>
+          </span>
+          <span class="bar-value positive">+124</span>
+        </div>
+        
+        <div class="bar-row">
+          <span class="bar-label">長榮航太</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:47.6%; background:#0891b2;"></span>
+          </span>
+          <span class="bar-value positive">+121</span>
+        </div>
+        
+      </div>
+      
+
+      
+      
+      <h3 class="lu-chip-subtitle">外資賣超但鎖漲停 <span class="muted">（主力強拉）</span></h3>
+      <div class="bar-list">
+        
+        
+        <div class="bar-row">
+          <span class="bar-label">飛宏</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:100.0%; background:#64748b;"></span>
+          </span>
+          <span class="bar-value negative">-4,919</span>
+        </div>
+        
+        <div class="bar-row">
+          <span class="bar-label">合勤控</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:18.5%; background:#64748b;"></span>
+          </span>
+          <span class="bar-value negative">-909</span>
+        </div>
+        
+        <div class="bar-row">
+          <span class="bar-label">大研生醫*</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:16.0%; background:#64748b;"></span>
+          </span>
+          <span class="bar-value negative">-785</span>
+        </div>
+        
+        <div class="bar-row">
+          <span class="bar-label">全球傳動</span>
+          <span class="bar-track">
+            <span class="bar-fill" style="width:8.2%; background:#64748b;"></span>
+          </span>
+          <span class="bar-value negative">-402</span>
+        </div>
+        
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+<section class="section-block">
+  <header class="section-head">
+    <h2 class="section-title">漲停個股（按族群排序）</h2>
+    <p class="section-sub">依 AI 精細族群分類分組，展示法人籌碼與漲停驅動力摘要</p>
+  </header>
+
+  <div class="lu-groups">
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <a href="topic/半導體設備.html" class="topic-chip"
+               style="border-color:#06b6d4; color:#06b6d4;">半導體設備</a>
+          
+          <span class="muted">· 4 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/6664.html">群翊 <span class="muted">(6664)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">354.50</td>
+              <td style="text-align:right;">2,530</td>
+              <td style="text-align:right;"><span class="negative">-121</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-19</span></td>
+              <td class="lu-reason">AI載板設備訂單滿載，連續漲停但外資持續賣超</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/3455.html">由田 <span class="muted">(3455)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">139.00</td>
+              <td style="text-align:right;">4,138</td>
+              <td style="text-align:right;"><span class="positive">+68</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-9</span></td>
+              <td class="lu-reason">AOI光學檢測設備持續受惠半導體與面板產業檢測需求</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/6208.html">日揚 <span class="muted">(6208)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">52.40</td>
+              <td style="text-align:right;">1,079</td>
+              <td style="text-align:right;"><span class="positive">+7</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td class="lu-reason">真空腔體設備持續受惠半導體擴廠需求</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/6130.html">上亞科技 <span class="muted">(6130)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">27.15</td>
+              <td style="text-align:right;">526</td>
+              <td style="text-align:right;"><span class="negative">-17</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td class="lu-reason">真空設備受惠半導體擴廠需求，連續漲停</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">網通設備</span>
+          
+          <span class="muted">· 3 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/3704.html">合勤控 <span class="muted">(3704)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">39.65</td>
+              <td style="text-align:right;">50,334</td>
+              <td style="text-align:right;"><span class="negative">-909</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+187</span></td>
+              <td class="lu-reason">企業級網通設備受惠WiFi 7升級與資安設備換機潮，成交量爆至5萬張</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/2444.html">兆勁 <span class="muted">(2444)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">13.65</td>
+              <td style="text-align:right;">3,609</td>
+              <td style="text-align:right;"><span class="positive">+68</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-11</span></td>
+              <td class="lu-reason">網通設備受惠智慧家庭與寬頻建設需求</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/3518.html">柏騰 <span class="muted">(3518)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">23.45</td>
+              <td style="text-align:right;">1,252</td>
+              <td style="text-align:right;"><span class="positive">+192</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+5</span></td>
+              <td class="lu-reason">資安與網路管理設備受惠企業資安防護需求增加</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">PCB材料</span>
+          
+          <span class="muted">· 2 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/5475.html">德宏 <span class="muted">(5475)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">246.50</td>
+              <td style="text-align:right;">8,537</td>
+              <td style="text-align:right;"><span class="positive">+397</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+20</span></td>
+              <td class="lu-reason">PCB玻纖布持續缺貨，AI伺服器高層數板推升需求，連三日漲停</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/7751.html">竑騰 <span class="muted">(7751)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">1665.00</td>
+              <td style="text-align:right;">237</td>
+              <td style="text-align:right;"><span class="positive">+76</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-38</span></td>
+              <td class="lu-reason">PCB微鑽針受惠AI伺服器高層數板鑽孔需求，連續漲停</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">國防軍工</span>
+          
+          <span class="muted">· 2 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/6753.html">龍德造船 <span class="muted">(6753)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">161.50</td>
+              <td style="text-align:right;">17,131</td>
+              <td style="text-align:right;"><span class="positive">+1,973</span></td>
+              <td style="text-align:right;"><span class="positive">+254</span></td>
+              <td style="text-align:right;"><span class="positive">+462</span></td>
+              <td class="lu-reason">國防1.25兆特別預算曝光，千艘無人艦艇訂單受惠最直接，連二日漲停</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/2645.html">長榮航太 <span class="muted">(2645)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">177.00</td>
+              <td style="text-align:right;">9,742</td>
+              <td style="text-align:right;"><span class="negative">-271</span></td>
+              <td style="text-align:right;"><span class="positive">+121</span></td>
+              <td style="text-align:right;"><span class="positive">+365</span></td>
+              <td class="lu-reason">航太維修MRO受惠全球航空客運復甦，國防航太零件訂單亦同步成長</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">電源模組</span>
+          
+          <span class="muted">· 3 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/2457.html">飛宏 <span class="muted">(2457)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">37.00</td>
+              <td style="text-align:right;">71,697</td>
+              <td style="text-align:right;"><span class="negative">-4,919</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+1,012</span></td>
+              <td class="lu-reason">低軌衛星電源營收年增逾50%，連二日漲停但外資反手賣超，成交量達7萬張</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/4741.html">泓瀚 <span class="muted">(4741)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">40.70</td>
+              <td style="text-align:right;">1,721</td>
+              <td style="text-align:right;"><span class="positive">+9</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td class="lu-reason">電源適配器需求穩定，連續漲停鎖住籌碼</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/3043.html">科風 <span class="muted">(3043)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">24.90</td>
+              <td style="text-align:right;">1,611</td>
+              <td style="text-align:right;"><span class="negative">-94</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-2</span></td>
+              <td class="lu-reason">UPS不斷電系統受惠資料中心與關鍵基礎設施電力保護需求</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">面板光電</span>
+          
+          <span class="muted">· 3 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/2489.html">瑞軒 <span class="muted">(2489)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">21.05</td>
+              <td style="text-align:right;">34,663</td>
+              <td style="text-align:right;"><span class="positive">+399</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+279</span></td>
+              <td class="lu-reason">顯示器代工受惠大尺寸電視需求回溫，連二日漲停帶量上攻</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/3049.html">精金 <span class="muted">(3049)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">10.10</td>
+              <td style="text-align:right;">25,145</td>
+              <td style="text-align:right;"><span class="positive">+836</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+137</span></td>
+              <td class="lu-reason">光電元件受惠面板回溫，連三日漲停帶量上攻</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/4934.html">太極 <span class="muted">(4934)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">16.65</td>
+              <td style="text-align:right;">5,079</td>
+              <td style="text-align:right;"><span class="negative">-249</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+19</span></td>
+              <td class="lu-reason">TFT-LCD面板驅動IC設計受惠面板回溫帶動設計需求回升</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">半導體IC</span>
+          
+          <span class="muted">· 3 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/2363.html">矽統 <span class="muted">(2363)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">56.90</td>
+              <td style="text-align:right;">29,990</td>
+              <td style="text-align:right;"><span class="negative">-350</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+2,158</span></td>
+              <td class="lu-reason">多媒體晶片受惠邊緣AI運算與OTT平台升級需求，自營商買超逾2千張</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/8162.html">微矽電子-創 <span class="muted">(8162)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">38.90</td>
+              <td style="text-align:right;">996</td>
+              <td style="text-align:right;"><span class="positive">+3</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-18</span></td>
+              <td class="lu-reason">RF射頻IC受惠無線通訊模組需求成長</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/6921.html">嘉雨思-創 <span class="muted">(6921)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">62.10</td>
+              <td style="text-align:right;">69</td>
+              <td style="text-align:right;"><span class="positive">+3</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-14</span></td>
+              <td class="lu-reason">半導體設計新創，產品線拓展帶動營收成長預期</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">光通訊</span>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/3163.html">波若威 <span class="muted">(3163)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">952.00</td>
+              <td style="text-align:right;">6,094</td>
+              <td style="text-align:right;"><span class="negative">-42</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+8</span></td>
+              <td class="lu-reason">矽光子CPO連續漲停，輝達2026矽光子商轉元年定調不變，為NVL72供應鏈核心</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">重電設備</span>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/1514.html">亞力 <span class="muted">(1514)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">139.50</td>
+              <td style="text-align:right;">32,132</td>
+              <td style="text-align:right;"><span class="positive">+2,218</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+50</span></td>
+              <td class="lu-reason">AI資料中心與再生能源併網帶動配電設備需求暴增，變電站訂單能見度至2027年</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <a href="topic/被動元件.html" class="topic-chip"
+               style="border-color:#8b5cf6; color:#8b5cf6;">被動元件</a>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/3152.html">璟德 <span class="muted">(3152)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">156.00</td>
+              <td style="text-align:right;">2,841</td>
+              <td style="text-align:right;"><span class="positive">+39</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+124</span></td>
+              <td class="lu-reason">LTCC射頻元件受惠5G與WiFi 7模組需求，自營商積極買超</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">半導體封測</span>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/6147.html">頎邦 <span class="muted">(6147)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">84.00</td>
+              <td style="text-align:right;">72,958</td>
+              <td style="text-align:right;"><span class="negative">-50</span></td>
+              <td style="text-align:right;"><span class="negative">-228</span></td>
+              <td style="text-align:right;"><span class="negative">-140</span></td>
+              <td class="lu-reason">驅動IC封測龍頭連三日漲停，面板回暖加上RF與LPO非驅動IC新應用持續擴大</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">半導體材料</span>
+          
+          <span class="muted">· 2 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/3016.html">嘉晶 <span class="muted">(3016)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">72.60</td>
+              <td style="text-align:right;">36,059</td>
+              <td style="text-align:right;"><span class="positive">+123</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+202</span></td>
+              <td class="lu-reason">SiC磊晶代工龍頭連二日漲停，電動車與再生能源功率元件需求持續升溫</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/6103.html">合邦 <span class="muted">(6103)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">43.45</td>
+              <td style="text-align:right;">9</td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td class="lu-reason">第三代半導體SiC與GaN材料需求持續成長</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <a href="topic/連接器.html" class="topic-chip"
+               style="border-color:#6366f1; color:#6366f1;">連接器</a>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/6735.html">美達科技 <span class="muted">(6735)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">62.40</td>
+              <td style="text-align:right;">206</td>
+              <td style="text-align:right;"><span class="negative">-95</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-2</span></td>
+              <td class="lu-reason">高速連接器受惠AI伺服器需求，連續漲停</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">金屬加工</span>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/6727.html">亞泰金屬 <span class="muted">(6727)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">358.00</td>
+              <td style="text-align:right;">2,839</td>
+              <td style="text-align:right;"><span class="negative">-123</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+10</span></td>
+              <td class="lu-reason">MIM金屬射出成型持續受惠消費電子與車用精密零件需求</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">感測元件</span>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/4549.html">桓達 <span class="muted">(4549)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">97.00</td>
+              <td style="text-align:right;">908</td>
+              <td style="text-align:right;"><span class="negative">-43</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td class="lu-reason">工業溫度感測器持續受惠半導體設備與能源產業需求</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <a href="topic/生技醫療.html" class="topic-chip"
+               style="border-color:#16a34a; color:#16a34a;">生技醫療</a>
+          
+          <span class="muted">· 3 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/7780.html">大研生醫* <span class="muted">(7780)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">24.55</td>
+              <td style="text-align:right;">9,354</td>
+              <td style="text-align:right;"><span class="negative">-785</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-184</span></td>
+              <td class="lu-reason">保健食品品牌連二日漲停，健康意識抬頭帶動營收成長</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/4911.html">德英 <span class="muted">(4911)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">41.50</td>
+              <td style="text-align:right;">312</td>
+              <td style="text-align:right;"><span class="positive">+2</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td class="lu-reason">農業生技植物保護新藥題材持續</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/1796.html">金穎生技 <span class="muted">(1796)</span></a></td>
+              <td><span class="muted">櫃</span></td>
+              <td style="text-align:right;">40.70</td>
+              <td style="text-align:right;">84</td>
+              <td style="text-align:right;"><span class="negative">-1</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td class="lu-reason">益生菌原料需求穩定，連續漲停鎖住</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">電機機械</span>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/4540.html">全球傳動 <span class="muted">(4540)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">49.85</td>
+              <td style="text-align:right;">15,315</td>
+              <td style="text-align:right;"><span class="negative">-402</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+140</span></td>
+              <td class="lu-reason">線性滑軌與滾珠螺桿受惠自動化產線需求，連二日漲停</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">主機板/IPC</span>
+          
+          <span class="muted">· 2 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/8201.html">無敵 <span class="muted">(8201)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">15.75</td>
+              <td style="text-align:right;">996</td>
+              <td style="text-align:right;"><span class="positive">+16</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+1</span></td>
+              <td class="lu-reason">電子辭典轉型AI教育裝置，邊緣AI應用題材</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/3494.html">誠研 <span class="muted">(3494)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">10.90</td>
+              <td style="text-align:right;">1,161</td>
+              <td style="text-align:right;"><span class="positive">+33</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+5</span></td>
+              <td class="lu-reason">嵌入式電腦受惠數位轉型，連二日漲停</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">紡織</span>
+          
+          <span class="muted">· 2 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/1473.html">台南 <span class="muted">(1473)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">27.10</td>
+              <td style="text-align:right;">2,793</td>
+              <td style="text-align:right;"><span class="negative">-169</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+5</span></td>
+              <td class="lu-reason">紡織股跌深反彈，資產題材與低基期吸引資金輪動</td>
+            </tr>
+            
+            <tr>
+              <td><a href="company/4426.html">利勤 <span class="muted">(4426)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">10.00</td>
+              <td style="text-align:right;">1,071</td>
+              <td style="text-align:right;"><span class="negative">-317</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="negative">-3</span></td>
+              <td class="lu-reason">耐隆紗受惠運動服飾與功能性紡織品需求</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">汽車零組件</span>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/6988.html">威力暘-創 <span class="muted">(6988)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">18.15</td>
+              <td style="text-align:right;">128</td>
+              <td style="text-align:right;"><span class="positive">+7</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td class="lu-reason">電動車充電模組受惠充電樁建置加速</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    
+    
+    <div class="panel lu-group-panel">
+      <div class="panel-header lu-group-header">
+        <div class="lu-group-title">
+          
+            <span class="topic-chip" style="border-color:#64748b; color:#64748b;">塑膠回收</span>
+          
+          <span class="muted">· 1 檔</span>
+          
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="table compact">
+          <thead>
+            <tr>
+              <th>個股</th>
+              <th>市場</th>
+              <th style="text-align:right;">收盤</th>
+              <th style="text-align:right;">成交張數</th>
+              <th style="text-align:right;">外資</th>
+              <th style="text-align:right;">投信</th>
+              <th style="text-align:right;">自營</th>
+              <th>漲停驅動力</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td><a href="company/1337.html">再生-KY <span class="muted">(1337)</span></a></td>
+              <td><span class="muted">市</span></td>
+              <td style="text-align:right;">5.33</td>
+              <td style="text-align:right;">2,079</td>
+              <td style="text-align:right;"><span class="positive">+11</span></td>
+              <td style="text-align:right;"><span class="muted">—</span></td>
+              <td style="text-align:right;"><span class="positive">+7</span></td>
+              <td class="lu-reason">再生塑膠受惠ESG與循環經濟政策推動</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+<style>
+/* ─ 漲停分析：頁面專屬輕量裝飾（復用族群寶原生 .panel/.table/.bar-list/.topic-chip） ─ */
+.lu-analysis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 4px;
+}
+.lu-analysis-item {
+  border-left: 3px solid var(--accent, #2563eb);
+  padding: 4px 0 4px 14px;
+}
+.lu-analysis-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+.lu-analysis-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-mute, #475569);
+  margin: 0;
+}
+.lu-chip-subtitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 14px 0 4px;
+  padding: 0 4px;
+}
+.lu-chip-subtitle:first-child {
+  margin-top: 4px;
+}
+.lu-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.lu-group-panel {
+  padding: 0;
+}
+.lu-group-header {
+  align-items: center;
+}
+.lu-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.lu-reason {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-mute, #475569);
+  max-width: 520px;
+}
+@media (max-width: 820px) {
+  .lu-reason { max-width: none; }
+}
+</style>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 族群寶 · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-24</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "";
+</script>
+<script src="data/search-data.js" defer></script>
+<script src="static/app.js" defer></script>
+
+</body>
+</html>

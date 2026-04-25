@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% set page = "limit_up" %}
-{% block title %}今日漲停分析 · 族群寶{% endblock %}
+{% block title %}漲停分析 · 族群寶{% endblock %}
 
 {% macro fmt_int(n) -%}
   {%- if n is none -%}—{%- else -%}{{ "{:,}".format(n|int) }}{%- endif -%}
@@ -22,12 +22,38 @@
 
 {% block content %}
 <section class="hero">
-  <h1>今日漲停分析 <small>{{ lu_date }}</small></h1>
+  <h1>漲停分析 <small>{{ lu_date }}{% if lu_is_latest %} · 最新{% endif %}</small></h1>
   <p>
     當日共 <strong class="positive">{{ lu_total }}</strong> 檔漲停、橫跨 <strong>{{ lu_n_groups }}</strong> 個精細族群。
     點族群標籤可跳族群寶題材頁、點個股名稱可進個股詳情。
   </p>
 </section>
+
+{% if lu_all_dates %}
+<div class="lu-date-bar">
+  <label for="lu-date-picker">選擇交易日：</label>
+  <select id="lu-date-picker" onchange="
+    var d = this.value;
+    if (!d) return;
+    location.href = d === '{{ lu_all_dates[-1] }}' ? 'limit-up.html' : 'limit-up-' + d + '.html';
+  ">
+    {% for d in lu_all_dates|reverse %}
+    <option value="{{ d }}" {% if d == lu_current_date %}selected{% endif %}>{{ d }}{% if d == lu_all_dates[-1] %} · 最新{% endif %}</option>
+    {% endfor %}
+  </select>
+  <span class="lu-date-nav">
+    {% set idx = lu_all_dates.index(lu_current_date) %}
+    {% if idx > 0 %}
+      <a class="lu-nav-btn" href="{% if lu_all_dates[idx-1] == lu_all_dates[-1] %}limit-up.html{% else %}limit-up-{{ lu_all_dates[idx-1] }}.html{% endif %}">‹ 前一天 {{ lu_all_dates[idx-1] }}</a>
+    {% endif %}
+    {% if idx < lu_all_dates|length - 1 %}
+      <a class="lu-nav-btn" href="{% if lu_all_dates[idx+1] == lu_all_dates[-1] %}limit-up.html{% else %}limit-up-{{ lu_all_dates[idx+1] }}.html{% endif %}">後一天 {{ lu_all_dates[idx+1] }} ›</a>
+    {% endif %}
+  </span>
+  <span class="muted lu-date-total">共 {{ lu_all_dates|length }} 個交易日</span>
+  <a class="lu-nav-btn" href="limit-up-stats.html" style="margin-left:12px; background:var(--accent-soft); color:var(--accent-dark); border-color:var(--accent);">歷史統計 →</a>
+</div>
+{% endif %}
 
 {# ─────── 族群概覽與籌碼觀察 ─────── #}
 <section class="section-block">
@@ -62,11 +88,11 @@
         <span class="muted">漲停個股買賣超</span>
       </div>
 
-      {% set fb = lu_chip.get("foreignBuy", []) %}
+      {% set fb = lu_chip.get("foreignBuy", [])|selectattr("amount", "defined")|list %}
       {% if fb %}
       <h3 class="lu-chip-subtitle">外資大買超</h3>
       <div class="bar-list">
-        {% set fb_max = fb[0].amount if fb[0].amount > 0 else 1 %}
+        {% set fb_max = (fb[0].amount if fb[0].amount and fb[0].amount > 0 else 1) %}
         {% for x in fb[:8] %}
         <div class="bar-row">
           <span class="bar-label">{{ x.name }}</span>
@@ -79,11 +105,11 @@
       </div>
       {% endif %}
 
-      {% set tb = lu_chip.get("trustBuy", []) %}
+      {% set tb = lu_chip.get("trustBuy", [])|selectattr("amount", "defined")|list %}
       {% if tb %}
       <h3 class="lu-chip-subtitle">投信買超</h3>
       <div class="bar-list">
-        {% set tb_max = tb[0].amount if tb[0].amount > 0 else 1 %}
+        {% set tb_max = (tb[0].amount if tb[0].amount and tb[0].amount > 0 else 1) %}
         {% for x in tb[:8] %}
         <div class="bar-row">
           <span class="bar-label">{{ x.name }}</span>
@@ -96,11 +122,11 @@
       </div>
       {% endif %}
 
-      {% set fs = lu_chip.get("foreignSellButLimitUp", []) %}
+      {% set fs = lu_chip.get("foreignSellButLimitUp", [])|selectattr("amount", "defined")|list %}
       {% if fs %}
       <h3 class="lu-chip-subtitle">外資賣超但鎖漲停 <span class="muted">（主力強拉）</span></h3>
       <div class="bar-list">
-        {% set fs_max = -fs[0].amount if fs[0].amount < 0 else 1 %}
+        {% set fs_max = (-fs[0].amount if fs[0].amount and fs[0].amount < 0 else 1) %}
         {% for x in fs[:8] %}
         <div class="bar-row">
           <span class="bar-label">{{ x.name }}</span>
@@ -179,7 +205,7 @@
 </section>
 
 <style>
-/* ─ 今日漲停分析：頁面專屬輕量裝飾（復用族群寶原生 .panel/.table/.bar-list/.topic-chip） ─ */
+/* ─ 漲停分析：頁面專屬輕量裝飾（復用族群寶原生 .panel/.table/.bar-list/.topic-chip） ─ */
 .lu-analysis-list {
   display: flex;
   flex-direction: column;
