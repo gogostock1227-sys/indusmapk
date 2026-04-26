@@ -90,6 +90,18 @@ def check_position(profile: StockProfile, spec: GroupSpec) -> CheckResult:
     """
     pos = profile.supply_chain_position
 
+    if spec.hard_whitelist and profile.ticker not in set(spec.hard_whitelist):
+        return CheckResult(
+            name="C3_position",
+            ok=False,
+            weight=0.35,
+            reason=(
+                f"{spec.group_name} 採硬白名單；{profile.ticker} 不在 "
+                f"{spec.hard_whitelist}；個股位階={pos}，供應商/設備/耗材/通路不得列入本體族群"
+            ),
+            hard_fail=True,
+        )
+
     if pos in spec.forbidden_positions:
         return CheckResult(
             name="C3_position",

@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CPU 概念股 · 族群寶</title>
+<meta name="description" content="族群寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="../static/logo.png">
+<link rel="apple-touch-icon" href="../static/logo.png">
+<link rel="stylesheet" href="../static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <img class="logo-mark" src="../static/logo.png" alt="族群寶 IndusMap">
+      <span class="logo-text">
+        <strong>族群寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="../index.html" class="">首頁</a>
+      <a href="../today.html" class="">今日焦點</a>
+      <a href="../limit-up.html" class="">漲停分析</a>
+      <a href="../topics.html" class="active">題材列表</a>
+      <a href="../compare.html" class="">題材對比</a>
+      <a href="../rankings.html" class="">排行榜</a>
+      <a href="../rs.html" class="">RS 評分</a>
+      <a href="../heatmap.html" class="">產業地圖</a>
+      <a href="../database.html" class="">公司資料庫</a>
+      <a href="../ai.html" class="">市場觀察</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<nav class="breadcrumb">
+  <a href="../index.html">每日焦點</a> ›
+  <a href="../topics.html">題材總覽</a> ›
+  <span style="color:#0071c5;">CPU 概念股</span>
+</nav>
+
+<section class="topic-hero" style="--accent:#0071c5;">
+  <div class="topic-hero-inner">
+    <div class="category-tag" style="background:#0071c522; color:#0071c5;">AI / 半導體</div>
+    <h1>CPU 概念股</h1>
+    <p class="topic-en">CPU Supply Chain</p>
+    <p class="topic-desc">Intel/AMD CPU 短缺崛起族群（2026 Q2 Lisa Su 確認需求遠超預期）。祥碩 (AMD USB pure-play)、信驊 (Server BMC 全球第一)、欣興/南電/景碩 (CPU ABF 載板三雄)、嘉澤 (LGA Socket)、日月光投控 (CPU 封測)、華碩/技嘉/微星/華擎 (主機板)、矽力*-KY (DDR5 PMIC)、奇鋐/雙鴻 (CPU 散熱)、台達電 (CPU VRM) 為核心受惠台廠。</p>
+    <div class="topic-kpis">
+      <span class="kpi"><em>CAGR</em><strong>20%</strong></span>
+      <span class="kpi"><em>市場規模</em><strong>180B USD</strong></span>
+      <span class="kpi"><em>成分股</em><strong>11</strong></span>
+      <span class="kpi"><em>今日平均</em><strong class="positive">+1.62%</strong></span>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="indicator-grid">
+  
+  <div class="indicator-card">
+    <small>事件</small>
+    <strong>Intel/AMD CPU 短缺</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>AMD pure-play</small>
+    <strong>祥碩 / 信驊</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>ABF 載板</small>
+    <strong>欣興 / 南電 / 景碩</strong>
+  </div>
+  
+  <div class="indicator-card">
+    <small>毛利</small>
+    <strong>封測 30% / 載板 25%</strong>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>概念股報酬走勢</h2>
+    <span class="muted">等權重投組 · 近 6 個月</span>
+  </div>
+  <div class="topic-chart-kpis" id="topic_chart_kpis_CPU概念股"></div>
+  <div id="topic_chart_CPU概念股" style="width:100%; height:340px; padding:4px 12px 12px;"></div>
+  <script>
+  (function(){
+    const raw = {"dates": ["2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24"], "values": [0.0, 4.46, 5.41, 3.74, 3.66, 4.47, 3.88, 2.85, 4.9, 5.08, 6.68, 4.37, 4.86, 5.56, 3.06, 1.76, 4.94, 2.34, 2.82, 0.59, 0.07, 2.84, 1.65, 0.28, -1.15, -3.87, 0.46, -3.79, -1.08, 1.55, 3.73, 5.81, 8.57, 5.97, 5.47, 6.16, 5.29, 7.66, 7.52, 9.8, 9.86, 10.18, 10.26, 10.13, 8.63, 6.61, 5.41, 7.18, 8.08, 7.21, 7.26, 9.39, 9.0, 10.17, 9.98, 9.48, 9.77, 10.71, 12.2, 11.62, 14.02, 15.43, 14.85, 17.04, 16.89, 19.1, 21.34, 23.96, 23.55, 26.96, 30.67, 32.42, 34.91, 34.19, 32.24, 32.48, 32.87, 40.5, 42.63, 37.54, 35.43, 39.98, 42.8, 43.43, 43.36, 46.3, 52.87, 53.52, 49.66, 45.71, 36.14, 44.36, 47.3, 38.71, 44.42, 51.74, 56.1, 56.64, 58.57, 64.35, 71.44, 69.72, 69.59, 64.19, 60.94, 67.26, 68.17, 68.78, 65.53, 56.23, 64.24, 60.59, 64.96, 76.02, 78.28, 79.72, 79.4, 79.72, 86.53, 95.5, 96.92, 104.1, 109.63, 114.05, 107.56, 110.92], "ret_1d": 1.62, "ret_1w": 7.11, "ret_1m": 26.1, "ret_3m": 77.09, "ret_6m": 110.92};
+    const kpiEl = document.getElementById('topic_chart_kpis_CPU概念股');
+    const chartEl = document.getElementById('topic_chart_CPU概念股');
+    if (!raw) {
+      chartEl.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;">查無歷史資料</div>';
+      return;
+    }
+    // KPI 卡
+    const fmtPct = (v) => v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    kpiEl.innerHTML = `
+      <div><small>近 1 日漲跌幅</small><strong class="${cls(raw.ret_1d)}">${fmtPct(raw.ret_1d)}</strong></div>
+      <div><small>近 1 週漲跌幅</small><strong class="${cls(raw.ret_1w)}">${fmtPct(raw.ret_1w)}</strong></div>
+      <div><small>近 1 月漲跌幅</small><strong class="${cls(raw.ret_1m)}">${fmtPct(raw.ret_1m)}</strong></div>
+    `;
+
+    function start() {
+      if (typeof echarts === 'undefined') { return setTimeout(start, 120); }
+      const chart = echarts.init(chartEl, 'dark', { renderer: 'canvas' });
+      const last = raw.values[raw.values.length - 1];
+      const isUp = last >= 0;
+      const mainColor = isUp ? '#ef4444' : '#10b981';  // 台股紅漲綠跌
+      const fillColorStart = isUp ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)';
+      const fillColorEnd   = isUp ? 'rgba(239,68,68,0.02)' : 'rgba(16,185,129,0.02)';
+      chart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 12, right: 56, top: 20, bottom: 32, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(15,20,28,0.95)',
+          borderColor: '#374151', borderWidth: 1,
+          textStyle: { color: '#e5e7eb', fontSize: 13 },
+          formatter: (p) => {
+            const x = p[0];
+            const v = x.value;
+            const c = v >= 0 ? '#f87171' : '#4ade80';
+            return `<div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">${x.axisValue}</div>
+                    <b style="color:${c};font-size:15px;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</b>`;
+          }
+        },
+        xAxis: {
+          type: 'category', data: raw.dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#374151' } },
+          axisTick: { show: false },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            interval: Math.max(1, Math.floor(raw.dates.length / 2) - 1),
+            showMinLabel: true, showMaxLabel: true,
+          },
+        },
+        yAxis: {
+          type: 'value', position: 'right',
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          axisLabel: {
+            color: '#9ca3af', fontSize: 11,
+            formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`
+          },
+        },
+        series: [{
+          type: 'line',
+          data: raw.values,
+          smooth: 0.2,
+          symbol: 'none',
+          lineStyle: { color: mainColor, width: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: fillColorStart },
+              { offset: 1, color: fillColorEnd },
+            ])
+          },
+          markLine: {
+            silent: true, symbol: 'none',
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'dashed', width: 1 },
+            label: { show: false }
+          }
+        }],
+      });
+      window.addEventListener('resize', () => chart.resize());
+    }
+    start();
+  })();
+  </script>
+</section>
+
+<section class="grid-2col">
+  <div class="panel">
+    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="snapshot">
+      <div><em>今日平均</em><strong class="positive">+1.62%</strong></div>
+      <div><em>5日平均</em><strong class="positive">+7.21%</strong></div>
+      <div><em>20日平均</em><strong class="positive">+26.20%</strong></div>
+      <div><em>族群成交額</em><strong>614.5 億</strong></div>
+      <div><em>漲停家數</em><strong>1</strong></div>
+      <div><em>外資買超家數</em><strong>8</strong></div>
+      <div><em>投信買超家數</em><strong>3</strong></div>
+      <div><em>今日最強</em><strong>南電</strong></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="related-list">
+      
+      
+      <a class="related-chip" href="台積電供應鏈.html" style="border-color:#ff7847; color:#ff7847;">
+        台積電供應鏈
+        <small>共用 4 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="2奈米先進製程.html" style="border-color:#dc2626; color:#dc2626;">
+        2奈米先進製程
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="ABF載板.html" style="border-color:#dc2626; color:#dc2626;">
+        ABF載板
+        <small>共用 2 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="輝達概念股.html" style="border-color:#76b900; color:#76b900;">
+        輝達概念股
+        <small>共用 5 檔</small>
+      </a>
+      
+      
+      <a class="related-chip" href="GoogleTPU.html" style="border-color:#4285f4; color:#4285f4;">
+        Google TPU
+        <small>共用 3 檔</small>
+      </a>
+      
+      
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>成分股清單</h2>
+    <span class="muted">依今日成交金額排序</span>
+  </div>
+  <div class="table-scroll">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>代號</th><th>名稱</th>
+        <th>收盤</th>
+        <th>今日</th><th>5日</th><th>20日</th>
+        <th>外資(張)</th><th>投信(張)</th>
+        <th>成交金額</th>
+        <th>其他題材</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/8046.html">8046</a></td>
+        <td>
+          <a href="../company/8046.html">南電</a>
+          <span class="hl-star" data-tip="ABF 載板 全球 #3｜NVIDIA GPU 載板供應" title="ABF 載板 全球 #3｜NVIDIA GPU 載板供應">★</span>
+           <span class="badge badge-red">漲停</span>
+          
+        </td>
+        <td>874.00</td>
+        <td class="positive">+9.94%</td>
+        <td class="positive">+20.72%</td>
+        <td class="positive">+61.85%</td>
+        <td class="positive">
+          +4987
+        </td>
+        <td class="positive">
+          +2891
+        </td>
+        <td>196.5 億</td>
+        <td>
+          
+          
+            <span class="tag">輝達概念股</span><span class="tag">CoWoS先進封裝</span><span class="tag">PCB/銅箔基板</span>
+            
+              <span class="tag tag-more" data-tip="ABF載板、2奈米先進製程、Chiplet 小晶片、美國製造回流/晶片法案、高階 PCB/HDI、Flexible PCB/軟板、台積電供應鏈" title="ABF載板、2奈米先進製程、Chiplet 小晶片、美國製造回流/晶片法案、高階 PCB/HDI、Flexible PCB/軟板、台積電供應鏈">+7</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5274.html">5274</a></td>
+        <td>
+          <a href="../company/5274.html">信驊</a>
+          <span class="hl-star" data-tip="BMC 伺服器管理晶片 全球 #1｜ServerOn Chip、AI 伺服器管理 IC" title="BMC 伺服器管理晶片 全球 #1｜ServerOn Chip、AI 伺服器管理 IC">★</span>
+          
+          
+        </td>
+        <td>16370.00</td>
+        <td class="positive">+4.47%</td>
+        <td class="positive">+18.58%</td>
+        <td class="positive">+42.35%</td>
+        <td class="positive">
+          +106
+        </td>
+        <td class="negative">
+          -67
+        </td>
+        <td>88.8 億</td>
+        <td>
+          
+          <span class="muted">—</span>
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3037.html">3037</a></td>
+        <td>
+          <a href="../company/3037.html">欣興</a>
+          <span class="hl-star" data-tip="ABF 載板 全球 #1｜AI GPU / CPU 載板主力供應，CoWoS-L 互連" title="ABF 載板 全球 #1｜AI GPU / CPU 載板主力供應，CoWoS-L 互連">★</span>
+          
+          
+        </td>
+        <td>790.00</td>
+        <td class="positive">+8.52%</td>
+        <td class="positive">+22.86%</td>
+        <td class="positive">+56.13%</td>
+        <td class="positive">
+          +2177
+        </td>
+        <td class="negative">
+          -493
+        </td>
+        <td>76.8 億</td>
+        <td>
+          
+          
+            <span class="tag">輝達概念股</span><span class="tag">Google TPU</span><span class="tag">CoWoS先進封裝</span>
+            
+              <span class="tag tag-more" data-tip="PCB/銅箔基板、ABF載板、蘋果概念股、2奈米先進製程、折疊機/Apple 新機、AI 眼鏡 / Meta Ray-Ban、Chiplet 小晶片、美國製造回流/晶片法案、光學薄膜、OLED/Micro LED、台積電供應鏈" title="PCB/銅箔基板、ABF載板、蘋果概念股、2奈米先進製程、折疊機/Apple 新機、AI 眼鏡 / Meta Ray-Ban、Chiplet 小晶片、美國製造回流/晶片法案、光學薄膜、OLED/Micro LED、台積電供應鏈">+11</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3533.html">3533</a></td>
+        <td>
+          <a href="../company/3533.html">嘉澤</a>
+          <span class="hl-star" data-tip="高速連接器 台灣 #1｜224G SerDes、CPU / GPU Socket、AI 伺服器內部互連" title="高速連接器 台灣 #1｜224G SerDes、CPU / GPU Socket、AI 伺服器內部互連">★</span>
+          
+          
+        </td>
+        <td>2520.00</td>
+        <td class="positive">+2.44%</td>
+        <td class="positive">+1.20%</td>
+        <td class="positive">+17.21%</td>
+        <td class="positive">
+          +171
+        </td>
+        <td class="positive">
+          +55
+        </td>
+        <td>61.0 億</td>
+        <td>
+          
+          
+            <span class="tag">連接器</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6515.html">6515</a></td>
+        <td>
+          <a href="../company/6515.html">穎崴</a>
+          <span class="hl-star" data-tip="半導體測試介面 全球 #1｜高頻測試 socket、HBM 測試" title="半導體測試介面 全球 #1｜高頻測試 socket、HBM 測試">★</span>
+          
+          
+        </td>
+        <td>10060.00</td>
+        <td class="negative">-6.24%</td>
+        <td class="negative">-2.38%</td>
+        <td class="positive">+19.05%</td>
+        <td class="positive">
+          +45
+        </td>
+        <td class="negative">
+          -61
+        </td>
+        <td>57.1 億</td>
+        <td>
+          
+          
+            <span class="tag">輝達概念股</span><span class="tag">Google TPU</span><span class="tag">檢測/設備服務</span>
+            
+              <span class="tag tag-more" data-tip="2奈米先進製程、台積電供應鏈" title="2奈米先進製程、台積電供應鏈">+2</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/6510.html">6510</a></td>
+        <td>
+          <a href="../company/6510.html">精測</a>
+          <span class="hl-star" data-tip="測試探針卡 台灣 #1｜MEMS 探針卡、高階 IC 測試" title="測試探針卡 台灣 #1｜MEMS 探針卡、高階 IC 測試">★</span>
+          
+          
+        </td>
+        <td>3630.00</td>
+        <td class="negative">-5.71%</td>
+        <td class="negative">-2.94%</td>
+        <td class="positive">+13.62%</td>
+        <td class="positive">
+          +29
+        </td>
+        <td class="negative">
+          -11
+        </td>
+        <td>56.8 億</td>
+        <td>
+          
+          
+            <span class="tag">Google TPU</span><span class="tag">檢測/設備服務</span><span class="tag">台積電供應鏈</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/5269.html">5269</a></td>
+        <td>
+          <a href="../company/5269.html">祥碩</a>
+          <span class="hl-star" data-tip="USB Host IC 全球 #1｜AMD 主機板 USB 獨家、PCIe Switch 卡位" title="USB Host IC 全球 #1｜AMD 主機板 USB 獨家、PCIe Switch 卡位">★</span>
+          
+          
+        </td>
+        <td>1295.00</td>
+        <td class="positive">+1.57%</td>
+        <td class="positive">+1.97%</td>
+        <td class="positive">+10.21%</td>
+        <td class="negative">
+          -472
+        </td>
+        <td class="negative">
+          -10
+        </td>
+        <td>26.6 億</td>
+        <td>
+          
+          
+            <span class="tag">IC設計</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3653.html">3653</a></td>
+        <td>
+          <a href="../company/3653.html">健策</a>
+          <span class="hl-star" data-tip="冷板散熱 全球 #3｜CDU 冷板液冷、手機均熱板" title="冷板散熱 全球 #3｜CDU 冷板液冷、手機均熱板">★</span>
+          
+          
+        </td>
+        <td>5370.00</td>
+        <td class="positive">+1.13%</td>
+        <td class="positive">+17.63%</td>
+        <td class="positive">+36.12%</td>
+        <td class="positive">
+          +202
+        </td>
+        <td class="negative">
+          -136
+        </td>
+        <td>25.3 億</td>
+        <td>
+          
+          
+            <span class="tag">輝達概念股</span><span class="tag">散熱/液冷</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/2376.html">2376</a></td>
+        <td>
+          <a href="../company/2376.html">技嘉</a>
+          <span class="hl-star" data-tip="顯示卡 全球 #3 + AI 伺服器｜技嘉電競顯卡 + B200 伺服器" title="顯示卡 全球 #3 + AI 伺服器｜技嘉電競顯卡 + B200 伺服器">★</span>
+          
+          
+        </td>
+        <td>278.00</td>
+        <td class="positive">+1.09%</td>
+        <td class="negative">-1.24%</td>
+        <td class="positive">+18.80%</td>
+        <td class="negative">
+          -269
+        </td>
+        <td class="negative">
+          -162
+        </td>
+        <td>14.0 億</td>
+        <td>
+          
+          
+            <span class="tag">AI伺服器</span><span class="tag">輝達概念股</span><span class="tag">AI PC/邊緣AI</span>
+            
+              <span class="tag tag-more" data-tip="車用電子、PC/電競品牌、智慧城市/V2X、AI基礎設施/資料中心" title="車用電子、PC/電競品牌、智慧城市/V2X、AI基礎設施/資料中心">+4</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/4938.html">4938</a></td>
+        <td>
+          <a href="../company/4938.html">和碩</a>
+          <span class="hl-star" data-tip="筆電 ODM 全球前五｜和碩 iPhone + AI 伺服器" title="筆電 ODM 全球前五｜和碩 iPhone + AI 伺服器">★</span>
+          
+          
+        </td>
+        <td>84.30</td>
+        <td class="positive">+0.36%</td>
+        <td class="positive">+1.57%</td>
+        <td class="positive">+8.91%</td>
+        <td class="negative">
+          -3154
+        </td>
+        <td class="positive">
+          +1666
+        </td>
+        <td>10.3 億</td>
+        <td>
+          
+          
+            <span class="tag">蘋果概念股</span><span class="tag">新南向/東南亞產能</span><span class="tag">印度產能/印度概念</span>
+            
+          
+        </td>
+      </tr>
+      
+      
+      <tr class="has-hl">
+        <td><a href="../company/3515.html">3515</a></td>
+        <td>
+          <a href="../company/3515.html">華擎</a>
+          <span class="hl-star" data-tip="AI 主機板 全球前三｜NVIDIA B100/B200 主機板設計" title="AI 主機板 全球前三｜NVIDIA B100/B200 主機板設計">★</span>
+          
+          
+        </td>
+        <td>226.50</td>
+        <td class="positive">+0.22%</td>
+        <td class="positive">+1.34%</td>
+        <td class="positive">+3.90%</td>
+        <td class="positive">
+          +88
+        </td>
+        <td class="">
+          +0
+        </td>
+        <td>1.4 億</td>
+        <td>
+          
+          
+            <span class="tag">PC/電競品牌</span>
+            
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 族群寶 · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-24</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "../";
+</script>
+<script src="../data/search-data.js" defer></script>
+<script src="../static/app.js" defer></script>
+
+</body>
+</html>

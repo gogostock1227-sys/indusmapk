@@ -1,0 +1,262 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "last_updated": "2026-04-26",
+    "description": "族群驗證 regression fixtures。每筆代表一個 (ticker, group) pair 的人工 ground truth verdict，用於檢驗 v3 baseline 與後續 v4 三審合議流程。",
+    "verdict_enum": ["CORE", "SATELLITE", "ABSTAIN", "REMOVE", "KEEP_ANY"],
+    "case_type_enum": ["false_positive", "true_positive_core", "true_positive_satellite", "false_negative", "grey_zone"],
+    "notes": "KEEP_ANY = 落在 core/satellite/abstain 任一即通過。fixture 來源以 batch_*.md 人工 audit 為主，輔以 enrichment_pilot.json industry/revenue 欄位交叉驗證。"
+  },
+  "fixtures": [
+    {
+      "id": "fp-01",
+      "ticker": "3686",
+      "ticker_name": "達能",
+      "group": "矽晶圓",
+      "expected_verdict": "REMOVE",
+      "case_type": "false_positive",
+      "reason": "達能板塊 Technology 但產業 Solar，本業為太陽能矽晶圓再生廠，與半導體矽晶圓無關。應重分類至太陽能/光電板。",
+      "evidence_source": "batch_2.md L66 + enrichment_pilot.industry='太陽能 600GW Phase3 15GW 規劃'"
+    },
+    {
+      "id": "fp-02",
+      "ticker": "5285",
+      "ticker_name": "界霖",
+      "group": "碳化矽/SiC",
+      "expected_verdict": "ABSTAIN",
+      "case_type": "grey_zone",
+      "reason": "界霖為功率導線架（封裝材料），主業非 SiC 但下游高度應用 SiC MOSFET。v4 應放 ABSTAIN（人工 review queue），由人工確認是 REMOVE 還是 SATELLITE。比 v3 直接給 CORE 嚴謹得多。",
+      "evidence_source": "batch_2.md + 仲裁設計：t1 ABSTAIN + t2 SATELLITE → ABSTAIN（人工把關）"
+    },
+    {
+      "id": "fp-03",
+      "ticker": "5347",
+      "ticker_name": "世界先進",
+      "group": "碳化矽/SiC",
+      "expected_verdict": "REMOVE",
+      "case_type": "false_positive",
+      "reason": "世界先進為 8 吋成熟製程代工，營收結構不含 SiC 化合物半導體本業，應重分類至晶圓代工成熟製程。",
+      "evidence_source": "enrichment_pilot.industry='半導體 7000 億 NVIDIA Rubin' + 無 SiC 拆解 %"
+    },
+    {
+      "id": "fp-04",
+      "ticker": "8021",
+      "ticker_name": "尖點",
+      "group": "碳化矽/SiC",
+      "expected_verdict": "REMOVE",
+      "case_type": "false_positive",
+      "reason": "尖點為 PCB 微鑽針製造，與 SiC 化合物半導體本業無關。應重分類至 PCB 設備耗材。",
+      "evidence_source": "batch_2.md SiC 應移除清單 + 業務簡介"
+    },
+    {
+      "id": "fp-05",
+      "ticker": "6735",
+      "ticker_name": "美達科技",
+      "group": "碳化矽/SiC",
+      "expected_verdict": "REMOVE",
+      "case_type": "false_positive",
+      "reason": "美達為 LED/光電零件，營收結構與 SiC 化合物半導體無重疊，應重分類至光電零件。",
+      "evidence_source": "concept_groups.py 當前成員 + enrichment 無 SiC 占比"
+    },
+    {
+      "id": "tp-01",
+      "ticker": "3231",
+      "ticker_name": "緯創",
+      "group": "AI伺服器",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "緯創為全球前三大 ICT 代工廠，GB200/GB300 液冷伺服器主供應，AI 伺服器 ODM #3。",
+      "evidence_source": "batch_1.md L37 + enrichment_pilot.industry='AI 伺服器 3000 億 CAGR 40%'"
+    },
+    {
+      "id": "tp-02",
+      "ticker": "6669",
+      "ticker_name": "緯穎",
+      "group": "AI伺服器",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "緯穎為 CSP 直營 AI 伺服器 #1，Meta/Microsoft/AWS 雲端 AI 機櫃獨家。",
+      "evidence_source": "batch_1.md L37 + enrichment_pilot.revenue='ODM-Direct Hyperscaler'"
+    },
+    {
+      "id": "tp-03",
+      "ticker": "3707",
+      "ticker_name": "漢磊",
+      "group": "碳化矽/SiC",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "漢磊為亞太前三大 SiC/GaN 晶圓代工廠，SiC 功率半導體晶圓代工佔營收 45-50%。",
+      "evidence_source": "batch_2.md L500 + enrichment_pilot.industry='SiC/GaN 晶圓代工 亞太前三'"
+    },
+    {
+      "id": "tp-04",
+      "ticker": "3016",
+      "ticker_name": "嘉晶",
+      "group": "碳化矽/SiC",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "嘉晶為台灣唯一量產 4/6 吋 SiC 與 6 吋 GaN 磊晶廠。",
+      "evidence_source": "batch_2.md L501 + enrichment_pilot.industry='SiC GaN 化合物半導體'"
+    },
+    {
+      "id": "tp-05",
+      "ticker": "6488",
+      "ticker_name": "環球晶",
+      "group": "矽晶圓",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "環球晶為全球第三大、台灣第一大矽晶圓供應商。",
+      "evidence_source": "enrichment_pilot.revenue='全球第三大 台灣第一大'"
+    },
+    {
+      "id": "tp-06",
+      "ticker": "2368",
+      "ticker_name": "金像電",
+      "group": "AI伺服器",
+      "expected_verdict": "KEEP_ANY",
+      "case_type": "true_positive_satellite",
+      "reason": "金像電為高階伺服器 PCB 台股 #1，AI 業務 30%、伺服器整體 80%，CORE 或 SATELLITE 皆可（PCB 廠 revenue 拆細不易分純 AI）。",
+      "evidence_source": "batch_1.md L47 + enrichment_pilot.revenue='AI ASIC UBB GPU 30% / 伺服器整體 80%'"
+    },
+    {
+      "id": "gz-01",
+      "ticker": "2308",
+      "ticker_name": "台達電",
+      "group": "碳化矽/SiC",
+      "expected_verdict": "REMOVE",
+      "case_type": "false_positive",
+      "reason": "台達電是電源/基礎設施品牌商，SiC 是 BOM 之一非主業，嚴格定義下不該在 SiC 本業族群。應重分類至電源供應器/AI 伺服器。",
+      "evidence_source": "v4 嚴格族群定義：SiC 族群 = SiC 晶圓/磊晶/MOSFET 製造，不含下游應用商"
+    },
+    {
+      "id": "gz-02",
+      "ticker": "2457",
+      "ticker_name": "飛宏",
+      "group": "碳化矽/SiC",
+      "expected_verdict": "REMOVE",
+      "case_type": "false_positive",
+      "reason": "飛宏 supply_chain_position=THERMAL（散熱），不在 SiC allowed_positions；EV 充電模組僅是 SiC 應用層而非製造。",
+      "evidence_source": "stock_profiles[2457].position=THERMAL + SiC 群禁區位階"
+    },
+    {
+      "id": "abf-01",
+      "ticker": "3037",
+      "ticker_name": "欣興",
+      "group": "ABF載板",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "ABF 載板硬白名單三雄之一，屬載板本體廠。",
+      "evidence_source": "user redline 2026-04-27 + group_specs.hard_whitelist"
+    },
+    {
+      "id": "abf-02",
+      "ticker": "8046",
+      "ticker_name": "南電",
+      "group": "ABF載板",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "ABF 載板硬白名單三雄之一，屬載板本體廠。",
+      "evidence_source": "user redline 2026-04-27 + group_specs.hard_whitelist"
+    },
+    {
+      "id": "abf-03",
+      "ticker": "3189",
+      "ticker_name": "景碩",
+      "group": "ABF載板",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "ABF 載板硬白名單三雄之一，屬載板本體廠。",
+      "evidence_source": "user redline 2026-04-27 + group_specs.hard_whitelist"
+    },
+    {
+      "id": "abf-04",
+      "ticker": "8074",
+      "ticker_name": "鉅橡",
+      "group": "ABF載板",
+      "expected_verdict": "REMOVE",
+      "case_type": "false_positive",
+      "reason": "鉅橡是 ABF 載板鑽孔用墊板/耗材供應商，不是 ABF 載板本體廠。",
+      "evidence_source": "My-TW-Coverage/Pilot_Reports/Electronic Components/8074_鉅橡.md"
+    },
+    {
+      "id": "abf-05",
+      "ticker": "3114",
+      "ticker_name": "好德",
+      "group": "ABF載板",
+      "expected_verdict": "REMOVE",
+      "case_type": "false_positive",
+      "reason": "好德為通路代理，硬白名單外且位階不符。",
+      "evidence_source": "group_specs.hard_whitelist + stock_profiles position=DISTRIB"
+    },
+    {
+      "id": "cpu-01",
+      "ticker": "3533",
+      "ticker_name": "嘉澤",
+      "group": "CPU 概念股",
+      "expected_verdict": "KEEP_ANY",
+      "case_type": "true_positive_satellite",
+      "reason": "嘉澤為 CPU/GPU Socket 與高速連接器供應鏈，屬 CPU 平台概念供應鏈。",
+      "evidence_source": "stock_profiles + My-TW-Coverage Socket/CPU keyword"
+    },
+    {
+      "id": "quartz-01",
+      "ticker": "3042",
+      "ticker_name": "晶技",
+      "group": "石英元件",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "晶技為石英元件龍頭，主產品含晶體/振盪器/TCXO/OCXO。",
+      "evidence_source": "stock_profiles[3042].business_summary + Coverage"
+    },
+    {
+      "id": "quartz-02",
+      "ticker": "8289",
+      "ticker_name": "泰藝",
+      "group": "石英元件",
+      "expected_verdict": "KEEP_ANY",
+      "case_type": "true_positive_satellite",
+      "reason": "泰藝為石英元件廠商，受惠 AI/5G/IoT 時脈需求。",
+      "evidence_source": "stock_profiles[8289].business_summary"
+    },
+    {
+      "id": "cpo-01",
+      "ticker": "3081",
+      "ticker_name": "聯亞",
+      "group": "矽光子",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "聯亞為矽光子/CPO 光通訊核心元件廠。",
+      "evidence_source": "known_issues.yaml SIPHO_3081"
+    },
+    {
+      "id": "cpo-02",
+      "ticker": "3081",
+      "ticker_name": "聯亞",
+      "group": "光通訊/CPO",
+      "expected_verdict": "KEEP_ANY",
+      "case_type": "true_positive_satellite",
+      "reason": "聯亞同時屬 CPO/光通訊供應鏈，但仍需保留矽光子與 CPO 分層。",
+      "evidence_source": "My-TW-Coverage + group_specs 光通訊/CPO"
+    },
+    {
+      "id": "mem-01",
+      "ticker": "2408",
+      "ticker_name": "南亞科",
+      "group": "記憶體",
+      "expected_verdict": "CORE",
+      "case_type": "true_positive_core",
+      "reason": "南亞科為 DRAM IDM，屬記憶體本業。",
+      "evidence_source": "stock_profiles[2408].position=IDM_DRAM"
+    },
+    {
+      "id": "mem-02",
+      "ticker": "8299",
+      "ticker_name": "群聯",
+      "group": "記憶體",
+      "expected_verdict": "KEEP_ANY",
+      "case_type": "true_positive_satellite",
+      "reason": "群聯屬 NAND/SSD 控制 IC 設計，是記憶體供應鏈，但不得放入 HBM 本體族群。",
+      "evidence_source": "stock_profiles[8299].themes=NAND_TIGHT/aiDAPTIV"
+    }
+  ]
+}

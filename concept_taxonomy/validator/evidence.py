@@ -30,6 +30,13 @@ SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
 # Coverage 抽取
 # ─────────────────────────────────────────────────────────────────────────────
 QUOTE_WINDOW = 60  # 關鍵字前後各取 60 字
+PRIMARY_COVERAGE_SECTIONS = (
+    "業務簡介",
+    "供應鏈位置",
+    "主要客戶及供應商",
+    "營收來源",
+    "產業趨勢與成長動能",
+)
 
 
 def find_coverage_file(sym: str) -> Optional[Path]:
@@ -47,6 +54,63 @@ def _strip_markdown(text: str) -> str:
     text = re.sub(r"\*\*([^\*]+?)\*\*", r"\1", text)        # bold
     text = re.sub(r"`([^`]+?)`", r"\1", text)               # inline code
     return text
+
+
+def read_coverage_sections(sym: str) -> dict:
+    """讀 My-TW-Coverage 個股報告並切成章節。
+
+    回傳格式：
+        {
+          "found": bool,
+          "path": str | None,
+          "industry_folder": str | None,
+          "sections": {"業務簡介": "...", ...},
+        }
+    """
+    path = find_coverage_file(sym)
+    if path is None:
+        return {"found": False, "path": None, "industry_folder": None, "sections": {}}
+
+    text = path.read_text(encoding="utf-8")
+    sections: dict[str, str] = {}
+    current = "_PREAMBLE"
+    buffer: list[str] = []
+    for line in text.splitlines():
+        m = re.match(r"^##\s+(.+?)\s*$", line)
+        if m:
+            sections[current] = "\n".join(buffer)
+            current = m.group(1).strip()
+            buffer = []
+        else:
+            buffer.append(line)
+    sections[current] = "\n".join(buffer)
+
+    return {
+        "found": True,
+        "path": str(path.relative_to(PROJECT_ROOT)),
+        "industry_folder": path.parent.name,
+        "sections": sections,
+    }
+
+
+def build_primary_coverage_text(sym: str, max_chars: int = 3200) -> tuple[str, dict]:
+    """把 Coverage 關鍵章節合併成驗證用主證據文字。
+
+    只取業務、供應鏈、客戶/供應商、營收來源等章節，避免財務表格噪音。
+    """
+    data = read_coverage_sections(sym)
+    if not data["found"]:
+        return "", data
+
+    chunks: list[str] = []
+    sections = data.get("sections", {})
+    for sec in PRIMARY_COVERAGE_SECTIONS:
+        body = sections.get(sec, "")
+        if body:
+            chunks.append(f"## {sec}\n{_strip_markdown(body)}")
+    if not chunks:
+        chunks.append(_strip_markdown("\n".join(sections.values())))
+    return "\n\n".join(chunks)[:max_chars], data
 
 
 def extract_coverage(sym: str, keywords: list[str]) -> dict:

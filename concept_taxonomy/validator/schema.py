@@ -136,6 +136,10 @@ class GroupSpec:
     downstream_demote: list[str] = field(default_factory=list)       # 命中此位階自動降 satellite
     core_keywords: list[str] = field(default_factory=list)           # Coverage / Web 全文檢索 anchor
     exclusion_keywords: list[str] = field(default_factory=list)
+    validation_mode: str = "evidence"                                # evidence / hard_whitelist / market_concept
+    hard_whitelist: list[str] = field(default_factory=list)           # 本體族群硬白名單；名單外直接 REMOVE
+    market_keywords: list[str] = field(default_factory=list)          # 市場概念驗證 anchor（新聞/法說/主題頁）
+    market_evidence_required: bool = False                           # true 時需 Tier3 或 Coverage 市場證據輔助
     deprecated: bool = False
     deprecation_reason: str = ""
     merge_into: Optional[str] = None

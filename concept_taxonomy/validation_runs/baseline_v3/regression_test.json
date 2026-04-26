@@ -1,0 +1,268 @@
+{
+  "_meta": {
+    "pipeline": "v3",
+    "fixtures_path": "concept_taxonomy\\validator\\regression_fixtures.json",
+    "patch_path": "concept_taxonomy\\master_patch_v3.json",
+    "ran_at": "2026-04-26T14:57:34+00:00",
+    "passed": 7,
+    "failed": 6,
+    "total": 13
+  },
+  "results": [
+    {
+      "fixture_id": "fp-01",
+      "ticker": "3686",
+      "ticker_name": "達能",
+      "group": "矽晶圓",
+      "expected": "REMOVE",
+      "actual": "CORE",
+      "passed": false,
+      "reason": "達能板塊 Technology 但產業 Solar，本業為太陽能矽晶圓再生廠，與半導體矽晶圓無關。應重分類至太陽能/光電板。",
+      "evidence_source": "batch_2.md L66 + enrichment_pilot.industry='太陽能 600GW Phase3 15GW 規劃'",
+      "bucket_breakdown": {
+        "core_count": 7,
+        "satellite_count": 0,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 7,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "fp-02",
+      "ticker": "5285",
+      "ticker_name": "界霖",
+      "group": "碳化矽/SiC",
+      "expected": "REMOVE",
+      "actual": "CORE",
+      "passed": false,
+      "reason": "界霖為全球前三大功率導線架（封裝材料），非 SiC 晶圓/磊晶/MOSFET 本業。應重分類至半導體封裝材料。",
+      "evidence_source": "batch_2.md + enrichment_pilot.revenue='功率導線架'",
+      "bucket_breakdown": {
+        "core_count": 9,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 14,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "fp-03",
+      "ticker": "5347",
+      "ticker_name": "世界先進",
+      "group": "碳化矽/SiC",
+      "expected": "SATELLITE",
+      "actual": "CORE",
+      "passed": false,
+      "reason": "世界先進為 8 吋成熟製程代工，2026 跟 NVIDIA Rubin 連動但 SiC 非主業，應降為衛星或重分類至晶圓代工成熟製程。",
+      "evidence_source": "enrichment_pilot.industry='半導體 7000 億 NVIDIA Rubin'",
+      "bucket_breakdown": {
+        "core_count": 9,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 14,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "fp-04",
+      "ticker": "8021",
+      "ticker_name": "尖點",
+      "group": "碳化矽/SiC",
+      "expected": "REMOVE",
+      "actual": "CORE",
+      "passed": false,
+      "reason": "尖點為 PCB 微鑽針製造，與 SiC 化合物半導體本業無關。應重分類至 PCB 設備耗材。",
+      "evidence_source": "batch_2.md SiC 應移除清單 + 業務簡介",
+      "bucket_breakdown": {
+        "core_count": 9,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 14,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "fp-05",
+      "ticker": "6735",
+      "ticker_name": "美達科技",
+      "group": "碳化矽/SiC",
+      "expected": "ABSTAIN",
+      "actual": "CORE",
+      "passed": false,
+      "reason": "美達為 LED/光電零件，與 SiC 關聯薄弱，需 v4 用營收佔比重新驗證。",
+      "evidence_source": "concept_groups.py 當前成員 + 缺乏 enrichment 證據",
+      "bucket_breakdown": {
+        "core_count": 9,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 14,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "tp-01",
+      "ticker": "3231",
+      "ticker_name": "緯創",
+      "group": "AI伺服器",
+      "expected": "CORE",
+      "actual": "CORE",
+      "passed": true,
+      "reason": "緯創為全球前三大 ICT 代工廠，GB200/GB300 液冷伺服器主供應，AI 伺服器 ODM #3。",
+      "evidence_source": "batch_1.md L37 + enrichment_pilot.industry='AI 伺服器 3000 億 CAGR 40%'",
+      "bucket_breakdown": {
+        "core_count": 20,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 25,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "tp-02",
+      "ticker": "6669",
+      "ticker_name": "緯穎",
+      "group": "AI伺服器",
+      "expected": "CORE",
+      "actual": "CORE",
+      "passed": true,
+      "reason": "緯穎為 CSP 直營 AI 伺服器 #1，Meta/Microsoft/AWS 雲端 AI 機櫃獨家。",
+      "evidence_source": "batch_1.md L37 + enrichment_pilot.revenue='ODM-Direct Hyperscaler'",
+      "bucket_breakdown": {
+        "core_count": 20,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 25,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "tp-03",
+      "ticker": "3707",
+      "ticker_name": "漢磊",
+      "group": "碳化矽/SiC",
+      "expected": "CORE",
+      "actual": "CORE",
+      "passed": true,
+      "reason": "漢磊為亞太前三大 SiC/GaN 晶圓代工廠，SiC 功率半導體晶圓代工佔營收 45-50%。",
+      "evidence_source": "batch_2.md L500 + enrichment_pilot.industry='SiC/GaN 晶圓代工 亞太前三'",
+      "bucket_breakdown": {
+        "core_count": 9,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 14,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "tp-04",
+      "ticker": "3016",
+      "ticker_name": "嘉晶",
+      "group": "碳化矽/SiC",
+      "expected": "CORE",
+      "actual": "CORE",
+      "passed": true,
+      "reason": "嘉晶為台灣唯一量產 4/6 吋 SiC 與 6 吋 GaN 磊晶廠。",
+      "evidence_source": "batch_2.md L501 + enrichment_pilot.industry='SiC GaN 化合物半導體'",
+      "bucket_breakdown": {
+        "core_count": 9,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 14,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "tp-05",
+      "ticker": "6488",
+      "ticker_name": "環球晶",
+      "group": "矽晶圓",
+      "expected": "CORE",
+      "actual": "CORE",
+      "passed": true,
+      "reason": "環球晶為全球第三大、台灣第一大矽晶圓供應商。",
+      "evidence_source": "enrichment_pilot.revenue='全球第三大 台灣第一大'",
+      "bucket_breakdown": {
+        "core_count": 7,
+        "satellite_count": 0,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 7,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "tp-06",
+      "ticker": "2368",
+      "ticker_name": "金像電",
+      "group": "AI伺服器",
+      "expected": "CORE",
+      "actual": "CORE",
+      "passed": true,
+      "reason": "金像電為高階伺服器 PCB 台股 #1，GB200/GB300 核心 PCB 獨家。",
+      "evidence_source": "batch_1.md L47",
+      "bucket_breakdown": {
+        "core_count": 20,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 25,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "gz-01",
+      "ticker": "2308",
+      "ticker_name": "台達電",
+      "group": "碳化矽/SiC",
+      "expected": "SATELLITE",
+      "actual": "NOT_IN_GROUP",
+      "passed": false,
+      "reason": "台達電做 SiC 逆變器/EV 充電（下游應用商，非 SiC 本業製造）。",
+      "evidence_source": "batch_2.md L478",
+      "bucket_breakdown": {
+        "core_count": 9,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 14,
+        "kind": "phase6_v3"
+      }
+    },
+    {
+      "fixture_id": "gz-02",
+      "ticker": "2457",
+      "ticker_name": "飛宏",
+      "group": "碳化矽/SiC",
+      "expected": "SATELLITE",
+      "actual": "SATELLITE",
+      "passed": true,
+      "reason": "飛宏 EV 充電模組（SiC 應用層，非製造）。",
+      "evidence_source": "batch_2.md L480 + 砷化鎵群中也有出現（弱命中第 232 字）",
+      "bucket_breakdown": {
+        "core_count": 9,
+        "satellite_count": 5,
+        "abstain_count": 0,
+        "removed_count": 0,
+        "keep_count": 14,
+        "kind": "phase6_v3"
+      }
+    }
+  ],
+  "failed_ids": [
+    "fp-01",
+    "fp-02",
+    "fp-03",
+    "fp-04",
+    "fp-05",
+    "gz-01"
+  ]
+}

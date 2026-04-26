@@ -6,6 +6,75 @@
     "coverage": "182 / 181",
     "notes": "industry_segment 改為 allowed_segments (list) 以支援系統級族群跨板塊。"
   },
+  "CPU 概念股": {
+    "allowed_segments": [
+      "AI_SEMI",
+      "ELEC_COMP",
+      "COMP_HW",
+      "POWER_GREEN"
+    ],
+    "allowed_positions": [
+      "IP",
+      "IC_DESIGN",
+      "ASIC_SVC",
+      "FOUNDRY",
+      "OSAT_ADV",
+      "TEST_INTF",
+      "SUBSTRATE",
+      "CONNECTOR",
+      "PCB_HDI",
+      "THERMAL",
+      "POWER_MOD",
+      "ODM_SYS",
+      "BRAND"
+    ],
+    "required_themes_any": [],
+    "required_themes_strong": [],
+    "forbidden_positions": [
+      "DISTRIB",
+      "END_USER",
+      "SVC_SAAS",
+      "IDM_NAND"
+    ],
+    "forbidden_themes": [],
+    "downstream_demote": [
+      "ODM_SYS",
+      "BRAND",
+      "THERMAL",
+      "POWER_MOD"
+    ],
+    "core_keywords": [
+      "CPU",
+      "處理器",
+      "Processor",
+      "Socket",
+      "Intel",
+      "AMD",
+      "Arm",
+      "伺服器平台",
+      "PC 平台"
+    ],
+    "exclusion_keywords": [
+      "通路代理",
+      "POS",
+      "Kiosk",
+      "NAND Flash 控制"
+    ],
+    "validation_mode": "market_concept",
+    "hard_whitelist": [],
+    "market_keywords": [
+      "CPU 概念股",
+      "Intel",
+      "AMD",
+      "伺服器 CPU",
+      "PC 處理器"
+    ],
+    "market_evidence_required": false,
+    "deprecated": false,
+    "merge_into": null,
+    "owner_batch": "user_redline_2026-04-27",
+    "rationale": "CPU 概念股是市場概念型族群，必須同時符合處理器平台供應鏈位置與公開/coverage 題材證據；排除僅終端應用、通路或無 CPU 平台關聯者。"
+  },
   "HBM 高頻寬記憶體": {
     "allowed_segments": [
       "AI_SEMI"
@@ -546,6 +615,18 @@
       "工業通路",
       "橡膠"
     ],
+    "validation_mode": "hard_whitelist",
+    "hard_whitelist": [
+      "3037",
+      "8046",
+      "3189"
+    ],
+    "market_keywords": [
+      "ABF 載板三雄",
+      "欣興 南電 景碩",
+      "ABF 載板"
+    ],
+    "market_evidence_required": false,
     "deprecated": false,
     "merge_into": null,
     "owner_batch": "user_redline_2026-04-26",
@@ -1002,13 +1083,16 @@
     ],
     "allowed_positions": [
       "IDM_DRAM",
+      "IDM_NAND",
       "IC_DESIGN",
       "DISTRIB"
     ],
     "required_themes_any": [
       "DDR5_RISE",
       "NICHE_DRAM",
-      "HBM3E_HBM4"
+      "HBM3E_HBM4",
+      "NAND_TIGHT",
+      "aiDAPTIV"
     ],
     "required_themes_strong": [
       "DDR5_RISE",
@@ -1018,9 +1102,24 @@
     "forbidden_themes": [],
     "downstream_demote": [],
     "core_keywords": [
-      "記憶體"
+      "記憶體",
+      "DRAM",
+      "NAND",
+      "Flash",
+      "SSD"
     ],
-    "exclusion_keywords": [],
+    "exclusion_keywords": [
+      "顯示驅動",
+      "光通訊",
+      "太陽能"
+    ],
+    "validation_mode": "evidence",
+    "market_keywords": [
+      "記憶體",
+      "DRAM",
+      "NAND Flash",
+      "SSD 控制"
+    ],
     "deprecated": false,
     "merge_into": null,
     "owner_batch": "auto_generated_v1",
@@ -1126,8 +1225,7 @@
   "軍工/國防": {
     "allowed_segments": [
       "NETCOM",
-      "DEFENSE",
-      "LOGISTICS"
+      "DEFENSE"
     ],
     "allowed_positions": [
       "ODM_SYS",
@@ -1157,7 +1255,6 @@
   },
   "無人機": {
     "allowed_segments": [
-      "LOGISTICS",
       "COMP_HW",
       "DEFENSE",
       "AI_SEMI",
@@ -1730,12 +1827,27 @@
       "石英",
       "Crystal",
       "晶振",
-      "TCXO"
+      "TCXO",
+      "OCXO",
+      "石英元件"
     ],
     "required_themes_strong": [],
     "forbidden_themes": [],
     "downstream_demote": [],
-    "exclusion_keywords": [],
+    "exclusion_keywords": [
+      "石英坩堝",
+      "石英玻璃",
+      "光罩石英基板"
+    ],
+    "validation_mode": "evidence",
+    "market_keywords": [
+      "石英元件",
+      "晶振",
+      "TCXO",
+      "OCXO",
+      "AI 伺服器時脈",
+      "5G 時脈"
+    ],
     "deprecated": false,
     "merge_into": null,
     "owner_batch": "hand_refined_v2_phase2",
@@ -1865,7 +1977,6 @@
   "碳權/ESG": {
     "allowed_segments": [
       "POWER_GREEN",
-      "FIN",
       "SOFTWARE"
     ],
     "allowed_positions": [
@@ -2252,8 +2363,7 @@
     "allowed_segments": [
       "COMP_HW",
       "ELEC_COMP",
-      "MATERIALS",
-      "CONSUMER"
+      "MATERIALS"
     ],
     "allowed_positions": [
       "ODM_SYS",
@@ -2353,7 +2463,6 @@
   "充電樁/充電服務": {
     "allowed_segments": [
       "EV_AUTO",
-      "CONSUMER",
       "POWER_GREEN",
       "ELEC_COMP"
     ],
@@ -2775,8 +2884,7 @@
   "印度產能/印度概念": {
     "allowed_segments": [
       "COMP_HW",
-      "ELEC_COMP",
-      "CONSUMER"
+      "ELEC_COMP"
     ],
     "allowed_positions": [
       "ODM_SYS",
@@ -3976,8 +4084,7 @@
     "allowed_segments": [
       "MATERIALS",
       "COMP_HW",
-      "ELEC_COMP",
-      "CONSUMER"
+      "ELEC_COMP"
     ],
     "allowed_positions": [
       "ODM_SYS",
@@ -4006,8 +4113,7 @@
     "allowed_segments": [
       "AI_SEMI",
       "ELEC_COMP",
-      "COMP_HW",
-      "CONSUMER"
+      "COMP_HW"
     ],
     "allowed_positions": [
       "FOUNDRY",
@@ -5803,10 +5909,7 @@
       "EV_AUTO",
       "DEFENSE",
       "MED_BIO",
-      "FIN",
-      "CONSUMER",
       "MATERIALS",
-      "LOGISTICS",
       "SOFTWARE"
     ],
     "allowed_positions": [],

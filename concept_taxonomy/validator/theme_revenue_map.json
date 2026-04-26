@@ -1,0 +1,684 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "last_updated": "2026-04-26",
+    "description": "族群題材 → 營收/業務描述 keyword 映射表。tier2_revenue.py 用此累加營收 % 判定族群純度。",
+    "schema": {
+      "required_keywords": "命中即累加 pct，至少 1 個 match 才算該族群有曝險",
+      "forbidden_keywords": "命中代表這檔個股的營收主要落在「不屬於該族群」的領域，會被視為 strong negative signal",
+      "industry_must_not_be": "enrichment_pilot 的 industry/board 欄位含這些字代表 hard fail（如 Solar 廠不該在矽晶圓群）",
+      "min_pct_for_core": "達此營收 % 才算 CORE（pure play）",
+      "min_pct_for_satellite": "達此 % 算 SATELLITE，未達者視 ABSTAIN/REMOVE"
+    }
+  },
+  "AI伺服器": {
+    "required_keywords": [
+      "AI 伺服器", "AI server", "AI伺服器",
+      "HPC", "高效能運算",
+      "GB200", "GB300", "B200", "B300",
+      "DGX", "HGX", "NVL72",
+      "Hyperscaler", "CSP",
+      "Rubin", "Blackwell",
+      "ASIC", "Trainium", "TPU",
+      "資料中心", "Data Center",
+      "液冷", "Cold Plate", "CDU",
+      "雲端伺服器"
+    ],
+    "forbidden_keywords": [
+      "紡織", "航空", "貨運", "物流", "水泥", "鋼鐵",
+      "食品", "餐飲", "觀光", "農業",
+      "自行車", "輪胎", "塑化"
+    ],
+    "industry_must_not_be": ["Solar", "Textile", "Aviation", "Logistics", "Steel", "Food"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "矽晶圓": {
+    "required_keywords": [
+      "矽晶圓", "Silicon Wafer", "wafer fabrication",
+      "晶圓供應", "8 吋晶圓", "12 吋晶圓",
+      "300mm wafer", "200mm wafer"
+    ],
+    "forbidden_keywords": [
+      "太陽能矽晶圓", "Solar Wafer",
+      "電廠投資", "綠電",
+      "FIT", "躉購",
+      "再生能源", "光電板"
+    ],
+    "industry_must_not_be": ["Solar", "Renewable Energy", "Utility"],
+    "min_pct_for_core": 0.50,
+    "min_pct_for_satellite": 0.15
+  },
+  "碳化矽/SiC": {
+    "required_keywords": [
+      "SiC", "碳化矽",
+      "SiC MOSFET", "SiC Diode", "SiC SBD",
+      "SiC 磊晶", "SiC 晶圓",
+      "化合物半導體",
+      "GaN-on-SiC"
+    ],
+    "forbidden_keywords": [
+      "GaAs 代工", "砷化鎵代工",
+      "矽光子", "VCSEL 模組", "光通訊模組",
+      "太陽能矽晶圓", "光電板",
+      "Mini LED", "Micro LED",
+      "PCB 微鑽孔", "鑽針製造", "微鑽針",
+      "純粹導線架", "8 吋成熟製程代工"
+    ],
+    "industry_must_not_be": ["Solar", "Pure PCB", "Steel"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.05
+  },
+  "記憶體": {
+    "required_keywords": [
+      "DRAM", "NAND", "記憶體",
+      "Flash", "NOR Flash", "NAND Flash",
+      "Memory", "DDR4", "DDR5", "LPDDR5",
+      "SRAM", "MRAM"
+    ],
+    "forbidden_keywords": [
+      "太陽能", "光電板",
+      "VCSEL", "光通訊",
+      "顯示驅動", "LCD Driver", "Display Driver IC",
+      "矽智財", "IP",
+      "導線架", "Lead Frame"
+    ],
+    "industry_must_not_be": ["Solar", "Display Driver"],
+    "min_pct_for_core": 0.50,
+    "min_pct_for_satellite": 0.15
+  },
+  "DDR5/LPDDR5 記憶體": {
+    "required_keywords": [
+      "DDR5", "LPDDR5", "DDR4",
+      "DRAM", "記憶體模組"
+    ],
+    "forbidden_keywords": [
+      "NAND", "Flash", "SSD 控制",
+      "連接器", "Connector", "Socket",
+      "矽智財"
+    ],
+    "industry_must_not_be": ["Solar"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "HBM 高頻寬記憶體": {
+    "required_keywords": [
+      "HBM", "HBM3", "HBM3E", "HBM4",
+      "高頻寬記憶體", "High Bandwidth Memory",
+      "CoWoS", "FOPLP"
+    ],
+    "forbidden_keywords": [
+      "aiDAPTIV", "NAND Flash 控制",
+      "POS", "Wi-Fi", "PCIe Switch"
+    ],
+    "industry_must_not_be": ["Solar"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.05
+  },
+  "資料中心": {
+    "required_keywords": [
+      "資料中心", "Data Center", "DC",
+      "AI 資料中心", "Hyperscaler",
+      "雲端", "Cloud",
+      "伺服器", "Server",
+      "UPS", "電源", "液冷"
+    ],
+    "forbidden_keywords": [
+      "紡織機械", "成衣", "纖維",
+      "食品", "餐飲", "農業",
+      "自行車", "鋼鐵", "水泥"
+    ],
+    "industry_must_not_be": ["Textile", "Food"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.10
+  },
+  "AI基礎設施/資料中心": {
+    "required_keywords": [
+      "AI 基礎設施", "資料中心", "Data Center",
+      "Hyperscaler", "CSP", "雲端",
+      "伺服器", "AI 伺服器",
+      "電源", "液冷"
+    ],
+    "forbidden_keywords": [
+      "紡織", "航空", "物流", "鋼鐵"
+    ],
+    "industry_must_not_be": ["Textile", "Aviation"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.10
+  },
+  "IC設計": {
+    "required_keywords": [
+      "IC 設計", "Fabless", "IC設計", "晶片設計",
+      "ASIC", "SoC", "MCU", "GPU", "DPU", "NPU"
+    ],
+    "forbidden_keywords": [
+      "晶圓代工", "代工服務",
+      "IC 通路", "IC 代理",
+      "封測代工", "OSAT 代工",
+      "PCB 製造", "PCB 廠"
+    ],
+    "industry_must_not_be": ["Solar", "Steel", "Textile"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "電動車": {
+    "required_keywords": [
+      "電動車", "EV", "Electric Vehicle",
+      "Tesla", "BYD", "Rivian", "Lucid",
+      "車用", "車載",
+      "BMS", "OBC", "DC-DC", "Inverter",
+      "馬達", "減速機",
+      "Cell-to-Pack", "刀片電池",
+      "EV 充電", "充電樁"
+    ],
+    "forbidden_keywords": [
+      "燃油車", "傳統汽車",
+      "AI 伺服器主業", "資料中心主業",
+      "紡織", "鋼鐵"
+    ],
+    "industry_must_not_be": ["Textile", "Steel"],
+    "min_pct_for_core": 0.15,
+    "min_pct_for_satellite": 0.10
+  },
+  "特斯拉概念股": {
+    "required_keywords": [
+      "Tesla", "特斯拉",
+      "Model 3", "Model Y", "Model S", "Model X", "Cybertruck",
+      "Autopilot", "FSD"
+    ],
+    "forbidden_keywords": [
+      "燃油車", "Toyota", "Honda 車燈"
+    ],
+    "industry_must_not_be": [],
+    "min_pct_for_core": 0.20,
+    "min_pct_for_satellite": 0.05
+  },
+  "輝達概念股": {
+    "required_keywords": [
+      "NVIDIA", "輝達",
+      "GB200", "GB300", "B200", "B300", "Blackwell", "Rubin",
+      "DGX", "HGX", "NVL72",
+      "GeForce", "RTX",
+      "GPU", "AI 加速器", "AI Accelerator"
+    ],
+    "forbidden_keywords": [
+      "Intel CPU 主業", "AMD APU", "燃油車", "紡織"
+    ],
+    "industry_must_not_be": ["Textile", "Aviation", "Solar"],
+    "min_pct_for_core": 0.20,
+    "min_pct_for_satellite": 0.05
+  },
+  "蘋果概念股": {
+    "required_keywords": [
+      "Apple", "蘋果",
+      "iPhone", "iPad", "Mac", "Apple Watch", "AirPods", "Vision Pro",
+      "A19", "M4", "M5",
+      "FaceID", "LiDAR"
+    ],
+    "forbidden_keywords": [
+      "燃油車", "紡織", "鋼鐵"
+    ],
+    "industry_must_not_be": ["Textile", "Steel"],
+    "min_pct_for_core": 0.20,
+    "min_pct_for_satellite": 0.05
+  },
+  "連接器": {
+    "required_keywords": [
+      "連接器", "Connector",
+      "Socket", "Pin", "Cable",
+      "高速線材", "高頻連接",
+      "Wire-to-Board", "Board-to-Board"
+    ],
+    "forbidden_keywords": [
+      "IC 設計", "晶圓代工",
+      "PCB 製造", "BIOS 軟體"
+    ],
+    "industry_must_not_be": ["Solar", "Textile"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "PCB/銅箔基板": {
+    "required_keywords": [
+      "PCB", "印刷電路板",
+      "HDI", "高密度互連",
+      "ABF 載板", "BT 載板", "IC 載板",
+      "CCL", "銅箔基板", "Copper Clad Laminate",
+      "FPC", "軟板"
+    ],
+    "forbidden_keywords": [
+      "IC 設計", "Fabless",
+      "晶圓代工",
+      "連接器主業"
+    ],
+    "industry_must_not_be": ["Solar", "Textile", "Aviation"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "ABF載板": {
+    "required_keywords": [
+      "ABF 載板", "ABF載板",
+      "Ajinomoto Build-up Film",
+      "IC 載板", "高階載板",
+      "CPU 載板", "GPU 載板",
+      "Build-up substrate"
+    ],
+    "forbidden_keywords": [
+      "鑽孔用板", "酚醛墊板", "墊板",
+      "設備", "加工設備", "通路代理",
+      "材料供應商", "耗材"
+    ],
+    "industry_must_not_be": ["Industrial Distribution", "Machinery", "Solar"],
+    "min_pct_for_core": 0.15,
+    "min_pct_for_satellite": 0.10
+  },
+  "CPU 概念股": {
+    "required_keywords": [
+      "CPU", "處理器", "Processor",
+      "Intel", "AMD", "Arm",
+      "Socket", "伺服器平台",
+      "PC 平台", "主機板",
+      "CPU 載板"
+    ],
+    "forbidden_keywords": [
+      "NAND Flash 控制", "POS", "Kiosk",
+      "通路代理", "純軟體服務"
+    ],
+    "industry_must_not_be": ["Textile", "Food", "Aviation", "Solar"],
+    "min_pct_for_core": 0.25,
+    "min_pct_for_satellite": 0.05
+  },
+  "5G 通訊": {
+    "required_keywords": [
+      "5G", "6G",
+      "毫米波", "mmWave",
+      "Sub-6", "Sub-6GHz",
+      "Open RAN", "ORAN",
+      "基地台", "Small Cell"
+    ],
+    "forbidden_keywords": [
+      "Wi-Fi 主業", "藍牙", "紡織"
+    ],
+    "industry_must_not_be": ["Textile", "Solar"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.10
+  },
+  "低軌衛星": {
+    "required_keywords": [
+      "低軌衛星", "LEO", "LEO Satellite",
+      "Starlink", "Kuiper", "OneWeb",
+      "衛星通訊", "SATCOM",
+      "衛星地面站", "用戶終端"
+    ],
+    "forbidden_keywords": [
+      "5G 主業", "Wi-Fi"
+    ],
+    "industry_must_not_be": ["Textile", "Steel"],
+    "min_pct_for_core": 0.20,
+    "min_pct_for_satellite": 0.05
+  },
+  "面板/顯示器": {
+    "required_keywords": [
+      "面板", "Panel",
+      "OLED", "LCD", "Mini LED", "Micro LED",
+      "TFT-LCD", "AMOLED",
+      "顯示器", "Display"
+    ],
+    "forbidden_keywords": [
+      "AI 伺服器主業", "晶圓代工",
+      "PCB 主業"
+    ],
+    "industry_must_not_be": ["Solar", "Steel", "Textile"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "LED/光電": {
+    "required_keywords": [
+      "LED", "Mini LED", "Micro LED",
+      "光電", "光學",
+      "VCSEL", "雷射",
+      "MOCVD", "磊晶"
+    ],
+    "forbidden_keywords": [
+      "晶圓代工", "IC 設計",
+      "AI 伺服器主業"
+    ],
+    "industry_must_not_be": ["Solar", "Steel"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "半導體設備": {
+    "required_keywords": [
+      "半導體設備", "Semiconductor Equipment",
+      "晶圓設備", "微影設備", "蝕刻機",
+      "封裝設備", "測試設備",
+      "EUV", "Lithography",
+      "ATE", "Probe Card"
+    ],
+    "forbidden_keywords": [
+      "PCB 設備主業", "工業電腦",
+      "代工服務"
+    ],
+    "industry_must_not_be": ["Solar", "Steel"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.15
+  },
+  "半導體/晶片代工次族": {
+    "required_keywords": [
+      "晶圓代工", "Foundry",
+      "晶圓製造", "Wafer Fab",
+      "成熟製程", "先進製程",
+      "5nm", "3nm", "2nm",
+      "封測", "OSAT"
+    ],
+    "forbidden_keywords": [
+      "IC 設計主業", "Fabless 主業",
+      "PCB 製造"
+    ],
+    "industry_must_not_be": ["Solar", "Textile"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "台積電供應鏈": {
+    "required_keywords": [
+      "台積電", "TSMC",
+      "晶圓代工", "Foundry",
+      "CoWoS", "FOPLP",
+      "InFO", "ABF 載板",
+      "光罩", "Photomask"
+    ],
+    "forbidden_keywords": [
+      "Intel 代工主業",
+      "Samsung Foundry 主業"
+    ],
+    "industry_must_not_be": ["Solar", "Textile"],
+    "min_pct_for_core": 0.20,
+    "min_pct_for_satellite": 0.05
+  },
+  "電子通路": {
+    "required_keywords": [
+      "IC 通路", "電子通路",
+      "代理商", "經銷商",
+      "Distributor", "Channel"
+    ],
+    "forbidden_keywords": [
+      "IC 設計", "Fabless",
+      "晶圓代工", "OSAT"
+    ],
+    "industry_must_not_be": ["Solar", "Steel", "Textile"],
+    "min_pct_for_core": 0.50,
+    "min_pct_for_satellite": 0.20
+  },
+  "醫材": {
+    "required_keywords": [
+      "醫療器材", "醫材", "Medical Device",
+      "心血管", "骨科", "牙科",
+      "手術", "植入物",
+      "FDA 510(k)", "CE Mark"
+    ],
+    "forbidden_keywords": [
+      "新藥", "原料藥",
+      "保健食品", "美妝"
+    ],
+    "industry_must_not_be": ["Technology", "Steel"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "新藥研發": {
+    "required_keywords": [
+      "新藥", "新藥研發", "新藥開發",
+      "臨床試驗", "Phase I", "Phase II", "Phase III",
+      "FDA", "EMA",
+      "GLP-1", "腫瘤", "免疫",
+      "ADC", "雙特異性抗體"
+    ],
+    "forbidden_keywords": [
+      "原料藥代工",
+      "保健食品", "醫材製造"
+    ],
+    "industry_must_not_be": ["Technology", "Steel", "Textile"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "生技醫療": {
+    "required_keywords": [
+      "生技", "生物技術", "Biotech",
+      "基因", "細胞治療",
+      "新藥", "醫療",
+      "CDMO", "CMO"
+    ],
+    "forbidden_keywords": [
+      "AI 伺服器", "半導體",
+      "PCB", "面板"
+    ],
+    "industry_must_not_be": ["Technology"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "中小型生技": {
+    "required_keywords": [
+      "生技", "新藥", "醫療",
+      "臨床試驗", "細胞", "基因",
+      "保健食品", "保健品"
+    ],
+    "forbidden_keywords": [
+      "AI 伺服器", "半導體",
+      "PCB", "面板", "鋼鐵"
+    ],
+    "industry_must_not_be": ["Technology", "Steel", "Textile"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "電動車充電/充電樁": {
+    "required_keywords": [
+      "充電樁", "充電器", "Charging Station",
+      "EV 充電", "EV Charger",
+      "OBC", "On-Board Charger",
+      "AC 慢充", "DC 快充",
+      "NEVI", "CCS", "CHAdeMO"
+    ],
+    "forbidden_keywords": [
+      "AI 伺服器電源主業",
+      "資料中心 UPS 主業"
+    ],
+    "industry_must_not_be": ["Textile", "Steel"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.10
+  },
+  "Google TPU": {
+    "required_keywords": [
+      "TPU", "Google TPU",
+      "Tensor Processing Unit",
+      "Trillium", "Ironwood",
+      "Google AI 加速器"
+    ],
+    "forbidden_keywords": [
+      "燃油車", "紡織"
+    ],
+    "industry_must_not_be": ["Textile", "Steel"],
+    "min_pct_for_core": 0.10,
+    "min_pct_for_satellite": 0.02
+  },
+  "ASIC/IP矽智財": {
+    "required_keywords": [
+      "ASIC", "ASIC 設計",
+      "矽智財", "IP", "Silicon IP",
+      "ARM", "RISC-V",
+      "SerDes", "PCIe IP"
+    ],
+    "forbidden_keywords": [
+      "晶圓代工主業", "PCB 主業",
+      "面板主業"
+    ],
+    "industry_must_not_be": ["Solar", "Textile"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.10
+  },
+  "CoWoS先進封裝": {
+    "required_keywords": [
+      "CoWoS", "FOPLP", "InFO",
+      "先進封裝", "Advanced Packaging",
+      "2.5D", "3D IC",
+      "矽中介層", "Silicon Interposer"
+    ],
+    "forbidden_keywords": [
+      "一般封測主業", "傳統 OSAT"
+    ],
+    "industry_must_not_be": ["Solar", "Textile"],
+    "min_pct_for_core": 0.20,
+    "min_pct_for_satellite": 0.05
+  },
+  "矽光子": {
+    "required_keywords": [
+      "矽光子", "Silicon Photonics",
+      "VCSEL", "Co-Packaged Optics", "CPO",
+      "光通訊", "Optical",
+      "DR4", "FR4 光模組",
+      "800G", "1.6T"
+    ],
+    "forbidden_keywords": [
+      "Mini LED 主業", "Micro LED 主業",
+      "毫米波", "PCB 主業"
+    ],
+    "industry_must_not_be": ["Solar", "Textile"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.10
+  },
+  "光通訊/CPO": {
+    "required_keywords": [
+      "CPO", "Co-Packaged Optics",
+      "光通訊", "光模組", "光收發",
+      "Silicon Photonics", "矽光子",
+      "800G", "1.6T", "DR4", "FR4",
+      "VCSEL", "光引擎"
+    ],
+    "forbidden_keywords": [
+      "Mini LED 主業", "Micro LED 主業",
+      "顯示器主業", "PCB 主業",
+      "通路代理"
+    ],
+    "industry_must_not_be": ["Textile", "Food", "Solar"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.10
+  },
+  "散熱/液冷": {
+    "required_keywords": [
+      "散熱", "Thermal",
+      "液冷", "Liquid Cooling",
+      "Cold Plate", "冷板",
+      "CDU", "Manifold",
+      "風扇", "Fan",
+      "均熱板", "VC", "Heat Pipe"
+    ],
+    "forbidden_keywords": [
+      "電源主業", "PCB 主業",
+      "IC 設計"
+    ],
+    "industry_must_not_be": ["Solar", "Textile"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.10
+  },
+  "被動元件": {
+    "required_keywords": [
+      "被動元件", "Passive",
+      "MLCC", "電容",
+      "電感", "Inductor",
+      "電阻", "Resistor",
+      "Choke", "Filter"
+    ],
+    "forbidden_keywords": [
+      "IC 設計", "晶圓代工"
+    ],
+    "industry_must_not_be": ["Solar", "Textile"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "石英元件": {
+    "required_keywords": [
+      "石英元件", "石英晶體",
+      "晶振", "振盪器",
+      "TCXO", "OCXO", "Crystal",
+      "Quartz", "SAW Filter",
+      "時脈元件"
+    ],
+    "forbidden_keywords": [
+      "石英坩堝", "石英玻璃",
+      "光罩石英基板", "晶圓材料"
+    ],
+    "industry_must_not_be": ["Solar", "Glass", "Building Materials"],
+    "min_pct_for_core": 0.15,
+    "min_pct_for_satellite": 0.10
+  },
+  "電源供應器": {
+    "required_keywords": [
+      "電源供應器", "Power Supply",
+      "PSU", "AC/DC", "DC/DC",
+      "BBU", "UPS",
+      "Server PSU"
+    ],
+    "forbidden_keywords": [
+      "IC 設計", "晶圓代工",
+      "PCB 主業"
+    ],
+    "industry_must_not_be": ["Solar", "Textile"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "車用電子": {
+    "required_keywords": [
+      "車用", "車載",
+      "ADAS", "AEB", "LKA",
+      "車用 IC", "車用感測",
+      "ECU", "TCU",
+      "Tier 1", "Tier 2"
+    ],
+    "forbidden_keywords": [
+      "AI 伺服器主業", "PCB 製造主業"
+    ],
+    "industry_must_not_be": ["Textile", "Solar"],
+    "min_pct_for_core": 0.30,
+    "min_pct_for_satellite": 0.10
+  },
+  "交通運輸/物流": {
+    "required_keywords": [
+      "航空", "航運", "海運",
+      "貨櫃", "Container",
+      "物流", "Logistics",
+      "貨攬", "Freight Forwarder"
+    ],
+    "forbidden_keywords": [
+      "AI 伺服器", "半導體",
+      "PCB", "面板"
+    ],
+    "industry_must_not_be": ["Technology", "Semiconductor"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "食品/民生": {
+    "required_keywords": [
+      "食品", "民生", "餐飲",
+      "飲料", "肉品", "海鮮",
+      "速食", "便利商店",
+      "保健食品"
+    ],
+    "forbidden_keywords": [
+      "AI", "半導體", "PCB",
+      "晶圓", "面板"
+    ],
+    "industry_must_not_be": ["Technology", "Semiconductor"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  },
+  "食品零售": {
+    "required_keywords": [
+      "便利商店", "超商", "超市",
+      "食品零售", "Grocery", "Convenience Store",
+      "通路", "Channel"
+    ],
+    "forbidden_keywords": [
+      "AI", "半導體", "PCB"
+    ],
+    "industry_must_not_be": ["Technology"],
+    "min_pct_for_core": 0.40,
+    "min_pct_for_satellite": 0.10
+  }
+}

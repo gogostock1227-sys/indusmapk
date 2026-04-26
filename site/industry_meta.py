@@ -9,6 +9,23 @@ INDUSTRY_META = {
     # ═══════════════════════════════════════════
     #  AI / 半導體核心
     # ═══════════════════════════════════════════
+    "CPU 概念股": {
+        "en": "CPU Supply Chain",
+        "category": "AI / 半導體",
+        "color": "#0071c5",
+        "desc": "Intel/AMD CPU 短缺崛起族群（2026 Q2 Lisa Su 確認需求遠超預期）。"
+                "祥碩 (AMD USB pure-play)、信驊 (Server BMC 全球第一)、欣興/南電/景碩 (CPU ABF 載板三雄)、"
+                "嘉澤 (LGA Socket)、日月光投控 (CPU 封測)、華碩/技嘉/微星/華擎 (主機板)、"
+                "矽力*-KY (DDR5 PMIC)、奇鋐/雙鴻 (CPU 散熱)、台達電 (CPU VRM) 為核心受惠台廠。",
+        "cagr": "20%",
+        "market_size": "180B USD",
+        "indicators": [
+            {"label": "事件", "value": "Intel/AMD CPU 短缺"},
+            {"label": "AMD pure-play", "value": "祥碩 / 信驊"},
+            {"label": "ABF 載板", "value": "欣興 / 南電 / 景碩"},
+            {"label": "毛利", "value": "封測 30% / 載板 25%"},
+        ],
+    },
     "AI伺服器": {
         "en": "AI Server",
         "category": "AI / 半導體",
