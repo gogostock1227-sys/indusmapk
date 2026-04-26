@@ -1448,6 +1448,30 @@ def compute_mansfield_rs(close: pd.DataFrame, index_series: pd.Series,
     return mansfield.round(1)
 
 
+def compute_cumulative_return(close: pd.DataFrame, index_series: pd.Series,
+                               window: int = 250) -> tuple[pd.DataFrame, pd.Series]:
+    """以 window 日前為基期 (=0%)，回傳逐日累積報酬 %。
+
+    回傳 (stock_cum_df, index_cum_series)：
+      stock_cum_df: index=date, columns=symbol, values=累積報酬 %（保留 1 位）
+      index_cum_series: index=date, values=大盤累積報酬 %
+    """
+    if close is None or close.empty or index_series is None or len(index_series) == 0:
+        return pd.DataFrame(), pd.Series(dtype=float)
+    common = close.index.intersection(index_series.index)
+    if len(common) < window + 1:
+        window = len(common) - 1
+    if window < 5:
+        return pd.DataFrame(), pd.Series(dtype=float)
+    px = close.loc[common].iloc[-window-1:]
+    idx = index_series.loc[common].iloc[-window-1:]
+    base_px = px.iloc[0]
+    base_idx = idx.iloc[0]
+    stock_cum = (px.div(base_px) - 1) * 100
+    index_cum = (idx / base_idx - 1) * 100
+    return stock_cum.round(1), index_cum.round(1)
+
+
 def build_rs_rows(stock_metrics: pd.DataFrame, rs_today: pd.Series, close: pd.DataFrame,
                   name_map: dict, industry_map: dict, market_map: dict,
                   company_topics: dict, lookback: int = 240) -> list[dict]:
@@ -1848,6 +1872,10 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     mansfield_tpex_df  = compute_mansfield_rs(data["close"], tpex_series,  lookback=240)
     print(f"         vs 加權覆蓋 {mansfield_taiex_df.shape[1] if not mansfield_taiex_df.empty else 0} 檔；"
           f"vs 櫃買覆蓋 {mansfield_tpex_df.shape[1] if not mansfield_tpex_df.empty else 0} 檔")
+    # 累積報酬對比（個股 vs 大盤同期 %，250 日基期 0%）
+    print("       · 計算累積報酬對比（個股 vs 加權/櫃買，250 日基期 0%）...")
+    cum_stock_taiex_df, cum_taiex_s = compute_cumulative_return(data["close"], taiex_series, window=250)
+    cum_stock_tpex_df,  cum_tpex_s  = compute_cumulative_return(data["close"], tpex_series,  window=250)
 
     # 共用資料
     base_ctx = {
@@ -2390,17 +2418,34 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
                     return None
                 t = s.reindex(pd.DatetimeIndex(all_dates))
                 return [None if pd.isna(v) else round(float(v), 1) for v in t.values]
+            def _align_cum_stock(df):
+                if df is None or df.empty or sym not in df.columns:
+                    return None
+                s = df[sym].dropna()
+                if len(s) < 5:
+                    return None
+                t = s.reindex(pd.DatetimeIndex(all_dates))
+                return [None if pd.isna(v) else round(float(v), 1) for v in t.values]
+            def _align_cum_index(s):
+                if s is None or len(s) == 0:
+                    return None
+                t = s.reindex(pd.DatetimeIndex(all_dates))
+                return [None if pd.isna(v) else round(float(v), 1) for v in t.values]
             # 預設顯示哪個指數：上櫃 → 櫃買；其他 → 加權
             default_idx = "tpex" if data["market_map"].get(sym) == "otc" else "taiex"
             rs_chart_payload = {
-                "dates":         [d.strftime("%y/%m/%d") for d in all_dates],
-                "year":          _align(year_s),
-                "quarter":       _align(quarter_s),
-                "ms_taiex":      _align_mansfield(mansfield_taiex_df),
-                "ms_tpex":       _align_mansfield(mansfield_tpex_df),
-                "twii":          _align_index(taiex_series),
-                "tpex":          _align_index(tpex_series),
-                "default_index": default_idx,
+                "dates":              [d.strftime("%y/%m/%d") for d in all_dates],
+                "year":               _align(year_s),
+                "quarter":            _align(quarter_s),
+                "ms_taiex":           _align_mansfield(mansfield_taiex_df),
+                "ms_tpex":            _align_mansfield(mansfield_tpex_df),
+                "cum_stock_vs_taiex": _align_cum_stock(cum_stock_taiex_df),
+                "cum_taiex":          _align_cum_index(cum_taiex_s),
+                "cum_stock_vs_tpex":  _align_cum_stock(cum_stock_tpex_df),
+                "cum_tpex":           _align_cum_index(cum_tpex_s),
+                "twii":               _align_index(taiex_series),
+                "tpex":               _align_index(tpex_series),
+                "default_index":      default_idx,
             }
         # 兼容舊 rs_history 變數（若舊模板仍引用）
         rs_history_data = None

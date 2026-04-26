@@ -59,7 +59,7 @@
 <section class="panel rs-history-panel">
   <div class="panel-header">
     <h2>RS 評分走勢</h2>
-    <span class="muted">近 {{ rs_chart.dates|length }} 個交易日 · RS 強勢線 80 / 相對中性位 0</span>
+    <span class="muted">近 {{ rs_chart.dates|length }} 個交易日 · RS 強勢線 80 / 相對中性位 0 / 累積基期 0%</span>
   </div>
   <div class="rs-chart-toolbar" id="rs_toolbar_{{ symbol }}">
     <div class="rs-mode-group" data-group="mode">
@@ -67,6 +67,8 @@
       <button type="button" class="rs-btn" data-mode="quarter">季 RS（60 日）</button>
       <button type="button" class="rs-btn" data-mode="ms_taiex">vs 加權</button>
       <button type="button" class="rs-btn" data-mode="ms_tpex">vs 櫃買</button>
+      <button type="button" class="rs-btn" data-mode="cum_taiex">累積 vs 加權</button>
+      <button type="button" class="rs-btn" data-mode="cum_tpex">累積 vs 櫃買</button>
     </div>
     <span class="rs-toolbar-label">右軸疊加</span>
     <div class="rs-mode-group rs-index-group" data-group="index">
@@ -93,58 +95,114 @@
         tpex:  { name: '櫃買指數', color: '#7c3aed', data: data.tpex },
       };
       const MODE_META = {
-        year:     { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
-        quarter:  { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
-        ms_taiex: { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
-        ms_tpex:  { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
+        year:      { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
+        quarter:   { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
+        ms_taiex:  { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
+        ms_tpex:   { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
+        cum_taiex: { label: '累積 vs 加權',      type: 'cum', idx: 'taiex',
+                     stockColor: '#dc2626', idxColor: '#1e40af', idxName: '加權累積報酬',
+                     stockKey: 'cum_stock_vs_taiex', idxKey: 'cum_taiex' },
+        cum_tpex:  { label: '累積 vs 櫃買',      type: 'cum', idx: 'tpex',
+                     stockColor: '#dc2626', idxColor: '#7c3aed', idxName: '櫃買累積報酬',
+                     stockKey: 'cum_stock_vs_tpex', idxKey: 'cum_tpex' },
       };
 
       function build() {
         const meta = MODE_META[mode];
         const isRs        = (meta.type === 'rs');
         const isMansfield = (meta.type === 'mansfield');
+        const isCum       = (meta.type === 'cum');
 
-        const values = data[mode] || [];
-        let lineColor = meta.color;
-        if (isRs) {
-          const last = values.filter(v => v != null).slice(-1)[0];
-          lineColor = last == null ? '#ff7847'
-                    : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
+        let series;
+        let yAxisLeft;
+
+        if (isCum) {
+          // 累積報酬對比：個股 + 指定大盤兩條同 % 軸線
+          const stockData = data[meta.stockKey];
+          const idxData   = data[meta.idxKey];
+          const idxName   = meta.idxName;
+          const idxColor  = meta.idxColor;
+
+          series = [];
+          if (stockData && stockData.filter(v => v != null).length >= 2) {
+            series.push({
+              name: '個股累積報酬', type: 'line', smooth: true, symbol: 'none',
+              yAxisIndex: 0, data: stockData, connectNulls: true,
+              lineStyle: { color: meta.stockColor, width: 2 },
+              areaStyle: { color: 'rgba(220,38,38,0.08)' },
+              markLine: {
+                symbol: 'none', silent: true,
+                data: [{ yAxis: 0,
+                  lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
+                  label: {
+                    formatter: '基期 0%', color: '#10b981',
+                    fontSize: 11, fontWeight: 600,
+                    position: 'insideEndTop', distance: [4, 2],
+                    backgroundColor: 'rgba(255,255,255,0.92)',
+                    padding: [2, 5], borderRadius: 3,
+                  }
+                }]
+              },
+            });
+          }
+          if (idxData && idxData.filter(v => v != null).length >= 2) {
+            series.push({
+              name: idxName, type: 'line', smooth: true, symbol: 'none',
+              yAxisIndex: 0, data: idxData, connectNulls: true,
+              lineStyle: { color: idxColor, width: 1.6 },
+            });
+          }
+          yAxisLeft = {
+            type: 'value', scale: true, name: '累積報酬 %', position: 'left',
+            nameTextStyle: { color: meta.stockColor, fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11,
+              formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          };
+        } else {
+          // RS / Mansfield 既有邏輯
+          const values = data[mode] || [];
+          let lineColor = meta.color;
+          if (isRs) {
+            const last = values.filter(v => v != null).slice(-1)[0];
+            lineColor = last == null ? '#ff7847'
+                      : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
+          }
+          series = [{
+            name: meta.label, type: 'line', smooth: true, symbol: 'none',
+            yAxisIndex: 0, data: values, connectNulls: true,
+            areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
+            lineStyle: { color: lineColor, width: 2 },
+            markLine: {
+              symbol: 'none', silent: true,
+              data: [{
+                yAxis: isMansfield ? 0 : 80,
+                lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
+                label: {
+                  formatter: isMansfield ? '相對中性位' : '強勢 80',
+                  color: '#10b981',
+                  fontSize: 11, fontWeight: 600,
+                  position: 'insideEndTop', distance: [4, 2],
+                  backgroundColor: 'rgba(255,255,255,0.92)',
+                  padding: [2, 5], borderRadius: 3,
+                }
+              }]
+            },
+          }];
+          yAxisLeft = isMansfield ? {
+            type: 'value', scale: true, name: '相對強度 %', position: 'left',
+            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11,
+              formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          } : {
+            type: 'value', min: 0, max: 100, interval: 20,
+            name: 'RS', position: 'left',
+            nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11 },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          };
         }
-        const series = [{
-          name: meta.label, type: 'line', smooth: true, symbol: 'none',
-          yAxisIndex: 0, data: values, connectNulls: true,
-          areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
-          lineStyle: { color: lineColor, width: 2 },
-          markLine: {
-            symbol: 'none', silent: true,
-            data: [{
-              yAxis: isMansfield ? 0 : 80,
-              lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
-              label: {
-                formatter: isMansfield ? '相對中性位' : '強勢 80',
-                color: '#10b981',
-                fontSize: 11, fontWeight: 600,
-                position: 'insideEndTop', distance: [4, 2],
-                backgroundColor: 'rgba(255,255,255,0.92)',
-                padding: [2, 5], borderRadius: 3,
-              }
-            }]
-          },
-        }];
-        const yAxisLeft = isMansfield ? {
-          type: 'value', scale: true, name: '相對強度 %', position: 'left',
-          nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
-          axisLabel: { color: '#64748b', fontSize: 11,
-            formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
-          splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-        } : {
-          type: 'value', min: 0, max: 100, interval: 20,
-          name: 'RS', position: 'left',
-          nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },
-          axisLabel: { color: '#64748b', fontSize: 11 },
-          splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-        };
 
         const idx = (idxKey !== 'none') ? IDX_META[idxKey] : null;
         const hasIdx = !!(idx && Array.isArray(idx.data) && idx.data.length);
