@@ -223,9 +223,23 @@ def build_profile(
     groups_idx: dict[str, list[str]],
     specs: dict,
     fixture_profiles: dict,
+    manual_overrides: dict | None = None,
 ) -> dict:
-    """為單一個股產 profile。"""
-    # 1. fixture 優先
+    """為單一個股產 profile。
+
+    優先序：manual_overrides > fixture > Coverage heuristic > group voting
+    """
+    manual_overrides = manual_overrides or {}
+
+    # 0. manual_overrides 優先（人工 ground truth；regex 撞 bug 的最終解）
+    if ticker in manual_overrides:
+        p = dict(manual_overrides[ticker])
+        p["last_validated"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        p["confidence"] = 0.95
+        p["human_reviewed"] = True
+        return p
+
+    # 1. fixture 次之
     if ticker in fixture_profiles:
         p = dict(fixture_profiles[ticker])
         p["last_validated"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -328,11 +342,19 @@ def main():
     fixtures = json.loads(fixture_path.read_text(encoding="utf-8"))
     fixtures = {k: v for k, v in fixtures.items() if not k.startswith("_")}
 
+    # 人工覆寫層（priority 最高）
+    overrides_path = TAXONOMY_DIR / "manual_overrides.json"
+    manual_overrides = {}
+    if overrides_path.exists():
+        manual_overrides = json.loads(overrides_path.read_text(encoding="utf-8"))
+        manual_overrides = {k: v for k, v in manual_overrides.items() if not k.startswith("_")}
+        print(f"  manual_overrides：{len(manual_overrides)} 檔人工覆寫")
+
     print(f"[4/5] 為 {len(unique_tickers)} 檔產畫像...")
     profiles = {}
     stats = {"with_seg": 0, "with_pos": 0, "with_themes": 0, "with_coverage": 0, "skipped": 0}
     for i, sym in enumerate(unique_tickers, 1):
-        p = build_profile(sym, snapshot, groups_idx, specs, fixtures)
+        p = build_profile(sym, snapshot, groups_idx, specs, fixtures, manual_overrides)
         profiles[sym] = p
         if p.get("_skip_reason"):
             stats["skipped"] += 1
