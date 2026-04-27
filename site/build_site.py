@@ -123,7 +123,7 @@ def refresh_trending_topics() -> None:
         print(f"[trending] 抓取例外：{e}（沿用前次 cache）")
 
 
-def refresh_futures_list(max_age_days: float = 7.0) -> None:
+def refresh_futures_list(max_age_days: float = 1.0) -> None:
     """跑 fetch_futures_list.py 抓期交所個股期貨清單。
 
     cache 在 max_age_days 內不重抓（期交所清單變動慢，週更即可）。
@@ -161,6 +161,30 @@ def refresh_futures_list(max_age_days: float = 7.0) -> None:
         print(f"[futures] 抓取例外：{e}（沿用前次 cache）")
 
 
+def _fetch_tpex_official_recent() -> pd.Series:
+    """從 TPEx 官方 OpenAPI 抓最近約 17 日櫃買指數收盤值（含當日）。
+
+    端點：https://www.tpex.org.tw/openapi/v1/tpex_index
+    用途：FinLab `stock_index_price:收盤指數` 常延遲 1-3 日，本函數提供即時補丁。
+    回傳 pd.Series (index=日期, value=收盤值)；失敗時回空 Series。
+    """
+    import requests
+    url = "https://www.tpex.org.tw/openapi/v1/tpex_index"
+    try:
+        r = requests.get(url, timeout=15)
+        r.raise_for_status()
+        rows = r.json()
+        if not rows:
+            return pd.Series(dtype=float, name="tpex")
+        dates  = [pd.Timestamp(row["Date"]) for row in rows]   # "20260427" pandas 自動解析
+        closes = [float(row["Close"]) for row in rows]
+        s = pd.Series(closes, index=pd.DatetimeIndex(dates), name="tpex").sort_index()
+        return s
+    except Exception as e:
+        print(f"[indices] TPEx 官方備援抓取失敗：{e}")
+        return pd.Series(dtype=float, name="tpex")
+
+
 def load_market_indices(use_cache: bool = True) -> dict:
     """載入台股兩大盤指數收盤價：上市加權 + 櫃買。
 
@@ -181,21 +205,48 @@ def load_market_indices(use_cache: bool = True) -> dict:
     out: dict = {}
     try:
         from finlab import data as _fl_data
-        d = _fl_data.get("stock_index_price:收盤指數")
-        col_map = {"taiex": "上市發行量加權股價指數", "tpex": "上櫃櫃買指數:指數"}
-        for key, col in col_map.items():
-            if col in d.columns:
-                s = d[col].dropna()
-                s.name = key
-                out[key] = s
+        # 加權指數：用 world_index 的 ^TWII（即時更新到當日，跟 close 同步）
+        try:
+            wi = _fl_data.get("world_index:close")
+            if "^TWII" in wi.columns:
+                s = wi["^TWII"].dropna()
+                s.name = "taiex"
+                out["taiex"] = s
+                print(f"[indices] 加權指數（^TWII，即時源）：{len(s)} 日，最新 {s.index.max().date()}")
+        except Exception as e:
+            print(f"[indices] world_index:^TWII 抓取失敗：{e}")
+        # 櫃買指數：用 stock_index_price（每日批次更新，可能延遲 1-3 日）
+        try:
+            si = _fl_data.get("stock_index_price:收盤指數")
+            if "上櫃櫃買指數:指數" in si.columns:
+                s = si["上櫃櫃買指數:指數"].dropna()
+                s.name = "tpex"
+                out["tpex"] = s
+                print(f"[indices] 櫃買指數（stock_index_price，批次源）：{len(s)} 日，最新 {s.index.max().date()}")
+        except Exception as e:
+            print(f"[indices] stock_index_price:櫃買指數 抓取失敗：{e}")
+        # === 網路備援：TPEx 官方 OpenAPI 覆蓋櫃買最近約 17 日（即時源）===
+        if "tpex" in out and not out["tpex"].empty:
+            official = _fetch_tpex_official_recent()
+            if not official.empty:
+                finlab_last = out["tpex"].index.max().date()
+                merged = out["tpex"].copy()
+                merged.update(official)  # 同日 finlab 有則用官方覆蓋
+                # 官方有但 finlab 沒的日期（最新延遲日）也補進來
+                new_dates = official.index.difference(merged.index)
+                if len(new_dates) > 0:
+                    merged = pd.concat([merged, official.loc[new_dates]]).sort_index()
+                out["tpex"] = merged
+                new_last = merged.index.max().date()
+                print(f"[indices] 櫃買備援：TPEx 官方覆蓋 {len(official)} 日；finlab 原最新 {finlab_last} → 補丁後 {new_last}")
         if out:
             try:
                 pd.concat(list(out.values()), axis=1).to_parquet(INDICES_CACHE)
-                print(f"[indices] 抓取 + 寫入 cache：{ {k: len(v) for k,v in out.items()} }")
+                print(f"[indices] 寫入 cache：{ {k: len(v) for k,v in out.items()} }")
             except Exception as e:
                 print(f"[indices] cache 寫入失敗：{e}")
         else:
-            print("[indices] FinLab stock_index_price:收盤指數 無加權/櫃買欄位")
+            print("[indices] FinLab 兩個來源都失敗")
         return out
     except Exception as e:
         print(f"[indices] FinLab 抓取失敗：{e}")
@@ -628,6 +679,13 @@ def _load_finlab_data():
     d["name_map"]     = info.set_index("symbol")["公司簡稱"].to_dict()
     d["industry_map"] = info.set_index("symbol")["產業類別"].to_dict() if "產業類別" in info.columns else {}
     d["market_map"]   = info.set_index("symbol")["市場別"].to_dict() if "市場別" in info.columns else {}
+
+    # 同步刷新大盤指數 cache（加權 + 櫃買），避免 daily_build 跑 finlab 時 indices 卡舊值
+    print("  [FinLab] 下載大盤指數（上市加權 + 櫃買）...")
+    try:
+        load_market_indices(use_cache=False)
+    except Exception as e:
+        print(f"  [警告] 大盤指數刷新失敗：{e}（沿用前次 cache）")
     return d
 
 
@@ -1876,6 +1934,19 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     market_indices = load_market_indices(use_cache=True)
     taiex_series = market_indices.get("taiex", pd.Series(dtype=float))
     tpex_series  = market_indices.get("tpex",  pd.Series(dtype=float))
+    # 對齊 close 日期軸：FinLab 櫃買 dataset 常延遲 1-3 日，用 ffill 補（用前一交易日收盤值）
+    # 避免 vs 櫃買 / 累積 vs 櫃買 在最新日因日期對不上而出現 null 斷點
+    if not taiex_series.empty:
+        taiex_series = taiex_series.reindex(data["close"].index, method="ffill")
+        print(f"       · 加權指數對齊到 close 日期軸：{len(taiex_series)} 日，最新 {taiex_series.dropna().index.max().date()}")
+    if not tpex_series.empty:
+        last_real = tpex_series.index.max().date()
+        tpex_series = tpex_series.reindex(data["close"].index, method="ffill")
+        last_filled = tpex_series.dropna().index.max().date()
+        if last_real != last_filled:
+            print(f"       · 櫃買指數延遲：實際資料到 {last_real}，ffill 到 {last_filled}（用前值補）")
+        else:
+            print(f"       · 櫃買指數對齊：{len(tpex_series)} 日，最新 {last_filled}")
     # Mansfield 比值法：(個股/大盤) 對 240 日均值的 % 偏離；上揚 = 贏大盤
     print("       · 計算 Mansfield 相對強度（個股/大盤比值對 240 日均偏離）...")
     mansfield_taiex_df = compute_mansfield_rs(data["close"], taiex_series, lookback=240)
