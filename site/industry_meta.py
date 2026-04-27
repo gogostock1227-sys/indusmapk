@@ -369,14 +369,14 @@ INDUSTRY_META = {
         "en": "Passive Components",
         "category": "連接器 / 被動",
         "color": "#8b5cf6",
-        "desc": "MLCC、電感、電阻等被動元件。AI 伺服器用量暴增、汽車電子需求強。",
+        "desc": "MLCC、晶片電阻、電容、電感、保護/EMI 與磁性元件等核心被動元件製造商。PCB、電子通路、石英元件與機構件另歸各自題材。",
         "cagr": "12%",
         "market_size": "20B USD",
         "indicators": [
-            {"label": "單伺服器用量", "value": "x3"},
-            {"label": "週期位置", "value": "復甦中"},
+            {"label": "範圍", "value": "RCL / 保護 / 磁性"},
             {"label": "龍頭", "value": "國巨 / 華新科"},
-            {"label": "材料自主", "value": "70%+"},
+            {"label": "應用", "value": "AI 伺服器 / 車用"},
+            {"label": "排除", "value": "PCB / 通路 / 石英"},
         ],
     },
     "記憶體": {
@@ -391,6 +391,21 @@ INDUSTRY_META = {
             {"label": "HBM 滲透", "value": "AI 需求爆發"},
             {"label": "DDR 漲幅", "value": "2026 Q1 +20%"},
             {"label": "台廠", "value": "南亞科 / 華邦 / 群聯"},
+        ],
+    },
+    "記憶體模組廠": {
+        "en": "Memory Module Makers",
+        "category": "AI / 半導體",
+        "color": "#7c3aed",
+        "desc": "採購 DRAM 與 NAND Flash 顆粒，封裝、測試並銷售 DRAM 模組、SSD 與工控/嵌入式儲存。"
+                "記憶體價格循環上行時，低價庫存與品牌通路放大毛利彈性；反向時則要留意庫存跌價與需求波動。",
+        "cagr": "15-25%",
+        "market_size": "—",
+        "indicators": [
+            {"label": "觀察核心", "value": "模組報價 / 庫存水位"},
+            {"label": "主要產品", "value": "DRAM 模組 / SSD"},
+            {"label": "景氣槓桿", "value": "現貨價上行 + 低價庫存"},
+            {"label": "台廠代表", "value": "威剛 / 十銓 / 宇瞻"},
         ],
     },
 
@@ -1327,9 +1342,9 @@ INDUSTRY_META = {
     },
     "NAND Flash/SSD 控制": {
         "en": "NAND Flash / SSD", "category": "AI / 半導體", "color": "#e11d48",
-        "desc": "QLC NAND 滲透、AI 伺服器 SSD 容量翻倍。群聯 aiDAPTIV+ 將 SSD 模擬為 DRAM。",
+        "desc": "NAND Flash 控制 IC、SSD 主控與嵌入式儲存控制晶片。AI 伺服器與邊緣裝置推升 SSD 容量與讀寫規格，群聯、點序受惠 NAND 控制器與儲存方案升級。",
         "cagr": "25%", "market_size": "70B USD",
-        "indicators": [{"label":"技術","value":"QLC / PLC NAND"},{"label":"控制晶片","value":"群聯"},{"label":"aiDAPTIV+","value":"AI DC 採用"},{"label":"容量","value":"翻倍成長"}],
+        "indicators": [{"label":"技術","value":"QLC / PLC NAND"},{"label":"控制晶片","value":"群聯 / 點序"},{"label":"應用","value":"SSD / eMMC / UFS"},{"label":"容量","value":"AI DC 翻倍成長"}],
     },
     "安全監控/影像監控": {
         "en": "Video Surveillance", "category": "國防 / 資安", "color": "#991b1b",

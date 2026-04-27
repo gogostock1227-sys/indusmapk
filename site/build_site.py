@@ -1096,12 +1096,18 @@ def compute_company_chip_data(d: dict, sym: str, days: int = 30) -> dict | None:
 
 
 def get_disposal_info(disposal_map: dict, sym: str) -> dict | None:
-    """從 fetch_extras 的處置股字典查該檔。也嘗試 .lstrip('0') 容錯。"""
+    """從 fetch_extras 的處置股字典查該檔。
+    對 4 碼上市櫃個股做 .lstrip('0') / 純數字 fallback 容錯；
+    5-6 碼 ETF（00 開頭）只做精確匹配，避免 '006208'.lstrip('0') 撞 4 碼股票（如日揚 6208）。"""
     if not disposal_map:
         return None
     info = disposal_map.get(sym)
-    if info is None:
-        info = disposal_map.get(sym.lstrip("0"))
+    if info is not None:
+        return info
+    # ETF 樣式（00 開頭、≥5 碼）只做精確匹配
+    if sym.startswith("00") and len(sym) >= 5:
+        return None
+    info = disposal_map.get(sym.lstrip("0"))
     if info is None:
         # 字母後綴（例：1522A）主代號 fallback
         base = "".join(c for c in sym if c.isdigit())
@@ -1111,11 +1117,15 @@ def get_disposal_info(disposal_map: dict, sym: str) -> dict | None:
 
 
 def get_holder_info(holder_history: dict, levels: list, sym: str) -> dict | None:
-    """從 holders_history 查該檔所有週的 15 級資料，轉成前端用的 view。"""
+    """從 holders_history 查該檔所有週的 15 級資料，轉成前端用的 view。
+    5-6 碼 ETF（00 開頭）只做精確匹配，避免跨類型撞 4 碼股票的集保資料。"""
     if not holder_history:
         return None
     hist_by_date = holder_history.get(sym)
     if hist_by_date is None:
+        # ETF 樣式（00 開頭、≥5 碼）只做精確匹配
+        if sym.startswith("00") and len(sym) >= 5:
+            return None
         hist_by_date = holder_history.get(sym.lstrip("0"))
     if hist_by_date is None:
         base = "".join(c for c in sym if c.isdigit())
@@ -2684,6 +2694,11 @@ def write_json_data(heatmap_data, search_data):
     # 搜尋資料輸出 .js 檔（script 載入避免 file:// CORS）
     (data_dir / "search-data.js").write_text(
         "window.SEARCH_DATA = " + json.dumps(search_data, ensure_ascii=False) + ";",
+        encoding="utf-8",
+    )
+    # 同步輸出純 JSON，避免舊版 search.json 殘留造成題材反查抽查誤判。
+    (data_dir / "search.json").write_text(
+        json.dumps(search_data, ensure_ascii=False),
         encoding="utf-8",
     )
 

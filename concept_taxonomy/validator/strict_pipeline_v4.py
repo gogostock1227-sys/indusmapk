@@ -114,6 +114,32 @@ def make_profile(d: dict | None) -> StockProfile | None:
     )
 
 
+def synthesize_theme_map_entry(group_name: str, spec: GroupSpec) -> dict | None:
+    """從 group_specs 合成最低限度的 Tier 2 keyword map。
+
+    用途：讓尚未手工建 `theme_revenue_map` 的族群也能全站驗證一輪，
+    不再整群保守 abstain。這是「可追溯候選驗證」，不是人工精修 map。
+    """
+    required: list[str] = []
+    for kw in [group_name, *spec.core_keywords, *spec.market_keywords]:
+        if kw and kw not in required:
+            required.append(kw)
+    forbidden: list[str] = []
+    for kw in [*spec.exclusion_keywords, *spec.forbidden_themes, *spec.forbidden_positions]:
+        if kw and kw not in forbidden:
+            forbidden.append(kw)
+    if not required:
+        return None
+    return {
+        "required_keywords": required,
+        "forbidden_keywords": forbidden,
+        "industry_must_not_be": [],
+        "min_pct_for_core": 0.30,
+        "min_pct_for_satellite": 0.05,
+        "_synthetic": True,
+    }
+
+
 def evaluate_pair(
     ticker: str,
     group_name: str,
@@ -212,10 +238,14 @@ def run_full_validation(
             continue
 
         theme_entry = theme_map.get(g)
+        synthetic_theme_map = False
 
-        # 客戶概念股 / 政策概念股：強制走 conservative，避免主業 dominance 誤踢
+        # 政策/事件概念股不使用既有人工 theme map；改用 specs 合成 map 跑可追溯驗證。
         if g in CUSTOMER_OR_POLICY_GROUPS:
             theme_entry = None
+        if theme_entry is None:
+            theme_entry = synthesize_theme_map_entry(g, spec)
+            synthetic_theme_map = bool(theme_entry)
 
         # 保守模式：若沒 theme_revenue_map（多數族群目前未建模），不執行上架。
         # 嚴格口徑：ABSTAIN 不再寫入 keep；只有硬白名單可先進 CORE。
@@ -365,10 +395,13 @@ def run_full_validation(
             "abstain": abstains,
             "removed": removeds,
             "keep": cores + satellites,
-            "source": "strict_v4",
+            "source": "strict_v4_synthetic_theme_map" if synthetic_theme_map else "strict_v4",
+            "theme_map_source": "synthetic_from_group_specs" if synthetic_theme_map else "theme_revenue_map",
             "validated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         }
         overall["strict_groups"] += 1
+        if synthetic_theme_map:
+            overall["synthetic_theme_map_groups"] += 1
         overall["core"] += len(cores)
         overall["satellite"] += len(satellites)
         overall["abstain"] += len(abstains)
