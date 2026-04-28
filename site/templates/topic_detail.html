@@ -15,7 +15,7 @@
     <div class="category-tag" style="background:{{ meta.color }}22; color:{{ meta.color }};">{{ meta.category }}</div>
     <h1>{{ group }}</h1>
     <p class="topic-en">{{ meta.en }}</p>
-    <p class="topic-desc">{{ meta.desc }}</p>
+    <p class="topic-desc">{{ ai_summary.hero_desc if ai_summary and ai_summary.hero_desc else meta.desc }}</p>
     <div class="topic-kpis">
       <span class="kpi"><em>CAGR</em><strong>{{ meta.cagr }}</strong></span>
       <span class="kpi"><em>市場規模</em><strong>{{ meta.market_size }}</strong></span>
@@ -57,14 +57,16 @@
 </section>
 {% endif %}
 
+{% if topic_indicators %}
 <section class="indicator-grid">
-  {% for ind in meta.indicators %}
+  {% for ind in topic_indicators %}
   <div class="indicator-card">
     <small>{{ ind.label }}</small>
     <strong>{{ ind.value }}</strong>
   </div>
   {% endfor %}
 </section>
+{% endif %}
 
 <section class="panel">
   <div class="panel-header">
@@ -198,6 +200,12 @@
     <h2>成分股清單</h2>
     <span class="muted">依今日成交金額排序</span>
   </div>
+  {% if stocks.empty %}
+  <div class="topic-empty-state">
+    <strong>目前尚無成分股</strong>
+    <p>此細產業已納入產業分類，後續資料更新後會自動顯示成分股與族群指標。</p>
+  </div>
+  {% else %}
   <div class="table-scroll">
   <table class="table">
     <thead>
@@ -246,5 +254,6 @@
     </tbody>
   </table>
   </div>
+  {% endif %}
 </section>
 {% endblock %}

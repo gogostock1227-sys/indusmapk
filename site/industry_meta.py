@@ -5,6 +5,11 @@
 最後更新: 2026-04-24
 """
 
+try:
+    from moneydj_industry_meta import MONEYDJ_INDUSTRY_META
+except ImportError:
+    MONEYDJ_INDUSTRY_META = {}
+
 INDUSTRY_META = {
     # ═══════════════════════════════════════════
     #  AI / 半導體核心
@@ -1957,6 +1962,8 @@ def get_meta(group_name: str) -> dict:
     """取得題材 meta，沒有則回傳預設值"""
     if group_name in INDUSTRY_META:
         return INDUSTRY_META[group_name]
+    if group_name in MONEYDJ_INDUSTRY_META:
+        return MONEYDJ_INDUSTRY_META[group_name]
     return {
         "en": group_name,
         "category": "其他",

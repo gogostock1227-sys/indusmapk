@@ -5,7 +5,7 @@
 {% block content %}
 <section class="hero">
   <h1>題材總覽</h1>
-  <p>45+ 台股產業族群一覽。點擊卡片進入題材詳情頁，看成分股、法人動向、熱力圖、相關題材。</p>
+  <p>{{ groups|length }} 個台股題材與產業細分族群一覽。點擊卡片進入詳情頁，看成分股、法人動向、熱力圖、相關題材。</p>
 </section>
 
 {% if system_topics %}
@@ -65,7 +65,7 @@
         <h3>{{ g }}</h3>
         <span class="pill" style="background:{{ meta.color }}22; color:{{ meta.color }};">{{ meta.category }}</span>
       </div>
-      <p class="topic-card-desc">{{ meta.desc[:80] }}{% if meta.desc|length > 80 %}…{% endif %}</p>
+      <p class="topic-card-desc">{{ topic_card_desc(g, 96) }}</p>
       <div class="topic-card-stats">
         <div>
           <span class="stat-mini-label">成分股</span>

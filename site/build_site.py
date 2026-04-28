@@ -925,6 +925,30 @@ def compute_category_aggregates(stock_metrics: pd.DataFrame, group_metrics: dict
     return result
 
 
+def is_etf_like_symbol(sym: str, name: str = "") -> bool:
+    """排除 ETF / ETN / 指數型商品，避免首頁公司數把金融商品算進上市櫃公司。"""
+    name_upper = str(name).upper()
+    if sym.startswith("00") and 4 <= len(sym) <= 6:
+        return True
+    fund_keywords = ("ETF", "ETN", "指數", "正2", "反1", "受益", "REIT")
+    return any(keyword in name_upper for keyword in fund_keywords)
+
+
+def get_listed_otc_symbols(stock_metrics: pd.DataFrame, name_map: dict, market_map: dict) -> list[str]:
+    """首頁統計口徑：只計上市、上櫃，且需有正式股名。"""
+    symbols: list[str] = []
+    for sym in stock_metrics.index:
+        if market_map.get(sym) not in {"sii", "otc"}:
+            continue
+        name = name_map.get(sym)
+        if not (isinstance(name, str) and name.strip() and name.strip() != sym):
+            continue
+        if is_etf_like_symbol(sym, name):
+            continue
+        symbols.append(sym)
+    return symbols
+
+
 def compute_topic_return_series(d: dict, members: list, days=125) -> dict | None:
     """計算族群當成等權重組合的 6 個月累積報酬曲線 + 近 1D/1W/1M 報酬。
     days=125 ≈ 6 個月交易日。回傳 dates, returns(%), ret_1d, ret_5d, ret_20d 全是百分比。"""
@@ -1270,6 +1294,7 @@ def build_search_data(
     company_topics: dict,
     disposal_map: dict | None = None,
     market_map: dict | None = None,
+    ai_summaries: dict | None = None,
 ) -> list:
     """搜尋用資料。[{type, label, sub, href, keywords}]
 
@@ -1283,10 +1308,11 @@ def build_search_data(
     items = []
     for group in CONCEPT_GROUPS:
         meta = get_meta(group)
+        desc = get_topic_summary_text(group, ai_summaries, limit=50)
         items.append({
             "type":  "topic",
             "label": group,
-            "sub":   meta["desc"][:50] + ("..." if len(meta["desc"]) > 50 else ""),
+            "sub":   desc,
             "href":  f"topic/{slugify(group)}.html",
             "keywords": f"{group} {meta['en']} {meta['category']} 題材 族群 概念",
         })
@@ -1758,6 +1784,37 @@ def load_ai_summaries() -> dict:
         return {}
 
 
+def get_topic_summary_text(group: str, ai_summaries: dict | None = None, limit: int | None = None) -> str:
+    """題材卡片優先顯示補好的介紹，避免回落到分類同步用的短句。"""
+    payload = (ai_summaries or {}).get(group) or {}
+    meta = get_meta(group)
+    text = payload.get("hero_desc") or payload.get("analysis") or meta.get("desc", "")
+    text = " ".join(str(text).split())
+    if limit is not None and len(text) > limit:
+        return text[:limit].rstrip() + "..."
+    return text
+
+
+def has_generic_indicators(indicators: list | tuple | None) -> bool:
+    if not indicators:
+        return False
+    generic_labels = {"大族群", "成分股數", "資料狀態"}
+    labels = {str(item.get("label", "")) for item in indicators if isinstance(item, dict)}
+    return bool(labels & generic_labels)
+
+
+def select_topic_indicators(meta: dict, ai_summary: dict | None) -> list:
+    meta_indicators = meta.get("indicators") or []
+    ai_indicators = (ai_summary or {}).get("indicators") or []
+    if ai_indicators and (
+        meta.get("actual_count") is not None
+        or not meta_indicators
+        or has_generic_indicators(meta_indicators)
+    ):
+        return ai_indicators
+    return meta_indicators or ai_indicators
+
+
 def compute_limit_up_stats(limit_up_by_date: dict, close_df) -> dict:
     """對歷史漲停資料計算：
        1) daily_summary     — 每日漲停家數、隔日平均/中位/正報酬率
@@ -1903,12 +1960,13 @@ def compute_limit_up_stats(limit_up_by_date: dict, close_df) -> dict:
     }
 
 
-def render_all(data, stock_metrics, group_metrics, related, company_topics, rich=None, extras=None, coverage=None, stock_profiles=None):
+def render_all(data, stock_metrics, group_metrics, related, company_topics, rich=None, extras=None, coverage=None, stock_profiles=None, ai_summaries=None):
     env = build_env()
     rich = rich or {"basic": {}, "business": {}, "revenue": {}, "financials": {}, "dividends": {}, "director": {}}
     extras = extras or {"disposal": {}, "holders": {}}
     coverage = coverage or {}
     stock_profiles = stock_profiles or {}
+    ai_summaries = ai_summaries or load_ai_summaries()
     name_map = data["name_map"]
     last_date = data["close"].index[-1].strftime("%Y-%m-%d")
 
@@ -1967,12 +2025,16 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             key=lambda g: -group_metrics.get(g, {}).get("amount_sum_mn", 0)
         )[:8],
         "has_limit_up": has_limit_up,
+        "topic_card_desc": lambda group, limit=96: get_topic_summary_text(group, ai_summaries, limit=limit),
     }
 
     # Index（每日焦點）
     total_groups = len(CONCEPT_GROUPS)
-    total_limit_up = int(stock_metrics["limit_up"].sum())
-    total_limit_down = int(stock_metrics["limit_down"].sum())
+    listed_otc_symbols = get_listed_otc_symbols(stock_metrics, name_map, data["market_map"])
+    listed_otc_rows = stock_metrics.loc[stock_metrics.index.intersection(listed_otc_symbols)]
+    total_stocks = len(listed_otc_symbols)
+    total_limit_up = int(listed_otc_rows["limit_up"].sum()) if "limit_up" in listed_otc_rows.columns else 0
+    total_limit_down = int(listed_otc_rows["limit_down"].sum()) if "limit_down" in listed_otc_rows.columns else 0
     top_gain = sorted(
         [(g, m) for g, m in group_metrics.items()],
         key=lambda x: -x[1]["ret_1d_mean"],
@@ -2010,7 +2072,6 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
 
     category_aggs = compute_category_aggregates(stock_metrics, group_metrics)
 
-    total_stocks = len(stock_metrics)
     hot_topics = load_hot_topics(top_n=6)
     index_html = env.get_template("index.html").render(
         **base_ctx,
@@ -2115,13 +2176,15 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         ("每日漲停",       "system-limit-up",     "#ef4444", "當日漲停板個股清單，掌握強勢族群輪動領頭羊。"),
         ("每日跌停",       "system-limit-down",   "#22c55e", "當日跌停板個股清單，警惕弱勢族群與風險訊號。"),
     ]
-    top_value_syms = stock_metrics.sort_values("amount_mn", ascending=False).head(20).index.tolist()
+    listed_otc_index = stock_metrics.index.intersection(listed_otc_symbols)
+    listed_otc_metrics = stock_metrics.loc[listed_otc_index]
+    top_value_syms = listed_otc_metrics.sort_values("amount_mn", ascending=False).head(20).index.tolist()
     if "limit_up" in stock_metrics.columns:
-        limit_up_syms = stock_metrics.index[stock_metrics["limit_up"].fillna(False).astype(bool)].tolist()
+        limit_up_syms = listed_otc_metrics.index[listed_otc_metrics["limit_up"].fillna(False).astype(bool)].tolist()
     else:
         limit_up_syms = []
     if "limit_down" in stock_metrics.columns:
-        limit_down_syms = stock_metrics.index[stock_metrics["limit_down"].fillna(False).astype(bool)].tolist()
+        limit_down_syms = listed_otc_metrics.index[listed_otc_metrics["limit_down"].fillna(False).astype(bool)].tolist()
     else:
         limit_down_syms = []
     SYSTEM_MEMBERS = {
@@ -2196,12 +2259,11 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     )
     (DIST_DIR / "ai.html").write_text(ai_html, encoding="utf-8")
 
-    # AI 題材摘要（背景 agent 產出）
-    ai_summaries = load_ai_summaries()
-
     # 每個題材頁 + 快取 topic_series 供 compare 頁共用
     topic_dir = DIST_DIR / "topic"
     topic_dir.mkdir(exist_ok=True)
+    for stale_topic in topic_dir.glob("*.html"):
+        stale_topic.unlink()
     tpl_topic = env.get_template("topic_detail.html")
     all_topic_series = {}
     all_topic_meta   = {}
@@ -2226,6 +2288,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             company_topics=company_topics,
             topic_series_json=json.dumps(topic_series, ensure_ascii=False) if topic_series else "null",
             ai_summary=ai_sum,
+            topic_indicators=select_topic_indicators(meta, ai_sum),
         )
         (topic_dir / f"{slugify(group)}.html").write_text(html, encoding="utf-8")
         if topic_series:
@@ -2284,6 +2347,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             company_topics=company_topics,
             topic_series_json=json.dumps(sys_series, ensure_ascii=False) if sys_series else "null",
             ai_summary=None,
+            topic_indicators=[],
         )
         (topic_dir / f"{slug}.html").write_text(html, encoding="utf-8")
         sys_topic_count += 1
@@ -2370,13 +2434,14 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     (DIST_DIR / "rs.html").write_text(rs_html, encoding="utf-8")
     print(f"       ✓ RS 評分頁：{len(rs_rows)} 檔 / 強勢股 {sum(1 for r in rs_rows if r['rs']>=80)} 檔 / 強勢產業 {len(strong_groups)} 個")
 
-    # 公司資料庫頁（全上市櫃清單 + 前端搜尋/篩選/排序）
+    # 公司資料庫頁（上市櫃清單 + 前端搜尋/篩選/排序）
     industries_list = sorted({
-        v for v in data["industry_map"].values()
-        if isinstance(v, str) and v.strip()
+        data["industry_map"].get(sym, "")
+        for sym in listed_otc_symbols
+        if isinstance(data["industry_map"].get(sym, ""), str) and data["industry_map"].get(sym, "").strip()
     })
     db_rows = []
-    for sym in stock_metrics.index:
+    for sym in listed_otc_symbols:
         row = stock_metrics.loc[sym]
         name_raw = name_map.get(sym)
         name = name_raw if isinstance(name_raw, str) and name_raw.strip() else sym
@@ -2562,7 +2627,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         )
         (company_dir / f"{sym}.html").write_text(html, encoding="utf-8")
         n_pages += 1
-    print(f"       ✓ 個股頁 {n_pages} 檔（全上市櫃）")
+    print(f"       ✓ 個股頁 {n_pages} 檔（全資料庫可用標的）")
 
 
 def copy_static():
@@ -2811,6 +2876,7 @@ def main():
 
     print("[4/5] 產生 JSON 資料（熱力圖 + 搜尋）...")
     extras = load_extras()
+    ai_summaries = load_ai_summaries()
     heatmap_data = build_heatmap_data(stock_metrics, data["name_map"])
     search_data = build_search_data(
         stock_metrics,
@@ -2819,6 +2885,7 @@ def main():
         company_topics,
         disposal_map=extras.get("disposal", {}),
         market_map=data.get("market_map", {}),
+        ai_summaries=ai_summaries,
     )
     write_json_data(heatmap_data, search_data)
 
@@ -2828,7 +2895,7 @@ def main():
     rich = load_company_rich()
     coverage = load_coverage()
     stock_profiles = load_stock_profiles()
-    render_all(data, stock_metrics, group_metrics, related, company_topics, rich=rich, extras=extras, coverage=coverage, stock_profiles=stock_profiles)
+    render_all(data, stock_metrics, group_metrics, related, company_topics, rich=rich, extras=extras, coverage=coverage, stock_profiles=stock_profiles, ai_summaries=ai_summaries)
 
     idx = DIST_DIR / "index.html"
     print(f"\n✓ 建置完成！打開：{idx}")
