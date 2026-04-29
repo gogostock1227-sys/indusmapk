@@ -87,6 +87,10 @@ DEFAULT_HOT_TOPICS = [
     "CoWoS先進封裝",
 ]
 
+# 今日強弱題材只比較成交值超過 1 億的族群，避免低流動性題材扭曲焦點榜。
+FOCUS_TOPIC_MIN_AMOUNT_MN = 100.0
+FOCUS_TOPIC_MIN_AMOUNT_LABEL = "1 億"
+
 
 def refresh_trending_topics() -> None:
     """跑 fetch_trending_topics.py 抓當日熱門題材，寫入 .cache_trending.json。
@@ -2035,12 +2039,17 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     total_stocks = len(listed_otc_symbols)
     total_limit_up = int(listed_otc_rows["limit_up"].sum()) if "limit_up" in listed_otc_rows.columns else 0
     total_limit_down = int(listed_otc_rows["limit_down"].sum()) if "limit_down" in listed_otc_rows.columns else 0
+    focus_group_items = [
+        (g, m)
+        for g, m in group_metrics.items()
+        if float(m.get("amount_sum_mn") or 0) > FOCUS_TOPIC_MIN_AMOUNT_MN
+    ]
     top_gain = sorted(
-        [(g, m) for g, m in group_metrics.items()],
+        focus_group_items,
         key=lambda x: -x[1]["ret_1d_mean"],
     )[:10]
     top_loss = sorted(
-        [(g, m) for g, m in group_metrics.items()],
+        focus_group_items,
         key=lambda x: x[1]["ret_1d_mean"],
     )[:10]
     top_flow = sorted(
@@ -2164,6 +2173,8 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         movers_up=movers_up,
         movers_down=movers_down,
         top_value=top_value,                       # 新增：成值分析（成交值前30）
+        focus_topic_min_amount_mn=FOCUS_TOPIC_MIN_AMOUNT_MN,
+        focus_topic_min_amount_label=FOCUS_TOPIC_MIN_AMOUNT_LABEL,
         name_map=name_map,
         company_topics=company_topics,
         industry_map=data["industry_map"],

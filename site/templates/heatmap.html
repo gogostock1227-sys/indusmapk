@@ -47,7 +47,7 @@
   
 <section class="hero">
   <h1>市場熱力圖</h1>
-  <p>依個股漲跌幅（絕對值）決定區塊大小，顏色代表漲跌方向。可切換單日 / 單週 / 單月觀察時間維度。</p>
+  <p>依成交金額排序資金熱點，預設聚焦前 120 大族群；顏色代表漲跌幅，可切換單日 / 單週 / 單月觀察時間維度。</p>
 </section>
 
 <div class="heatmap-toolbar">
@@ -57,6 +57,16 @@
       <button class="toggle-btn" data-tf="weekly">單週</button>
       <button class="toggle-btn" data-tf="monthly">單月</button>
     </div>
+    <div class="toggle-group">
+      <button class="toggle-btn active" data-scope="top">重點 120</button>
+      <button class="toggle-btn" data-scope="all">全部族群</button>
+    </div>
+    <label class="heatmap-filter">
+      <span>分類</span>
+      <select id="heatmap-category" aria-label="篩選大分類">
+        <option value="all">全部分類</option>
+      </select>
+    </label>
   </div>
   <div class="heatmap-legend" id="legend-daily">
     <span class="legend-label">跌</span>
@@ -94,9 +104,38 @@
   </div>
 </div>
 
-<div id="heatmap" class="heatmap-canvas"></div>
-<div class="heatmap-hint">
-  <span>方塊大小 = 成交金額 · 顏色 = 漲跌幅 · <b>點族群放大看個股</b> → 點個股跳至個股頁 · 上方麵包屑可返回上層</span>
+<div class="heatmap-layout">
+  <section class="heatmap-main">
+    <div id="heatmap" class="heatmap-canvas"></div>
+    <div class="heatmap-hint" id="heatmap-hint">
+      <span>方塊大小 = 成交金額 · 顏色 = 漲跌幅 · <b>點族群放大看個股</b> → 點個股跳至個股頁 · 上方麵包屑可返回上層</span>
+    </div>
+  </section>
+
+  <aside class="heatmap-panel" aria-label="熱點摘要">
+    <div class="panel-kicker">資金熱點</div>
+    <h2>目前畫面摘要</h2>
+    <p id="heatmap-scope-summary">顯示成交金額前 120 大族群。</p>
+    <div class="heatmap-stat-grid">
+      <div>
+        <small>顯示族群</small>
+        <strong id="heatmap-visible-count">--</strong>
+      </div>
+      <div>
+        <small>成交合計</small>
+        <strong id="heatmap-visible-amount">--</strong>
+      </div>
+      <div>
+        <small>平均漲跌</small>
+        <strong id="heatmap-visible-ret">--</strong>
+      </div>
+    </div>
+    <div class="heatmap-leader-head">
+      <span>資金排序</span>
+      <span>漲跌</span>
+    </div>
+    <ol class="heatmap-leaders" id="heatmap-leaders"></ol>
+  </aside>
 </div>
 
 </main>
@@ -122,13 +161,22 @@ window.HEATMAP_DATA = {
 };
 window.addEventListener('load', () => {
   const chart = echarts.init(document.getElementById('heatmap'), 'dark', { renderer: 'canvas' });
+  const chartEl = document.getElementById('heatmap');
+  const categorySelect = document.getElementById('heatmap-category');
+  const scopeSummaryEl = document.getElementById('heatmap-scope-summary');
+  const visibleCountEl = document.getElementById('heatmap-visible-count');
+  const visibleAmountEl = document.getElementById('heatmap-visible-amount');
+  const visibleRetEl = document.getElementById('heatmap-visible-ret');
+  const leadersEl = document.getElementById('heatmap-leaders');
 
   const HEATMAP_COLORS_11 = ['#0b4a26','#1a6e3a','#2e8b4d','#4fa66a','#7dbf92','#6e7681','#c89e9e','#d77272','#d1344f','#b91c34','#8b0b22'];
   const BREAKS_DAILY      = [-9,-7,-5,-3,-1, 1, 3, 5, 7, 9];
   const BREAKS_WEEK_MONTH = [-27,-21,-15,-9,-3, 3, 9,15,21,27];
+  const TOP_GROUP_LIMIT = 120;
+  const LEADER_LIMIT = 8;
 
   function retColorJS(v, tf) {
-    if (v === null || v === undefined) return '#6e7681';
+    if (!Number.isFinite(Number(v))) return '#6e7681';
     const breaks = (tf === 'daily') ? BREAKS_DAILY : BREAKS_WEEK_MONTH;
     let idx = 0;
     for (const b of breaks) { if (v < b) break; idx++; }
@@ -164,9 +212,13 @@ window.addEventListener('load', () => {
     textStyle: { color: '#e5e7eb', fontSize: 13 },
     extraCssText: 'box-shadow: 0 8px 24px rgba(0,0,0,0.5); border-radius: 10px;',
     formatter: (info) => {
-      const v = info.value;
-      if (!v) return `<b>${info.name}</b>`;
-      const ret = v[1], amt = v[0];
+      const v = Array.isArray(info.value)
+        ? info.value
+        : (info.data && Array.isArray(info.data.value) ? info.data.value : null);
+      if (!v || v.length < 2) return `<b>${info.name}</b>`;
+      const ret = Number(v[1]);
+      const amt = Number(v[0]);
+      if (!Number.isFinite(ret) || !Number.isFinite(amt)) return `<b>${info.name}</b>`;
       const retC = retColorJS(ret, currentTf);
       const fmt = (n) => {
         if (n >= 100) return (n/100).toFixed(1) + ' 億';
@@ -218,10 +270,96 @@ window.addEventListener('load', () => {
   ];
 
   let currentTf = 'daily';
-  let currentRootPath = [];  // 記錄 zoom 路徑，用於返回
+  let currentScope = 'top';
+  let currentCategory = 'all';
+
+  function fmtAmount(n) {
+    if (!Number.isFinite(n) || n <= 0) return '--';
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)} 兆`;
+    if (n >= 100) return `${(n / 100).toFixed(1)} 億`;
+    return `${Math.round(n * 100)} 萬`;
+  }
+
+  function fmtRet(n) {
+    if (!Number.isFinite(n)) return '--';
+    return `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
+  }
+
+  function buildCategoryOptions() {
+    const categoryStats = new Map();
+    const daily = window.HEATMAP_DATA.daily || [];
+    daily.forEach((group) => {
+      const category = group.category || '未分類';
+      const prev = categoryStats.get(category) || { amount: 0, count: 0 };
+      prev.amount += Number(group.value && group.value[0]) || 0;
+      prev.count += 1;
+      categoryStats.set(category, prev);
+    });
+
+    [...categoryStats.entries()]
+      .sort((a, b) => b[1].amount - a[1].amount || a[0].localeCompare(b[0], 'zh-Hant'))
+      .forEach(([category, stat]) => {
+        const opt = document.createElement('option');
+        opt.value = category;
+        opt.textContent = `${category}（${stat.count}）`;
+        categorySelect.appendChild(opt);
+      });
+  }
+
+  function getFilteredData() {
+    const source = window.HEATMAP_DATA[currentTf] || [];
+    const byCategory = currentCategory === 'all'
+      ? source
+      : source.filter((group) => (group.category || '未分類') === currentCategory);
+    const visible = currentScope === 'top'
+      ? byCategory.slice(0, TOP_GROUP_LIMIT)
+      : byCategory;
+    return { source, byCategory, visible };
+  }
+
+  function updatePanel(visible, byCategory) {
+    const amount = visible.reduce((sum, group) => sum + (Number(group.value && group.value[0]) || 0), 0);
+    const ret = visible.length
+      ? visible.reduce((sum, group) => sum + (Number(group.value && group.value[1]) || 0), 0) / visible.length
+      : NaN;
+
+    visibleCountEl.textContent = `${visible.length} / ${byCategory.length}`;
+    visibleAmountEl.textContent = fmtAmount(amount);
+    visibleRetEl.textContent = fmtRet(ret);
+    visibleRetEl.className = Number.isFinite(ret) ? (ret >= 0 ? 'is-up' : 'is-down') : '';
+    scopeSummaryEl.textContent = currentScope === 'top'
+      ? `顯示${currentCategory === 'all' ? '全市場' : currentCategory}成交金額前 ${Math.min(TOP_GROUP_LIMIT, byCategory.length)} 大族群。`
+      : `顯示${currentCategory === 'all' ? '全市場' : currentCategory}全部 ${byCategory.length} 個族群。`;
+
+    leadersEl.innerHTML = '';
+    visible.slice(0, LEADER_LIMIT).forEach((group, index) => {
+      const retValue = Number(group.value && group.value[1]) || 0;
+      const li = document.createElement('li');
+      const rank = document.createElement('div');
+      const main = document.createElement('div');
+      const name = document.createElement('strong');
+      const meta = document.createElement('span');
+      const retNode = document.createElement('b');
+
+      rank.className = 'leader-rank';
+      rank.textContent = String(index + 1);
+      main.className = 'leader-main';
+      name.textContent = group.name;
+      meta.textContent = `${group.category || '未分類'} · ${fmtAmount(Number(group.value && group.value[0]) || 0)}`;
+      retNode.className = retValue >= 0 ? 'is-up' : 'is-down';
+      retNode.textContent = fmtRet(retValue);
+
+      main.append(name, meta);
+      li.append(rank, main, retNode);
+      leadersEl.appendChild(li);
+    });
+  }
 
   function render() {
-    const data = window.HEATMAP_DATA[currentTf] || [];
+    const { byCategory, visible } = getFilteredData();
+    chartEl.classList.toggle('is-all', currentScope === 'all');
+    chart.resize();
+    updatePanel(visible, byCategory);
     chart.setOption({
       backgroundColor: 'transparent',
       animation: true,
@@ -229,7 +367,7 @@ window.addEventListener('load', () => {
       tooltip: sharedTooltip,
       series: [{
         type: 'treemap',
-        data: data,
+        data: visible,
         width: '100%',
         height: '100%',
         roam: false,
@@ -269,6 +407,7 @@ window.addEventListener('load', () => {
         levels: levels,
       }]
     }, true);  // notMerge 徹底替換
+    window.requestAnimationFrame(() => chart.resize());
   }
 
   // Click 攔截：stock leaf → 跳 company 頁；其他由 ECharts zoomToNode 處理
@@ -295,6 +434,21 @@ window.addEventListener('load', () => {
     });
   });
 
+  document.querySelectorAll('.toggle-btn[data-scope]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-btn[data-scope]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      currentScope = b.dataset.scope;
+      render();
+    });
+  });
+
+  categorySelect.addEventListener('change', () => {
+    currentCategory = categorySelect.value;
+    render();
+  });
+
+  buildCategoryOptions();
   render();
 
   window.addEventListener('resize', () => chart.resize());

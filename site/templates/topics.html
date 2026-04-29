@@ -47,11 +47,14 @@
 </section>
 {% endif %}
 
-<div class="filter-bar">
+<div class="filter-collapse" data-filter-collapse>
+<div class="filter-bar topic-filter-bar is-collapsed" id="topic-filter-bar">
   <button class="filter-chip active" data-filter="all">全部</button>
   {% for c in categories %}
   <button class="filter-chip" data-filter="{{ c }}" style="border-color:{{ CATEGORY_COLORS.get(c, '#64748b') }};">{{ c }}</button>
   {% endfor %}
+</div>
+<button class="filter-toggle" type="button" data-filter-toggle aria-controls="topic-filter-bar" aria-expanded="false" hidden>點我展開更多</button>
 </div>
 
 <section class="topic-grid">
@@ -94,20 +97,77 @@
 </section>
 
 <script>
+const filterCollapse = document.querySelector('[data-filter-collapse]');
+const filterBar = document.getElementById('topic-filter-bar');
+const filterToggle = filterCollapse ? filterCollapse.querySelector('[data-filter-toggle]') : null;
+
+function setFilterExpanded(expanded) {
+  if (!filterBar || !filterToggle) return;
+  filterBar.classList.toggle('is-expanded', expanded);
+  filterBar.classList.toggle('is-collapsed', !expanded);
+  filterToggle.setAttribute('aria-expanded', String(expanded));
+  filterToggle.textContent = expanded ? '收合分類' : '點我展開更多';
+}
+
+function getCollapsedFilterHeight(rowLimit = 4) {
+  if (!filterBar) return 0;
+  const chips = Array.from(filterBar.querySelectorAll('.filter-chip'));
+  if (!chips.length) return 0;
+  const rowTops = [];
+  chips.forEach(chip => {
+    const top = chip.offsetTop;
+    if (!rowTops.some(rowTop => Math.abs(rowTop - top) < 2)) rowTops.push(top);
+  });
+  if (rowTops.length <= rowLimit) return filterBar.scrollHeight;
+  const lastVisibleTop = rowTops[rowLimit - 1];
+  const lastVisibleRow = chips.filter(chip => Math.abs(chip.offsetTop - lastVisibleTop) < 2);
+  return Math.max(...lastVisibleRow.map(chip => chip.offsetTop + chip.offsetHeight));
+}
+
+function updateFilterCollapse() {
+  if (!filterBar || !filterToggle) return;
+  const collapsedHeight = getCollapsedFilterHeight(4);
+  filterBar.style.setProperty('--collapsed-filter-height', `${collapsedHeight}px`);
+  const needsCollapse = filterBar.scrollHeight > collapsedHeight + 4;
+  filterToggle.hidden = !needsCollapse;
+  if (!needsCollapse) {
+    filterBar.classList.remove('is-collapsed', 'is-expanded');
+    filterToggle.setAttribute('aria-expanded', 'false');
+    return;
+  }
+  if (!filterBar.classList.contains('is-expanded')) setFilterExpanded(false);
+}
+
+function revealActiveFilter(btn) {
+  if (!filterBar || !btn || !filterBar.classList.contains('is-collapsed')) return;
+  const collapsedHeight = parseFloat(getComputedStyle(filterBar).getPropertyValue('--collapsed-filter-height')) || 0;
+  if (btn.offsetTop + btn.offsetHeight > collapsedHeight + 1) setFilterExpanded(true);
+}
+
 function applyFilter(filterValue) {
-  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-  const target = Array.from(document.querySelectorAll('.filter-chip'))
+  if (!filterBar) return;
+  filterBar.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  const target = Array.from(filterBar.querySelectorAll('.filter-chip'))
     .find(b => b.dataset.filter === filterValue) || document.querySelector('.filter-chip[data-filter="all"]');
   if (target) target.classList.add('active');
+  revealActiveFilter(target);
   const f = target ? target.dataset.filter : 'all';
   document.querySelectorAll('.topic-card').forEach(c => {
     c.style.display = (f === 'all' || c.dataset.category === f) ? '' : 'none';
   });
 }
 
-document.querySelectorAll('.filter-chip').forEach(btn => {
+if (filterToggle) {
+  filterToggle.addEventListener('click', () => {
+    setFilterExpanded(!filterBar.classList.contains('is-expanded'));
+  });
+}
+
+if (filterBar) {
+filterBar.querySelectorAll('.filter-chip').forEach(btn => {
   btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
 });
+}
 
 // 頁面載入時讀 ?cat=XXX 自動套用該分類的 filter
 (function initFromUrl() {
@@ -115,5 +175,11 @@ document.querySelectorAll('.filter-chip').forEach(btn => {
   const cat = params.get('cat');
   if (cat) applyFilter(cat);
 })();
+
+requestAnimationFrame(updateFilterCollapse);
+window.addEventListener('resize', updateFilterCollapse);
+if ('ResizeObserver' in window && filterBar) {
+  new ResizeObserver(updateFilterCollapse).observe(filterBar);
+}
 </script>
 {% endblock %}
