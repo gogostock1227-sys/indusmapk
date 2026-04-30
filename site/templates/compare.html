@@ -43,7 +43,7 @@
 window.TOPIC_SERIES = {{ topic_series_json|safe }};
 window.TOPIC_META   = {{ topic_meta_json|safe }};
 window.STOCK_INDEX  = {{ stock_index_json|safe }};
-window.STOCK_SERIES = {};   // 懶加載快取
+window.STOCK_SERIES = {{ stock_series_json|safe }};   // 內嵌快取，讓 file:// 開啟也能讀取個股資料
 </script>
 <script>
 (function(){
@@ -60,8 +60,8 @@ window.STOCK_SERIES = {};   // 懶加載快取
   const STOCK_BY_SYM = {};
   STOCK_INDEX.forEach(s => { STOCK_BY_SYM[s.sym] = s; });
 
-  // 個股顏色調色板（灰階 + 暖中性）
-  const STOCK_PALETTE = ['#94a3b8', '#cbd5e1', '#a3a3a3', '#fbbf24', '#f97316'];
+  // 個股固定只使用 5 色，避免重算後顏色漂移。
+  const STOCK_PALETTE = ['#2563eb', '#dc2626', '#16a34a', '#f59e0b', '#7c3aed'];
 
   // state: Map<key, {kind:'topic'|'stock', key, name}>
   const state = new Map();
@@ -95,6 +95,7 @@ window.STOCK_SERIES = {};   // 懶加載快取
 
   async function ensureStockSeries(sym) {
     if (window.STOCK_SERIES[sym]) return window.STOCK_SERIES[sym];
+    if (location.protocol === 'file:') return null;
     try {
       const r = await fetch('data/stock_series/' + encodeURIComponent(sym) + '.json');
       if (!r.ok) return null;

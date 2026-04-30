@@ -27,6 +27,7 @@ MONEYDJ_META_PATH = SITE_DIR / "moneydj_industry_meta.py"
 STOCK_NAME_OVERRIDES_PATH = SITE_DIR / "stock_name_overrides.json"
 
 PROTECTED_NAMES = {
+    "ABF載板",
     "Google TPU",
     "輝達概念股",
     "CPU 概念股",

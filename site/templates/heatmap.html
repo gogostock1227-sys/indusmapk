@@ -122,16 +122,15 @@
         <strong id="heatmap-visible-count">--</strong>
       </div>
       <div>
-        <small>成交合計</small>
-        <strong id="heatmap-visible-amount">--</strong>
-      </div>
-      <div>
         <small>平均漲跌</small>
         <strong id="heatmap-visible-ret">--</strong>
       </div>
     </div>
-    <div class="heatmap-leader-head">
-      <span>資金排序</span>
+    <div class="heatmap-leader-tools">
+      <div class="toggle-group heatmap-rank-toggle" role="group" aria-label="排行榜排序">
+        <button class="toggle-btn active" data-rank="amount">資金排序</button>
+        <button class="toggle-btn" data-rank="return">漲跌排序</button>
+      </div>
       <span>漲跌</span>
     </div>
     <ol class="heatmap-leaders" id="heatmap-leaders"></ol>
@@ -165,7 +164,6 @@ window.addEventListener('load', () => {
   const categorySelect = document.getElementById('heatmap-category');
   const scopeSummaryEl = document.getElementById('heatmap-scope-summary');
   const visibleCountEl = document.getElementById('heatmap-visible-count');
-  const visibleAmountEl = document.getElementById('heatmap-visible-amount');
   const visibleRetEl = document.getElementById('heatmap-visible-ret');
   const leadersEl = document.getElementById('heatmap-leaders');
 
@@ -272,6 +270,7 @@ window.addEventListener('load', () => {
   let currentTf = 'daily';
   let currentScope = 'top';
   let currentCategory = 'all';
+  let currentRank = 'amount';
 
   function fmtAmount(n) {
     if (!Number.isFinite(n) || n <= 0) return '--';
@@ -318,13 +317,11 @@ window.addEventListener('load', () => {
   }
 
   function updatePanel(visible, byCategory) {
-    const amount = visible.reduce((sum, group) => sum + (Number(group.value && group.value[0]) || 0), 0);
     const ret = visible.length
       ? visible.reduce((sum, group) => sum + (Number(group.value && group.value[1]) || 0), 0) / visible.length
       : NaN;
 
     visibleCountEl.textContent = `${visible.length} / ${byCategory.length}`;
-    visibleAmountEl.textContent = fmtAmount(amount);
     visibleRetEl.textContent = fmtRet(ret);
     visibleRetEl.className = Number.isFinite(ret) ? (ret >= 0 ? 'is-up' : 'is-down') : '';
     scopeSummaryEl.textContent = currentScope === 'top'
@@ -332,7 +329,13 @@ window.addEventListener('load', () => {
       : `顯示${currentCategory === 'all' ? '全市場' : currentCategory}全部 ${byCategory.length} 個族群。`;
 
     leadersEl.innerHTML = '';
-    visible.slice(0, LEADER_LIMIT).forEach((group, index) => {
+    const leaders = [...visible].sort((a, b) => {
+      if (currentRank === 'return') {
+        return (Number(b.value && b.value[1]) || 0) - (Number(a.value && a.value[1]) || 0);
+      }
+      return (Number(b.value && b.value[0]) || 0) - (Number(a.value && a.value[0]) || 0);
+    });
+    leaders.slice(0, LEADER_LIMIT).forEach((group, index) => {
       const retValue = Number(group.value && group.value[1]) || 0;
       const li = document.createElement('li');
       const rank = document.createElement('div');
@@ -440,6 +443,16 @@ window.addEventListener('load', () => {
       b.classList.add('active');
       currentScope = b.dataset.scope;
       render();
+    });
+  });
+
+  document.querySelectorAll('.toggle-btn[data-rank]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-btn[data-rank]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      currentRank = b.dataset.rank;
+      const { byCategory, visible } = getFilteredData();
+      updatePanel(visible, byCategory);
     });
   });
 

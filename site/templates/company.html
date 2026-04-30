@@ -41,6 +41,7 @@
         <span class="disposal-warn-icon" aria-hidden="true">⚠</span>
         <span class="disposal-warn-title">處置股警示</span>
         <span class="disposal-card-badge">{{ disposal.status }}</span>
+        {% if disposal.match_label %}<span class="disposal-card-level" title="撮合分級：每 {{ disposal.match_minutes }} 分鐘人工管制撮合一次">{{ disposal.match_label }}</span>{% endif %}
       </div>
       <div class="disposal-card-body">
         {% if disposal.reason %}<div class="dc-row"><em>處置原因</em><span>{{ disposal.reason }}</span></div>{% endif %}
@@ -59,14 +60,14 @@
 <section class="panel rs-history-panel">
   <div class="panel-header">
     <h2>RS 評分走勢</h2>
-    <span class="muted">近 {{ rs_chart.dates|length }} 個交易日 · RS 強勢線 80 / 相對中性位 0 / 累積基期 0%</span>
+    <span class="muted">近 {{ rs_chart.dates|length }} 個交易日 · RS 強勢線 80 · 比值起點=100 · 累積基期 0%</span>
   </div>
   <div class="rs-chart-toolbar" id="rs_toolbar_{{ symbol }}">
     <div class="rs-mode-group" data-group="mode">
       <button type="button" class="rs-btn active" data-mode="year">年 RS（240 日）</button>
       <button type="button" class="rs-btn" data-mode="quarter">季 RS（60 日）</button>
-      <button type="button" class="rs-btn" data-mode="ms_taiex">vs 加權</button>
-      <button type="button" class="rs-btn" data-mode="ms_tpex">vs 櫃買</button>
+      <button type="button" class="rs-btn" data-mode="ratio_taiex">vs 加權</button>
+      <button type="button" class="rs-btn" data-mode="ratio_tpex">vs 櫃買</button>
       <button type="button" class="rs-btn" data-mode="cum_taiex">累積 vs 加權</button>
       <button type="button" class="rs-btn" data-mode="cum_tpex">累積 vs 櫃買</button>
     </div>
@@ -95,28 +96,57 @@
         tpex:  { name: '櫃買指數', color: '#7c3aed', data: data.tpex },
       };
       const MODE_META = {
-        year:      { label: '年 RS（240 日）',  type: 'rs',        color: '#ff7847' },
-        quarter:   { label: '季 RS（60 日）',   type: 'rs',        color: '#9333ea' },
-        ms_taiex:  { label: 'vs 加權（中性位）', type: 'mansfield', color: '#ea580c' },
-        ms_tpex:   { label: 'vs 櫃買（中性位）', type: 'mansfield', color: '#db2777' },
-        cum_taiex: { label: '累積 vs 加權',      type: 'cum', idx: 'taiex',
-                     stockColor: '#dc2626', idxColor: '#1e40af', idxName: '加權累積報酬',
-                     stockKey: 'cum_stock_vs_taiex', idxKey: 'cum_taiex' },
-        cum_tpex:  { label: '累積 vs 櫃買',      type: 'cum', idx: 'tpex',
-                     stockColor: '#dc2626', idxColor: '#7c3aed', idxName: '櫃買累積報酬',
-                     stockKey: 'cum_stock_vs_tpex', idxKey: 'cum_tpex' },
+        year:        { label: '年 RS（240 日）',     type: 'rs',    color: '#ff7847' },
+        quarter:     { label: '季 RS（60 日）',      type: 'rs',    color: '#9333ea' },
+        ratio_taiex: { label: '個股 / 加權 比值',   type: 'ratio', color: '#ea580c' },
+        ratio_tpex:  { label: '個股 / 櫃買 比值',   type: 'ratio', color: '#db2777' },
+        cum_taiex:   { label: '累積 vs 加權',        type: 'cum', idx: 'taiex',
+                       stockColor: '#dc2626', idxColor: '#1e40af', idxName: '加權累積報酬',
+                       stockKey: 'cum_stock_vs_taiex', idxKey: 'cum_taiex' },
+        cum_tpex:    { label: '累積 vs 櫃買',        type: 'cum', idx: 'tpex',
+                       stockColor: '#dc2626', idxColor: '#7c3aed', idxName: '櫃買累積報酬',
+                       stockKey: 'cum_stock_vs_tpex', idxKey: 'cum_tpex' },
       };
 
       function build() {
         const meta = MODE_META[mode];
-        const isRs        = (meta.type === 'rs');
-        const isMansfield = (meta.type === 'mansfield');
-        const isCum       = (meta.type === 'cum');
+        const isRs    = (meta.type === 'rs');
+        const isRatio = (meta.type === 'ratio');
+        const isCum   = (meta.type === 'cum');
 
         let series;
         let yAxisLeft;
 
-        if (isCum) {
+        if (isRatio) {
+          // 個股 / 大盤 比值，normalize 到 起點 = 100；> 100 = 相對水位高於起點，< 100 反之
+          const values = data[mode] || [];
+          series = [{
+            name: meta.label, type: 'line', smooth: true, symbol: 'none',
+            yAxisIndex: 0, data: values, connectNulls: true,
+            lineStyle: { color: meta.color, width: 2 },
+            areaStyle: { color: 'rgba(234,88,12,0.06)' },
+            markLine: {
+              symbol: 'none', silent: true,
+              data: [{ yAxis: 100,
+                lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
+                label: {
+                  formatter: '起點 100', color: '#10b981',
+                  fontSize: 11, fontWeight: 600,
+                  position: 'insideEndTop', distance: [4, 2],
+                  backgroundColor: 'rgba(255,255,255,0.92)',
+                  padding: [2, 5], borderRadius: 3,
+                }
+              }]
+            },
+          }];
+          yAxisLeft = {
+            type: 'value', scale: true, name: '相對水位（起點=100）', position: 'left',
+            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
+            axisLabel: { color: '#64748b', fontSize: 11,
+              formatter: v => v.toFixed(0) },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+          };
+        } else if (isCum) {
           // 累積報酬對比：個股 + 指定大盤兩條同 % 軸線
           const stockData = data[meta.stockKey];
           const idxData   = data[meta.idxKey];
@@ -160,27 +190,22 @@
             splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
           };
         } else {
-          // RS / Mansfield 既有邏輯
+          // RS（年/季）：0-100 軸 + 強勢線 80 + 區域填色
           const values = data[mode] || [];
-          let lineColor = meta.color;
-          if (isRs) {
-            const last = values.filter(v => v != null).slice(-1)[0];
-            lineColor = last == null ? '#ff7847'
-                      : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
-          }
+          const last = values.filter(v => v != null).slice(-1)[0];
+          const lineColor = last == null ? '#ff7847'
+                          : (last >= 80 ? '#dc2626' : (last < 30 ? '#6b7280' : meta.color));
           series = [{
             name: meta.label, type: 'line', smooth: true, symbol: 'none',
             yAxisIndex: 0, data: values, connectNulls: true,
-            areaStyle: isMansfield ? null : { color: 'rgba(255,120,71,0.12)' },
+            areaStyle: { color: 'rgba(255,120,71,0.12)' },
             lineStyle: { color: lineColor, width: 2 },
             markLine: {
               symbol: 'none', silent: true,
-              data: [{
-                yAxis: isMansfield ? 0 : 80,
+              data: [{ yAxis: 80,
                 lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
                 label: {
-                  formatter: isMansfield ? '相對中性位' : '強勢 80',
-                  color: '#10b981',
+                  formatter: '強勢 80', color: '#10b981',
                   fontSize: 11, fontWeight: 600,
                   position: 'insideEndTop', distance: [4, 2],
                   backgroundColor: 'rgba(255,255,255,0.92)',
@@ -189,13 +214,7 @@
               }]
             },
           }];
-          yAxisLeft = isMansfield ? {
-            type: 'value', scale: true, name: '相對強度 %', position: 'left',
-            nameTextStyle: { color: meta.color, fontSize: 11, padding: [0,0,4,0] },
-            axisLabel: { color: '#64748b', fontSize: 11,
-              formatter: v => (v > 0 ? '+' : '') + v.toFixed(0) + '%' },
-            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-          } : {
+          yAxisLeft = {
             type: 'value', min: 0, max: 100, interval: 20,
             name: 'RS', position: 'left',
             nameTextStyle: { color: '#92400e', fontSize: 11, padding: [0,0,4,0] },

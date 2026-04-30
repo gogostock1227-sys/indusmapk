@@ -30,6 +30,7 @@ import warnings
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import quote
 
 warnings.filterwarnings("ignore")
 
@@ -1181,15 +1182,49 @@ def compute_company_chip_data(d: dict, sym: str, days: int = 30) -> dict | None:
     return out
 
 
+_DISPOSAL_MATCH_RE = re.compile(r"每\s*(\d+)\s*分鐘撮合")
+
+
+def parse_disposal_match_minutes(info: dict) -> int | None:
+    """從處置資訊文字 parse 出撮合分鐘（5/10/20/25…），無法判斷回 None。
+    台股慣例：第一次處置 5 分撮合、第二次處置 20 分撮合（部分為 25 分），
+    上市櫃文字裡都會寫『每 X 分鐘撮合一次』。"""
+    if not info:
+        return None
+    text = " ".join([
+        info.get("action") or "",
+        info.get("detail") or "",
+        info.get("reason") or "",
+    ])
+    m = _DISPOSAL_MATCH_RE.search(text)
+    if not m:
+        return None
+    try:
+        return int(m.group(1))
+    except (ValueError, TypeError):
+        return None
+
+
+def _enrich_disposal_match_level(info: dict) -> dict:
+    """為 disposal info dict 注入 match_minutes / match_label 兩個欄位（in-place，且只跑一次）。"""
+    if not info or "match_minutes" in info:
+        return info
+    mm = parse_disposal_match_minutes(info)
+    info["match_minutes"] = mm
+    info["match_label"] = f"{mm} 分撮合" if mm else ""
+    return info
+
+
 def get_disposal_info(disposal_map: dict, sym: str) -> dict | None:
     """從 fetch_extras 的處置股字典查該檔。
     對 4 碼上市櫃個股做 .lstrip('0') / 純數字 fallback 容錯；
-    5-6 碼 ETF（00 開頭）只做精確匹配，避免 '006208'.lstrip('0') 撞 4 碼股票（如日揚 6208）。"""
+    5-6 碼 ETF（00 開頭）只做精確匹配，避免 '006208'.lstrip('0') 撞 4 碼股票（如日揚 6208）。
+    回傳前會注入 match_minutes / match_label（撮合分鐘分級）。"""
     if not disposal_map:
         return None
     info = disposal_map.get(sym)
     if info is not None:
-        return info
+        return _enrich_disposal_match_level(info)
     # ETF 樣式（00 開頭、≥5 碼）只做精確匹配
     if sym.startswith("00") and len(sym) >= 5:
         return None
@@ -1199,7 +1234,7 @@ def get_disposal_info(disposal_map: dict, sym: str) -> dict | None:
         base = "".join(c for c in sym if c.isdigit())
         if base and base != sym:
             info = disposal_map.get(base)
-    return info
+    return _enrich_disposal_match_level(info) if info else None
 
 
 def get_holder_info(holder_history: dict, levels: list, sym: str) -> dict | None:
@@ -1337,7 +1372,12 @@ def build_search_data(
             status = (disp_info.get("status") or "").strip()
             if "注意" in status:
                 tags += ["注意股"]
-            badges.append("⚠處置中")
+            mm = disp_info.get("match_minutes")
+            if mm:
+                badges.append(f"⚠處置中 {mm}分")
+                tags += [f"{mm}分處置", f"{mm}分撮合"]
+            else:
+                badges.append("⚠處置中")
 
         mkt_disp = market_label_map.get(market_map.get(sym, ""), "")
         if mkt_disp:
@@ -1428,6 +1468,11 @@ def tv_symbol_digits(sym: str) -> str:
     return "".join(c for c in (sym or "") if c.isdigit())
 
 
+def urlquote(v) -> str:
+    """URL 查詢參數用的百分比編碼。"""
+    return quote(str(v or ""), safe="")
+
+
 def build_env():
     env = Environment(
         loader=FileSystemLoader(str(TEMPLATE_DIR)),
@@ -1437,6 +1482,7 @@ def build_env():
     env.filters["fmt_amount"] = fmt_amount
     env.filters["slugify"] = slugify
     env.filters["tv_symbol"] = tv_symbol_digits
+    env.filters["urlquote"] = urlquote
     env.globals["CATEGORY_COLORS"] = CATEGORY_COLORS
     env.globals["get_meta"] = get_meta
     env.globals["STOCK_HIGHLIGHTS"] = STOCK_HIGHLIGHTS
@@ -1521,18 +1567,33 @@ def update_rs_history(rs_today: pd.Series, today, path: Path = None,
     return merged
 
 
-def compute_mansfield_rs(close: pd.DataFrame, index_series: pd.Series,
-                         lookback: int = 240, min_periods: int = 120) -> pd.DataFrame:
-    """Mansfield 風格相對強度：(個股/大盤比值) 對 N 日均值的 % 偏離。
+def compute_index_ratio(close: pd.DataFrame, index_series: pd.Series,
+                        lookback: int = 240, min_periods: int = 120) -> pd.DataFrame:
+    """個股對大盤的純比值：ratio_t = stock_close_t / index_close_t。
 
     - close: 收盤價 DataFrame, index=date, columns=symbol
     - index_series: 大盤指數 Series（taiex 或 tpex）
-    - lookback: 移動平均窗口（240 日 ≈ 52 週，台股年線慣例）
-    - min_periods: 至少需要的資料點才算（避免新上市股噪音過大）
+    - lookback / min_periods: 僅用於決定有效起點，不再做 240 日均值除法
 
-    回傳 DataFrame: index=date, columns=symbol, values=% 偏離（保留 1 位小數）
-    > 0 表示個股 / 大盤比值高於 52 週均，個股贏大盤；< 0 反之。
+    回傳 DataFrame: index=date, columns=symbol, values=比值（保留 8 位小數，比值通常很小）
+    線上揚 = 個股相對大盤水位拉開；線下彎 = 反之。
+    無中性線 / 無強弱絕對基準（只看趨勢方向與相對水位變化）。
     """
+    if close is None or close.empty or index_series is None or len(index_series) == 0:
+        return pd.DataFrame()
+    common = close.index.intersection(index_series.index)
+    if len(common) < min_periods + 1:
+        return pd.DataFrame()
+    px = close.loc[common]
+    idx = index_series.loc[common]
+    ratio = px.div(idx, axis=0)
+    return ratio.round(8)
+
+
+# 向後兼容別名（舊變數名 / 舊呼叫點仍可用）
+def compute_mansfield_rs(close: pd.DataFrame, index_series: pd.Series,
+                         lookback: int = 240, min_periods: int = 120) -> pd.DataFrame:
+    """[已停用] 改用 compute_index_ratio。保留只為避免外部 import 斷裂。"""
     if close is None or close.empty or index_series is None or len(index_series) == 0:
         return pd.DataFrame()
     common = close.index.intersection(index_series.index)
@@ -2010,11 +2071,11 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         else:
             print(f"       · 櫃買指數對齊：{len(tpex_series)} 日，最新 {last_filled}")
     # Mansfield 比值法：(個股/大盤) 對 240 日均值的 % 偏離；上揚 = 贏大盤
-    print("       · 計算 Mansfield 相對強度（個股/大盤比值對 240 日均偏離）...")
-    mansfield_taiex_df = compute_mansfield_rs(data["close"], taiex_series, lookback=240)
-    mansfield_tpex_df  = compute_mansfield_rs(data["close"], tpex_series,  lookback=240)
-    print(f"         vs 加權覆蓋 {mansfield_taiex_df.shape[1] if not mansfield_taiex_df.empty else 0} 檔；"
-          f"vs 櫃買覆蓋 {mansfield_tpex_df.shape[1] if not mansfield_tpex_df.empty else 0} 檔")
+    print("       · 計算個股 / 大盤純比值（ratio = stock_close / index_close，無中性線）...")
+    ratio_taiex_df = compute_index_ratio(data["close"], taiex_series, lookback=240)
+    ratio_tpex_df  = compute_index_ratio(data["close"], tpex_series,  lookback=240)
+    print(f"         vs 加權覆蓋 {ratio_taiex_df.shape[1] if not ratio_taiex_df.empty else 0} 檔；"
+          f"vs 櫃買覆蓋 {ratio_tpex_df.shape[1] if not ratio_tpex_df.empty else 0} 檔")
     # 累積報酬對比（個股 vs 大盤同期 %，250 日基期 0%）
     print("       · 計算累積報酬對比（個股 vs 加權/櫃買，250 日基期 0%）...")
     cum_stock_taiex_df, cum_taiex_s = compute_cumulative_return(data["close"], taiex_series, window=250)
@@ -2079,7 +2140,12 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     ]
     top_value = top_value.sort_values("amount_mn", ascending=False).head(30)
 
-    category_aggs = compute_category_aggregates(stock_metrics, group_metrics)
+    category_aggs_all = compute_category_aggregates(stock_metrics, group_metrics)
+    homepage_category_names = set(CATEGORY_COLORS.keys())
+    category_aggs = [
+        cat for cat in category_aggs_all
+        if cat.get("name") in homepage_category_names
+    ]
 
     hot_topics = load_hot_topics(top_n=6)
     index_html = env.get_template("index.html").render(
@@ -2181,11 +2247,12 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     )
     (DIST_DIR / "today.html").write_text(today_html, encoding="utf-8")
 
-    # 系統指標題材（每日動態：成交值前20 / 漲停 / 跌停）
+    # 系統指標題材（每日動態：成交值前20 / 漲停 / 跌停 / 處置股）
     SYSTEM_TOPIC_DEFS = [
         ("每日成交值前20", "system-top-value-20", "#3b82f6", "市場資金最集中的 20 檔個股，反映當日主力進場焦點。"),
         ("每日漲停",       "system-limit-up",     "#ef4444", "當日漲停板個股清單，掌握強勢族群輪動領頭羊。"),
         ("每日跌停",       "system-limit-down",   "#22c55e", "當日跌停板個股清單，警惕弱勢族群與風險訊號。"),
+        ("每日處置股",     "system-disposal",     "#f59e0b", "當日所有處置中個股清單，依撮合分級（5/10/20/25 分）標示交易異常風險。"),
     ]
     listed_otc_index = stock_metrics.index.intersection(listed_otc_symbols)
     listed_otc_metrics = stock_metrics.loc[listed_otc_index]
@@ -2198,10 +2265,27 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         limit_down_syms = listed_otc_metrics.index[listed_otc_metrics["limit_down"].fillna(False).astype(bool)].tolist()
     else:
         limit_down_syms = []
+    # 處置股清單：取 disposal map 所有 key，過濾出在 stock_metrics 索引內的（避免空資料）
+    disposal_map_now = extras.get("disposal", {}) or {}
+    disposal_syms = [
+        s for s in disposal_map_now.keys()
+        if s in stock_metrics.index
+    ]
+    # 依「處置等級重→輕」「成交額大→小」排序：25 分 > 20 分 > 10 分 > 5 分 > 未標分鐘
+    def _disposal_sort_key(sym: str):
+        info = disposal_map_now.get(sym, {}) or {}
+        # 確保 info 已被 enrich（match_minutes 欄位存在）
+        if "match_minutes" not in info:
+            _enrich_disposal_match_level(info)
+        mm = info.get("match_minutes") or 0
+        amt = float(stock_metrics.at[sym, "amount_mn"]) if sym in stock_metrics.index else 0.0
+        return (-mm, -amt)
+    disposal_syms.sort(key=_disposal_sort_key)
     SYSTEM_MEMBERS = {
         "每日成交值前20": top_value_syms,
         "每日漲停":        limit_up_syms,
         "每日跌停":        limit_down_syms,
+        "每日處置股":      disposal_syms,
     }
     system_topics = []
     for sname, slug, color, desc in SYSTEM_TOPIC_DEFS:
@@ -2371,12 +2455,13 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
                 "slug":     slug,
                 "n_stocks": len(rows),
             }
-    print(f"       ✓ 系統指標題材詳情頁 {sys_topic_count} 頁（成交值前20 / 漲停 / 跌停）")
+    print(f"       ✓ 系統指標題材詳情頁 {sys_topic_count} 頁（成交值前20 / 漲停 / 跌停 / 處置股）")
 
-    # 個股 6 個月累積報酬 series（compare 頁異步加載用）
+    # 個股 6 個月累積報酬 series（compare 頁內嵌使用，另輸出 JSON 作為伺服器模式備援）
     stock_data_dir = DIST_DIR / "data" / "stock_series"
     stock_data_dir.mkdir(parents=True, exist_ok=True)
     stock_index = []
+    stock_series_map = {}
     stock_series_count = 0
     close_cols = set(data["close"].columns)
     for sym in stock_metrics.index:
@@ -2385,6 +2470,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         series = compute_topic_return_series(data, [sym], days=125)
         if not series:
             continue
+        stock_series_map[sym] = series
         (stock_data_dir / f"{sym}.json").write_text(
             json.dumps(series, ensure_ascii=False), encoding="utf-8"
         )
@@ -2405,6 +2491,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         topic_series_json=json.dumps(all_topic_series, ensure_ascii=False),
         topic_meta_json=json.dumps(all_topic_meta, ensure_ascii=False),
         stock_index_json=json.dumps(stock_index, ensure_ascii=False),
+        stock_series_json=json.dumps(stock_series_map, ensure_ascii=False),
     )
     (DIST_DIR / "compare.html").write_text(compare_html, encoding="utf-8")
 
@@ -2567,14 +2654,22 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
                     return None
                 t = series.reindex(pd.DatetimeIndex(all_dates), method="ffill")
                 return [None if pd.isna(v) else round(float(v), 2) for v in t.values]
-            def _align_mansfield(df):
+            def _align_ratio(df):
                 if df is None or df.empty or sym not in df.columns:
                     return None
                 s = df[sym].dropna()
                 if len(s) < 5:
                     return None
                 t = s.reindex(pd.DatetimeIndex(all_dates))
-                return [None if pd.isna(v) else round(float(v), 1) for v in t.values]
+                # Normalize：以顯示窗口第一個非 NaN 為基期 100
+                non_null = t.dropna()
+                if non_null.empty:
+                    return None
+                base = float(non_null.iloc[0])
+                if base == 0:
+                    return None
+                normalized = (t / base) * 100
+                return [None if pd.isna(v) else round(float(v), 1) for v in normalized.values]
             def _align_cum_stock(df):
                 if df is None or df.empty or sym not in df.columns:
                     return None
@@ -2594,8 +2689,8 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
                 "dates":              [d.strftime("%y/%m/%d") for d in all_dates],
                 "year":               _align(year_s),
                 "quarter":            _align(quarter_s),
-                "ms_taiex":           _align_mansfield(mansfield_taiex_df),
-                "ms_tpex":            _align_mansfield(mansfield_tpex_df),
+                "ratio_taiex":        _align_ratio(ratio_taiex_df),
+                "ratio_tpex":         _align_ratio(ratio_tpex_df),
                 "cum_stock_vs_taiex": _align_cum_stock(cum_stock_taiex_df),
                 "cum_taiex":          _align_cum_index(cum_taiex_s),
                 "cum_stock_vs_tpex":  _align_cum_stock(cum_stock_tpex_df),
