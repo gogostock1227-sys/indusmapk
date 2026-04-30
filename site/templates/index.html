@@ -76,6 +76,294 @@
   </div>
 </section>
 
+{% if daily_chip_report %}
+<section class="daily-chip-report section-block" id="daily-chip-report">
+  <header class="chip-report-head">
+    <div>
+      <p class="eyebrow">Daily Market Positioning</p>
+      <h2 class="section-title">每日台股籌碼報告</h2>
+      <p class="section-sub">
+        現貨法人、融資融券、期貨與臺指選擇權未平倉，一張表看懂今日資金站位
+      </p>
+    </div>
+    <div class="chip-report-stamp">
+      <strong>{{ daily_chip_report.report_date }}</strong>
+      <span>官方日資料彙整</span>
+    </div>
+  </header>
+
+  {% if daily_chip_report.status == 'partial' and daily_chip_report.errors %}
+  <div class="chip-report-warning">
+    部分來源暫時無法更新，已優先顯示可取得資料。
+  </div>
+  {% endif %}
+
+  <div class="chip-report-overview">
+    {% if daily_chip_report.vix %}
+    <article class="daily-chip-tile vix-panel">
+      <div class="chip-panel-kicker">台指選擇權波動率</div>
+      <div class="vix-main">
+        <span>VIX</span>
+        <strong>{{ daily_chip_report.vix.value_text }}</strong>
+      </div>
+      <div class="vix-sub">
+        <span>{{ daily_chip_report.vix.date }}</span>
+        <em class="{{ daily_chip_report.vix.change.class }}">較前日 {{ daily_chip_report.vix.change.text }}</em>
+      </div>
+    </article>
+    {% endif %}
+
+    {% if daily_chip_report.spot and daily_chip_report.spot.total %}
+    <article class="daily-chip-tile key-metric-tile">
+      <span class="tile-label">現貨三大法人</span>
+      <strong class="{{ daily_chip_report.spot.total.total.class }}">{{ daily_chip_report.spot.total.total.text }}</strong>
+      <em>外資 {{ daily_chip_report.spot.total.foreign.text }}</em>
+      <small>{{ daily_chip_report.spot.summary }}</small>
+    </article>
+    {% endif %}
+
+    {% if daily_chip_report.margin and daily_chip_report.margin.twse %}
+    <article class="daily-chip-tile key-metric-tile">
+      <span class="tile-label">信用交易</span>
+      <strong class="{{ daily_chip_report.margin.twse.financing_delta_amount.class }}">{{ daily_chip_report.margin.twse.financing_delta_amount.text }}</strong>
+      <em>融資餘額 {{ daily_chip_report.margin.twse.financing_balance_amount.text }}</em>
+      <small>{{ daily_chip_report.margin.summary }}</small>
+    </article>
+    {% endif %}
+
+    {% if daily_chip_report.futures and daily_chip_report.futures.foreign %}
+    <article class="daily-chip-tile key-metric-tile">
+      <span class="tile-label">外資臺股期貨</span>
+      <strong class="{{ daily_chip_report.futures.foreign.oi_lots.class }}">{{ daily_chip_report.futures.foreign.oi_lots.text }}</strong>
+      <em class="{{ daily_chip_report.futures.foreign.delta_lots.class }}">較前日 {{ daily_chip_report.futures.foreign.delta_lots.text }}</em>
+      <small>{{ daily_chip_report.futures.summary }}</small>
+    </article>
+    {% endif %}
+  </div>
+
+  <div class="daily-chip-detail-grid">
+    {% if daily_chip_report.spot %}
+    <article class="daily-chip-panel spot-panel">
+      <div class="chip-panel-head">
+        <div>
+          <h3>現貨法人買賣超</h3>
+          <p>{{ daily_chip_report.spot.summary }}</p>
+        </div>
+        <span>{{ daily_chip_report.spot.date }}</span>
+      </div>
+      <div class="chip-table-scroll">
+        <table class="chip-report-table">
+          <thead>
+            <tr>
+              <th>市場</th>
+              <th>外資</th>
+              <th>投信</th>
+              <th>自營商</th>
+              <th>合計</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in daily_chip_report.spot.markets %}
+            <tr class="{% if row.market == '合計' %}is-total{% endif %}">
+              <th>{{ row.market }}</th>
+              <td class="{{ row.foreign.class }}">{{ row.foreign.text }}</td>
+              <td class="{{ row.trust.class }}">{{ row.trust.text }}</td>
+              <td class="{{ row.dealer.class }}">{{ row.dealer.text }}</td>
+              <td class="{{ row.total.class }}">{{ row.total.text }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+    {% endif %}
+
+    {% if daily_chip_report.futures %}
+    <article class="daily-chip-panel futures-panel">
+      <div class="chip-panel-head">
+        <div>
+          <h3>{{ daily_chip_report.futures.product }}未平倉</h3>
+          <p>{{ daily_chip_report.futures.summary }}</p>
+        </div>
+        <span>{{ daily_chip_report.futures.date }}</span>
+      </div>
+      <div class="futures-grid">
+        {% for row in daily_chip_report.futures.rows %}
+        <div class="futures-row">
+          <span class="party">{{ row.label }}</span>
+          <strong class="{{ row.oi_lots.class }}">{{ row.oi_lots.text }}</strong>
+          <em class="{{ row.delta_lots.class }}">增減 {{ row.delta_lots.text }}</em>
+          <small>契約金額 {{ row.oi_amount.text }} · 當日淨交易 {{ row.trade_net_lots.text }}</small>
+        </div>
+        {% endfor %}
+      </div>
+    </article>
+    {% endif %}
+
+    {% if daily_chip_report.margin %}
+    <article class="daily-chip-panel margin-panel">
+      <div class="chip-panel-head">
+        <div>
+          <h3>融資融券餘額</h3>
+          <p>{{ daily_chip_report.margin.summary }}</p>
+        </div>
+        <span>{{ daily_chip_report.margin.date }}</span>
+      </div>
+      <div class="chip-table-scroll">
+        <table class="chip-report-table margin-ratio-table">
+          <thead>
+            <tr>
+              <th>市場</th>
+              <th>日期</th>
+              <th>融資增減(億)</th>
+              <th>融資餘額(億)</th>
+              <th>融券增減(張)</th>
+              <th>融券餘額(張)</th>
+              <th>券資比</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in daily_chip_report.margin.rows %}
+            <tr>
+              <th>{{ row.market }}</th>
+              <td>{{ row.date }}</td>
+              <td class="{{ row.financing_delta_amount.class }}">{{ row.financing_delta_amount.text|replace(' 億','') }}</td>
+              <td>{{ row.financing_balance_amount.text|replace(' 億','') }}</td>
+              <td class="{{ row.short_delta.class }}">{{ row.short_delta.text|replace(' 張','') }}</td>
+              <td>{{ row.short_balance.text|replace(' 張','') }}</td>
+              <td>{{ row.short_margin_ratio.text }}</td>
+            </tr>
+            {% if row.financing_lots_note %}
+            <tr class="margin-note-row">
+              <td colspan="7">{{ row.market }}：{{ row.financing_lots_note }}；官方日餘額未提供融資金額欄位。</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="margin-mini-notes">
+        <span>融資單位：億</span>
+        <span>融券單位：張</span>
+        <span>券資比＝融券餘額 ÷ 融資餘額張數</span>
+        <span>上櫃融資金額：官方日資料未揭示</span>
+      </div>
+    </article>
+    {% endif %}
+
+    {% if daily_chip_report.options %}
+    <article class="daily-chip-panel options-panel">
+      <div class="chip-panel-head">
+        <div>
+          <h3>{{ daily_chip_report.options.product }}留倉</h3>
+          <p>{{ daily_chip_report.options.summary }}</p>
+        </div>
+        <span>{{ daily_chip_report.options.date }}</span>
+      </div>
+
+      {% if daily_chip_report.options.identities %}
+      <div class="option-intent-board">
+        {% for group in daily_chip_report.options.identities %}
+        <section class="option-intent-group">
+          <div class="option-intent-head">
+            <strong>{{ group.identity }}</strong>
+            <span class="{{ group.lot_combo.class }}">口數 {{ group.lot_combo.code }} · {{ group.lot_combo.bias }}</span>
+            <span class="{{ group.amount_combo.class }}">資金 {{ group.amount_combo.code }} · {{ group.amount_combo.bias }}</span>
+          </div>
+
+          <div class="option-lanes">
+            <div class="option-lane">
+              <div class="option-lane-title">
+                <span>口數布局</span>
+                <strong class="{{ group.lot_combo.class }}">{{ group.lot_combo.code }}</strong>
+              </div>
+              <p>{{ group.lot_combo.reading }}</p>
+              <div class="option-leg-grid">
+                <div class="option-leg">
+                  <span class="option-tag option-call">CALL</span>
+                  <b class="{{ group.call_row.delta_lots.class }}">{{ group.call_row.delta_lots.text }}</b>
+                  <i class="{{ group.call_row.lot_signal.class }}">{{ group.call_row.lot_signal.code }}</i>
+                  <small>淨留倉 {{ group.call_row.oi_lots.text }}</small>
+                </div>
+                <div class="option-leg">
+                  <span class="option-tag option-put">PUT</span>
+                  <b class="{{ group.put_row.delta_lots.class }}">{{ group.put_row.delta_lots.text }}</b>
+                  <i class="{{ group.put_row.lot_signal.class }}">{{ group.put_row.lot_signal.code }}</i>
+                  <small>淨留倉 {{ group.put_row.oi_lots.text }}</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="option-lane">
+              <div class="option-lane-title">
+                <span>資金布局</span>
+                <strong class="{{ group.amount_combo.class }}">{{ group.amount_combo.code }}</strong>
+              </div>
+              <p>{{ group.amount_combo.reading }}</p>
+              <div class="option-leg-grid">
+                <div class="option-leg">
+                  <span class="option-tag option-call">CALL</span>
+                  <b class="{{ group.call_row.delta_amount.class }}">{{ group.call_row.delta_amount.text }}</b>
+                  <i class="{{ group.call_row.amount_signal.class }}">{{ group.call_row.amount_signal.code }}</i>
+                  <small>淨留倉 {{ group.call_row.oi_amount.text }}</small>
+                </div>
+                <div class="option-leg">
+                  <span class="option-tag option-put">PUT</span>
+                  <b class="{{ group.put_row.delta_amount.class }}">{{ group.put_row.delta_amount.text }}</b>
+                  <i class="{{ group.put_row.amount_signal.class }}">{{ group.put_row.amount_signal.code }}</i>
+                  <small>淨留倉 {{ group.put_row.oi_amount.text }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <details class="option-raw-details">
+        <summary>原始明細</summary>
+        <div class="chip-table-scroll">
+          <table class="chip-report-table options-table">
+            <thead>
+              <tr>
+                <th>身份</th>
+                <th>權別</th>
+                <th>淨留倉口數</th>
+                <th>口數增減</th>
+                <th>口數判斷</th>
+                <th>契約金額</th>
+                <th>金額增減</th>
+                <th>資金判斷</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in daily_chip_report.options.rows %}
+              <tr>
+                <th>{{ row.identity }}</th>
+                <td><span class="option-tag option-{{ row.tag|lower }}">{{ row.tag }}</span></td>
+                <td class="{{ row.oi_lots.class }}">{{ row.oi_lots.text }}</td>
+                <td class="{{ row.delta_lots.class }}">{{ row.delta_lots.text }}</td>
+                <td><span class="option-signal {{ row.lot_signal.class }}">{{ row.lot_signal.code }}</span></td>
+                <td class="{{ row.oi_amount.class }}">{{ row.oi_amount.text }}</td>
+                <td class="{{ row.delta_amount.class }}">{{ row.delta_amount.text }}</td>
+                <td><span class="option-signal {{ row.amount_signal.class }}">{{ row.amount_signal.code }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </article>
+    {% endif %}
+  </div>
+
+  <p class="chip-report-source">
+    來源：TWSE、TPEx、TAIFEX；產生時間 {{ daily_chip_report.generated_at_label or daily_chip_report.generated_at }}
+  </p>
+</section>
+{% endif %}
+
 <section class="section-block">
   <header class="section-head">
     <h2 class="section-title">族群地圖</h2>

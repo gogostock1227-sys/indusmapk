@@ -61,6 +61,7 @@ RICH_PKL = SITE_DIR / ".company_rich.pkl"
 EXTRAS_JSON = SITE_DIR / ".cache_extras.json"
 TRENDING_JSON = SITE_DIR / ".cache_trending.json"
 FUTURES_JSON = SITE_DIR / ".cache_futures.json"
+DAILY_CHIP_JSON = SITE_DIR / ".cache_daily_chip_report.json"
 RS_HISTORY = SITE_DIR / ".cache_rs_history.parquet"
 RS_HISTORY_QUARTER = SITE_DIR / ".cache_rs_history_quarter.parquet"
 TAIEX_CACHE = SITE_DIR / ".cache_taiex.parquet"  # 舊：只存加權指數，保留以利向後兼容
@@ -164,6 +165,54 @@ def refresh_futures_list(max_age_days: float = 1.0) -> None:
         print("[futures] 抓取逾時 60s，沿用前次 cache")
     except Exception as e:
         print(f"[futures] 抓取例外：{e}（沿用前次 cache）")
+
+
+def refresh_daily_chip_report(max_age_minutes: float = 30.0) -> None:
+    """跑 fetch_daily_chip_report.py 更新首頁每日籌碼報告。
+
+    官方來源偶爾會延遲或短暫失敗，因此採 subprocess 隔離；失敗時首頁沿用前次 cache。
+    """
+    import subprocess, time
+    if DAILY_CHIP_JSON.exists():
+        age_minutes = (time.time() - DAILY_CHIP_JSON.stat().st_mtime) / 60
+        if age_minutes < max_age_minutes:
+            print(f"[daily-chip] cache {age_minutes:.0f} 分鐘內，跳過抓取（{DAILY_CHIP_JSON.name}）")
+            return
+    script = SITE_DIR / "fetch_daily_chip_report.py"
+    if not script.exists():
+        print(f"[daily-chip] 跳過：找不到 {script.name}")
+        return
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script)],
+            timeout=120,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        if proc.returncode == 0:
+            tail = [l for l in proc.stdout.splitlines() if l.strip()][-8:]
+            for l in tail:
+                print(f"  {l}")
+        else:
+            print(f"[daily-chip] exit {proc.returncode}（沿用前次 cache）")
+            if proc.stderr:
+                print(proc.stderr[-500:])
+    except subprocess.TimeoutExpired:
+        print("[daily-chip] 抓取逾時 120s，沿用前次 cache")
+    except Exception as e:
+        print(f"[daily-chip] 抓取例外：{e}（沿用前次 cache）")
+
+
+def load_daily_chip_report() -> dict | None:
+    """讀取每日籌碼報告 cache，失敗時回 None，首頁會自動隱藏區塊。"""
+    if not DAILY_CHIP_JSON.exists():
+        return None
+    try:
+        return json.loads(DAILY_CHIP_JSON.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[daily-chip] 讀取 cache 失敗：{e}")
+        return None
 
 
 def _fetch_tpex_official_recent() -> pd.Series:
@@ -2148,6 +2197,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     ]
 
     hot_topics = load_hot_topics(top_n=6)
+    daily_chip_report = load_daily_chip_report()
     index_html = env.get_template("index.html").render(
         **base_ctx,
         total_groups=total_groups,
@@ -2157,6 +2207,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         top_flow=top_flow,
         category_aggs=category_aggs,
         hot_topics=hot_topics,
+        daily_chip_report=daily_chip_report,
     )
     (DIST_DIR / "index.html").write_text(index_html, encoding="utf-8")
 
@@ -2966,6 +3017,9 @@ def main():
 
     print("\n[0/5] 更新個股期貨清單（期交所，週更）...")
     refresh_futures_list()
+
+    print("\n[0b/5] 更新首頁每日籌碼報告（官方日資料）...")
+    refresh_daily_chip_report()
 
     print("\n[1/5] 載入資料...")
     data = load_data(use_cache=args.skip_finlab)
