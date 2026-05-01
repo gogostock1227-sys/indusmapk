@@ -12,11 +12,12 @@
   <div class="panel">
     <div class="panel-header">
       <h2>強勢延續</h2>
-      <span class="muted">20日 +5%↑、5日 +2%↑、今日續揚</span>
+      <span class="muted">20日 +5%↑、5日 +2%↑、今日續揚、族群成交額 &gt; {{ min_amount_label }}</span>
     </div>
     {% if leaders %}
+    <div class="table-scroll">
     <table class="table">
-      <thead><tr><th>題材</th><th>20日</th><th>5日</th><th>今日</th><th>漲停</th></tr></thead>
+      <thead><tr><th>題材</th><th>20日</th><th>5日</th><th>今日</th><th>成交額</th><th>漲停</th></tr></thead>
       <tbody>
         {% for g, m in leaders %}
         {% set meta = get_meta(g) %}
@@ -25,11 +26,13 @@
           <td class="positive">{{ m.ret_20d_mean|pct }}</td>
           <td class="positive">{{ m.ret_5d_mean|pct }}</td>
           <td class="{% if m.ret_1d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_1d_mean|pct }}</td>
+          <td>{{ m.amount_sum_mn|fmt_amount }}</td>
           <td>{% if m.n_limit_up %}<span class="badge badge-red">{{ m.n_limit_up }}</span>{% else %}—{% endif %}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    </div>
     {% else %}
     <p class="muted">目前沒有符合強勢延續條件的題材。</p>
     {% endif %}
@@ -38,11 +41,12 @@
   <div class="panel">
     <div class="panel-header">
       <h2>落後補漲候選</h2>
-      <span class="muted">20日 -3%↓ 但 5日 +1%↑（轉折中）</span>
+      <span class="muted">20日 -3%↓ 但 5日 +1%↑、族群成交額 &gt; {{ min_amount_label }}（轉折中）</span>
     </div>
     {% if laggards %}
+    <div class="table-scroll">
     <table class="table">
-      <thead><tr><th>題材</th><th>20日</th><th>5日</th><th>今日</th><th>成分股</th></tr></thead>
+      <thead><tr><th>題材</th><th>20日</th><th>5日</th><th>今日</th><th>成交額</th><th>成分股</th></tr></thead>
       <tbody>
         {% for g, m in laggards %}
         {% set meta = get_meta(g) %}
@@ -51,11 +55,13 @@
           <td class="negative">{{ m.ret_20d_mean|pct }}</td>
           <td class="positive">{{ m.ret_5d_mean|pct }}</td>
           <td class="{% if m.ret_1d_mean > 0 %}positive{% else %}negative{% endif %}">{{ m.ret_1d_mean|pct }}</td>
+          <td>{{ m.amount_sum_mn|fmt_amount }}</td>
           <td>{{ m.n_stocks }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    </div>
     {% else %}
     <p class="muted">目前沒有落後補漲訊號。</p>
     {% endif %}
@@ -65,8 +71,8 @@
 <section class="panel">
   <div class="panel-header"><h2>判讀說明</h2></div>
   <ul class="notes">
-    <li><b>強勢延續</b>：20日、5日、今日皆正，主力資金卡位中。進場偏逢回買，出場設 20日均線破線。</li>
-    <li><b>落後補漲</b>：20日仍弱但 5日轉強，屬於資金輪動受益者。風險：仍可能是反彈而非反轉，搭配成交量與法人動向判斷。</li>
+    <li><b>強勢延續</b>：20日、5日、今日皆正，且族群成交額大於 {{ min_amount_label }}，代表中短期動能連續、今日仍有買盤延續；進場偏逢回買，出場設 20日均線破線。</li>
+    <li><b>落後補漲</b>：20日仍弱但 5日轉強，且族群成交額大於 {{ min_amount_label }}，屬於資金輪動受益者。風險：仍可能是反彈而非反轉，搭配成交量與法人動向判斷。</li>
   </ul>
 </section>
 {% endblock %}

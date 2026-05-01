@@ -122,7 +122,7 @@
   <div id="tech_chart_009819" style="height:720px; width:100%; padding:4px 4px 12px;"></div>
   <script>
   (function(){
-    const chartData = {"dates": ["2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30"], "ohlc": [[10.45, 12.54, 10.45, 12.99], [10.3, 10.89, 10.16, 11.33], [10.16, 10.05, 10.05, 10.17], [10.05, 10.01, 10.01, 10.06], [9.9, 9.89, 9.84, 9.91], [9.97, 9.94, 9.94, 10.01]], "volume": [116831.0, 170265.0, 219137.0, 59352.0, 82476.0, 55403.0], "ma5": [null, null, null, null, 10.68, 10.16], "ma10": [null, null, null, null, null, null], "ma20": [null, null, null, null, null, null], "ma60": [null, null, null, null, null, null], "bb_up": [null, null, null, null, null, null], "bb_lo": [null, null, null, null, null, null], "k": [null, null, null, null, null, null], "d": [null, null, null, null, null, null], "macd_dif": [0.0, -0.13, -0.3, -0.43, -0.54, -0.61], "macd_dea": [0.0, -0.03, -0.08, -0.15, -0.23, -0.31], "macd_hist": [0.0, -0.21, -0.44, -0.56, -0.62, -0.62], "rsi": [null, 0.0, 0.0, 0.0, 0.0, 0.28], "foreign_net": [130.0, 74.0, -856.0, 181.0, -174.0, 41.0], "trust_net": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_net": [-27000.0, -70520.0, -102174.0, -22780.0, -33450.0, -39961.0], "main_net": [-26869.0, -70446.0, -103031.0, -22599.0, -33624.0, -39920.0], "has_chip": {"main": true, "foreign": true, "trust": true, "dealer": true}};
+    const chartData = {"dates": ["2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30"], "ohlc": [[10.45, 12.54, 10.45, 12.99], [10.3, 10.89, 10.16, 11.33], [10.16, 10.05, 10.05, 10.17], [10.05, 10.01, 10.01, 10.06], [9.9, 9.89, 9.84, 9.91], [9.97, 9.94, 9.94, 10.01]], "volume": [116831.0, 170265.0, 219137.0, 59352.0, 82476.0, 55403.0], "ma5": [null, null, null, null, 10.68, 10.16], "ma10": [null, null, null, null, null, null], "ma20": [null, null, null, null, null, null], "ma60": [null, null, null, null, null, null], "bb_up": [null, null, null, null, null, null], "bb_lo": [null, null, null, null, null, null], "k": [null, null, null, null, null, null], "d": [null, null, null, null, null, null], "macd_dif": [0.0, -0.13, -0.3, -0.43, -0.54, -0.61], "macd_dea": [0.0, -0.03, -0.08, -0.15, -0.23, -0.31], "macd_hist": [0.0, -0.21, -0.44, -0.56, -0.62, -0.62], "rsi": [null, 0.0, 0.0, 0.0, 0.0, 0.28], "foreign_net": [130.0, 74.0, -856.0, 181.0, -174.0, 41.0], "trust_net": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_net": [-27000.0, -70520.0, -102174.0, -22780.0, -33450.0, -39961.0], "main_net": [-30480.0, -78208.0, -146321.0, -32200.0, -49998.0, -33161.0], "has_chip": {"main": true, "foreign": true, "trust": true, "dealer": true}};
     if (!chartData) {
       const el = document.getElementById('tech_chart_009819');
       if (el) el.innerHTML = '<div style="text-align:center; padding:80px 20px; color:var(--text-mute);">暫無 K 棒資料</div>';
@@ -590,7 +590,7 @@
   </div>
 
   <div class="tab-panel active" data-panel="inst-009819">
-    <div id="chip_inst_chart_009819" style="height:380px; width:100%; padding:8px;"></div>
+    <div id="chip_inst_chart_009819" style="height:430px; width:100%; padding:8px 8px 24px; margin-bottom:12px; box-sizing:border-box;"></div>
     <div class="scroll-table chip-table-wrap">
       <table class="table compact chip-inst-table"><thead>
         <tr>
@@ -688,15 +688,35 @@
       const el = document.getElementById('chip_inst_chart_'+sym);
       const ch = echarts.init(el, 'dark', { renderer: 'canvas' });
       const series = [];
-      if (chip.foreign_net) series.push({ name:'外資', type:'line', data: chip.foreign_net, smooth:true, lineStyle:{color:'#10b981',width:2}, itemStyle:{color:'#10b981'}, symbol:'circle', symbolSize:5 });
-      if (chip.trust_net)   series.push({ name:'投信', type:'line', data: chip.trust_net,   smooth:true, lineStyle:{color:'#ff7847',width:2}, itemStyle:{color:'#ff7847'}, symbol:'circle', symbolSize:5 });
-      if (chip.dealer_net)  series.push({ name:'自營商', type:'line', data: chip.dealer_net,smooth:true, lineStyle:{color:'#f472b6',width:2}, itemStyle:{color:'#f472b6'}, symbol:'circle', symbolSize:5 });
+      const instBar = (name, data, color, z) => ({
+        name, type:'bar', data,
+        barGap:'-100%', barCategoryGap:'46%', barMaxWidth:18,
+        itemStyle:{ color, opacity:0.76, borderRadius:[2,2,0,0] },
+        emphasis:{ focus:'series', itemStyle:{ opacity:0.96 } },
+        z
+      });
+      if (chip.foreign_net) series.push(instBar('外資', chip.foreign_net, '#10b981', 3));
+      if (chip.trust_net)   series.push(instBar('投信', chip.trust_net,   '#ff7847', 2));
+      if (chip.dealer_net)  series.push(instBar('自營商', chip.dealer_net,'#f472b6', 1));
       ch.setOption({
         backgroundColor:'transparent', animation:false,
         legend:{ data:['外資','投信','自營商'], top:0, textStyle:{color:'#9ca3af'} },
-        grid:{ left:60, right:20, top:36, bottom:40 },
-        tooltip:{ trigger:'axis', backgroundColor:'#1f2937', borderColor:'#374151', textStyle:{color:'#e5e7eb'}, valueFormatter:(v)=>Number(v).toLocaleString()+' 張' },
-        xAxis:{ type:'category', data: chip.dates, axisLabel:{color:'#9ca3af', rotate:45}, axisLine:{lineStyle:{color:'#374151'}} },
+        grid:{ left:60, right:20, top:42, bottom:86, containLabel:true },
+        tooltip:{
+          trigger:'axis',
+          axisPointer:{ type:'shadow' },
+          backgroundColor:'#1f2937', borderColor:'#374151',
+          textStyle:{color:'#e5e7eb'},
+          valueFormatter:(v)=>Number(v).toLocaleString()+' 張'
+        },
+        xAxis:{
+          type:'category',
+          data: chip.dates,
+          boundaryGap:true,
+          axisLabel:{ color:'#9ca3af', rotate:45, margin:16, fontSize:11, hideOverlap:true },
+          axisTick:{ alignWithLabel:true },
+          axisLine:{lineStyle:{color:'#374151'}}
+        },
         yAxis:{ type:'value', name:'張', nameTextStyle:{color:'#9ca3af'}, axisLabel:{color:'#9ca3af', formatter:(v)=>v>=1000||v<=-1000?(v/1000).toFixed(0)+'K':v}, splitLine:{lineStyle:{color:'rgba(255,255,255,0.04)'}} },
         series: series
       });
@@ -776,6 +796,12 @@
       const COLORS = { retail:'#dc2626', mid:'#b45309', big:'#059669' };
       const mdDate = (d) => (d || '').replace(/-/g,'').slice(0,8) || d;
       const shortDate = (d) => (d || '').slice(5);   // 04-17
+      const trendDate = (d) => {
+        const s = d || '';
+        return /^\d{4}-\d{2}-\d{2}$/.test(s)
+          ? `${s.slice(2,4)}年${s.slice(5,7)}/${s.slice(8,10)}`
+          : s;
+      };
       const fmtNum = (n) => (n == null || isNaN(n)) ? '—' : Math.abs(n).toLocaleString();
       const fmtSignedNum = (n) => {
         if (n == null || isNaN(n)) return '';
@@ -796,9 +822,9 @@
                    textStyle:{color:'#1f2937'}, icon:'circle' },
           tooltip:{ trigger:'axis', valueFormatter:(v)=> Number(v).toFixed(2)+'%',
                     backgroundColor:'rgba(255,255,255,0.96)', borderColor:'#d1d5db', textStyle:{color:'#111827'} },
-          grid:{ left:58, right:16, top:40, bottom:40 },
-          xAxis:{ type:'category', data: holder.dates.map(shortDate),
-                  axisLine:{lineStyle:{color:'#9ca3af'}}, axisLabel:{color:'#475569'} },
+          grid:{ left:58, right:16, top:40, bottom:58 },
+          xAxis:{ type:'category', data: holder.dates.map(trendDate),
+                  axisLine:{lineStyle:{color:'#9ca3af'}}, axisLabel:{color:'#475569', rotate:45, fontSize:11} },
           yAxis:{ type:'value', axisLabel:{color:'#475569', formatter:'{value}%'},
                   splitLine:{lineStyle:{color:'rgba(0,0,0,0.06)'}} },
           series:[
@@ -814,10 +840,10 @@
       }
       renderTrend();
 
-      // ── 股東人數卡（最近 4 週）──
+      // ── 股東人數卡（最近 3 週）──
       const snapEl = document.getElementById('holder_snap_'+sym);
       const N = holder.dates.length;
-      const DISPLAY_WEEKS = 4;
+      const DISPLAY_WEEKS = 3;
       const show = Math.min(DISPLAY_WEEKS, N);
       let htmlSnap = '';
       for (let i = N - show; i < N; i++) {
@@ -834,7 +860,7 @@
           <div class="muted" style="font-size:12px; line-height:1.6;">
             趨勢圖可顯示近一年歷史<br>
             目前僅 ${N} 週資料<br>
-            級距表顯示最近 4 週
+            級距表顯示最近 3 週
           </div>
         </div>`.repeat(DISPLAY_WEEKS - show);
       }

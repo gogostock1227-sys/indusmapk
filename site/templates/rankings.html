@@ -3,13 +3,39 @@
 {% block title %}排行榜 · 族群寶{% endblock %}
 
 {% block content %}
+{% macro chip_rank_panel(title, rows, value_label, value_class) %}
+<div class="panel">
+  <div class="panel-header"><h2>{{ title }}</h2><span class="muted">單位：張</span></div>
+  <table class="table compact">
+    <thead><tr><th>#</th><th>股票</th><th>產業</th><th>{{ value_label }}</th><th>今日</th><th>收盤</th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="rank-no">{{ loop.index }}</td>
+        <td><a href="company/{{ r.sym }}.html">{{ r.name }} <span class="muted">({{ r.sym }})</span></a></td>
+        <td class="muted">{{ r.industry or '—' }}</td>
+        <td class="{{ value_class }}">{{ "{:+,.0f}".format(r.value) }}</td>
+        <td class="{% if r.ret_1d and r.ret_1d > 0 %}positive{% elif r.ret_1d %}negative{% endif %}">{{ "{:+.2f}%".format(r.ret_1d*100) if r.ret_1d is not none else '—' }}</td>
+        <td>{{ "%.2f"|format(r.close) if r.close is not none else '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="muted">暫無資料</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endmacro %}
+
 <section class="hero">
   <h1>排行榜 <small>{{ last_date }}</small></h1>
   <p>籌碼、基本面、大戶變化多維度排行，快速定位強勢個股。所有排行都取 Top 20，點擊個股進入詳情頁。</p>
 </section>
 
 <div class="filter-bar" id="rank-tabs">
-  <button class="filter-chip active" data-tab="chips">籌碼 · 近 5 日法人</button>
+  <button class="filter-chip active" data-tab="chips">法人 · 近 5 日</button>
+  <button class="filter-chip" data-tab="institution-daily">法人 · 當日</button>
+  <button class="filter-chip" data-tab="main-daily">主力 · 當日</button>
+  <button class="filter-chip" data-tab="main-multi">主力 · 5/10 日</button>
   <button class="filter-chip" data-tab="revenue">月營收 YoY</button>
   <button class="filter-chip" data-tab="eps">EPS 年增</button>
   <button class="filter-chip" data-tab="big">大戶佔比變化</button>
@@ -93,6 +119,52 @@
         </tbody>
       </table>
     </div>
+  </div>
+
+  <div class="grid-2col">
+    {{ chip_rank_panel("自營商 近 5 日買超 Top 20", rankings.chips_dealer_buy, "5日買超", "positive") }}
+    {{ chip_rank_panel("自營商 近 5 日賣超 Top 20", rankings.chips_dealer_sell, "5日賣超", "negative") }}
+  </div>
+</div>
+
+<!-- ───────── 法人 當日 ───────── -->
+<div class="rank-tab-body" data-body="institution-daily" hidden>
+  <div class="grid-2col">
+    {{ chip_rank_panel("外資 當日買超 Top 20", rankings.chips_foreign_1d_buy, "當日買超", "positive") }}
+    {{ chip_rank_panel("外資 當日賣超 Top 20", rankings.chips_foreign_1d_sell, "當日賣超", "negative") }}
+  </div>
+
+  <div class="grid-2col">
+    {{ chip_rank_panel("投信 當日買超 Top 20", rankings.chips_trust_1d_buy, "當日買超", "positive") }}
+    {{ chip_rank_panel("投信 當日賣超 Top 20", rankings.chips_trust_1d_sell, "當日賣超", "negative") }}
+  </div>
+
+  <div class="grid-2col">
+    {{ chip_rank_panel("自營商 當日買超 Top 20", rankings.chips_dealer_1d_buy, "當日買超", "positive") }}
+    {{ chip_rank_panel("自營商 當日賣超 Top 20", rankings.chips_dealer_1d_sell, "當日賣超", "negative") }}
+  </div>
+</div>
+
+<!-- ───────── 主力 · 當日 ───────── -->
+<div class="rank-tab-body" data-body="main-daily" hidden>
+  <p class="muted" style="margin: 0 0 12px 0;">主力 = 當日分點 Top 15 買超 − Top 15 賣超（單位：張）。資料口徑：分點主力，不等於三大法人合計。</p>
+  <div class="grid-2col">
+    {{ chip_rank_panel("主力 當日買超 Top 20", rankings.chips_main_1d_buy, "當日買超", "positive") }}
+    {{ chip_rank_panel("主力 當日賣超 Top 20", rankings.chips_main_1d_sell, "當日賣超", "negative") }}
+  </div>
+</div>
+
+<!-- ───────── 主力 · 5/10 日 ───────── -->
+<div class="rank-tab-body" data-body="main-multi" hidden>
+  <p class="muted" style="margin: 0 0 12px 0;">近 5/10 日累計主力（分點 Top 15 買 − 賣）買賣超，看連續性籌碼方向。</p>
+  <div class="grid-2col">
+    {{ chip_rank_panel("主力 近 5 日買超 Top 20", rankings.chips_main_5d_buy, "5日買超", "positive") }}
+    {{ chip_rank_panel("主力 近 5 日賣超 Top 20", rankings.chips_main_5d_sell, "5日賣超", "negative") }}
+  </div>
+
+  <div class="grid-2col">
+    {{ chip_rank_panel("主力 近 10 日買超 Top 20", rankings.chips_main_10d_buy, "10日買超", "positive") }}
+    {{ chip_rank_panel("主力 近 10 日賣超 Top 20", rankings.chips_main_10d_sell, "10日賣超", "negative") }}
   </div>
 </div>
 

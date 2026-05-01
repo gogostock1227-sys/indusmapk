@@ -25,6 +25,7 @@ import re
 import sys
 import shutil
 import hashlib
+import time
 import webbrowser
 import warnings
 from collections import defaultdict
@@ -48,6 +49,21 @@ DIST_DIR = SITE_DIR / "dist"
 TEMPLATE_DIR = SITE_DIR / "templates"
 STATIC_SRC = SITE_DIR / "static"
 CACHE_FILE = SITE_DIR / ".cache.parquet"
+
+
+def write_text_retry(path: Path, text: str, encoding: str = "utf-8", retries: int = 6) -> None:
+    """Windows 大量重建時偶爾會遇到短暫寫檔失敗，重試避免整個 build 中斷。"""
+    last_err: OSError | None = None
+    for attempt in range(retries):
+        try:
+            path.write_text(text, encoding=encoding)
+            return
+        except OSError as exc:
+            last_err = exc
+            if attempt == retries - 1:
+                break
+            time.sleep(0.35 * (attempt + 1))
+    raise last_err
 CACHE_META = SITE_DIR / ".cache_meta.json"
 
 from concept_groups import CONCEPT_GROUPS
@@ -898,6 +914,7 @@ CACHE_KEYS = [
     "foreign_buy", "foreign_sell",
     "trust_buy", "trust_sell",
     "dealer_buy", "dealer_sell",
+    "broker_top15_buy", "broker_top15_sell",
     "margin_long_bal", "margin_long_buy", "margin_long_sell",
     "margin_short_bal", "margin_short_buy", "margin_short_sell",
     "disposal",
@@ -948,6 +965,10 @@ def _load_finlab_data():
     ds_hedge= _safe_get(data, "institutional_investors_trading_summary:自營商賣出股數(避險)")
     d["dealer_buy"]  = (db_self.add(db_hedge, fill_value=0) if db_self is not None and db_hedge is not None else (db_self or db_hedge))
     d["dealer_sell"] = (ds_self.add(ds_hedge, fill_value=0) if ds_self is not None and ds_hedge is not None else (ds_self or ds_hedge))
+
+    print("  [FinLab] 下載主力分點 Top15 買賣...")
+    d["broker_top15_buy"] = _safe_get(data, "etl:broker_transactions:top15_buy")
+    d["broker_top15_sell"] = _safe_get(data, "etl:broker_transactions:top15_sell")
 
     print("  [FinLab] 下載融資融券買賣...")
     d["margin_long_buy"]   = _safe_get(data, "margin_transactions:融資買進")
@@ -1068,8 +1089,11 @@ def compute_stock_metrics(d: dict) -> pd.DataFrame:
     """個股多時間維度指標。回傳 index=symbol, columns=[ret_1d, ret_5d, ret_20d, amount, ...]"""
     close = d["close"]
     amount = d["amount"]
-    foreign = d["foreign"]
-    trust = d["trust"]
+    foreign = d.get("foreign")
+    trust = d.get("trust")
+    dealer = d.get("dealer")
+    broker_top15_buy = d.get("broker_top15_buy")
+    broker_top15_sell = d.get("broker_top15_sell")
 
     last = close.iloc[-1]
     prev = close.iloc[-2]
@@ -1096,24 +1120,32 @@ def compute_stock_metrics(d: dict) -> pd.DataFrame:
         "amount_mn":  amt_last,
     })
 
-    # 法人
-    if foreign is not None and not foreign.empty:
-        foreign_last = foreign.iloc[-1] / 1000  # 張
-        foreign_5d_sum = foreign.iloc[-5:].sum() / 1000
-        df["foreign_1d"] = foreign_last
-        df["foreign_5d"] = foreign_5d_sum
-    else:
-        df["foreign_1d"] = 0.0
-        df["foreign_5d"] = 0.0
+    def add_chip_windows(
+        source: pd.DataFrame | None,
+        prefix: str,
+        scale: float = 1000.0,
+        empty_value: float = 0.0,
+    ) -> None:
+        for days in (1, 5, 10):
+            col = f"{prefix}_{days}d"
+            if source is not None and not source.empty:
+                df[col] = source.iloc[-days:].sum() / scale
+            else:
+                df[col] = empty_value
 
-    if trust is not None and not trust.empty:
-        trust_last = trust.iloc[-1] / 1000
-        trust_5d_sum = trust.iloc[-5:].sum() / 1000
-        df["trust_1d"] = trust_last
-        df["trust_5d"] = trust_5d_sum
-    else:
-        df["trust_1d"] = 0.0
-        df["trust_5d"] = 0.0
+    # 三大法人原始單位為股，轉成張。
+    add_chip_windows(foreign, "foreign")
+    add_chip_windows(trust, "trust")
+    add_chip_windows(dealer, "dealer")
+
+    # 主力採 FinLab 前 15 大券商分點買賣差，資料單位已是張。
+    main_chip = None
+    if (
+        broker_top15_buy is not None and not broker_top15_buy.empty
+        and broker_top15_sell is not None and not broker_top15_sell.empty
+    ):
+        main_chip = broker_top15_buy.sub(broker_top15_sell, fill_value=0)
+    add_chip_windows(main_chip, "main", scale=1.0, empty_value=float("nan"))
 
     return df
 
@@ -1369,16 +1401,23 @@ def compute_company_chart(d: dict, sym: str, days=240) -> dict | None:
             val = s.iloc[i]
             return round(float(val), 2) if pd.notna(val) else None
 
-        # 三大法人買賣超（張 = 股數 / 1000）— 對齊 K 線日期軸
-        def chip_series(key):
+        # 籌碼資料對齊 K 線日期軸：法人股數轉張；分點主力資料已是張。
+        def chip_series(key, scale=1000.0):
             df = d.get(key)
             if df is None or sym not in df.columns:
                 return None
-            return df[sym].reindex(idx) / 1000.0
+            return df[sym].reindex(idx) / scale
 
         foreign_s = chip_series("foreign")
         trust_s   = chip_series("trust")
         dealer_s  = chip_series("dealer")
+        broker_top15_buy_s = chip_series("broker_top15_buy", scale=1.0)
+        broker_top15_sell_s = chip_series("broker_top15_sell", scale=1.0)
+        main_s = (
+            broker_top15_buy_s.sub(broker_top15_sell_s, fill_value=0)
+            if broker_top15_buy_s is not None and broker_top15_sell_s is not None
+            else None
+        )
 
         def r0(s, i):
             if s is None:
@@ -1386,26 +1425,13 @@ def compute_company_chart(d: dict, sym: str, days=240) -> dict | None:
             val = s.iloc[i]
             return round(float(val), 0) if pd.notna(val) else None
 
-        # 主力 = 外資 + 投信 + 自營（缺值視為 0；但若三者全缺則回 None）
-        def main_at(i):
-            vals = []
-            for s in (foreign_s, trust_s, dealer_s):
-                if s is None:
-                    continue
-                v = s.iloc[i]
-                if pd.notna(v):
-                    vals.append(float(v))
-            if not vals:
-                return None
-            return round(sum(vals), 0)
-
         show_from = max(0, len(idx) - days)
         rng_slice = range(show_from, len(idx))
 
         has_foreign = foreign_s is not None and bool(foreign_s.notna().any())
         has_trust   = trust_s   is not None and bool(trust_s.notna().any())
         has_dealer  = dealer_s  is not None and bool(dealer_s.notna().any())
-        has_main    = has_foreign or has_trust or has_dealer
+        has_main    = main_s    is not None and bool(main_s.notna().any())
 
         return {
             "dates":   [t.strftime("%Y-%m-%d") for t in idx[show_from:]],
@@ -1429,7 +1455,7 @@ def compute_company_chart(d: dict, sym: str, days=240) -> dict | None:
             "foreign_net": [r0(foreign_s, i) for i in rng_slice] if has_foreign else None,
             "trust_net":   [r0(trust_s,   i) for i in rng_slice] if has_trust else None,
             "dealer_net":  [r0(dealer_s,  i) for i in rng_slice] if has_dealer else None,
-            "main_net":    [main_at(i) for i in rng_slice] if has_main else None,
+            "main_net":    [r0(main_s,    i) for i in rng_slice] if has_main else None,
             "has_chip": {
                 "main":    has_main,
                 "foreign": has_foreign,
@@ -2019,6 +2045,10 @@ def compute_rankings(stock_metrics: pd.DataFrame, rich: dict, extras: dict,
     返回 dict:
       chips_foreign_buy / chips_foreign_sell  — 近 5 日外資 Top 20
       chips_trust_buy   / chips_trust_sell    — 近 5 日投信 Top 20
+      chips_dealer_buy  / chips_dealer_sell   — 近 5 日自營商 Top 20
+      chips_*_1d_buy / chips_*_1d_sell        — 當日法人與主力 Top 20
+      chips_main_5d_buy / chips_main_5d_sell  — 近 5 日主力分點 Top 20
+      chips_main_10d_buy / chips_main_10d_sell — 近 10 日主力 Top 20
       revenue_yoy_up    / revenue_yoy_down    — 最新月營收 YoY Top/Bottom 20
       eps_growth_up     / eps_growth_down     — EPS vs 去年同季成長 Top/Bottom 20
       big_holders_up    / big_holders_down    — 近 N 週大戶佔比變化 Top/Bottom 20
@@ -2044,20 +2074,31 @@ def compute_rankings(stock_metrics: pd.DataFrame, rich: dict, extras: dict,
 
     # ─── 籌碼排行 ───
     syms = [s for s in stock_metrics.index if _has_valid_name(s)]
-    chips_foreign = [
-        {**_base_row(s), "value": float(stock_metrics.at[s, "foreign_5d"])}
-        for s in syms if "foreign_5d" in stock_metrics.columns
-        and pd.notna(stock_metrics.at[s, "foreign_5d"])
-    ]
-    chips_trust = [
-        {**_base_row(s), "value": float(stock_metrics.at[s, "trust_5d"])}
-        for s in syms if "trust_5d" in stock_metrics.columns
-        and pd.notna(stock_metrics.at[s, "trust_5d"])
-    ]
-    chips_foreign_buy = sorted(chips_foreign, key=lambda r: -r["value"])[:top_n]
-    chips_foreign_sell = sorted(chips_foreign, key=lambda r: r["value"])[:top_n]
-    chips_trust_buy = sorted(chips_trust, key=lambda r: -r["value"])[:top_n]
-    chips_trust_sell = sorted(chips_trust, key=lambda r: r["value"])[:top_n]
+    def chip_rows(metric: str) -> list[dict]:
+        if metric not in stock_metrics.columns:
+            return []
+        return [
+            {**_base_row(s), "value": float(stock_metrics.at[s, metric])}
+            for s in syms
+            if pd.notna(stock_metrics.at[s, metric])
+        ]
+
+    def chip_buy_sell(metric: str) -> tuple[list[dict], list[dict]]:
+        rows = chip_rows(metric)
+        return (
+            sorted(rows, key=lambda r: -r["value"])[:top_n],
+            sorted(rows, key=lambda r: r["value"])[:top_n],
+        )
+
+    chips_foreign_buy, chips_foreign_sell = chip_buy_sell("foreign_5d")
+    chips_trust_buy, chips_trust_sell = chip_buy_sell("trust_5d")
+    chips_dealer_buy, chips_dealer_sell = chip_buy_sell("dealer_5d")
+    chips_foreign_1d_buy, chips_foreign_1d_sell = chip_buy_sell("foreign_1d")
+    chips_trust_1d_buy, chips_trust_1d_sell = chip_buy_sell("trust_1d")
+    chips_dealer_1d_buy, chips_dealer_1d_sell = chip_buy_sell("dealer_1d")
+    chips_main_1d_buy, chips_main_1d_sell = chip_buy_sell("main_1d")
+    chips_main_5d_buy, chips_main_5d_sell = chip_buy_sell("main_5d")
+    chips_main_10d_buy, chips_main_10d_sell = chip_buy_sell("main_10d")
 
     # ─── 月營收 YoY 排行（統一月份 + 基期過小濾除 + YoY 合理區間）───
     rev_map = rich.get("revenue", {})
@@ -2157,6 +2198,20 @@ def compute_rankings(stock_metrics: pd.DataFrame, rich: dict, extras: dict,
         "chips_foreign_sell": chips_foreign_sell,
         "chips_trust_buy":    chips_trust_buy,
         "chips_trust_sell":   chips_trust_sell,
+        "chips_dealer_buy":   chips_dealer_buy,
+        "chips_dealer_sell":  chips_dealer_sell,
+        "chips_foreign_1d_buy":  chips_foreign_1d_buy,
+        "chips_foreign_1d_sell": chips_foreign_1d_sell,
+        "chips_trust_1d_buy":    chips_trust_1d_buy,
+        "chips_trust_1d_sell":   chips_trust_1d_sell,
+        "chips_dealer_1d_buy":   chips_dealer_1d_buy,
+        "chips_dealer_1d_sell":  chips_dealer_1d_sell,
+        "chips_main_1d_buy":  chips_main_1d_buy,
+        "chips_main_1d_sell": chips_main_1d_sell,
+        "chips_main_5d_buy":  chips_main_5d_buy,
+        "chips_main_5d_sell": chips_main_5d_sell,
+        "chips_main_10d_buy": chips_main_10d_buy,
+        "chips_main_10d_sell": chips_main_10d_sell,
         "revenue_yoy_up":     revenue_yoy_up,
         "revenue_yoy_down":   revenue_yoy_down,
         "eps_growth_up":      eps_growth_up,
@@ -2488,7 +2543,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         hot_topics=hot_topics,
         daily_chip_report=daily_chip_report,
     )
-    (DIST_DIR / "index.html").write_text(index_html, encoding="utf-8")
+    write_text_retry(DIST_DIR / "index.html", index_html)
 
     # 漲停分析（多日期版本：每個交易日都產一頁 + 日期下拉導航）
     if has_limit_up:
@@ -2528,11 +2583,11 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         # 每個日期獨立頁
         for d in limit_up_dates:
             html = _render_one(d, limit_up_by_date[d], d == latest_lu_date)
-            (DIST_DIR / f"limit-up-{d}.html").write_text(html, encoding="utf-8")
+            write_text_retry(DIST_DIR / f"limit-up-{d}.html", html)
 
         # limit-up.html = 最新一天
         latest_html = _render_one(latest_lu_date, limit_up_by_date[latest_lu_date], True)
-        (DIST_DIR / "limit-up.html").write_text(latest_html, encoding="utf-8")
+        write_text_retry(DIST_DIR / "limit-up.html", latest_html)
 
         # 漲停統計頁：隔日趨勢 + 族群熱力圖
         try:
@@ -2550,7 +2605,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
                 stats_groups_json=json.dumps(stats["heatmap_groups"], ensure_ascii=False),
                 stats_dates_json=json.dumps(stats["heatmap_dates"], ensure_ascii=False),
             )
-            (DIST_DIR / "limit-up-stats.html").write_text(stats_html, encoding="utf-8")
+            write_text_retry(DIST_DIR / "limit-up-stats.html", stats_html)
             print(f"       ✓ 漲停統計：{stats['overall']['total_limit_up']} 檔次｜隔日均 {stats['overall']['avg_next']}% ｜勝率 {stats['overall']['pos_rate']}%")
         # 清舊 iframe 遺留
         for stale in ("limit-up-inner.html",):
@@ -2575,7 +2630,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         company_topics=company_topics,
         industry_map=data["industry_map"],
     )
-    (DIST_DIR / "today.html").write_text(today_html, encoding="utf-8")
+    write_text_retry(DIST_DIR / "today.html", today_html)
 
     # 系統指標題材（每日動態：成交值前20 / 漲停 / 跌停 / 處置股）
     SYSTEM_TOPIC_DEFS = [
@@ -2648,7 +2703,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         categories=sorted({get_meta(g)["category"] for g in CONCEPT_GROUPS}),
         system_topics=system_topics,                # 新增：總覽區塊系統指標
     )
-    (DIST_DIR / "topics.html").write_text(topics_html, encoding="utf-8")
+    write_text_retry(DIST_DIR / "topics.html", topics_html)
 
     # Heatmap（內嵌 JSON 避 file:// CORS）
     heatmap_json = {
@@ -2661,28 +2716,34 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         heatmap_weekly=heatmap_json["weekly"],
         heatmap_monthly=heatmap_json["monthly"],
     )
-    (DIST_DIR / "heatmap.html").write_text(heatmap_html, encoding="utf-8")
+    write_text_retry(DIST_DIR / "heatmap.html", heatmap_html)
 
     # AI 分析頁（族群輪動 + 落後補漲）
+    liquid_group_items = [
+        (g, m)
+        for g, m in group_metrics.items()
+        if float(m.get("amount_sum_mn") or 0) > FOCUS_TOPIC_MIN_AMOUNT_MN
+    ]
     # 落後補漲：20D 弱但 5D 轉強
     laggards = []
-    for g, m in group_metrics.items():
+    for g, m in liquid_group_items:
         if m["ret_20d_mean"] < -0.03 and m["ret_5d_mean"] > 0.01:
             laggards.append((g, m))
-    laggards.sort(key=lambda x: -x[1]["ret_5d_mean"])
+    laggards.sort(key=lambda x: (-x[1]["ret_5d_mean"], -x[1]["amount_sum_mn"]))
     # 強勢延續：20D 強 + 5D 強 + 今日強
     leaders = []
-    for g, m in group_metrics.items():
+    for g, m in liquid_group_items:
         if m["ret_20d_mean"] > 0.05 and m["ret_5d_mean"] > 0.02 and m["ret_1d_mean"] > 0:
             leaders.append((g, m))
-    leaders.sort(key=lambda x: -(x[1]["ret_5d_mean"] + x[1]["ret_1d_mean"]))
+    leaders.sort(key=lambda x: (-(x[1]["ret_5d_mean"] + x[1]["ret_1d_mean"]), -x[1]["amount_sum_mn"]))
     ai_html = env.get_template("ai_analysis.html").render(
         **base_ctx,
         laggards=laggards[:10],
         leaders=leaders[:10],
+        min_amount_label=FOCUS_TOPIC_MIN_AMOUNT_LABEL,
         get_meta=get_meta,
     )
-    (DIST_DIR / "ai.html").write_text(ai_html, encoding="utf-8")
+    write_text_retry(DIST_DIR / "ai.html", ai_html)
 
     # 每個題材頁 + 快取 topic_series 供 compare 頁共用
     topic_dir = DIST_DIR / "topic"
@@ -2715,7 +2776,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             ai_summary=ai_sum,
             topic_indicators=select_topic_indicators(meta, ai_sum),
         )
-        (topic_dir / f"{slugify(group)}.html").write_text(html, encoding="utf-8")
+        write_text_retry(topic_dir / f"{slugify(group)}.html", html)
         if topic_series:
             all_topic_series[group] = topic_series
             all_topic_meta[group] = {
@@ -2780,7 +2841,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             ai_summary=None,
             topic_indicators=[],
         )
-        (topic_dir / f"{slug}.html").write_text(html, encoding="utf-8")
+        write_text_retry(topic_dir / f"{slug}.html", html)
         sys_topic_count += 1
         # 也加入 compare 來源池（系統指標也可被選來對比）
         if sys_series:
@@ -2807,9 +2868,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         if not series:
             continue
         stock_series_map[sym] = series
-        (stock_data_dir / f"{sym}.json").write_text(
-            json.dumps(series, ensure_ascii=False), encoding="utf-8"
-        )
+        write_text_retry(stock_data_dir / f"{sym}.json", json.dumps(series, ensure_ascii=False))
         nm = name_map.get(sym)
         nm = nm if isinstance(nm, str) and nm.strip() else sym
         stock_index.append({
@@ -2829,7 +2888,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         stock_index_json=json.dumps(stock_index, ensure_ascii=False),
         stock_series_json=json.dumps(stock_series_map, ensure_ascii=False),
     )
-    (DIST_DIR / "compare.html").write_text(compare_html, encoding="utf-8")
+    write_text_retry(DIST_DIR / "compare.html", compare_html)
 
     # 排行榜頁（籌碼 / 月營收 YoY / EPS 年增 / 大戶變化）
     rankings = compute_rankings(
@@ -2840,7 +2899,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         **base_ctx,
         rankings=rankings,
     )
-    (DIST_DIR / "rankings.html").write_text(rankings_html, encoding="utf-8")
+    write_text_retry(DIST_DIR / "rankings.html", rankings_html)
 
     # RS 評分頁（全市場 RS 排名 + 強勢股精選）
     rs_rows = build_rs_rows(
@@ -2865,7 +2924,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         total_count=len(rs_rows),
         strong_count=sum(1 for r in rs_rows if r["rs"] >= 80),
     )
-    (DIST_DIR / "rs.html").write_text(rs_html, encoding="utf-8")
+    write_text_retry(DIST_DIR / "rs.html", rs_html)
     print(f"       ✓ RS 評分頁：{len(rs_rows)} 檔 / 強勢股 {sum(1 for r in rs_rows if r['rs']>=80)} 檔 / 強勢產業 {len(strong_groups)} 個")
 
     # 公司資料庫頁（上市櫃清單 + 前端搜尋/篩選/排序）
@@ -2905,7 +2964,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         industries=industries_list,
         total_stocks=len(db_rows),
     )
-    (DIST_DIR / "database.html").write_text(db_html, encoding="utf-8")
+    write_text_retry(DIST_DIR / "database.html", db_html)
 
     # 每檔個股頁：全上市櫃覆蓋（有題材無題材都產頁），加上 FinLab 豐富資料
     # [FILTER] 過濾 strict 下市：無正式股名 AND 近 20 日完全無成交。ETF / 特別股保留（有股名就活）。
@@ -2923,9 +2982,9 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     if delisted:
         print(f"       ↳ 過濾 {len(delisted)} 檔已下市/停牌")
         (DIST_DIR / "data").mkdir(exist_ok=True)
-        (DIST_DIR / "data" / "delisted.json").write_text(
+        write_text_retry(
+            DIST_DIR / "data" / "delisted.json",
             json.dumps(sorted(delisted), ensure_ascii=False, indent=2),
-            encoding="utf-8",
         )
         # 同步刪除殘留 HTML（避免舊 build 留下的下市股頁仍可被索引）
         stale = 0
@@ -3067,7 +3126,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             rs_chart=rs_chart_payload,
             rs_chart_json=json.dumps(rs_chart_payload, ensure_ascii=False) if rs_chart_payload else "null",
         )
-        (company_dir / f"{sym}.html").write_text(html, encoding="utf-8")
+        write_text_retry(company_dir / f"{sym}.html", html)
         n_pages += 1
     print(f"       ✓ 個股頁 {n_pages} 檔（全資料庫可用標的）")
 
@@ -3191,7 +3250,7 @@ Sitemap: https://indusmapk.com/sitemap.xml
 
 def write_robots_txt():
     """寫入 robots.txt（禁止 AI 訓練爬蟲、允許搜尋引擎）"""
-    (DIST_DIR / "robots.txt").write_text(ROBOTS_TXT_CONTENT, encoding="utf-8")
+    write_text_retry(DIST_DIR / "robots.txt", ROBOTS_TXT_CONTENT)
 
 
 LIMIT_UP_REPORT_DIR = Path(r"C:/Users/user/Desktop/程式雜/AI股票網頁建構/reports")
@@ -3274,19 +3333,14 @@ def write_json_data(heatmap_data, search_data):
     data_dir = DIST_DIR / "data"
     data_dir.mkdir(exist_ok=True)
     for tf, nodes in heatmap_data.items():
-        (data_dir / f"heatmap_{tf}.json").write_text(
-            json.dumps(nodes, ensure_ascii=False), encoding="utf-8",
-        )
+        write_text_retry(data_dir / f"heatmap_{tf}.json", json.dumps(nodes, ensure_ascii=False))
     # 搜尋資料輸出 .js 檔（script 載入避免 file:// CORS）
-    (data_dir / "search-data.js").write_text(
+    write_text_retry(
+        data_dir / "search-data.js",
         "window.SEARCH_DATA = " + json.dumps(search_data, ensure_ascii=False) + ";",
-        encoding="utf-8",
     )
     # 同步輸出純 JSON，避免舊版 search.json 殘留造成題材反查抽查誤判。
-    (data_dir / "search.json").write_text(
-        json.dumps(search_data, ensure_ascii=False),
-        encoding="utf-8",
-    )
+    write_text_retry(data_dir / "search.json", json.dumps(search_data, ensure_ascii=False))
 
 
 # ═══════════════════════════════════════════

@@ -590,7 +590,7 @@
   </div>
 
   <div class="tab-panel active" data-panel="inst-3367">
-    <div id="chip_inst_chart_3367" style="height:380px; width:100%; padding:8px;"></div>
+    <div id="chip_inst_chart_3367" style="height:430px; width:100%; padding:8px 8px 24px; margin-bottom:12px; box-sizing:border-box;"></div>
     <div class="scroll-table chip-table-wrap">
       <table class="table compact chip-inst-table"><thead>
         <tr>
@@ -657,15 +657,35 @@
       const el = document.getElementById('chip_inst_chart_'+sym);
       const ch = echarts.init(el, 'dark', { renderer: 'canvas' });
       const series = [];
-      if (chip.foreign_net) series.push({ name:'外資', type:'line', data: chip.foreign_net, smooth:true, lineStyle:{color:'#10b981',width:2}, itemStyle:{color:'#10b981'}, symbol:'circle', symbolSize:5 });
-      if (chip.trust_net)   series.push({ name:'投信', type:'line', data: chip.trust_net,   smooth:true, lineStyle:{color:'#ff7847',width:2}, itemStyle:{color:'#ff7847'}, symbol:'circle', symbolSize:5 });
-      if (chip.dealer_net)  series.push({ name:'自營商', type:'line', data: chip.dealer_net,smooth:true, lineStyle:{color:'#f472b6',width:2}, itemStyle:{color:'#f472b6'}, symbol:'circle', symbolSize:5 });
+      const instBar = (name, data, color, z) => ({
+        name, type:'bar', data,
+        barGap:'-100%', barCategoryGap:'46%', barMaxWidth:18,
+        itemStyle:{ color, opacity:0.76, borderRadius:[2,2,0,0] },
+        emphasis:{ focus:'series', itemStyle:{ opacity:0.96 } },
+        z
+      });
+      if (chip.foreign_net) series.push(instBar('外資', chip.foreign_net, '#10b981', 3));
+      if (chip.trust_net)   series.push(instBar('投信', chip.trust_net,   '#ff7847', 2));
+      if (chip.dealer_net)  series.push(instBar('自營商', chip.dealer_net,'#f472b6', 1));
       ch.setOption({
         backgroundColor:'transparent', animation:false,
         legend:{ data:['外資','投信','自營商'], top:0, textStyle:{color:'#9ca3af'} },
-        grid:{ left:60, right:20, top:36, bottom:40 },
-        tooltip:{ trigger:'axis', backgroundColor:'#1f2937', borderColor:'#374151', textStyle:{color:'#e5e7eb'}, valueFormatter:(v)=>Number(v).toLocaleString()+' 張' },
-        xAxis:{ type:'category', data: chip.dates, axisLabel:{color:'#9ca3af', rotate:45}, axisLine:{lineStyle:{color:'#374151'}} },
+        grid:{ left:60, right:20, top:42, bottom:86, containLabel:true },
+        tooltip:{
+          trigger:'axis',
+          axisPointer:{ type:'shadow' },
+          backgroundColor:'#1f2937', borderColor:'#374151',
+          textStyle:{color:'#e5e7eb'},
+          valueFormatter:(v)=>Number(v).toLocaleString()+' 張'
+        },
+        xAxis:{
+          type:'category',
+          data: chip.dates,
+          boundaryGap:true,
+          axisLabel:{ color:'#9ca3af', rotate:45, margin:16, fontSize:11, hideOverlap:true },
+          axisTick:{ alignWithLabel:true },
+          axisLine:{lineStyle:{color:'#374151'}}
+        },
         yAxis:{ type:'value', name:'張', nameTextStyle:{color:'#9ca3af'}, axisLabel:{color:'#9ca3af', formatter:(v)=>v>=1000||v<=-1000?(v/1000).toFixed(0)+'K':v}, splitLine:{lineStyle:{color:'rgba(255,255,255,0.04)'}} },
         series: series
       });
@@ -745,6 +765,12 @@
       const COLORS = { retail:'#dc2626', mid:'#b45309', big:'#059669' };
       const mdDate = (d) => (d || '').replace(/-/g,'').slice(0,8) || d;
       const shortDate = (d) => (d || '').slice(5);   // 04-17
+      const trendDate = (d) => {
+        const s = d || '';
+        return /^\d{4}-\d{2}-\d{2}$/.test(s)
+          ? `${s.slice(2,4)}年${s.slice(5,7)}/${s.slice(8,10)}`
+          : s;
+      };
       const fmtNum = (n) => (n == null || isNaN(n)) ? '—' : Math.abs(n).toLocaleString();
       const fmtSignedNum = (n) => {
         if (n == null || isNaN(n)) return '';
@@ -765,9 +791,9 @@
                    textStyle:{color:'#1f2937'}, icon:'circle' },
           tooltip:{ trigger:'axis', valueFormatter:(v)=> Number(v).toFixed(2)+'%',
                     backgroundColor:'rgba(255,255,255,0.96)', borderColor:'#d1d5db', textStyle:{color:'#111827'} },
-          grid:{ left:58, right:16, top:40, bottom:40 },
-          xAxis:{ type:'category', data: holder.dates.map(shortDate),
-                  axisLine:{lineStyle:{color:'#9ca3af'}}, axisLabel:{color:'#475569'} },
+          grid:{ left:58, right:16, top:40, bottom:58 },
+          xAxis:{ type:'category', data: holder.dates.map(trendDate),
+                  axisLine:{lineStyle:{color:'#9ca3af'}}, axisLabel:{color:'#475569', rotate:45, fontSize:11} },
           yAxis:{ type:'value', axisLabel:{color:'#475569', formatter:'{value}%'},
                   splitLine:{lineStyle:{color:'rgba(0,0,0,0.06)'}} },
           series:[
@@ -783,10 +809,10 @@
       }
       renderTrend();
 
-      // ── 股東人數卡（最近 4 週）──
+      // ── 股東人數卡（最近 3 週）──
       const snapEl = document.getElementById('holder_snap_'+sym);
       const N = holder.dates.length;
-      const DISPLAY_WEEKS = 4;
+      const DISPLAY_WEEKS = 3;
       const show = Math.min(DISPLAY_WEEKS, N);
       let htmlSnap = '';
       for (let i = N - show; i < N; i++) {
@@ -803,7 +829,7 @@
           <div class="muted" style="font-size:12px; line-height:1.6;">
             趨勢圖可顯示近一年歷史<br>
             目前僅 ${N} 週資料<br>
-            級距表顯示最近 4 週
+            級距表顯示最近 3 週
           </div>
         </div>`.repeat(DISPLAY_WEEKS - show);
       }
