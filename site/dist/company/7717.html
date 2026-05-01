@@ -963,7 +963,7 @@
 <section class="panel chip-panel">
   <div class="panel-header">
     <h2>籌碼分析</h2>
-    <span class="muted">三大法人 / 融資融券 · 近 30 日</span>
+    <span class="muted">三大法人 / 主力 / 融資融券 · 近 30 日</span>
   </div>
   <div class="chip-snapshot">
     <div><em>外資今日</em><strong class="negative">-19 張</strong></div>
@@ -974,6 +974,7 @@
 
   <div class="tab-bar" data-sym="7717">
     <button class="tab-btn active" data-tab="inst">三大法人</button>
+    <button class="tab-btn" data-tab="main">主力</button>
     <button class="tab-btn" data-tab="margin">融資融券</button>
     <button class="tab-btn" data-tab="holder">大戶資訊</button>
   </div>
@@ -990,6 +991,16 @@
         </tr>
         <tr><th>買進</th><th>賣出</th><th>買賣超</th><th>買進</th><th>賣出</th><th>買賣超</th><th>買進</th><th>賣出</th><th>買賣超</th></tr>
       </thead><tbody id="chip_inst_tbody_7717"></tbody></table>
+    </div>
+  </div>
+
+  <div class="tab-panel" data-panel="main-7717">
+    <p class="muted" style="padding:0 14px; font-size:12px;">主力 = 當日分點 Top 15 買超 − Top 15 賣超（單位：張）。為分點主力口徑，不等於三大法人合計。</p>
+    <div id="chip_main_chart_7717" style="height:380px; width:100%; padding:8px 8px 24px; box-sizing:border-box;"></div>
+    <div class="scroll-table chip-table-wrap">
+      <table class="table compact chip-main-table"><thead>
+        <tr><th>日期</th><th>主力買進</th><th>主力賣出</th><th>買賣超</th></tr>
+      </thead><tbody id="chip_main_tbody_7717"></tbody></table>
     </div>
   </div>
 
@@ -1043,7 +1054,7 @@
 
   <script>
   (function(){
-    const chip = {"foreign_net": [2.0, -1.0, -4.0, -11.0, -7.0, -2.0, 28.0, -35.0, -148.0, -45.0, 37.0, -23.0, 17.0, 96.0, 36.0, 55.0, -108.0, -96.0, -3.0, -5.0, 26.0, -35.0, 20.0, -14.0, -38.0, 10.0, 240.0, -164.0, -61.0, -19.0], "trust_net": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 20.0, 60.0, 0.0, 0.0, 0.0, 30.0, 20.0, 0.0, 5.0, 210.0, 0.0, 25.0, 40.0, 0.0, 0.0, 0.0], "dealer_net": [20.0, -4.0, 3.0, -22.0, -24.0, 2.0, 14.0, 3.0, -10.0, -26.0, 9.0, 5.0, 22.0, -2.0, -13.0, 3.0, 2.0, -37.0, 5.0, 9.0, 11.0, 0.0, -24.0, 5.0, -66.0, 8.0, -5.0, 2.0, -4.0, 4.0], "foreign_buy": [5.0, 1.0, 5.0, 1.0, 1.0, 0.0, 47.0, 280.0, 533.0, 233.0, 69.0, 336.0, 246.0, 266.0, 310.0, 500.0, 215.0, 125.0, 165.0, 171.0, 222.0, 144.0, 239.0, 180.0, 175.0, 268.0, 457.0, 155.0, 68.0, 132.0], "foreign_sell": [3.0, 2.0, 9.0, 12.0, 8.0, 2.0, 19.0, 315.0, 681.0, 278.0, 32.0, 359.0, 229.0, 171.0, 274.0, 445.0, 323.0, 221.0, 168.0, 176.0, 196.0, 180.0, 219.0, 194.0, 213.0, 258.0, 217.0, 319.0, 129.0, 151.0], "trust_buy": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 20.0, 60.0, 0.0, 0.0, 0.0, 30.0, 20.0, 0.0, 5.0, 210.0, 0.0, 25.0, 40.0, 0.0, 0.0, 0.0], "trust_sell": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_buy": [25.0, 6.0, 7.0, 1.0, 5.0, 5.0, 26.0, 33.0, 42.0, 3.0, 11.0, 23.0, 34.0, 20.0, 7.0, 19.0, 7.0, 3.0, 12.0, 16.0, 14.0, 3.0, 1.0, 5.0, 0.0, 14.0, 8.0, 2.0, 0.0, 6.0], "dealer_sell": [5.0, 10.0, 4.0, 23.0, 29.0, 3.0, 12.0, 30.0, 52.0, 29.0, 2.0, 18.0, 12.0, 22.0, 20.0, 16.0, 5.0, 40.0, 7.0, 7.0, 3.0, 3.0, 25.0, 0.0, 66.0, 6.0, 13.0, 0.0, 4.0, 2.0], "dates": ["2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30"]};
+    const chip = {"foreign_net": [2.0, -1.0, -4.0, -11.0, -7.0, -2.0, 28.0, -35.0, -148.0, -45.0, 37.0, -23.0, 17.0, 96.0, 36.0, 55.0, -108.0, -96.0, -3.0, -5.0, 26.0, -35.0, 20.0, -14.0, -38.0, 10.0, 240.0, -164.0, -61.0, -19.0], "trust_net": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 20.0, 60.0, 0.0, 0.0, 0.0, 30.0, 20.0, 0.0, 5.0, 210.0, 0.0, 25.0, 40.0, 0.0, 0.0, 0.0], "dealer_net": [20.0, -4.0, 3.0, -22.0, -24.0, 2.0, 14.0, 3.0, -10.0, -26.0, 9.0, 5.0, 22.0, -2.0, -13.0, 3.0, 2.0, -37.0, 5.0, 9.0, 11.0, 0.0, -24.0, 5.0, -66.0, 8.0, -5.0, 2.0, -4.0, 4.0], "foreign_buy": [5.0, 1.0, 5.0, 1.0, 1.0, 0.0, 47.0, 280.0, 533.0, 233.0, 69.0, 336.0, 246.0, 266.0, 310.0, 500.0, 215.0, 125.0, 165.0, 171.0, 222.0, 144.0, 239.0, 180.0, 175.0, 268.0, 457.0, 155.0, 68.0, 132.0], "foreign_sell": [3.0, 2.0, 9.0, 12.0, 8.0, 2.0, 19.0, 315.0, 681.0, 278.0, 32.0, 359.0, 229.0, 171.0, 274.0, 445.0, 323.0, 221.0, 168.0, 176.0, 196.0, 180.0, 219.0, 194.0, 213.0, 258.0, 217.0, 319.0, 129.0, 151.0], "trust_buy": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 20.0, 60.0, 0.0, 0.0, 0.0, 30.0, 20.0, 0.0, 5.0, 210.0, 0.0, 25.0, 40.0, 0.0, 0.0, 0.0], "trust_sell": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_buy": [25.0, 6.0, 7.0, 1.0, 5.0, 5.0, 26.0, 33.0, 42.0, 3.0, 11.0, 23.0, 34.0, 20.0, 7.0, 19.0, 7.0, 3.0, 12.0, 16.0, 14.0, 3.0, 1.0, 5.0, 0.0, 14.0, 8.0, 2.0, 0.0, 6.0], "dealer_sell": [5.0, 10.0, 4.0, 23.0, 29.0, 3.0, 12.0, 30.0, 52.0, 29.0, 2.0, 18.0, 12.0, 22.0, 20.0, 16.0, 5.0, 40.0, 7.0, 7.0, 3.0, 3.0, 25.0, 0.0, 66.0, 6.0, 13.0, 0.0, 4.0, 2.0], "main_buy": [80.0, 40.0, 83.0, 59.0, 65.0, 86.0, 302.0, 602.0, 877.0, 295.0, 204.0, 537.0, 734.0, 713.0, 663.0, 617.0, 342.0, 429.0, 328.0, 345.0, 309.0, 277.0, 350.0, 432.0, 289.0, 411.0, 605.0, 258.0, 122.0, 179.0], "main_sell": [92.0, 60.0, 83.0, 78.0, 104.0, 72.0, 255.0, 489.0, 1123.0, 399.0, 93.0, 609.0, 492.0, 563.0, 595.0, 588.0, 373.0, 347.0, 266.0, 429.0, 237.0, 282.0, 383.0, 274.0, 425.0, 410.0, 608.0, 390.0, 193.0, 192.0], "main_net": [-12.0, -20.0, 0.0, -19.0, -39.0, 14.0, 47.0, 113.0, -246.0, -104.0, 111.0, -72.0, 242.0, 150.0, 68.0, 29.0, -31.0, 82.0, 62.0, -84.0, 72.0, -5.0, -33.0, 158.0, -136.0, 1.0, -3.0, -132.0, -71.0, -13.0], "dates": ["2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30"]};
     const sym = "7717";
     const root = document.querySelector('.tab-bar[data-sym="'+sym+'"]').closest('.chip-panel');
     // Tab switching
@@ -1136,6 +1147,65 @@
       </tr>`;
     }
     tbodyInst.innerHTML = htmlInst || '<tr><td colspan="10" class="muted">查無資料</td></tr>';
+
+    // ── 主力 chart（分點 Top 15 買 − 賣，紅綠雙色 bar）──
+    function renderMainChart(){
+      if (typeof echarts === 'undefined') return setTimeout(renderMainChart, 150);
+      const el = document.getElementById('chip_main_chart_'+sym);
+      if (!el) return;
+      const data = chip.main_net || [];
+      if (!data.length) {
+        el.innerHTML = '<div style="padding:32px;text-align:center;color:#64748b;">查無主力資料</div>';
+        return;
+      }
+      const ch = echarts.init(el, 'dark', { renderer: 'canvas' });
+      const colored = data.map(v => ({
+        value: v,
+        itemStyle: { color: (v >= 0 ? '#dc2626' : '#10b981'), opacity: 0.82, borderRadius: [2,2,0,0] }
+      }));
+      ch.setOption({
+        backgroundColor:'transparent', animation:false,
+        legend:{ data:['主力買賣超'], top:0, textStyle:{color:'#9ca3af'} },
+        grid:{ left:60, right:20, top:42, bottom:86, containLabel:true },
+        tooltip:{
+          trigger:'axis',
+          axisPointer:{ type:'shadow' },
+          backgroundColor:'#1f2937', borderColor:'#374151',
+          textStyle:{color:'#e5e7eb'},
+          valueFormatter:(v)=>Number(v).toLocaleString()+' 張'
+        },
+        xAxis:{
+          type:'category',
+          data: chip.dates,
+          boundaryGap:true,
+          axisLabel:{ color:'#9ca3af', rotate:45, margin:16, fontSize:11, hideOverlap:true },
+          axisTick:{ alignWithLabel:true },
+          axisLine:{lineStyle:{color:'#374151'}}
+        },
+        yAxis:{ type:'value', name:'張', nameTextStyle:{color:'#9ca3af'}, axisLabel:{color:'#9ca3af', formatter:(v)=>v>=1000||v<=-1000?(v/1000).toFixed(0)+'K':v}, splitLine:{lineStyle:{color:'rgba(255,255,255,0.04)'}} },
+        series: [{
+          name:'主力買賣超', type:'bar', data: colored,
+          barCategoryGap:'46%', barMaxWidth:18,
+          emphasis:{ focus:'series', itemStyle:{ opacity:0.96 } }
+        }]
+      });
+      window.addEventListener('resize', () => ch.resize());
+    }
+    renderMainChart();
+
+    // ── 主力 table ──
+    const tbodyMain = document.getElementById('chip_main_tbody_'+sym);
+    let htmlMain = '';
+    for (let i = n - 1; i >= n - tail; i--) {
+      const mb = chip.main_buy  ? chip.main_buy[i]  : null;
+      const ms = chip.main_sell ? chip.main_sell[i] : null;
+      const mn = chip.main_net  ? chip.main_net[i]  : null;
+      htmlMain += `<tr>
+        <td>${chip.dates[i].slice(5)}</td>
+        <td>${fmt(mb)}</td><td>${fmt(ms)}</td><td class="${cls(mn)}">${fmt(mn)}</td>
+      </tr>`;
+    }
+    tbodyMain.innerHTML = htmlMain || '<tr><td colspan="4" class="muted">查無資料</td></tr>';
 
     // ── 融資融券 chart ──
     function renderMarginChart(){

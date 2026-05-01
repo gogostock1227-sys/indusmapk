@@ -1502,6 +1502,19 @@ def compute_company_chip_data(d: dict, sym: str, days: int = 30) -> dict | None:
             out[k] = [round(float(x), 0) for x in s.values]
             dates_ref = s.index if dates_ref is None else dates_ref.union(s.index)
 
+    # 主力（分點 Top 15）：原始單位本來就是「張」，不 ÷1000
+    main_buy_s  = series_tail("broker_top15_buy",  to_lots=False)
+    main_sell_s = series_tail("broker_top15_sell", to_lots=False)
+    if main_buy_s is not None:
+        out["main_buy"]  = [round(float(x), 0) for x in main_buy_s.values]
+        dates_ref = main_buy_s.index if dates_ref is None else dates_ref.union(main_buy_s.index)
+    if main_sell_s is not None:
+        out["main_sell"] = [round(float(x), 0) for x in main_sell_s.values]
+        dates_ref = main_sell_s.index if dates_ref is None else dates_ref.union(main_sell_s.index)
+    if main_buy_s is not None and main_sell_s is not None:
+        net_s = main_buy_s.sub(main_sell_s, fill_value=0)
+        out["main_net"] = [round(float(x), 0) for x in net_s.values]
+
     # 融資融券（資料單位是「張」或「股」看 FinLab，一律再除 1 保原值；餘額這欄本來就是張）
     for k in [
         "margin_long_bal", "margin_long_buy", "margin_long_sell",
