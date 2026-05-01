@@ -119,6 +119,16 @@ if not exist ".git\" (
     goto :END
 )
 
+REM --- Clear stale .git/index.lock (>5 min old) before any git op ---
+REM Otherwise add/commit will fail silently and changes pile up locally.
+if exist ".git\index.lock" (
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "$lock = Get-Item -ErrorAction SilentlyContinue '.git\index.lock'; if ($lock -and $lock.LastWriteTime -lt (Get-Date).AddMinutes(-5)) { Write-Host '[INFO] Removing stale .git/index.lock (last modified:' $lock.LastWriteTime ')'; Remove-Item -Force '.git\index.lock'; exit 0 } elseif ($lock) { Write-Host '[WARN] .git/index.lock is fresh (<5 min), another git process may be running, skip deploy this round'; exit 1 } else { exit 0 }"
+    if errorlevel 1 (
+        echo [SKIP] Fresh git lock detected, will retry next scheduled run
+        goto :END
+    )
+)
+
 REM --- Check if there is anything to commit ---
 git diff --quiet --exit-code 2>nul
 set "HAS_CHANGES=%errorlevel%"
