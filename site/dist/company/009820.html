@@ -122,7 +122,7 @@
   <div id="tech_chart_009820" style="height:720px; width:100%; padding:4px 4px 12px;"></div>
   <script>
   (function(){
-    const chartData = {"dates": ["2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30"], "ohlc": [[10.04, 9.99, 9.98, 10.08], [10.0, 9.91, 9.81, 10.01], [10.03, 9.96, 9.96, 10.03], [10.0, 9.99, 9.98, 10.01], [9.92, 9.93, 9.9, 9.95], [9.93, 9.85, 9.85, 9.95]], "volume": [157241.0, 87435.0, 37147.0, 15994.0, 21072.0, 35073.0], "ma5": [null, null, null, null, 9.96, 9.93], "ma10": [null, null, null, null, null, null], "ma20": [null, null, null, null, null, null], "ma60": [null, null, null, null, null, null], "bb_up": [null, null, null, null, null, null], "bb_lo": [null, null, null, null, null, null], "k": [null, null, null, null, null, null], "d": [null, null, null, null, null, null], "macd_dif": [0.0, -0.01, -0.01, -0.01, -0.01, -0.02], "macd_dea": [0.0, -0.0, -0.0, -0.0, -0.0, -0.01], "macd_hist": [0.0, -0.01, -0.01, -0.0, -0.01, -0.02], "rsi": [null, 0.0, 4.59, 7.33, 6.91, 6.37], "foreign_net": [2090.0, 69.0, 36.0, -1.0, -39.0, null], "trust_net": [0.0, 0.0, 0.0, 0.0, 0.0, null], "dealer_net": [-9760.0, -1670.0, 6774.0, 5853.0, -2997.0, null], "main_net": [-7670.0, -1601.0, 6810.0, 5852.0, -3036.0, null], "has_chip": {"main": true, "foreign": true, "trust": true, "dealer": true}};
+    const chartData = {"dates": ["2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30"], "ohlc": [[10.04, 9.99, 9.98, 10.08], [10.0, 9.91, 9.81, 10.01], [10.03, 9.96, 9.96, 10.03], [10.0, 9.99, 9.98, 10.01], [9.92, 9.93, 9.9, 9.95], [9.93, 9.85, 9.85, 9.95]], "volume": [157241.0, 87435.0, 37147.0, 15994.0, 21072.0, 35073.0], "ma5": [null, null, null, null, 9.96, 9.93], "ma10": [null, null, null, null, null, null], "ma20": [null, null, null, null, null, null], "ma60": [null, null, null, null, null, null], "bb_up": [null, null, null, null, null, null], "bb_lo": [null, null, null, null, null, null], "k": [null, null, null, null, null, null], "d": [null, null, null, null, null, null], "macd_dif": [0.0, -0.01, -0.01, -0.01, -0.01, -0.02], "macd_dea": [0.0, -0.0, -0.0, -0.0, -0.0, -0.01], "macd_hist": [0.0, -0.01, -0.01, -0.0, -0.01, -0.02], "rsi": [null, 0.0, 4.59, 7.33, 6.91, 6.37], "foreign_net": [2090.0, 69.0, 36.0, -1.0, -39.0, 56.0], "trust_net": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_net": [-9760.0, -1670.0, 6774.0, 5853.0, -2997.0, -7047.0], "main_net": [-7670.0, -1601.0, 6810.0, 5852.0, -3036.0, -6990.0], "has_chip": {"main": true, "foreign": true, "trust": true, "dealer": true}};
     if (!chartData) {
       const el = document.getElementById('tech_chart_009820');
       if (el) el.innerHTML = '<div style="text-align:center; padding:80px 20px; color:var(--text-mute);">暫無 K 棒資料</div>';
@@ -577,8 +577,8 @@
     <span class="muted">三大法人 / 融資融券 · 近 30 日</span>
   </div>
   <div class="chip-snapshot">
-    <div><em>外資今日</em><strong class="negative">-39 張</strong></div>
-    <div><em>外資 5 日</em><strong class="positive">+2155 張</strong></div>
+    <div><em>外資今日</em><strong class="positive">+56 張</strong></div>
+    <div><em>外資 5 日</em><strong class="positive">+122 張</strong></div>
     <div><em>投信今日</em><strong class="">+0 張</strong></div>
     <div><em>投信 5 日</em><strong class="">+0 張</strong></div>
   </div>
@@ -615,15 +615,46 @@
 
   <div class="tab-panel" data-panel="holder-009820">
     
-    <div style="padding:40px;text-align:center;color:#64748b;">
-      查無此檔的集保分級資料（可能是新股、ETF 或權證）
+    <div class="holder-thresholds">
+      <div class="th-col"><em>散戶</em><small>持股 ≤</small><span class="pill">40-50 張</span></div>
+      <div class="th-col"><em>中實戶</em><small>持股 ≤</small><span class="pill">200-400 張</span></div>
+      <div class="th-col"><em>大戶</em><small>持股 &gt;</small><span class="pill">200-400 張</span></div>
+    </div>
+
+    <div class="holder-section">
+      <div class="holder-section-title">📈 持股佔比趨勢</div>
+      <div id="holder_trend_009820" style="height:280px; width:100%; padding:6px;"></div>
+    </div>
+
+    <div class="holder-section">
+      <div class="holder-section-title">👥 股東人數數據</div>
+      <div class="holder-snapshots" id="holder_snap_009820"></div>
+    </div>
+
+    <div class="holder-section">
+      <div class="holder-section-title">
+        📊 詳細數據比較
+        <span class="holder-toggle">
+          <button class="hm-btn active" data-mode="holders">人數</button>
+          <button class="hm-btn" data-mode="pcts">佔比</button>
+        </span>
+      </div>
+      <div class="holder-matrix-wrap">
+        <table class="table compact holder-matrix">
+          <thead id="holder_matrix_head_009820"></thead>
+          <tbody id="holder_matrix_body_009820"></tbody>
+        </table>
+      </div>
+      <p class="muted" style="padding:4px 14px 14px; font-size:12px;">
+        ▲/▼ 為相較於前一週的變動。資料來源：TDCC 集保戶股權分散週報。
+      </p>
     </div>
     
   </div>
 
   <script>
   (function(){
-    const chip = {"foreign_net": [2090.0, 69.0, 36.0, -1.0, -39.0], "trust_net": [0.0, 0.0, 0.0, 0.0, 0.0], "dealer_net": [-9760.0, -1670.0, 6774.0, 5853.0, -2997.0], "foreign_buy": [2092.0, 69.0, 38.0, 2.0, 11.0], "foreign_sell": [2.0, 0.0, 2.0, 3.0, 50.0], "trust_buy": [0.0, 0.0, 0.0, 0.0, 0.0], "trust_sell": [0.0, 0.0, 0.0, 0.0, 0.0], "dealer_buy": [19817.0, 11065.0, 9196.0, 6832.0, 6931.0], "dealer_sell": [29577.0, 12735.0, 2422.0, 979.0, 9928.0], "margin_long_buy": [0.0, 1844.0, 488.0, 105.0, 154.0, 57.0], "margin_long_sell": [0.0, 0.0, 213.0, 179.0, 102.0, 141.0], "margin_short_buy": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "margin_short_sell": [0.0, 0.0, 0.0, 0.0, 1.0, 0.0], "dates": ["2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29"]};
+    const chip = {"foreign_net": [2090.0, 69.0, 36.0, -1.0, -39.0, 56.0], "trust_net": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_net": [-9760.0, -1670.0, 6774.0, 5853.0, -2997.0, -7047.0], "foreign_buy": [2092.0, 69.0, 38.0, 2.0, 11.0, 56.0], "foreign_sell": [2.0, 0.0, 2.0, 3.0, 50.0, 0.0], "trust_buy": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "trust_sell": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dealer_buy": [19817.0, 11065.0, 9196.0, 6832.0, 6931.0, 9248.0], "dealer_sell": [29577.0, 12735.0, 2422.0, 979.0, 9928.0, 16295.0], "margin_long_buy": [0.0, 1844.0, 488.0, 105.0, 154.0, 57.0, 134.0], "margin_long_sell": [0.0, 0.0, 213.0, 179.0, 102.0, 141.0, 79.0], "margin_short_buy": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], "margin_short_sell": [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 200.0], "dates": ["2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30"]};
     const sym = "009820";
     const root = document.querySelector('.tab-bar[data-sym="'+sym+'"]').closest('.chip-panel');
     // Tab switching
@@ -740,7 +771,7 @@
     tbodyMg.innerHTML = htmlMg || '<tr><td colspan="7" class="muted">查無資料</td></tr>';
 
     // ── 大戶資訊：趨勢線 + 人數卡 + 15 級 × N 週矩陣表 ──
-    const holder = null;
+    const holder = {"dates": ["2026-04-24", "2026-04-30"], "levels": ["1-999", "1-5張", "5-10張", "10-15張", "15-20張", "20-30張", "30-40張", "40-50張", "50-100張", "100-200張", "200-400張", "400-600張", "600-800張", "800-1,000張", "1,000張以上"], "holders": [[431, 19384, 10399, 1749, 4898, 3346, 775, 2997, 3182, 1159, 487, 246, 26, 88, 98], [918, 22096, 10897, 2233, 4932, 3448, 940, 2863, 3217, 1233, 490, 247, 28, 85, 102]], "shares": [[102627, 55174450, 99019783, 24659952, 97332917, 97335876, 29873000, 149311709, 289300384, 200688000, 147308000, 125765000, 19299000, 87227000, 546304302], [239136, 61170720, 102281501, 30655412, 97635338, 98905433, 35744111, 142420294, 286349210, 207606381, 146943397, 126277000, 20797000, 84088000, 528089067]], "pcts": [[0.0, 2.8, 5.02, 1.25, 4.94, 4.94, 1.51, 7.58, 14.69, 10.19, 7.48, 6.38, 0.98, 4.43, 27.74], [0.01, 3.1, 5.19, 1.55, 4.95, 5.02, 1.81, 7.23, 14.54, 10.54, 7.46, 6.41, 1.05, 4.27, 26.81]], "retail_holders": [43979, 48327], "mid_holders": [4828, 4940], "big_holders": [458, 462], "retail_pct": [28.04, 28.86], "mid_pct": [32.36, 32.54], "big_pct": [39.53, 38.54], "delta_retail": [null, 4348], "delta_mid": [null, 112], "delta_big": [null, 4]};
     if (holder) {
       const COLORS = { retail:'#dc2626', mid:'#b45309', big:'#059669' };
       const mdDate = (d) => (d || '').replace(/-/g,'').slice(0,8) || d;
@@ -783,10 +814,11 @@
       }
       renderTrend();
 
-      // ── 股東人數卡（最近 3 週）──
+      // ── 股東人數卡（最近 4 週）──
       const snapEl = document.getElementById('holder_snap_'+sym);
       const N = holder.dates.length;
-      const show = Math.min(3, N);
+      const DISPLAY_WEEKS = 4;
+      const show = Math.min(DISPLAY_WEEKS, N);
       let htmlSnap = '';
       for (let i = N - show; i < N; i++) {
         htmlSnap += `<div class="snap-card">
@@ -796,15 +828,15 @@
           <div class="snap-row"><em>散戶人數：</em><strong>${fmtNum(holder.retail_holders[i])}</strong>${fmtSignedNum(holder.delta_retail[i])}</div>
         </div>`;
       }
-      if (show < 3) {
+      if (show < DISPLAY_WEEKS) {
         htmlSnap += `<div class="snap-card snap-card-empty">
           <div class="snap-date muted">—</div>
           <div class="muted" style="font-size:12px; line-height:1.6;">
-            每週 fetch 一次後累積歷史<br>
+            趨勢圖可顯示近一年歷史<br>
             目前僅 ${N} 週資料<br>
-            跑 <code>fetch_extras.py --only holders</code>
+            級距表顯示最近 4 週
           </div>
-        </div>`.repeat(3 - show);
+        </div>`.repeat(DISPLAY_WEEKS - show);
       }
       snapEl.innerHTML = htmlSnap;
 
@@ -813,18 +845,21 @@
         const thead = document.getElementById('holder_matrix_head_'+sym);
         const tbody = document.getElementById('holder_matrix_body_'+sym);
         const mat = (mode === 'pcts') ? holder.pcts : holder.holders;
+        const matrixStart = Math.max(0, holder.dates.length - DISPLAY_WEEKS);
+        const matrixDates = holder.dates.slice(matrixStart);
+        const matrixMat = mat.slice(matrixStart);
 
         let head = '<tr><th class="sticky-col">持股分級</th>';
-        holder.dates.forEach(d => { head += `<th>${mdDate(d)}</th>`; });
+        matrixDates.forEach(d => { head += `<th>${mdDate(d)}</th>`; });
         head += '</tr>';
         thead.innerHTML = head;
 
         let body = '';
         for (let lv = 0; lv < holder.levels.length; lv++) {
           body += `<tr><td class="sticky-col lvl-label">${holder.levels[lv]}</td>`;
-          for (let wk = 0; wk < holder.dates.length; wk++) {
-            const cur  = mat[wk][lv];
-            const prev = (wk > 0) ? mat[wk-1][lv] : null;
+          for (let wk = 0; wk < matrixDates.length; wk++) {
+            const cur  = matrixMat[wk][lv];
+            const prev = (wk > 0) ? matrixMat[wk-1][lv] : null;
             const delta = (prev == null) ? null : (cur - prev);
             let cell;
             if (mode === 'pcts') {

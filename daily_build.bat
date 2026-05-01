@@ -4,17 +4,18 @@ REM ===========================================================
 REM  Taiwan Industry Map - Daily Auto Rebuild
 REM
 REM  Pipeline (3 steps):
-REM    Step 1/3: fetch_extras.py       -> 處置股 + 集保分級週報
-REM    Step 2/3: fetch_company_rich.py -> 公司基本 + 月營收 + 季報 + 股利
-REM    Step 3/3: build_site.py         -> 股價 / 法人 / 融資融券 / render 2700+ pages
+REM    Step 1/3: fetch_extras.py       -> extras and TDCC holders
+REM    Step 2/3: fetch_company_rich.py -> company rich data
+REM    Step 3/3: build_site.py         -> prices/chips/render pages
 REM
-REM  漲停分析:
-REM    由外部專案產出 enriched-*.json 到
-REM    C:/Users/user/Desktop/程式雜/AI股票網頁建構/reports/
-REM    build_site.py 會自動抓最新一個 render 到 limit-up.html
+REM  Limit-up analysis:
+REM    Uses latest enriched-*.json reports when available.
 REM
 REM  Log: logs/build_YYYYMMDD_HHMM.log
-REM  Cron: daily 14:30 (30min after market close)
+REM  Schedule:
+REM    daily 15:30  first after-market pass
+REM    daily 17:00  main complete pass
+REM    daily 21:30  evening completeness pass
 REM ===========================================================
 setlocal enabledelayedexpansion
 
@@ -24,9 +25,9 @@ if "%PROJECT_DIR:~-1%"=="\" set "PROJECT_DIR=%PROJECT_DIR:~0,-1%"
 set "PYTHON=C:\Users\user\AppData\Local\Programs\Python\Python313\python.exe"
 set "BUILD_SCRIPT=site\build_site.py"
 
-REM --- Timestamp YYYYMMDD_HHMM (locale-independent via WMIC) ---
-for /f "tokens=2 delims==" %%a in ('wmic OS Get localdatetime /value 2^>nul ^| find "="') do set "DT=%%a"
-set "TIMESTAMP=!DT:~0,8!_!DT:~8,4!"
+REM --- Timestamp YYYYMMDD_HHMM (PowerShell; avoids WMIC dependency) ---
+for /f %%a in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-Date -Format yyyyMMdd_HHmm"') do set "TIMESTAMP=%%a"
+if not defined TIMESTAMP set "TIMESTAMP=manual_%RANDOM%"
 
 cd /d "%PROJECT_DIR%"
 if errorlevel 1 (
@@ -47,7 +48,7 @@ echo ===========================================================
 echo.
 
 REM --- Step 1/3: fetch extras (disposal + TDCC holders weekly) ---
-echo === [Step 1/3] Fetch extras (處置股 + 集保分級) === > "%LOG_FILE%"
+echo === [Step 1/3] Fetch extras === > "%LOG_FILE%"
 echo Start: %date% %time% >> "%LOG_FILE%"
 echo. >> "%LOG_FILE%"
 "%PYTHON%" "site\fetch_extras.py" >> "%LOG_FILE%" 2>&1
@@ -97,9 +98,9 @@ forfiles /p "logs" /s /m *.log /d -30 /c "cmd /c del @file" 2>nul
 REM ===========================================================
 REM  Auto-deploy to Cloudflare Pages via Git
 REM  Only runs when build succeeded AND git is initialized
-REM  Set DEPLOY=0 at top to disable
+REM  Run with DEPLOY=0 to disable
 REM ===========================================================
-set "DEPLOY=1"
+if not defined DEPLOY set "DEPLOY=1"
 
 if %BUILD_RC% neq 0 (
     echo [SKIP] Build failed, skipping deploy

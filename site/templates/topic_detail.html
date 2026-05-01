@@ -167,7 +167,7 @@
 
 <section class="grid-2col">
   <div class="panel">
-    <div class="panel-header"><h2>族群快照</h2></div>
+    <div class="panel-header"><h2>族群摘要</h2></div>
     <div class="snapshot">
       <div><em>今日平均</em><strong class="{% if summary.ret_1d_mean and summary.ret_1d_mean > 0 %}positive{% elif summary.ret_1d_mean %}negative{% endif %}">{{ summary.ret_1d_mean|pct if summary.ret_1d_mean else '—' }}</strong></div>
       <div><em>5日平均</em><strong class="{% if summary.ret_5d_mean and summary.ret_5d_mean > 0 %}positive{% elif summary.ret_5d_mean %}negative{% endif %}">{{ summary.ret_5d_mean|pct if summary.ret_5d_mean else '—' }}</strong></div>
@@ -181,16 +181,16 @@
   </div>
 
   <div class="panel">
-    <div class="panel-header"><h2>相關題材</h2><span class="muted">依共同成分股推導</span></div>
+    <div class="panel-header"><h2>相關題材</h2><span class="muted">依成分股其他題材重複次數</span></div>
     <div class="related-list">
       {% for r in related %}
       {% set rmeta = get_meta(r.name) %}
       <a class="related-chip" href="{{ r.name|slugify }}.html" style="border-color:{{ rmeta.color }}; color:{{ rmeta.color }};">
         {{ r.name }}
-        <small>共用 {{ r.shared }} 檔</small>
+        <small>重複 {{ r.shared }} 檔</small>
       </a>
       {% endfor %}
-      {% if not related %}<p class="muted">此題材沒有與其他族群明顯重疊的股票。</p>{% endif %}
+      {% if not related %}<p class="muted">這批成分股目前沒有可彙總的其他題材。</p>{% endif %}
     </div>
   </div>
 </section>

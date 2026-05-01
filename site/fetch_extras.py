@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import re
 import ssl
 import sys
 import urllib.request
@@ -87,8 +88,52 @@ def _roc_to_ad(s: str) -> str:
 #   處置股
 # ═══════════════════════════════════════════
 
+# TWSE detail 全文段落抽取：原文用全形數字「１」「２」「３」分段（半形相容）。
+# 段 1: 處置原因 / 段 2: 處置期間 / 段 3: 處置措施
+_TWSE_REASON_BLOCK = re.compile(
+    r"[１1]\s*處置原因[：:]\s*(.+?)(?=\s*[２2]\s*處置期間|\s*[３3]\s*處置措施|$)",
+    re.DOTALL,
+)
+_TWSE_ACTION_BLOCK = re.compile(
+    r"[３3]\s*處置措施[：:\s]*(.+)$",
+    re.DOTALL,
+)
+
+
+def _normalize_block(text: str) -> str:
+    """壓掉多餘空白／換行，保留可讀斷句（句號、a/b/c 列點之間加空格）。"""
+    if not text:
+        return ""
+    # 把連續空白 / 換行壓成單一空格
+    t = re.sub(r"\s+", " ", text).strip()
+    return t
+
+
+def _extract_twse_reason_action(detail: str) -> tuple[str, str]:
+    """從 TWSE Detail 完整文字抽出『處置原因』與『處置措施』段落純文字。
+    抓不到任何一段就回 ('','')，由 caller 退路用短分類欄位。"""
+    if not detail:
+        return "", ""
+    reason = ""
+    action = ""
+    m = _TWSE_REASON_BLOCK.search(detail)
+    if m:
+        reason = _normalize_block(m.group(1))
+    m = _TWSE_ACTION_BLOCK.search(detail)
+    if m:
+        action = _normalize_block(m.group(1))
+    return reason, action
+
+
 def fetch_disposal_twse() -> dict:
-    """TWSE 上市處置股清單。"""
+    """TWSE 上市處置股清單。
+    TWSE openapi 的 ReasonsOfDisposition / DispositionMeasures 只是『連續三次』『第一次處置』
+    這種短分類；完整文字（含『以人工管制之撮合終端機執行撮合作業（約每五分鐘撮合一次）』等核心
+    措施）藏在 Detail 欄位。所以：
+      - reason / action：優先用 Detail 抽出的完整段落，抽不到才退到短分類
+      - reason_summary / action_summary：保留短分類，前端可顯示為小 tag
+      - detail：保留完整原文，**不截斷**（過去截 240 字會把信用交易管控段砍掉）
+    """
     raw = _fetch("https://openapi.twse.com.tw/v1/announcement/punish")
     data = json.loads(raw)
     out = {}
@@ -102,15 +147,21 @@ def fetch_disposal_twse() -> dict:
             if sep in period:
                 start, end = period.split(sep, 1)
                 break
+        detail_full     = (row.get("Detail", "") or "").strip()
+        reason_summary  = (row.get("ReasonsOfDisposition", "") or "").strip()
+        action_summary  = (row.get("DispositionMeasures", "") or "").strip()
+        reason_long, action_long = _extract_twse_reason_action(detail_full)
         out[code] = {
-            "status":  "處置中",
-            "name":    row.get("Name", ""),
-            "reason":  row.get("ReasonsOfDisposition", ""),
-            "action":  row.get("DispositionMeasures", ""),
-            "as_of":   _roc_to_ad(start),
-            "end":     _roc_to_ad(end),
-            "detail":  (row.get("Detail", "") or "").strip()[:240],
-            "market":  "上市",
+            "status":          "處置中",
+            "name":            row.get("Name", ""),
+            "reason":          reason_long or reason_summary,
+            "action":          action_long or action_summary,
+            "reason_summary":  reason_summary,
+            "action_summary":  action_summary,
+            "as_of":           _roc_to_ad(start),
+            "end":             _roc_to_ad(end),
+            "detail":          detail_full,
+            "market":          "上市",
         }
     return out
 
@@ -147,14 +198,16 @@ def fetch_disposal_tpex() -> dict:
         name_raw = g(row, "證券名稱")
         name = name_raw.split("(")[0].strip() if "(" in name_raw else name_raw
         out[code] = {
-            "status":  "處置中",
-            "name":    name,
-            "reason":  g(row, "處置原因"),
-            "action":  g(row, "處置內容")[:240],
-            "as_of":   _roc_to_ad(start),
-            "end":     _roc_to_ad(end),
-            "detail":  "",
-            "market":  "上櫃",
+            "status":          "處置中",
+            "name":            name,
+            "reason":          g(row, "處置原因"),
+            "action":          g(row, "處置內容"),   # 不截斷，完整保留撮合分鐘 + 信用交易管控段
+            "reason_summary":  "",                    # TPEx 無短分類，欄位留空對齊上市結構
+            "action_summary":  "",
+            "as_of":           _roc_to_ad(start),
+            "end":             _roc_to_ad(end),
+            "detail":          "",
+            "market":          "上櫃",
         }
     return out
 
@@ -204,8 +257,10 @@ def fetch_holders_snapshot() -> tuple[str, dict]:
 
     snap: dict = {}
     for code, sub in df.groupby("證券代號"):
-        sym = str(code).strip().lstrip("0") or str(code).strip()
-        if len(sym) > 5:
+        # TDCC 的代號必須保留原樣。ETF / 主動 ETF 會有 0050、00981A
+        # 這類前導 0；若去掉，個股頁以完整代號查詢時會找不到資料。
+        sym = str(code).strip()
+        if not sym or len(sym) > 6:
             continue
         # 只保留 level 1-15（忽略 16 差異調整、17 合計）
         sub = sub[(sub["持股分級"] >= 1) & (sub["持股分級"] <= 15)]
@@ -223,10 +278,25 @@ def fetch_holders_snapshot() -> tuple[str, dict]:
     return latest_date, snap
 
 
-def merge_holders_history(prev_hist: dict, new_date: str, new_snap: dict, keep_weeks: int = 20) -> dict:
-    """把新一週併入現有歷史，保留最近 keep_weeks 週。
+def merge_holders_history(prev_hist: dict, new_date: str, new_snap: dict, keep_weeks: int = 60) -> dict:
+    """把新一週併入現有歷史，保留最近 keep_weeks 週（預設 60 ≈ 1 年再多 8 週緩衝）。
     結構：{sym: {date: {h, s, p}}, ...}"""
     hist = dict(prev_hist) if isinstance(prev_hist, dict) else {}
+
+    # 舊版曾把 TDCC 代號做 lstrip("0")，例如 00981A -> 981A、0050 -> 50。
+    # 這裡以最新 open data 的完整代號為準，把舊 key 的歷史搬回正確 key。
+    for full_sym in sorted(new_snap.keys()):
+        legacy_sym = full_sym.lstrip("0")
+        if (
+            legacy_sym
+            and legacy_sym != full_sym
+            and legacy_sym in hist
+        ):
+            merged = dict(hist.get(legacy_sym, {}))
+            merged.update(hist.get(full_sym, {}))
+            hist[full_sym] = merged
+            hist.pop(legacy_sym, None)
+
     all_syms = set(hist.keys()) | set(new_snap.keys())
     out = {}
     for sym in all_syms:
@@ -268,7 +338,7 @@ def main():
     if args.only in (None, "holders"):
         new_date, new_snap = fetch_holders_snapshot()
         payload["holders_history"] = merge_holders_history(
-            payload.get("holders_history", {}), new_date, new_snap, keep_weeks=20,
+            payload.get("holders_history", {}), new_date, new_snap, keep_weeks=60,
         )
         # 統計：合併後有多少日期
         all_dates = set()

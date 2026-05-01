@@ -28,7 +28,7 @@ import hashlib
 import webbrowser
 import warnings
 from collections import defaultdict
-from datetime import datetime
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote
 
@@ -68,6 +68,7 @@ TAIEX_CACHE = SITE_DIR / ".cache_taiex.parquet"  # 舊：只存加權指數，�
 INDICES_CACHE = SITE_DIR / ".cache_market_indices.parquet"  # 新：上市加權 + 櫃買
 NAME_OVERRIDES_JSON = SITE_DIR / "stock_name_overrides.json"
 COVERAGE_DIR = ROOT_DIR / "My-TW-Coverage" / "Pilot_Reports"
+TAIPEI_TZ = timezone(timedelta(hours=8))
 
 # 個股深度資料六大分頁：(UI 顯示名稱, MD 標頭關鍵字)
 COVERAGE_TABS = [
@@ -167,15 +168,193 @@ def refresh_futures_list(max_age_days: float = 1.0) -> None:
         print(f"[futures] 抓取例外：{e}（沿用前次 cache）")
 
 
-def refresh_daily_chip_report(max_age_minutes: float = 30.0) -> None:
+def today_taipei() -> date:
+    return datetime.now(TAIPEI_TZ).date()
+
+
+def normalize_date(value) -> date | None:
+    if value is None:
+        return None
+    if isinstance(value, pd.Timestamp):
+        return value.date()
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    text = str(value).strip()
+    if not text:
+        return None
+    candidates = [text[:10], text[:10].replace("/", "-"), text[:10].replace("-", "/"), text[:8]]
+    for candidate in candidates:
+        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y%m%d"):
+            try:
+                return datetime.strptime(candidate, fmt).date()
+            except Exception:
+                continue
+    try:
+        return pd.Timestamp(text).date()
+    except Exception:
+        return None
+
+
+def _market_source(name: str, url: str, status: str, note: str = "") -> dict:
+    return {"name": name, "url": url, "status": status, "note": note}
+
+
+def _twse_holiday_from_rows(rows, target_date: date) -> dict | None:
+    target_iso = target_date.isoformat()
+    for row in rows or []:
+        if isinstance(row, dict):
+            values = list(row.values())
+            date_text = str(row.get("日期") or row.get("date") or row.get("Date") or (values[0] if values else "")).strip()
+            name = str(row.get("名稱") or row.get("name") or row.get("Name") or (values[1] if len(values) > 1 else "")).strip()
+            description = str(row.get("說明") or row.get("description") or row.get("Description") or (values[2] if len(values) > 2 else "")).strip()
+        else:
+            values = list(row) if isinstance(row, (list, tuple)) else [row]
+            date_text = str(values[0]).strip() if values else ""
+            name = str(values[1]).strip() if len(values) > 1 else ""
+            description = str(values[2]).strip() if len(values) > 2 else ""
+        if target_iso in date_text:
+            return {"name": name, "description": description}
+    return None
+
+
+def fetch_twse_holiday_reason(target_date: date) -> tuple[dict | None, list[dict]]:
+    """查 TWSE 市場開休市表；失敗只回傳來源狀態，不阻斷 build。"""
+    import requests
+    from io import StringIO
+
+    base_url = "https://www.twse.com.tw/holidaySchedule/holidaySchedule"
+    params = {"queryYear": str(target_date.year - 1911), "response": "json"}
+    checked: list[dict] = []
+
+    try:
+        r = requests.get(base_url, params=params, headers={"User-Agent": "Mozilla/5.0"}, timeout=8, verify=False)
+        r.raise_for_status()
+        payload = r.json()
+        reason = _twse_holiday_from_rows(payload.get("data") or payload.get("tables") or [], target_date)
+        checked.append(_market_source("TWSE holidaySchedule", r.url, "ok", "json"))
+        if reason:
+            return reason, checked
+    except Exception as exc:
+        checked.append(_market_source("TWSE holidaySchedule", base_url, "error", str(exc)[:160]))
+
+    html_params = {"queryYear": str(target_date.year - 1911), "response": "html"}
+    try:
+        r = requests.get(base_url, params=html_params, headers={"User-Agent": "Mozilla/5.0"}, timeout=8, verify=False)
+        r.raise_for_status()
+        rows = []
+        for df in pd.read_html(StringIO(r.text)):
+            rows.extend(df.astype(str).values.tolist())
+        reason = _twse_holiday_from_rows(rows, target_date)
+        checked.append(_market_source("TWSE holidaySchedule HTML", r.url, "ok", "html"))
+        if reason:
+            return reason, checked
+    except Exception as exc:
+        checked.append(_market_source("TWSE holidaySchedule HTML", base_url, "error", str(exc)[:160]))
+
+    return None, checked
+
+
+def fetch_dgpa_weather_closure(target_date: date) -> tuple[dict | None, list[dict]]:
+    """查 DGPA 天然災害停班停課；只把台北市全日或上午停班視為全日停市。"""
+    import requests
+
+    url = "https://www.dgpa.gov.tw/typh/daily/nds.html"
+    checked: list[dict] = []
+    try:
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
+        r.raise_for_status()
+        text = r.text
+        checked.append(_market_source("DGPA typhoon daily", url, "ok"))
+    except Exception as exc:
+        return None, [_market_source("DGPA typhoon daily", url, "error", str(exc)[:160])]
+
+    compact = re.sub(r"\s+", "", text.replace("台北市", "臺北市"))
+    if "無停班停課訊息" in compact:
+        return None, checked
+    pos = compact.find("臺北市")
+    if pos < 0:
+        return None, checked
+    window = compact[pos: pos + 240]
+    has_closure = "停止上班" in window
+    afternoon_only = "下午停止上班" in window and "上午停止上班" not in window and "全日停止上班" not in window
+    if has_closure and not afternoon_only:
+        return {"name": "天然災害停市", "description": "臺北市停止上班，集中交易市場全日休市"}, checked
+    return None, checked
+
+
+def describe_market_status(latest_trade_date) -> dict:
+    today = today_taipei()
+    latest = normalize_date(latest_trade_date)
+    status = {
+        "date": today.isoformat(),
+        "latest_trade_date": latest.isoformat() if latest else "",
+        "is_trading_day": bool(latest and today <= latest),
+        "reason": "trading_day",
+        "reason_label": "今日已有交易資料",
+        "checked_sources": [],
+    }
+    if status["is_trading_day"]:
+        return status
+
+    if today.weekday() >= 5:
+        status.update({"reason": "weekend", "reason_label": "週末休市"})
+        return status
+
+    reason, checked = fetch_twse_holiday_reason(today)
+    status["checked_sources"].extend(checked)
+    if reason:
+        label = reason.get("name") or "預定休市"
+        desc = reason.get("description") or ""
+        status.update({
+            "reason": "scheduled_holiday",
+            "reason_label": f"{label}：{desc}" if desc else label,
+        })
+        return status
+
+    weather, checked = fetch_dgpa_weather_closure(today)
+    status["checked_sources"].extend(checked)
+    if weather:
+        status.update({
+            "reason": "weather_closure",
+            "reason_label": weather.get("description") or weather.get("name") or "天然災害停市",
+        })
+        return status
+
+    status.update({
+        "reason": "no_new_close",
+        "reason_label": "尚未取得今日收盤資料，保守沿用前次籌碼報告",
+    })
+    return status
+
+
+def refresh_daily_chip_report(latest_trade_date=None, max_age_minutes: float = 30.0) -> None:
     """跑 fetch_daily_chip_report.py 更新首頁每日籌碼報告。
 
     官方來源偶爾會延遲或短暫失敗，因此採 subprocess 隔離；失敗時首頁沿用前次 cache。
     """
     import subprocess, time
+    needs_catchup = daily_chip_cache_needs_refresh(latest_trade_date) if latest_trade_date is not None else False
+    if latest_trade_date is not None:
+        market_status = describe_market_status(latest_trade_date)
+        if not market_status["is_trading_day"] and not needs_catchup:
+            print(
+                "[daily-chip] skip: "
+                f"{market_status['date']} 非交易日或尚無收盤資料；"
+                f"latest={market_status['latest_trade_date']}；"
+                f"reason={market_status['reason']} ({market_status['reason_label']})"
+            )
+            return
+        if not market_status["is_trading_day"] and needs_catchup:
+            print(
+                "[daily-chip] non-trading day but cache is stale; "
+                f"try catch-up for latest={market_status['latest_trade_date']} "
+                f"({market_status['reason_label']})"
+            )
     if DAILY_CHIP_JSON.exists():
         age_minutes = (time.time() - DAILY_CHIP_JSON.stat().st_mtime) / 60
-        if age_minutes < max_age_minutes:
+        if age_minutes < max_age_minutes and not needs_catchup:
             print(f"[daily-chip] cache {age_minutes:.0f} 分鐘內，跳過抓取（{DAILY_CHIP_JSON.name}）")
             return
     script = SITE_DIR / "fetch_daily_chip_report.py"
@@ -209,10 +388,46 @@ def load_daily_chip_report() -> dict | None:
     if not DAILY_CHIP_JSON.exists():
         return None
     try:
-        return json.loads(DAILY_CHIP_JSON.read_text(encoding="utf-8"))
+        report = json.loads(DAILY_CHIP_JSON.read_text(encoding="utf-8"))
+        try:
+            from fetch_daily_chip_report import normalize_report_for_template
+
+            report = normalize_report_for_template(report)
+        except Exception as normalize_error:
+            print(f"[daily-chip] cache schema normalize failed: {normalize_error}")
+        return report
     except Exception as e:
         print(f"[daily-chip] 讀取 cache 失敗：{e}")
         return None
+
+
+def _daily_chip_date_key(value) -> date | None:
+    if not value:
+        return None
+    return normalize_date(str(value).replace("/", "-"))
+
+
+def _daily_chip_section_date(report: dict, section: str) -> date | None:
+    part = report.get(section)
+    return _daily_chip_date_key(part.get("date")) if isinstance(part, dict) else None
+
+
+def daily_chip_cache_needs_refresh(latest_trade_date) -> bool:
+    latest = normalize_date(latest_trade_date)
+    if not latest:
+        return False
+    report = load_daily_chip_report()
+    if not report:
+        return True
+    if _daily_chip_date_key(report.get("report_date")) != latest:
+        return True
+    for section in ("spot", "margin", "futures", "options", "vix"):
+        section_date = _daily_chip_section_date(report, section)
+        if section_date and section_date < latest:
+            return True
+        if not section_date and not report.get(section):
+            return True
+    return False
 
 
 def _fetch_tpex_official_recent() -> pd.Series:
@@ -488,9 +703,33 @@ _BULLET_PREFIXES = ("- ", "* ", "• ", "・")
 _WIKILINK_RE = _re.compile(r"\[\[([^\[\]]+?)\]\]")
 _BOLD_RE = _re.compile(r"\*\*([^*\n]+?)\*\*")
 
+_DISPLAY_SOURCE_REPLACEMENTS = (
+    ("與 [[Yahoo 股市]] ", ""),
+    ("與[[Yahoo 股市]] ", ""),
+    ("／[[Yahoo 股市]]", ""),
+    ("/[[Yahoo 股市]]", ""),
+    ("、[[Yahoo 股市]]", ""),
+    ("[[Yahoo 股市]]／", ""),
+    ("[[Yahoo 股市]]/", ""),
+    ("[[Yahoo 股市]]、", ""),
+    ("[[Yahoo 股市]]", ""),
+    ("Yahoo 股市", ""),
+    ("Yahoo股市", ""),
+)
+
+
+def strip_hidden_source_names(text: str) -> str:
+    """移除不希望在網站顯示的來源名稱。"""
+    if not isinstance(text, str) or "Yahoo" not in text:
+        return text
+    for old, new in _DISPLAY_SOURCE_REPLACEMENTS:
+        text = text.replace(old, new)
+    return text
+
 
 def _coverage_inline(text: str) -> str:
     """Convert inline MD (wikilinks + bold) to HTML. Input may already contain raw chars."""
+    text = strip_hidden_source_names(text)
     out = _html.escape(text)
     out = _WIKILINK_RE.sub(lambda m: f'<span class="wiki-ref">{m.group(1)}</span>', out)
     out = _BOLD_RE.sub(r"<strong>\1</strong>", out)
@@ -904,29 +1143,6 @@ def compute_group_metrics(stock_metrics: pd.DataFrame) -> dict:
     return result
 
 
-def compute_related_topics(top_n=5) -> dict:
-    """以共同成分股推導相關題材。每檔股票是一個 bag，兩族群的 Jaccard 相似度"""
-    groups = {g: set(m) for g, m in CONCEPT_GROUPS.items()}
-    related = {}
-    for g1, s1 in groups.items():
-        scores = []
-        for g2, s2 in groups.items():
-            if g1 == g2:
-                continue
-            inter = len(s1 & s2)
-            if inter == 0:
-                continue
-            union = len(s1 | s2)
-            jac = inter / union
-            scores.append((g2, jac, inter))
-        scores.sort(key=lambda x: (-x[1], -x[2]))
-        related[g1] = [
-            {"name": g2, "jaccard": round(j, 3), "shared": n}
-            for g2, j, n in scores[:top_n]
-        ]
-    return related
-
-
 def compute_company_topics() -> dict:
     """每檔股票反查所屬題材"""
     result = defaultdict(list)
@@ -934,6 +1150,50 @@ def compute_company_topics() -> dict:
         for s in members:
             result[s].append(group)
     return dict(result)
+
+
+def compute_member_related_topics(
+    members,
+    company_topics: dict,
+    exclude_group: str | None = None,
+    top_n: int = 5,
+) -> list:
+    """從成分股的其他題材統計重複次數，取前 N 大相關題材。"""
+    unique_members = list(dict.fromkeys(members or []))
+    member_count = len(unique_members)
+    topic_counts = defaultdict(int)
+
+    for sym in unique_members:
+        for topic in company_topics.get(sym, []):
+            if topic == exclude_group:
+                continue
+            topic_counts[topic] += 1
+
+    related = []
+    for topic, shared in topic_counts.items():
+        topic_members = set(CONCEPT_GROUPS.get(topic, []))
+        union = member_count + len(topic_members) - shared
+        related.append({
+            "name": topic,
+            "jaccard": round(shared / union, 3) if union else 0,
+            "shared": shared,
+        })
+
+    related.sort(key=lambda r: (-r["shared"], -r["jaccard"], r["name"]))
+    return related[:top_n]
+
+
+def compute_related_topics(company_topics: dict, top_n=5) -> dict:
+    """替每個題材彙總成分股最常重複出現的其他題材。"""
+    return {
+        group: compute_member_related_topics(
+            members,
+            company_topics,
+            exclude_group=group,
+            top_n=top_n,
+        )
+        for group, members in CONCEPT_GROUPS.items()
+    }
 
 
 def compute_category_aggregates(stock_metrics: pd.DataFrame, group_metrics: dict) -> list:
@@ -959,6 +1219,8 @@ def compute_category_aggregates(stock_metrics: pd.DataFrame, group_metrics: dict
             cat_ret = float((rows["ret_1d"] * rows["amount_mn"]).sum(skipna=True) / total_amt)
         else:
             cat_ret = float(rows["ret_1d"].mean(skipna=True) or 0)
+        # 簡單算術平均（每檔股各 1 票）
+        cat_ret_simple = float(rows["ret_1d"].mean(skipna=True) or 0)
         # 代表題材：該 category 下按成交額排序取 Top 3
         top_groups = sorted(
             [(g, group_metrics.get(g, {}).get("amount_sum_mn", 0)) for g in groups],
@@ -967,13 +1229,14 @@ def compute_category_aggregates(stock_metrics: pd.DataFrame, group_metrics: dict
         top_names = [g for g, _ in top_groups]
         # color 用 CATEGORY_COLORS
         result.append({
-            "name":        cat,
-            "n_groups":    len(groups),
-            "n_stocks":    len(unique_syms),
-            "total_amt":   total_amt,
-            "ret_mean":    cat_ret,
-            "top_groups":  top_names,
-            "color":       CATEGORY_COLORS.get(cat, "#64748b"),
+            "name":            cat,
+            "n_groups":        len(groups),
+            "n_stocks":        len(unique_syms),
+            "total_amt":       total_amt,
+            "ret_mean":        cat_ret,           # 加權（預設）
+            "ret_mean_simple": cat_ret_simple,    # 算術
+            "top_groups":      top_names,
+            "color":           CATEGORY_COLORS.get(cat, "#64748b"),
         })
     result.sort(key=lambda x: -x["total_amt"])
     return result
@@ -1231,13 +1494,24 @@ def compute_company_chip_data(d: dict, sym: str, days: int = 30) -> dict | None:
     return out
 
 
-_DISPOSAL_MATCH_RE = re.compile(r"每\s*(\d+)\s*分鐘撮合")
+_DISPOSAL_MATCH_RE_AR = re.compile(r"每\s*(\d+)\s*分鐘撮合")
+_DISPOSAL_MATCH_RE_CN = re.compile(r"每\s*([零一二三四五六七八九十兩]+)\s*分鐘撮合")
+# 中文數字 → 阿拉伯（只 cover 處置實務會用到的值：5/10/15/20/25/30）
+_CN_MIN_MAP = {
+    "五": 5,
+    "十": 10,
+    "十五": 15,
+    "二十": 20,
+    "二十五": 25,
+    "三十": 30,
+}
 
 
 def parse_disposal_match_minutes(info: dict) -> int | None:
     """從處置資訊文字 parse 出撮合分鐘（5/10/20/25…），無法判斷回 None。
     台股慣例：第一次處置 5 分撮合、第二次處置 20 分撮合（部分為 25 分），
-    上市櫃文字裡都會寫『每 X 分鐘撮合一次』。"""
+    上市櫃文字裡都會寫『每 X 分鐘撮合一次』；
+    TPEx 用半形阿拉伯數字（每5分鐘），TWSE 用全形漢字（每五分鐘），兩種都要對齊。"""
     if not info:
         return None
     text = " ".join([
@@ -1245,13 +1519,18 @@ def parse_disposal_match_minutes(info: dict) -> int | None:
         info.get("detail") or "",
         info.get("reason") or "",
     ])
-    m = _DISPOSAL_MATCH_RE.search(text)
-    if not m:
-        return None
-    try:
-        return int(m.group(1))
-    except (ValueError, TypeError):
-        return None
+    # 1) 半形阿拉伯
+    m = _DISPOSAL_MATCH_RE_AR.search(text)
+    if m:
+        try:
+            return int(m.group(1))
+        except (ValueError, TypeError):
+            pass
+    # 2) 中文數字（TWSE 文字慣用）
+    m = _DISPOSAL_MATCH_RE_CN.search(text)
+    if m:
+        return _CN_MIN_MAP.get(m.group(1))
+    return None
 
 
 def _enrich_disposal_match_level(info: dict) -> dict:
@@ -2482,13 +2761,19 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
             "top_stock":     rows_sorted.index[0] if len(rows_sorted) else "",
         }
         sys_series = compute_topic_return_series(data, members, days=125)
+        sys_related = compute_member_related_topics(
+            members,
+            company_topics,
+            exclude_group=sname,
+            top_n=5,
+        )
         html = tpl_topic.render(
             **base_ctx,
             group=sname,
             meta=sys_meta,
             stocks=rows_sorted,
             summary=sys_summary,
-            related=[],
+            related=sys_related,
             name_map=name_map,
             company_topics=company_topics,
             topic_series_json=json.dumps(sys_series, ensure_ascii=False) if sys_series else "null",
@@ -2932,8 +3217,16 @@ def _strip_inline_html(s):
 
 
 def _clean_limit_up_payload(payload: dict) -> dict:
-    """清洗 payload：groupAnalysis.text、stocks.reason、chipObservation.* 的文字欄位。"""
+    """清洗 payload：groupAnalysis.text、stocks.reason、chipObservation.* 的文字欄位。
+    並把新版 schema {group, count, analysis} 標準化為 template 使用的舊版 {name, text}。"""
     for ga in payload.get("groupAnalysis", []) or []:
+        # schema 標準化：新版 (group/count/analysis) → 舊版 (name/text)
+        if "name" not in ga and "group" in ga:
+            grp = ga.get("group", "")
+            cnt = ga.get("count")
+            ga["name"] = f"{grp}（{cnt} 檔）" if cnt is not None else grp
+        if "text" not in ga and "analysis" in ga:
+            ga["text"] = ga["analysis"]
         if "text" in ga:
             ga["text"] = _strip_inline_html(ga["text"])
         if "name" in ga:
@@ -3018,11 +3311,11 @@ def main():
     print("\n[0/5] 更新個股期貨清單（期交所，週更）...")
     refresh_futures_list()
 
-    print("\n[0b/5] 更新首頁每日籌碼報告（官方日資料）...")
-    refresh_daily_chip_report()
+    print("\n[0b/5] 每日籌碼報告：等待主行情確認最新交易日...")
 
     print("\n[1/5] 載入資料...")
     data = load_data(use_cache=args.skip_finlab)
+    refresh_daily_chip_report(latest_trade_date=data["close"].index[-1])
 
     print("[2/5] 計算個股指標...")
     stock_metrics = compute_stock_metrics(data)
@@ -3030,8 +3323,8 @@ def main():
 
     print("[3/5] 計算族群指標 + 相關題材...")
     group_metrics = compute_group_metrics(stock_metrics)
-    related = compute_related_topics()
     company_topics = compute_company_topics()
+    related = compute_related_topics(company_topics)
     print(f"       ✓ {len(group_metrics)} 個族群")
 
     print("[4/5] 產生 JSON 資料（熱力圖 + 搜尋）...")

@@ -24,10 +24,18 @@ python site\build_site.py --skip-finlab
 ## 部署流程
 
 ```
-14:30 Windows 工作排程
-  → daily_build.bat （FinLab → Python build → git push）
+15:30 Windows 工作排程：盤後第一版
+17:00 Windows 工作排程：主站完整版
+21:30 Windows 工作排程：晚間補版
+  → daily_build.bat quiet（FinLab → Python build → git push）
   → Cloudflare Pages 自動部署
   → https://indusmapk.com 更新
+```
+
+建立或更新這三個排程：
+
+```bat
+setup_daily_schedule.bat
 ```
 
 ## 檔案結構

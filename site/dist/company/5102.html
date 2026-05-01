@@ -901,10 +901,11 @@
       }
       renderTrend();
 
-      // ── 股東人數卡（最近 3 週）──
+      // ── 股東人數卡（最近 4 週）──
       const snapEl = document.getElementById('holder_snap_'+sym);
       const N = holder.dates.length;
-      const show = Math.min(3, N);
+      const DISPLAY_WEEKS = 4;
+      const show = Math.min(DISPLAY_WEEKS, N);
       let htmlSnap = '';
       for (let i = N - show; i < N; i++) {
         htmlSnap += `<div class="snap-card">
@@ -914,15 +915,15 @@
           <div class="snap-row"><em>散戶人數：</em><strong>${fmtNum(holder.retail_holders[i])}</strong>${fmtSignedNum(holder.delta_retail[i])}</div>
         </div>`;
       }
-      if (show < 3) {
+      if (show < DISPLAY_WEEKS) {
         htmlSnap += `<div class="snap-card snap-card-empty">
           <div class="snap-date muted">—</div>
           <div class="muted" style="font-size:12px; line-height:1.6;">
-            每週 fetch 一次後累積歷史<br>
+            趨勢圖可顯示近一年歷史<br>
             目前僅 ${N} 週資料<br>
-            跑 <code>fetch_extras.py --only holders</code>
+            級距表顯示最近 4 週
           </div>
-        </div>`.repeat(3 - show);
+        </div>`.repeat(DISPLAY_WEEKS - show);
       }
       snapEl.innerHTML = htmlSnap;
 
@@ -931,18 +932,21 @@
         const thead = document.getElementById('holder_matrix_head_'+sym);
         const tbody = document.getElementById('holder_matrix_body_'+sym);
         const mat = (mode === 'pcts') ? holder.pcts : holder.holders;
+        const matrixStart = Math.max(0, holder.dates.length - DISPLAY_WEEKS);
+        const matrixDates = holder.dates.slice(matrixStart);
+        const matrixMat = mat.slice(matrixStart);
 
         let head = '<tr><th class="sticky-col">持股分級</th>';
-        holder.dates.forEach(d => { head += `<th>${mdDate(d)}</th>`; });
+        matrixDates.forEach(d => { head += `<th>${mdDate(d)}</th>`; });
         head += '</tr>';
         thead.innerHTML = head;
 
         let body = '';
         for (let lv = 0; lv < holder.levels.length; lv++) {
           body += `<tr><td class="sticky-col lvl-label">${holder.levels[lv]}</td>`;
-          for (let wk = 0; wk < holder.dates.length; wk++) {
-            const cur  = mat[wk][lv];
-            const prev = (wk > 0) ? mat[wk-1][lv] : null;
+          for (let wk = 0; wk < matrixDates.length; wk++) {
+            const cur  = matrixMat[wk][lv];
+            const prev = (wk > 0) ? matrixMat[wk-1][lv] : null;
             const delta = (prev == null) ? null : (cur - prev);
             let cell;
             if (mode === 'pcts') {

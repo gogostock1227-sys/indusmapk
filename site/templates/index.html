@@ -77,300 +77,269 @@
 </section>
 
 {% if daily_chip_report %}
-<section class="daily-chip-report section-block" id="daily-chip-report">
-  <header class="chip-report-head">
-    <div>
-      <p class="eyebrow">Daily Market Positioning</p>
-      <h2 class="section-title">每日台股籌碼報告</h2>
-      <p class="section-sub">
-        現貨法人、融資融券、期貨與臺指選擇權未平倉，一張表看懂今日資金站位
-      </p>
+<section class="v2-chip-report-wrap section-block" id="daily-chip-report">
+<div class="v2-chip-report no-spark density-normal">
+  <header class="r-header">
+    <div class="left">
+      <div class="r-eyebrow">Daily Chip Brief．每日籌碼簡報</div>
+      <h1 class="r-h1">每日台股籌碼報告</h1>
+      <div class="r-note">現貨法人、融資融券、期貨與臺指選擇權未平倉，一張表看懂今日資金站位</div>
     </div>
-    <div class="chip-report-stamp">
-      <strong>{{ daily_chip_report.report_date }}</strong>
-      <span>官方日資料彙整</span>
+    <div class="right">
+      <div class="r-num" style="font-size:20px;letter-spacing:0.04em">{{ daily_chip_report.report_date }}</div>
+      <div class="r-meta">TWSE．TPEx．TAIFEX．每日彙整</div>
     </div>
   </header>
 
   {% if daily_chip_report.status == 'partial' and daily_chip_report.errors %}
-  <div class="chip-report-warning">
-    部分來源暫時無法更新，已優先顯示可取得資料。
-  </div>
+  <div class="v2-warning">部分來源暫時無法更新，已優先顯示可取得資料。</div>
   {% endif %}
 
-  <div class="chip-report-overview">
+  {# ─── KPI 列 ─── #}
+  <div class="v2-kpis">
     {% if daily_chip_report.vix %}
-    <article class="daily-chip-tile vix-panel">
-      <div class="chip-panel-kicker">台指選擇權波動率</div>
-      <div class="vix-main">
-        <span>VIX</span>
-        <strong>{{ daily_chip_report.vix.value_text }}</strong>
-      </div>
-      <div class="vix-sub">
-        <span>{{ daily_chip_report.vix.date }}</span>
-        <em class="{{ daily_chip_report.vix.change.class }}">較前日 {{ daily_chip_report.vix.change.text }}</em>
-      </div>
-    </article>
+    <div class="v2-kpi">
+      <div class="v2-kpi-head"><span class="v2-kpi-eyebrow">VIX</span></div>
+      <div class="v2-kpi-label">臺指選擇權波動率</div>
+      <div class="v2-kpi-value"><span class="r-num {{ daily_chip_report.vix.change.class }}">{{ daily_chip_report.vix.value_text }}</span></div>
+      <div class="v2-kpi-delta r-num {{ daily_chip_report.vix.change.class }}">較前日 {{ daily_chip_report.vix.change.text }}</div>
+    </div>
     {% endif %}
 
     {% if daily_chip_report.spot and daily_chip_report.spot.total %}
-    <article class="daily-chip-tile key-metric-tile">
-      <span class="tile-label">現貨三大法人</span>
-      <strong class="{{ daily_chip_report.spot.total.total.class }}">{{ daily_chip_report.spot.total.total.text }}</strong>
-      <em>外資 {{ daily_chip_report.spot.total.foreign.text }}</em>
-      <small>{{ daily_chip_report.spot.summary }}</small>
-    </article>
+    <div class="v2-kpi">
+      <div class="v2-kpi-head"><span class="v2-kpi-eyebrow">法人合計</span></div>
+      <div class="v2-kpi-label">現貨買賣超</div>
+      <div class="v2-kpi-value">
+        <span class="r-num {{ daily_chip_report.spot.total.total.class }}">{{ daily_chip_report.spot.total.total.text|replace(' 億','') }}</span>
+        <span class="unit">億</span>
+      </div>
+      <div class="v2-kpi-delta r-num {{ daily_chip_report.spot.total.foreign.class }}">外資 {{ daily_chip_report.spot.total.foreign.text }}</div>
+    </div>
     {% endif %}
 
-    {% if daily_chip_report.margin and daily_chip_report.margin.twse %}
-    <article class="daily-chip-tile key-metric-tile">
-      <span class="tile-label">信用交易</span>
-      <strong class="{{ daily_chip_report.margin.twse.financing_delta_amount.class }}">{{ daily_chip_report.margin.twse.financing_delta_amount.text }}</strong>
-      <em>融資餘額 {{ daily_chip_report.margin.twse.financing_balance_amount.text }}</em>
-      <small>{{ daily_chip_report.margin.summary }}</small>
-    </article>
+    {% if daily_chip_report.margin and daily_chip_report.margin.markets %}
+    {% set m_total = daily_chip_report.margin.markets[2] %}
+    <div class="v2-kpi">
+      <div class="v2-kpi-head"><span class="v2-kpi-eyebrow">融資</span></div>
+      <div class="v2-kpi-label">融資增減</div>
+      <div class="v2-kpi-value">
+        <span class="r-num {{ m_total.financing_delta_amount.class }}">{{ m_total.financing_delta_amount.text|replace(' 億','') }}</span>
+        <span class="unit">億</span>
+      </div>
+      <div class="v2-kpi-delta r-num {{ m_total.margin_short_delta.class }}">融券 {{ m_total.margin_short_delta.text }}</div>
+    </div>
     {% endif %}
 
     {% if daily_chip_report.futures and daily_chip_report.futures.foreign %}
-    <article class="daily-chip-tile key-metric-tile">
-      <span class="tile-label">外資臺股期貨</span>
-      <strong class="{{ daily_chip_report.futures.foreign.oi_lots.class }}">{{ daily_chip_report.futures.foreign.oi_lots.text }}</strong>
-      <em class="{{ daily_chip_report.futures.foreign.delta_lots.class }}">較前日 {{ daily_chip_report.futures.foreign.delta_lots.text }}</em>
-      <small>{{ daily_chip_report.futures.summary }}</small>
-    </article>
+    <div class="v2-kpi">
+      <div class="v2-kpi-head"><span class="v2-kpi-eyebrow">外資期貨</span></div>
+      <div class="v2-kpi-label">期貨未平倉</div>
+      <div class="v2-kpi-value">
+        <span class="r-num {{ daily_chip_report.futures.foreign.oi_lots.class }}">{{ daily_chip_report.futures.foreign.oi_lots.text|replace(' 口','') }}</span>
+        <span class="unit">口</span>
+      </div>
+      <div class="v2-kpi-delta r-num {{ daily_chip_report.futures.foreign.delta_lots.class }}">較前日 {{ daily_chip_report.futures.foreign.delta_lots.text }}</div>
+    </div>
     {% endif %}
   </div>
 
-  <div class="daily-chip-detail-grid">
-    {% if daily_chip_report.spot %}
-    <article class="daily-chip-panel spot-panel">
-      <div class="chip-panel-head">
-        <div>
-          <h3>現貨法人買賣超</h3>
-          <p>{{ daily_chip_report.spot.summary }}</p>
+  {# ─── 雙欄主體 ─── #}
+  <div class="v2-body">
+    <div class="v2-col">
+      {% if daily_chip_report.spot %}
+      <section>
+        <div class="r-section-title">
+          <div class="r-h2"><span class="r-section-num">§1</span><span>現貨法人買賣超</span></div>
+          <div class="r-meta">{{ daily_chip_report.spot.date }}</div>
         </div>
-        <span>{{ daily_chip_report.spot.date }}</span>
-      </div>
-      <div class="chip-table-scroll">
-        <table class="chip-report-table">
-          <thead>
-            <tr>
-              <th>市場</th>
-              <th>外資</th>
-              <th>投信</th>
-              <th>自營商</th>
-              <th>合計</th>
-            </tr>
-          </thead>
+        <div class="r-note" style="padding:6px 0">{{ daily_chip_report.spot.summary }}</div>
+        <table class="r-table">
+          <thead><tr><th>市場</th><th>外資</th><th>投信</th><th>自營商</th><th>合計</th></tr></thead>
           <tbody>
             {% for row in daily_chip_report.spot.markets %}
             <tr class="{% if row.market == '合計' %}is-total{% endif %}">
-              <th>{{ row.market }}</th>
-              <td class="{{ row.foreign.class }}">{{ row.foreign.text }}</td>
-              <td class="{{ row.trust.class }}">{{ row.trust.text }}</td>
-              <td class="{{ row.dealer.class }}">{{ row.dealer.text }}</td>
-              <td class="{{ row.total.class }}">{{ row.total.text }}</td>
+              <td>{{ row.market }}</td>
+              <td class="num {{ row.foreign.class }}">{{ row.foreign.text|replace(' 億','') }}</td>
+              <td class="num {{ row.trust.class }}">{{ row.trust.text|replace(' 億','') }}</td>
+              <td class="num {{ row.dealer.class }}">{{ row.dealer.text|replace(' 億','') }}</td>
+              <td class="num {{ row.total.class }}">{{ row.total.text|replace(' 億','') }}</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
-      </div>
-    </article>
-    {% endif %}
+        {% set t = daily_chip_report.spot.total %}
+        {% set scale = [t.foreign.value|abs, t.trust.value|abs, t.dealer.value|abs, t.total.value|abs]|max %}
+        {% set scale_yi = (scale / 100000000) if scale else 1 %}
+        <div class="v2-symbar-grid">
+          {% for item in [
+            {'lbl':'外資', 'm':t.foreign},
+            {'lbl':'投信', 'm':t.trust},
+            {'lbl':'自營商', 'm':t.dealer},
+            {'lbl':'合計', 'm':t.total},
+          ] %}
+            {% set v_yi = (item.m.value or 0) / 100000000 %}
+            {% set pct = (v_yi|abs) / scale_yi if scale_yi else 0 %}
+            {% set bar_w = (pct * 130)|round(1) %}
+            {% set is_up = (item.m.value or 0) > 0 %}
+            <span class="lbl">{{ item.lbl }}</span>
+            <svg class="v2-symbar" width="270" height="14" viewBox="0 0 270 14">
+              <line x1="0" y1="7" x2="270" y2="7" stroke="var(--rule-2)" stroke-width="8"/>
+              {% if is_up %}
+                <rect x="135" y="3" width="{{ bar_w }}" height="8" fill="var(--up)"/>
+              {% else %}
+                <rect x="{{ 135 - bar_w }}" y="3" width="{{ bar_w }}" height="8" fill="var(--down)"/>
+              {% endif %}
+              <line x1="135" y1="0" x2="135" y2="13" stroke="var(--ink-2)" stroke-width="1"/>
+            </svg>
+            <span class="val {{ item.m.class }}">{{ item.m.text|replace(' 億','') }} 億</span>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
 
-    {% if daily_chip_report.futures %}
-    <article class="daily-chip-panel futures-panel">
-      <div class="chip-panel-head">
-        <div>
-          <h3>{{ daily_chip_report.futures.product }}未平倉</h3>
-          <p>{{ daily_chip_report.futures.summary }}</p>
+      {% if daily_chip_report.futures %}
+      <section>
+        <div class="r-section-title">
+          <div class="r-h2"><span class="r-section-num">§2</span><span>{{ daily_chip_report.futures.product }}未平倉</span></div>
+          <div class="r-meta">{{ daily_chip_report.futures.date }}</div>
         </div>
-        <span>{{ daily_chip_report.futures.date }}</span>
-      </div>
-      <div class="futures-grid">
-        {% for row in daily_chip_report.futures.rows %}
-        <div class="futures-row">
-          <span class="party">{{ row.label }}</span>
-          <strong class="{{ row.oi_lots.class }}">{{ row.oi_lots.text }}</strong>
-          <em class="{{ row.delta_lots.class }}">增減 {{ row.delta_lots.text }}</em>
-          <small>契約金額 {{ row.oi_amount.text }} · 當日淨交易 {{ row.trade_net_lots.text }}</small>
+        <div class="r-note" style="padding:6px 0">{{ daily_chip_report.futures.summary }}</div>
+        <div class="v2-futures">
+          {% for r in daily_chip_report.futures.rows %}
+          <div class="v2-futures-cell">
+            <div class="v2-futures-head">
+              <span class="r-h3">{{ r.label }}</span>
+              <span class="r-num {{ r.delta_lots.class }}" style="font-size:14px">增減 {{ r.delta_lots.text }}</span>
+            </div>
+            <div class="v2-futures-value {{ r.oi_lots.class }}">
+              {{ r.oi_lots.text|replace(' 口','') }} <span class="unit">口</span>
+            </div>
+            <div class="v2-futures-line2">契約金額 {{ r.oi_amount.text }} · 當日淨交易 {{ r.trade_net_lots.text }}</div>
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
-      </div>
-    </article>
-    {% endif %}
+      </section>
+      {% endif %}
+    </div>
 
-    {% if daily_chip_report.margin %}
-    <article class="daily-chip-panel margin-panel">
-      <div class="chip-panel-head">
-        <div>
-          <h3>融資融券餘額</h3>
-          <p>{{ daily_chip_report.margin.summary }}</p>
+    <div class="v2-col">
+      {% if daily_chip_report.margin %}
+      <section>
+        <div class="r-section-title">
+          <div class="r-h2"><span class="r-section-num">§3</span><span>融資融券餘額</span></div>
+          <div class="r-meta">{{ daily_chip_report.margin.date }}</div>
         </div>
-        <span>{{ daily_chip_report.margin.date }}</span>
-      </div>
-      <div class="chip-table-scroll">
-        <table class="chip-report-table margin-ratio-table">
+        <div class="r-note" style="padding:6px 0">{{ daily_chip_report.margin.summary }}</div>
+        <table class="r-table">
           <thead>
             <tr>
               <th>市場</th>
-              <th>日期</th>
-              <th>融資增減(億)</th>
-              <th>融資餘額(億)</th>
-              <th>融券增減(張)</th>
-              <th>融券餘額(張)</th>
+              <th>融資增減<small style="color:var(--ink-3);font-weight:400;letter-spacing:0">（億）</small></th>
+              <th>融資餘額<small style="color:var(--ink-3);font-weight:400;letter-spacing:0">（億）</small></th>
+              <th>融券增減<small style="color:var(--ink-3);font-weight:400;letter-spacing:0">（張）</small></th>
+              <th>融券餘額<small style="color:var(--ink-3);font-weight:400;letter-spacing:0">（張）</small></th>
               <th>券資比</th>
             </tr>
           </thead>
           <tbody>
-            {% for row in daily_chip_report.margin.rows %}
-            <tr>
-              <th>{{ row.market }}</th>
-              <td>{{ row.date }}</td>
-              <td class="{{ row.financing_delta_amount.class }}">{{ row.financing_delta_amount.text|replace(' 億','') }}</td>
-              <td>{{ row.financing_balance_amount.text|replace(' 億','') }}</td>
-              <td class="{{ row.short_delta.class }}">{{ row.short_delta.text|replace(' 張','') }}</td>
-              <td>{{ row.short_balance.text|replace(' 張','') }}</td>
-              <td>{{ row.short_margin_ratio.text }}</td>
+            {% for row in daily_chip_report.margin.markets %}
+            <tr class="{% if row.market == '合計' %}is-total{% endif %}">
+              <td>{{ row.market }}</td>
+              <td class="num {{ row.financing_delta_amount.class }}">{{ row.financing_delta_amount.text|replace(' 億','') }}</td>
+              <td class="num">{{ row.financing_balance_amount.text|replace(' 億','') }}</td>
+              <td class="num {{ row.short_delta.class }}">{{ row.short_delta.text|replace(' 張','') }}</td>
+              <td class="num">{{ row.short_balance.text|replace(' 張','') }}</td>
+              <td class="num">{% if row.market != '合計' %}{{ row.short_margin_ratio.text }}{% else %}—{% endif %}</td>
             </tr>
-            {% if row.financing_lots_note %}
-            <tr class="margin-note-row">
-              <td colspan="7">{{ row.market }}：{{ row.financing_lots_note }}；官方日餘額未提供融資金額欄位。</td>
-            </tr>
-            {% endif %}
             {% endfor %}
           </tbody>
         </table>
-      </div>
-      <div class="margin-mini-notes">
-        <span>融資單位：億</span>
-        <span>融券單位：張</span>
-        <span>券資比＝融券餘額 ÷ 融資餘額張數</span>
-        <span>上櫃融資金額：官方日資料未揭示</span>
-      </div>
-    </article>
-    {% endif %}
-
-    {% if daily_chip_report.options %}
-    <article class="daily-chip-panel options-panel">
-      <div class="chip-panel-head">
-        <div>
-          <h3>{{ daily_chip_report.options.product }}留倉</h3>
-          <p>{{ daily_chip_report.options.summary }}</p>
-        </div>
-        <span>{{ daily_chip_report.options.date }}</span>
-      </div>
-
-      {% if daily_chip_report.options.identities %}
-      <div class="option-intent-board">
-        {% for group in daily_chip_report.options.identities %}
-        <section class="option-intent-group">
-          <div class="option-intent-head">
-            <strong>{{ group.identity }}</strong>
-            <span class="{{ group.lot_combo.class }}">口數 {{ group.lot_combo.code }} · {{ group.lot_combo.bias }}</span>
-            <span class="{{ group.amount_combo.class }}">資金 {{ group.amount_combo.code }} · {{ group.amount_combo.bias }}</span>
-          </div>
-
-          <div class="option-lanes">
-            <div class="option-lane">
-              <div class="option-lane-title">
-                <span>口數布局</span>
-                <strong class="{{ group.lot_combo.class }}">{{ group.lot_combo.code }}</strong>
-              </div>
-              <p>{{ group.lot_combo.reading }}</p>
-              <div class="option-leg-grid">
-                <div class="option-leg">
-                  <span class="option-tag option-call">CALL</span>
-                  <b class="{{ group.call_row.delta_lots.class }}">{{ group.call_row.delta_lots.text }}</b>
-                  <i class="{{ group.call_row.lot_signal.class }}">{{ group.call_row.lot_signal.code }}</i>
-                  <small>淨留倉 {{ group.call_row.oi_lots.text }}</small>
-                </div>
-                <div class="option-leg">
-                  <span class="option-tag option-put">PUT</span>
-                  <b class="{{ group.put_row.delta_lots.class }}">{{ group.put_row.delta_lots.text }}</b>
-                  <i class="{{ group.put_row.lot_signal.class }}">{{ group.put_row.lot_signal.code }}</i>
-                  <small>淨留倉 {{ group.put_row.oi_lots.text }}</small>
-                </div>
-              </div>
-            </div>
-
-            <div class="option-lane">
-              <div class="option-lane-title">
-                <span>資金布局</span>
-                <strong class="{{ group.amount_combo.class }}">{{ group.amount_combo.code }}</strong>
-              </div>
-              <p>{{ group.amount_combo.reading }}</p>
-              <div class="option-leg-grid">
-                <div class="option-leg">
-                  <span class="option-tag option-call">CALL</span>
-                  <b class="{{ group.call_row.delta_amount.class }}">{{ group.call_row.delta_amount.text }}</b>
-                  <i class="{{ group.call_row.amount_signal.class }}">{{ group.call_row.amount_signal.code }}</i>
-                  <small>淨留倉 {{ group.call_row.oi_amount.text }}</small>
-                </div>
-                <div class="option-leg">
-                  <span class="option-tag option-put">PUT</span>
-                  <b class="{{ group.put_row.delta_amount.class }}">{{ group.put_row.delta_amount.text }}</b>
-                  <i class="{{ group.put_row.amount_signal.class }}">{{ group.put_row.amount_signal.code }}</i>
-                  <small>淨留倉 {{ group.put_row.oi_amount.text }}</small>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        {% endfor %}
-      </div>
+        <div class="r-meta" style="margin-top:10px;font-size:14px">融資單位：億　融券單位：張　券資比＝融券餘額÷融資餘額張數</div>
+      </section>
       {% endif %}
 
-      <details class="option-raw-details">
-        <summary>原始明細</summary>
-        <div class="chip-table-scroll">
-          <table class="chip-report-table options-table">
-            <thead>
-              <tr>
-                <th>身份</th>
-                <th>權別</th>
-                <th>淨留倉口數</th>
-                <th>口數增減</th>
-                <th>口數判斷</th>
-                <th>契約金額</th>
-                <th>金額增減</th>
-                <th>資金判斷</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in daily_chip_report.options.rows %}
-              <tr>
-                <th>{{ row.identity }}</th>
-                <td><span class="option-tag option-{{ row.tag|lower }}">{{ row.tag }}</span></td>
-                <td class="{{ row.oi_lots.class }}">{{ row.oi_lots.text }}</td>
-                <td class="{{ row.delta_lots.class }}">{{ row.delta_lots.text }}</td>
-                <td><span class="option-signal {{ row.lot_signal.class }}">{{ row.lot_signal.code }}</span></td>
-                <td class="{{ row.oi_amount.class }}">{{ row.oi_amount.text }}</td>
-                <td class="{{ row.delta_amount.class }}">{{ row.delta_amount.text }}</td>
-                <td><span class="option-signal {{ row.amount_signal.class }}">{{ row.amount_signal.code }}</span></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+      {% if daily_chip_report.options and daily_chip_report.options.identities %}
+      <section>
+        <div class="r-section-title">
+          <div class="r-h2"><span class="r-section-num">§4</span><span>{{ daily_chip_report.options.product }}留倉</span></div>
+          <div class="r-meta">{{ daily_chip_report.options.date }}</div>
         </div>
-      </details>
-    </article>
-    {% endif %}
+        <div class="r-note" style="padding:6px 0">{{ daily_chip_report.options.summary }}</div>
+        {% for g in daily_chip_report.options.identities %}
+        <div class="v2-options-party">
+          <div class="v2-options-head">
+            <span class="r-h3">{{ g.identity }}</span>
+            <span class="r-meta" style="font-size:14px">口數 {{ g.lot_combo.code }}．{{ g.lot_combo.bias }}　資金 {{ g.amount_combo.code }}．{{ g.amount_combo.bias }}</span>
+          </div>
+          <div class="v2-quad-grid">
+            <div class="v2-quad">
+              <div class="v2-quad-head">
+                <span class="v2-quad-title">口數</span>
+                <span class="v2-quad-label">{{ g.lot_combo.code }}</span>
+              </div>
+              <div class="v2-quad-cells">
+                <div class="v2-quad-cell {% if g.call_row.delta_lots.value > 0 %}up{% else %}down{% endif %}">
+                  <div class="v2-quad-tag">CALL．{{ g.call_row.lot_signal.code }}</div>
+                  <div class="v2-quad-val {{ g.call_row.delta_lots.class }}">{{ g.call_row.delta_lots.text|replace(' 口','') }}<span class="unit">口</span></div>
+                  <div class="v2-quad-net">淨 {{ g.call_row.oi_lots.text|replace(' 口','') }}</div>
+                </div>
+                <div class="v2-quad-cell {% if g.put_row.delta_lots.value > 0 %}up{% else %}down{% endif %}">
+                  <div class="v2-quad-tag">PUT．{{ g.put_row.lot_signal.code }}</div>
+                  <div class="v2-quad-val {{ g.put_row.delta_lots.class }}">{{ g.put_row.delta_lots.text|replace(' 口','') }}<span class="unit">口</span></div>
+                  <div class="v2-quad-net">淨 {{ g.put_row.oi_lots.text|replace(' 口','') }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="v2-quad">
+              <div class="v2-quad-head">
+                <span class="v2-quad-title">資金</span>
+                <span class="v2-quad-label">{{ g.amount_combo.code }}</span>
+              </div>
+              <div class="v2-quad-cells">
+                <div class="v2-quad-cell {% if g.call_row.delta_amount.value > 0 %}up{% else %}down{% endif %}">
+                  <div class="v2-quad-tag">CALL．{{ g.call_row.amount_signal.code }}</div>
+                  <div class="v2-quad-val {{ g.call_row.delta_amount.class }}">{{ g.call_row.delta_amount.text|replace(' 億','') }}<span class="unit">億</span></div>
+                  <div class="v2-quad-net">淨 {{ g.call_row.oi_amount.text|replace(' 億','') }}</div>
+                </div>
+                <div class="v2-quad-cell {% if g.put_row.delta_amount.value > 0 %}up{% else %}down{% endif %}">
+                  <div class="v2-quad-tag">PUT．{{ g.put_row.amount_signal.code }}</div>
+                  <div class="v2-quad-val {{ g.put_row.delta_amount.class }}">{{ g.put_row.delta_amount.text|replace(' 億','') }}<span class="unit">億</span></div>
+                  <div class="v2-quad-net">淨 {{ g.put_row.oi_amount.text|replace(' 億','') }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </section>
+      {% endif %}
+    </div>
   </div>
 
-  <p class="chip-report-source">
-    來源：TWSE、TPEx、TAIFEX；產生時間 {{ daily_chip_report.generated_at_label or daily_chip_report.generated_at }}
-  </p>
+  <footer class="r-footer">
+    <div>來源：TWSE．TPEx．TAIFEX．產生時間 {{ (daily_chip_report.generated_at_label or daily_chip_report.generated_at)[:10] }}</div>
+    <div class="r-num">{{ daily_chip_report.report_date }}</div>
+  </footer>
+</div>
 </section>
 {% endif %}
 
 <section class="section-block">
-  <header class="section-head">
-    <h2 class="section-title">族群地圖</h2>
-    <p class="section-sub">點擊任一分類，深入查看該領域的題材族群與成分股</p>
+  <header class="section-head category-map-head">
+    <div>
+      <h2 class="section-title">族群地圖</h2>
+      <p class="section-sub">點擊任一分類，深入查看該領域的題材族群與成分股</p>
+    </div>
+    <div class="cat-ret-toggle" role="tablist" aria-label="族群漲跌計算方式">
+      <button type="button" class="cat-ret-btn is-active" data-mode="weighted"
+              title="按成交額加權平均：高流動性股影響更大">成交額加權</button>
+      <button type="button" class="cat-ret-btn" data-mode="simple"
+              title="算術平均：每檔股各 1 票">算術平均</button>
+    </div>
   </header>
 
-  <div class="category-map">
+  <div class="category-map" data-ret-mode="weighted">
     {% for cat in category_aggs %}
     <a href="topics.html?cat={{ cat.name|urlquote }}" class="category-card"
        data-category="{{ cat.name }}">
@@ -386,7 +355,11 @@
           {% endfor %}
         </ul>
         <div class="category-stats">
-          <span class="{% if cat.ret_mean > 0 %}positive{% elif cat.ret_mean < 0 %}negative{% endif %}">
+          <span class="cat-ret {% if cat.ret_mean > 0 %}positive{% elif cat.ret_mean < 0 %}negative{% endif %}"
+                data-weighted="{{ '%.4f'|format(cat.ret_mean) }}"
+                data-weighted-text="{{ cat.ret_mean|pct }}"
+                data-simple="{{ '%.4f'|format(cat.ret_mean_simple) }}"
+                data-simple-text="{{ cat.ret_mean_simple|pct }}">
             {{ cat.ret_mean|pct }}
           </span>
           <span class="amt">{{ cat.total_amt|fmt_amount }}</span>
@@ -396,6 +369,31 @@
     {% endfor %}
 
   </div>
+
+  <script>
+  (function () {
+    var btns = document.querySelectorAll('.cat-ret-toggle .cat-ret-btn');
+    var grid = document.querySelector('.category-map');
+    if (!btns.length || !grid) return;
+    function apply(mode) {
+      grid.setAttribute('data-ret-mode', mode);
+      grid.querySelectorAll('.cat-ret').forEach(function (el) {
+        var v = parseFloat(el.getAttribute('data-' + mode));
+        var t = el.getAttribute('data-' + mode + '-text');
+        el.textContent = t || '—';
+        el.classList.remove('positive', 'negative');
+        if (!isNaN(v) && v > 0) el.classList.add('positive');
+        else if (!isNaN(v) && v < 0) el.classList.add('negative');
+      });
+      btns.forEach(function (b) {
+        b.classList.toggle('is-active', b.getAttribute('data-mode') === mode);
+      });
+    }
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () { apply(b.getAttribute('data-mode')); });
+    });
+  })();
+  </script>
 </section>
 
 <section class="community-cta">

@@ -215,6 +215,19 @@ def recent_dates(start_ymd: str, days: int = 12) -> list[str]:
     return [(start - timedelta(days=i)).strftime("%Y%m%d") for i in range(days)]
 
 
+def recent_months(start_ymd: str, months: int = 4) -> list[str]:
+    year = int(start_ymd[:4])
+    month = int(start_ymd[4:6])
+    out: list[str] = []
+    for _ in range(months):
+        out.append(f"{year:04d}{month:02d}")
+        month -= 1
+        if month == 0:
+            year -= 1
+            month = 12
+    return out
+
+
 def fetch_twse_institution(date_ymd: str | None = None) -> dict:
     params = {"type": "day", "response": "json"}
     if date_ymd:
@@ -378,6 +391,17 @@ def build_margin_from_twse(j: dict) -> dict:
     }
 
 
+def fetch_tpex_margin_yahoo() -> dict:
+    url = "https://tw.stock.yahoo.com/_td-stock/api/resource/StockServices.twcredits;exchange=TWO"
+    try:
+        r = requests.get(url, headers={"User-Agent": UA}, timeout=10)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        print(f"[warning] fetch Yahoo twcredits failed: {e}", file=sys.stderr)
+        return {}
+
+
 def build_margin_from_tpex(j: dict) -> dict:
     table = (j.get("tables") or [{}])[0]
     fields = table.get("fields", [])
@@ -398,11 +422,25 @@ def build_margin_from_tpex(j: dict) -> dict:
     prev_short = sum_field("前券餘額(張)")
     cur_short = sum_field("券餘額")
     date = j.get("date") or slash_to_ymd(roc_to_ad_date(table.get("date")))
+
+    yahoo_delta_amount: int | None = None
+    yahoo_bal_amount: int | None = None
+    try:
+        yj = fetch_tpex_margin_yahoo()
+        credits_list = yj.get("credits", {}).get("list", [])
+        if credits_list:
+            latest = credits_list[0]
+            # Yahoo unit is Million, our 'yi_thousand' formatter expects Thousand
+            yahoo_delta_amount = int(float(latest.get("financingChangeM", 0)) * 1000)
+            yahoo_bal_amount = int(float(latest.get("financingTotalM", 0)) * 1000)
+    except Exception:
+        pass
+
     return {
         "market": "上櫃",
         "date": ymd_to_slash(date),
-        "financing_delta_amount": metric(None, "yi_thousand_delta"),
-        "financing_balance_amount": metric(None, "yi_thousand_plain"),
+        "financing_delta_amount": metric(yahoo_delta_amount, "yi_thousand_delta"),
+        "financing_balance_amount": metric(yahoo_bal_amount, "yi_thousand_plain"),
         "short_delta": metric(cur_short - prev_short, "shares"),
         "short_balance": metric(cur_short, "balance"),
         "short_margin_ratio": metric(cur_short / cur_long * 100 if cur_long else None, "percent"),
@@ -421,6 +459,22 @@ def build_margin_section() -> dict:
     combined_short = (twse["margin_short"]["value"] or 0) + (tpex["margin_short"]["value"] or 0)
     combined_long_delta = (twse["margin_long_delta"]["value"] or 0) + (tpex["margin_long_delta"]["value"] or 0)
     combined_short_delta = (twse["margin_short_delta"]["value"] or 0) + (tpex["margin_short_delta"]["value"] or 0)
+    twse_f_delta = twse["financing_delta_amount"]["value"]
+    twse_f_bal = twse["financing_balance_amount"]["value"]
+    tpex_f_delta_combined = tpex["financing_delta_amount"]["value"]
+    tpex_f_bal_combined = tpex["financing_balance_amount"]["value"]
+    combined_f_delta = (
+        (twse_f_delta or 0) + (tpex_f_delta_combined or 0)
+        if (twse_f_delta is not None or tpex_f_delta_combined is not None) else None
+    )
+    combined_f_bal = (
+        (twse_f_bal or 0) + (tpex_f_bal_combined or 0)
+        if (twse_f_bal is not None or tpex_f_bal_combined is not None) else None
+    )
+    combined_ratio = (
+        combined_short / combined_long * 100
+        if combined_short is not None and combined_long not in {None, 0} else None
+    )
     combined = {
         "market": "合計",
         "date": twse["date"] if twse["date"] == tpex["date"] else f"{twse['date']} / {tpex['date']}",
@@ -428,13 +482,27 @@ def build_margin_section() -> dict:
         "margin_long_delta": metric(combined_long_delta, "shares"),
         "margin_short": metric(combined_short, "balance"),
         "margin_short_delta": metric(combined_short_delta, "shares"),
+        "financing_delta_amount": metric(combined_f_delta, "yi_thousand_delta"),
+        "financing_balance_amount": metric(combined_f_bal, "yi_thousand_plain"),
+        "short_delta": metric(combined_short_delta, "shares"),
+        "short_balance": metric(combined_short, "balance"),
+        "short_margin_ratio": metric(combined_ratio, "percent"),
     }
     financing_delta_value = twse["financing_delta_amount"]["value"]
     short_delta_value = twse["short_delta"]["value"]
+    
+    tpex_f_delta = tpex["financing_delta_amount"]["value"]
+    tpex_summary = f"上櫃融資 {tpex['margin_long_delta']['text']}、融券 {tpex['margin_short_delta']['text']}。"
+    if tpex_f_delta is not None:
+        tpex_summary = (
+            f"上櫃融資金額{trend_word(tpex_f_delta, '增加', '減少')} {tpex['financing_delta_amount']['text'].replace('-', '')}，"
+            f"融券{trend_word(tpex['short_delta']['value'], '增加', '減少')} {tpex['short_delta']['text'].replace('+', '').replace('-', '')}。"
+        )
+
     summary = (
         f"上市融資金額較前日{trend_word(financing_delta_value, '增加', '減少')} {twse['financing_delta_amount']['text'].replace('-', '')}，"
         f"融券餘額{trend_word(short_delta_value, '增加', '減少')} {twse['short_delta']['text'].replace('+', '').replace('-', '')}；"
-        f"上櫃融資 {tpex['margin_long_delta']['text']}、融券 {tpex['margin_short_delta']['text']}。"
+        + tpex_summary
     )
     return {
         "date": twse["date"],
@@ -722,21 +790,51 @@ def fetch_vix_file(date_ymd: str) -> list[tuple[str, str, float]]:
     return rows
 
 
-def build_vix_section() -> dict:
-    current_date = latest_vix_date()
-    current_rows = fetch_vix_file(current_date)
-    latest = current_rows[-1] if current_rows else None
-    previous_value = None
-    previous_date = ""
-    for ymd in recent_dates(current_date, days=10)[1:]:
+def fetch_vix_daily_month_file(month_ym: str) -> list[tuple[str, str, float]]:
+    url = f"https://www.taifex.com.tw/file/taifex/Dailydownload/vix/log2data/{month_ym}new.txt"
+    r = requests.get(url, headers={"User-Agent": UA}, timeout=25)
+    r.raise_for_status()
+    text = r.content.decode("big5", errors="ignore")
+    if "<html" in text.lower() or "404" in text[:200]:
+        return []
+    rows: list[tuple[str, str, float]] = []
+    for line in text.splitlines():
+        parts = line.split()
+        if len(parts) < 3 or not parts[0].isdigit():
+            continue
         try:
-            rows = fetch_vix_file(ymd)
-            if rows:
-                previous_value = rows[-1][2]
-                previous_date = ymd_to_slash(ymd)
-                break
+            rows.append((parts[0], parts[1] if len(parts) > 1 else "", float(parts[-1])))
         except Exception:
             continue
+    return rows
+
+
+def fetch_recent_vix_daily_rows(start_ymd: str) -> list[tuple[str, str, float]]:
+    rows: list[tuple[str, str, float]] = []
+    seen: set[tuple[str, str]] = set()
+    for month_ym in recent_months(start_ymd, months=4):
+        try:
+            for row in fetch_vix_daily_month_file(month_ym):
+                key = (row[0], row[1])
+                if key not in seen:
+                    rows.append(row)
+                    seen.add(key)
+        except Exception:
+            continue
+    rows.sort(key=lambda row: (row[0], row[1]))
+    return rows
+
+
+def build_vix_section() -> dict:
+    listed_date = latest_vix_date()
+    daily_rows = fetch_recent_vix_daily_rows(listed_date)
+    if not daily_rows:
+        raise RuntimeError("TAIFEX VIX 無有效資料")
+    latest = daily_rows[-1]
+    current_date = latest[0]
+    previous = daily_rows[-2] if len(daily_rows) >= 2 else None
+    previous_value = previous[2] if previous else None
+    previous_date = ymd_to_slash(previous[0]) if previous else ""
     value = latest[2] if latest else None
     change = value - previous_value if value is not None and previous_value is not None else None
     return {
@@ -754,6 +852,146 @@ def safe_section(name: str, builder) -> tuple[dict | None, str | None]:
         return builder(), None
     except Exception as exc:
         return None, f"{name}: {exc}"
+
+
+REPORT_SECTIONS = ("spot", "margin", "futures", "options", "vix")
+
+
+def parse_report_date(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    text = str(value).strip()
+    for fmt in ("%Y/%m/%d", "%Y-%m-%d", "%Y%m%d"):
+        try:
+            return datetime.strptime(text.replace("-", "/") if fmt == "%Y/%m/%d" else text, fmt)
+        except Exception:
+            continue
+    return None
+
+
+def report_date_key(value: str | None):
+    parsed = parse_report_date(value)
+    return parsed.date() if parsed else None
+
+
+def load_existing_report(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(f"[daily-chip] warning: read existing cache failed: {exc}", file=sys.stderr)
+    return None
+
+
+def section_date_key(section: dict | None):
+    if not isinstance(section, dict):
+        return None
+    return report_date_key(section.get("date"))
+
+
+def merge_report_with_existing_sections(report: dict, existing: dict | None) -> dict:
+    if not existing or existing.get("report_date") != report.get("report_date"):
+        return report
+
+    recovered = []
+    for key in REPORT_SECTIONS:
+        if not report.get(key) and existing.get(key):
+            report[key] = existing[key]
+            recovered.append(key)
+            continue
+        report_section_date = section_date_key(report.get(key))
+        existing_section_date = section_date_key(existing.get(key))
+        if existing_section_date and report_section_date and report_section_date < existing_section_date:
+            report[key] = existing[key]
+            recovered.append(key)
+
+    if not recovered:
+        return report
+
+    old_errors = list(report.get("errors") or [])
+    prior_recovered = list(existing.get("recovered_sections") or [])
+    report["recovered_sections"] = sorted(set(prior_recovered + recovered))
+    if old_errors:
+        report["recovered_errors"] = old_errors
+    if all(report.get(key) for key in REPORT_SECTIONS):
+        report["errors"] = []
+        report["status"] = "ok"
+    else:
+        report["status"] = "partial" if report.get("errors") else "ok"
+    return report
+
+
+def _metric_value(row: dict | None, key: str) -> int | float | None:
+    if not isinstance(row, dict):
+        return None
+    item = row.get(key)
+    if not isinstance(item, dict):
+        return None
+    return item.get("value")
+
+
+def _sum_present(*values):
+    picked = [v for v in values if v is not None]
+    return sum(picked) if picked else None
+
+
+def normalize_margin_total_fields(report: dict) -> dict:
+    margin = report.get("margin")
+    if not isinstance(margin, dict):
+        return report
+    markets = margin.get("markets")
+    if not isinstance(markets, list) or len(markets) < 3:
+        return report
+
+    twse = margin.get("twse") if isinstance(margin.get("twse"), dict) else markets[0]
+    tpex = margin.get("tpex_lots") if isinstance(margin.get("tpex_lots"), dict) else markets[1]
+    total = markets[2]
+    if not isinstance(total, dict):
+        return report
+
+    if "financing_delta_amount" not in total:
+        total["financing_delta_amount"] = metric(
+            _sum_present(_metric_value(twse, "financing_delta_amount"), _metric_value(tpex, "financing_delta_amount")),
+            "yi_thousand_delta",
+        )
+    if "financing_balance_amount" not in total:
+        total["financing_balance_amount"] = metric(
+            _sum_present(_metric_value(twse, "financing_balance_amount"), _metric_value(tpex, "financing_balance_amount")),
+            "yi_thousand_plain",
+        )
+    if "short_delta" not in total:
+        total["short_delta"] = total.get("margin_short_delta") or metric(
+            _sum_present(_metric_value(twse, "short_delta"), _metric_value(tpex, "short_delta")),
+            "shares",
+        )
+    if "short_balance" not in total:
+        total["short_balance"] = total.get("margin_short") or metric(
+            _sum_present(_metric_value(twse, "short_balance"), _metric_value(tpex, "short_balance")),
+            "balance",
+        )
+    if "short_margin_ratio" not in total:
+        short_bal = _metric_value(total, "short_balance")
+        long_bal = _metric_value(total, "margin_long")
+        ratio = short_bal / long_bal * 100 if short_bal is not None and long_bal not in {None, 0} else None
+        total["short_margin_ratio"] = metric(ratio, "percent")
+    return report
+
+
+def normalize_report_for_template(report: dict) -> dict:
+    return normalize_margin_total_fields(report)
+
+
+def should_preserve_existing_cache(report: dict, existing: dict | None, force: bool) -> bool:
+    if force or not existing:
+        return False
+    report_dt = report_date_key(report.get("report_date"))
+    existing_dt = report_date_key(existing.get("report_date"))
+    if not report_dt:
+        return False
+    if existing_dt and report_dt < existing_dt:
+        return True
+    return False
 
 
 def build_report() -> dict:
@@ -775,15 +1013,20 @@ def build_report() -> dict:
     if err:
         errors.append(err)
 
-    source_dates = [
+    primary_source_dates = [
         s.get("date")
-        for s in [spot, margin, futures, options, vix]
+        for s in [spot, margin, futures, options]
+        if isinstance(s, dict) and s.get("date")
+    ]
+    source_dates = primary_source_dates or [
+        s.get("date")
+        for s in [vix]
         if isinstance(s, dict) and s.get("date")
     ]
     report_date = max(source_dates) if source_dates else now_taipei().strftime("%Y/%m/%d")
     return {
         "generated_at": generated.isoformat(timespec="seconds"),
-        "generated_at_label": generated.strftime("%Y/%m/%d %H:%M"),
+        "generated_at_label": generated.strftime("%Y/%m/%d"),
         "status": "partial" if errors else "ok",
         "errors": errors,
         "report_date": report_date,
@@ -805,11 +1048,24 @@ def build_report() -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=OUTPUT)
+    parser.add_argument("--force", action="store_true", help="force overwrite even when fetched report date is older than today")
     args = parser.parse_args()
 
+    existing = load_existing_report(args.output)
     report = build_report()
+    report = merge_report_with_existing_sections(report, existing)
+    report = normalize_report_for_template(report)
+    if should_preserve_existing_cache(report, existing, args.force):
+        print(
+            f"[daily-chip] SKIP overwrite: fetched date {report.get('report_date')} "
+            f"is older than today; keep existing {args.output.name}"
+        )
+        return 0
+
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[daily-chip] OK：{args.output.name}（status={report['status']}，date={report['report_date']}）")
+    if report.get("recovered_sections"):
+        print(f"  [recover] sections: {', '.join(report['recovered_sections'])}")
     if report["errors"]:
         for err in report["errors"]:
             print(f"  [warn] {err}")
