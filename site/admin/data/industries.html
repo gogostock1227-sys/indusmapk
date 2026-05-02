@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>產業文案 — indusmapk admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+<style>
+  .json-editor { width: 100%; min-height: calc(100vh - 16rem); font-family: ui-monospace, SF Mono, Menlo, monospace;
+    font-size: 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.75rem; resize: vertical; line-height: 1.5; }
+  .json-editor:focus { outline: 0; border-color: var(--accent); }
+  .editor-toolbar { display: flex; gap: 0.5rem; margin: 0.75rem 0; align-items: center; }
+  .json-stat { color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <h1>產業文案 <span class="muted" style="font-size:0.8rem; font-weight:400">data/industry_meta.json</span></h1>
+    <p class="muted" style="margin-top:-0.5rem">每個族群的中文介紹、CAGR、市場規模、indicators 等。直接編輯 JSON。</p>
+
+    <div class="card">
+      <div class="editor-toolbar">
+        <button class="btn-secondary" id="reload-btn">重新載入</button>
+        <button class="btn-secondary" id="format-btn">Format JSON</button>
+        <button id="save-btn">儲存（GitHub commit）</button>
+        <span class="json-stat" id="stat">載入中…</span>
+      </div>
+      <textarea class="json-editor" id="editor" spellcheck="false"></textarea>
+    </div>
+  </main>
+</div>
+
+<script src="/admin/app.js"></script>
+<script>
+(async function () {
+  await IM.renderSidebar("data-industries");
+  const $ = (s) => document.querySelector(s);
+  let sha = null;
+
+  async function load() {
+    try {
+      const r = await IM.fetchJson("/api/data/industry-meta");
+      $("#editor").value = JSON.stringify(r.data, null, 2);
+      sha = r.sha;
+      $("#stat").textContent = `共 ${r.group_count} 個族群 · sha ${sha?.slice(0,7) || "—"}`;
+    } catch (e) { IM.flash("載入失敗：" + e.message, "error"); }
+  }
+
+  $("#reload-btn").addEventListener("click", load);
+  $("#format-btn").addEventListener("click", () => {
+    try {
+      const obj = JSON.parse($("#editor").value);
+      $("#editor").value = JSON.stringify(obj, null, 2);
+      IM.flash("Format 完成", "success");
+    } catch (e) { IM.flash("JSON 格式錯誤：" + e.message, "error"); }
+  });
+  $("#save-btn").addEventListener("click", async () => {
+    let data;
+    try { data = JSON.parse($("#editor").value); }
+    catch (e) { IM.flash("JSON 格式錯誤：" + e.message, "error"); return; }
+    if (!confirm(`確定儲存 ${Object.keys(data).length} 個族群文案？這會建立 GitHub commit。`)) return;
+    try {
+      const r = await IM.fetchJson("/api/data/industry-meta", {
+        method: "PUT",
+        body: JSON.stringify({ data, summary: `編輯產業文案` }),
+      });
+      IM.flash(`已儲存 (commit ${r.commit.slice(0,7)})`, "success");
+      load();
+    } catch (e) {
+      if (e.status === 409) IM.flash("資料已被他人改動，請重新載入。", "error");
+      else IM.flash(e.message, "error");
+    }
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

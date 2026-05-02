@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>族群定義 — indusmapk admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+<style>
+  .groups-layout {
+    display: grid; grid-template-columns: 280px 1fr; gap: 1rem; height: calc(100vh - 7rem);
+  }
+  .groups-list-panel, .group-edit-panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .groups-list-panel header { padding: 0.75rem; border-bottom: 1px solid var(--border); }
+  .groups-list-panel input { width: 100%; }
+  .groups-list { overflow-y: auto; flex: 1; padding: 0.4rem; }
+  .group-row {
+    padding: 0.55rem 0.75rem; border-radius: 6px; cursor: pointer;
+    font-size: 13px; display: flex; justify-content: space-between; gap: 0.5rem;
+  }
+  .group-row:hover { background: var(--panel-hover); }
+  .group-row.active { background: var(--accent); color: #fff; }
+  .group-row .count { color: var(--muted); font-size: 11px; }
+  .group-row.active .count { color: rgba(255,255,255,0.7); }
+
+  .group-edit-panel { padding: 1.25rem; overflow-y: auto; }
+  .editor-empty { display: grid; place-items: center; flex: 1; color: var(--muted); }
+  .editor-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 0.75rem; flex-wrap: wrap; }
+  .editor-head h3 { margin: 0; font-size: 1.1rem; }
+  textarea.tickers {
+    width: 100%; min-height: 50vh; font-family: ui-monospace, SF Mono, Menlo, monospace;
+    font-size: 13px; background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; resize: vertical;
+  }
+  textarea.tickers:focus { outline: 0; border-color: var(--accent); }
+  .editor-help { color: var(--muted); font-size: 12px; margin: 0.5rem 0 0; }
+  .editor-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
+  .dirty-badge { color: var(--gold); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <h1>族群定義</h1>
+    <p class="muted" style="margin-top:-0.5rem">編輯 <code class="mono">data/concept_groups.json</code>。每個族群一個 ticker 列表（一行一個）。改完按發布觸發 GitHub Actions 重 build。</p>
+
+    <div class="groups-layout">
+      <div class="groups-list-panel">
+        <header>
+          <input type="search" id="q" placeholder="搜尋族群…">
+        </header>
+        <div class="groups-list" id="groups-list">
+          <div class="muted" style="padding:0.75rem">載入中…</div>
+        </div>
+      </div>
+
+      <div class="group-edit-panel" id="edit-panel">
+        <div class="editor-empty">← 從左側選一個族群開始編輯</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/admin/app.js"></script>
+<script>
+(async function () {
+  await IM.renderSidebar("data-groups");
+  const $ = (s) => document.querySelector(s);
+
+  let allData = {};   // {group: [tickers]}
+  let sha = null;
+  let activeGroup = null;
+  let dirty = {};     // {group: true} 標記哪些族群被改過
+
+  async function load() {
+    try {
+      const r = await IM.fetchJson("/api/data/concept-groups");
+      allData = r.data;
+      sha = r.sha;
+      renderList();
+    } catch (e) {
+      $("#groups-list").innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
+    }
+  }
+
+  function renderList() {
+    const q = $("#q").value.trim().toLowerCase();
+    const groups = Object.keys(allData)
+      .filter(g => !q || g.toLowerCase().includes(q))
+      .sort((a, b) => a.localeCompare(b, "zh-Hant"));
+    if (groups.length === 0) {
+      $("#groups-list").innerHTML = '<div class="empty">沒有符合條件的族群</div>';
+      return;
+    }
+    $("#groups-list").innerHTML = groups.map(g => {
+      const cnt = allData[g].length;
+      const isActive = g === activeGroup;
+      const isDirty = dirty[g];
+      return `<div class="group-row ${isActive ? "active" : ""}" data-group="${g}">
+        <span>${g}${isDirty ? ' <span class="dirty-badge">●</span>' : ""}</span>
+        <span class="count">${cnt}</span>
+      </div>`;
+    }).join("");
+    document.querySelectorAll(".group-row").forEach(r => {
+      r.addEventListener("click", () => openEditor(r.dataset.group));
+    });
+  }
+
+  function openEditor(group) {
+    activeGroup = group;
+    renderList();
+    const tickers = allData[group] || [];
+    $("#edit-panel").innerHTML = `
+      <div class="editor-head">
+        <h3>${group}</h3>
+        <div class="muted">共 <b id="t-count">${tickers.length}</b> 個 ticker</div>
+      </div>
+      <textarea class="tickers" id="t-area" spellcheck="false"></textarea>
+      <p class="editor-help">每行一個 ticker（如 <code>2330</code>、<code>2317</code>）。空行自動忽略。</p>
+      <div class="editor-actions">
+        <button class="btn-secondary" id="t-reset">還原</button>
+        <button id="t-apply">套用變更</button>
+      </div>
+    `;
+    const ta = $("#t-area");
+    ta.value = tickers.join("\n");
+    ta.addEventListener("input", () => {
+      const lines = ta.value.split("\n").map(s => s.trim()).filter(Boolean);
+      $("#t-count").textContent = lines.length;
+    });
+    $("#t-reset").addEventListener("click", () => {
+      ta.value = (allData[group] || []).join("\n");
+      $("#t-count").textContent = (allData[group] || []).length;
+    });
+    $("#t-apply").addEventListener("click", () => {
+      const lines = ta.value.split("\n").map(s => s.trim()).filter(Boolean);
+      // 去重保留順序
+      const seen = new Set(); const out = [];
+      for (const t of lines) { if (!seen.has(t)) { seen.add(t); out.push(t); } }
+      allData[group] = out;
+      dirty[group] = true;
+      renderList();
+      IM.flash(`「${group}」已暫存（共 ${out.length} 個 ticker），記得點上方「儲存全部」。`, "info");
+    });
+  }
+
+  function dirtyCount() { return Object.keys(dirty).length; }
+
+  // 上方加全域儲存按鈕
+  function injectGlobalActions() {
+    const h1 = document.querySelector(".main > h1");
+    const actions = document.createElement("div");
+    actions.style.cssText = "float:right; display:flex; gap:0.5rem;";
+    actions.innerHTML = `
+      <button class="btn-secondary" id="g-reload">重新載入</button>
+      <button id="g-save">儲存全部 <span id="g-dirty-count" class="muted" style="margin-left:0.25rem"></span></button>
+    `;
+    h1.parentElement.insertBefore(actions, h1.nextSibling);
+    document.getElementById("g-reload").addEventListener("click", async () => {
+      if (dirtyCount() > 0 && !confirm(`有 ${dirtyCount()} 個族群暫存改動未儲存，確定捨棄？`)) return;
+      dirty = {}; activeGroup = null;
+      $("#edit-panel").innerHTML = '<div class="editor-empty">← 從左側選一個族群開始編輯</div>';
+      await load();
+    });
+    document.getElementById("g-save").addEventListener("click", saveAll);
+  }
+
+  async function saveAll() {
+    const n = dirtyCount();
+    if (n === 0) { IM.flash("沒有改動需要儲存", "info"); return; }
+    if (!confirm(`要儲存 ${n} 個族群的改動？這會在 GitHub 建立新的 commit。`)) return;
+    try {
+      const summary = `改動 ${n} 個族群：${Object.keys(dirty).slice(0, 5).join("、")}${n > 5 ? "..." : ""}`;
+      const r = await IM.fetchJson("/api/data/concept-groups", {
+        method: "PUT",
+        body: JSON.stringify({ data: allData, summary }),
+      });
+      IM.flash(`已儲存 (commit ${r.commit.slice(0,7)})`, "success");
+      dirty = {};
+      sha = null;
+      renderList();
+    } catch (e) {
+      if (e.status === 409) {
+        IM.flash("資料已被他人改動，請點重新載入。", "error");
+      } else {
+        IM.flash(e.message, "error");
+      }
+    }
+  }
+
+  setInterval(() => {
+    const el = document.getElementById("g-dirty-count");
+    if (el) el.textContent = dirtyCount() ? `(${dirtyCount()})` : "";
+  }, 500);
+
+  $("#q").addEventListener("input", renderList);
+  injectGlobalActions();
+  load();
+})();
+</script>
+</body>
+</html>

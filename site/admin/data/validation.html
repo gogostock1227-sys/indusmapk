@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>驗證審核 — indusmapk admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <h1>驗證審核 <span class="muted" style="font-size:0.8rem; font-weight:400">validation_runs/</span></h1>
+    <p class="muted" style="margin-top:-0.5rem">驗證腳本產出的 audit 紀錄。標記 approve / reject 寫入 _approved.json。</p>
+
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn-secondary" id="reload-btn">重新整理</button>
+        <span class="muted" id="stat" style="font-size:12px"></span>
+      </div>
+      <div id="runs-table"><div class="muted">載入中…</div></div>
+    </div>
+  </main>
+</div>
+
+<script src="/admin/app.js"></script>
+<script>
+(async function () {
+  await IM.renderSidebar("data-validation");
+  const $ = (s) => document.querySelector(s);
+  let runs = [];
+
+  async function load() {
+    try {
+      const r = await IM.fetchJson("/api/data/validation-runs");
+      runs = r.runs;
+      $("#stat").textContent = `共 ${runs.length} 筆 run`;
+      render();
+    } catch (e) {
+      $("#runs-table").innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
+    }
+  }
+
+  function render() {
+    if (runs.length === 0) {
+      $("#runs-table").innerHTML = '<div class="empty">尚無驗證紀錄</div>';
+      return;
+    }
+    $("#runs-table").innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Run ID</th><th>大小</th><th>狀態</th><th>處理人 / 時間</th><th>備註</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${runs.map(r => {
+            const a = r.approved_state;
+            const stateTag = !a ? '<span class="tag tag-suspended">未處理</span>'
+                           : a.applied ? '<span class="tag tag-active">已套用</span>'
+                                       : '<span class="tag tag-expired">已退回</span>';
+            return `<tr>
+              <td class="mono">${r.run_id}</td>
+              <td class="mono muted">${(r.size/1024).toFixed(1)} KB</td>
+              <td>${stateTag}</td>
+              <td class="mono muted" style="font-size:11px">${a ? a.by + " / " + IM.fmtDate(a.at) : "—"}</td>
+              <td class="muted" style="font-size:12px">${a?.comment || ""}</td>
+              <td>
+                <button class="btn-sm" data-id="${r.run_id}" data-applied="1">approve</button>
+                <button class="btn-sm btn-danger" data-id="${r.run_id}" data-applied="0">reject</button>
+              </td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>`;
+    document.querySelectorAll("button[data-id]").forEach(b => {
+      b.addEventListener("click", () => act(b.dataset.id, b.dataset.applied === "1"));
+    });
+  }
+
+  async function act(runId, applied) {
+    const verb = applied ? "approve" : "reject";
+    const comment = prompt(`${verb} run ${runId}，輸入備註（可留空）：`, "");
+    if (comment === null) return; // 取消
+    try {
+      await IM.fetchJson("/api/data/validation-runs", {
+        method: "POST",
+        body: JSON.stringify({ run_id: runId, applied, comment: comment || undefined }),
+      });
+      IM.flash(`${verb} ${runId} 已紀錄`, "success");
+      load();
+    } catch (e) { IM.flash(e.message, "error"); }
+  }
+
+  $("#reload-btn").addEventListener("click", load);
+  load();
+})();
+</script>
+</body>
+</html>

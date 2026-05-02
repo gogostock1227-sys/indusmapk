@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>個股 profile — indusmapk admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+<style>
+  .stock-layout {
+    display: grid; grid-template-columns: 360px 1fr; gap: 1rem; height: calc(100vh - 7rem);
+  }
+  .stock-list-panel, .stock-edit-panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .stock-list-panel header { padding: 0.75rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.4rem; }
+  .stock-list-panel input { flex: 1; }
+  .stock-list { overflow-y: auto; flex: 1; padding: 0.3rem; }
+  .stock-row {
+    padding: 0.5rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .stock-row:hover { background: var(--panel-hover); }
+  .stock-row.active { background: var(--accent); color: #fff; }
+  .stock-row .ticker { font-family: ui-monospace, SF Mono, Menlo, monospace; font-weight: 600; min-width: 60px; }
+  .stock-row .name { flex: 1; }
+  .stock-row .seg { color: var(--muted); font-size: 11px; }
+  .stock-row.active .seg { color: rgba(255,255,255,0.8); }
+  .stock-edit-panel { padding: 1.5rem; overflow-y: auto; }
+  .form-grid { display: grid; gap: 1rem; }
+  .form-row label { display: block; color: var(--muted); margin-bottom: 0.3rem; font-size: 12px; }
+  .form-row input, .form-row textarea {
+    width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 13px; font-family: inherit;
+  }
+  .form-row textarea { min-height: 70px; resize: vertical; }
+  .form-row textarea.themes { font-family: ui-monospace, SF Mono, Menlo, monospace; }
+  .stock-meta { color: var(--muted); font-size: 12px; margin: 0.4rem 0; }
+  .reviewed-badge { background: rgba(16,185,129,0.15); color: #10b981; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <h1>個股 profile</h1>
+    <p class="muted" style="margin-top:-0.5rem">編輯 <code class="mono">concept_taxonomy/stock_profiles.json</code> 個股分類。每筆變更獨立 commit 到 GitHub。</p>
+
+    <div class="stock-layout">
+      <div class="stock-list-panel">
+        <header>
+          <input type="search" id="q" placeholder="搜尋 ticker 或公司名…">
+        </header>
+        <div class="stock-list" id="stock-list">
+          <div class="muted" style="padding:0.75rem">載入中…</div>
+        </div>
+      </div>
+
+      <div class="stock-edit-panel" id="edit-panel">
+        <div class="editor-empty muted" style="display:grid;place-items:center;flex:1">← 從左側選一個個股開始編輯</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/admin/app.js"></script>
+<script>
+(async function () {
+  await IM.renderSidebar("data-stock");
+  const $ = (s) => document.querySelector(s);
+
+  let allList = []; // [{ticker, name, industry_segment, ...}]
+  let activeTicker = null;
+
+  async function load() {
+    try {
+      const r = await IM.fetchJson("/api/data/stock-profiles");
+      allList = r.list;
+      renderList();
+    } catch (e) {
+      $("#stock-list").innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
+    }
+  }
+
+  function renderList() {
+    const q = $("#q").value.trim().toLowerCase();
+    const filtered = allList.filter(s =>
+      !q || s.ticker.includes(q) ||
+      (s.name && s.name.toLowerCase().includes(q)) ||
+      (s.industry_segment && s.industry_segment.toLowerCase().includes(q))
+    ).slice(0, 500);
+
+    if (filtered.length === 0) {
+      $("#stock-list").innerHTML = '<div class="empty">沒有符合條件的個股</div>';
+      return;
+    }
+    $("#stock-list").innerHTML = filtered.map(s => {
+      const isActive = s.ticker === activeTicker;
+      return `<div class="stock-row ${isActive ? "active" : ""}" data-ticker="${s.ticker}">
+        <span class="ticker">${s.ticker}</span>
+        <span class="name">${s.name || ""}</span>
+        <span class="seg">${s.industry_segment || ""}</span>
+        ${s.human_reviewed ? '<span class="reviewed-badge">✓</span>' : ""}
+      </div>`;
+    }).join("");
+    document.querySelectorAll(".stock-row").forEach(r => {
+      r.addEventListener("click", () => openEditor(r.dataset.ticker));
+    });
+    if (allList.length > 500) {
+      $("#stock-list").insertAdjacentHTML("beforeend",
+        `<div class="muted" style="padding:0.5rem 0.75rem;font-size:11px">列出前 500 個（共 ${allList.length}），請用搜尋縮小範圍</div>`);
+    }
+  }
+
+  async function openEditor(ticker) {
+    activeTicker = ticker;
+    renderList();
+    $("#edit-panel").innerHTML = '<div class="muted" style="padding:1rem"><span class="spinner"></span> 載入中…</div>';
+    try {
+      const r = await IM.fetchJson(`/api/data/stock-profiles?ticker=${encodeURIComponent(ticker)}`);
+      renderEditor(ticker, r.profile);
+    } catch (e) {
+      $("#edit-panel").innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
+    }
+  }
+
+  function renderEditor(ticker, p) {
+    const themes = Array.isArray(p.core_themes) ? p.core_themes.join("\n") : "";
+    $("#edit-panel").innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+        <h3 style="margin:0">${ticker} <span class="muted">${p.name || ""}</span></h3>
+        <div class="stock-meta">
+          ${p.last_validated ? `最後審核：${IM.fmtDate(p.last_validated)}` : ""}
+          ${p.confidence != null ? `· 信心 ${p.confidence}` : ""}
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-row">
+          <label>公司名 (name)</label>
+          <input type="text" id="f-name" value="${p.name || ""}">
+        </div>
+        <div class="form-row">
+          <label>產業段 (industry_segment)</label>
+          <input type="text" id="f-seg" value="${p.industry_segment || ""}" placeholder="例：AI_SEMI / ELEC_COMP / NETCOM">
+        </div>
+        <div class="form-row">
+          <label>供應鏈位階 (supply_chain_position)</label>
+          <input type="text" id="f-pos" value="${p.supply_chain_position || ""}" placeholder="例：IC_DESIGN / FOUNDRY / OSAT_ADV">
+        </div>
+        <div class="form-row">
+          <label>核心題材 (core_themes，每行一個)</label>
+          <textarea class="themes" id="f-themes" spellcheck="false">${themes}</textarea>
+        </div>
+        <div class="form-row">
+          <label>TWSE 產業</label>
+          <input type="text" id="f-twse" value="${p.twse_industry || ""}">
+        </div>
+        <div class="form-row">
+          <label>業務簡介摘要</label>
+          <textarea id="f-bizsummary">${p.business_summary || ""}</textarea>
+        </div>
+        <div class="form-row">
+          <label><input type="checkbox" id="f-reviewed" ${p.human_reviewed ? "checked" : ""}> 已人工審核 (human_reviewed)</label>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.5rem; justify-content:flex-end; margin-top:1.25rem">
+        <button class="btn-secondary" id="f-reset">還原</button>
+        <button id="f-save">儲存（會建立 GitHub commit）</button>
+      </div>
+    `;
+
+    $("#f-reset").addEventListener("click", () => openEditor(ticker));
+    $("#f-save").addEventListener("click", async () => {
+      const profile = {
+        ...p,
+        name: $("#f-name").value.trim(),
+        industry_segment: $("#f-seg").value.trim(),
+        supply_chain_position: $("#f-pos").value.trim(),
+        core_themes: $("#f-themes").value.split("\n").map(s => s.trim()).filter(Boolean),
+        twse_industry: $("#f-twse").value.trim(),
+        business_summary: $("#f-bizsummary").value.trim(),
+        human_reviewed: $("#f-reviewed").checked,
+      };
+      try {
+        const r = await IM.fetchJson("/api/data/stock-profiles", {
+          method: "PUT",
+          body: JSON.stringify({ ticker, profile, summary: `編輯 ${ticker} ${profile.name}` }),
+        });
+        IM.flash(`已儲存 ${ticker} (commit ${r.commit.slice(0,7)})`, "success");
+        // 更新本地 list 顯示
+        const idx = allList.findIndex(s => s.ticker === ticker);
+        if (idx >= 0) {
+          allList[idx] = {
+            ticker, name: profile.name,
+            industry_segment: profile.industry_segment,
+            supply_chain_position: profile.supply_chain_position,
+            core_themes: profile.core_themes.length,
+            human_reviewed: profile.human_reviewed,
+          };
+          renderList();
+        }
+      } catch (e) {
+        if (e.status === 409) {
+          IM.flash("資料已被他人改動，請重新載入該股。", "error");
+        } else {
+          IM.flash(e.message, "error");
+        }
+      }
+    });
+  }
+
+  $("#q").addEventListener("input", renderList);
+  load();
+})();
+</script>
+</body>
+</html>

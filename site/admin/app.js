@@ -99,7 +99,10 @@ window.IM = (function () {
       { sectionTitle: "資料維運" },
       { key: "data-groups", label: "族群定義", href: "/admin/data/groups.html" },
       { key: "data-stock", label: "個股 profile", href: "/admin/data/stock.html" },
-      { key: "data-publish", label: "發布", href: "/admin/data/publish.html" },
+      { key: "data-industries", label: "產業文案", href: "/admin/data/industries.html" },
+      { key: "data-master-patch", label: "Master Patch", href: "/admin/data/master-patch.html" },
+      { key: "data-validation", label: "驗證審核", href: "/admin/data/validation.html" },
+      { key: "data-publish", label: "🚀 發布", href: "/admin/data/publish.html" },
     ];
 
     const html = items.map(it => {

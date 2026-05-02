@@ -1,0 +1,77 @@
+name: Build and Deploy site
+
+on:
+  # Admin 點「發布」按鈕 → POST /api/build/trigger → workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: '觸發原因（admin 操作摘要）'
+        required: false
+        default: 'manual rebuild'
+  # Source 改動（templates / static / components / build_site.py / data 真理源）→ 自動 build
+  push:
+    branches: [main]
+    paths:
+      - 'data/**'
+      - 'concept_taxonomy/**'
+      - 'site/templates/**'
+      - 'site/static/**'
+      - 'site/components/**'
+      - 'site/build_site.py'
+      - 'concept_groups.py'
+
+# 同時間只跑一個 build（避免 daily_build.bat 與 admin 手動發布衝突）
+concurrency:
+  group: build-site
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Build site
+        run: python site/build_site.py --skip-finlab
+        env:
+          FINLAB_TOKEN: ${{ secrets.FINLAB_TOKEN }}
+          PYTHONUTF8: '1'
+
+      - name: Commit dist/ changes (if any)
+        run: |
+          git config user.name "indusmapk-build-bot"
+          git config user.email "noreply@indusmapk.com"
+          git add site/dist data 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No dist/ changes to commit"
+          else
+            REASON="${{ github.event.inputs.reason || 'push trigger' }}"
+            git commit -m "build: $REASON [skip ci]"
+            git push
+          fi
+
+      - name: Build summary
+        run: |
+          echo "### Build complete" >> $GITHUB_STEP_SUMMARY
+          echo "- Trigger: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Reason: ${{ github.event.inputs.reason || 'push' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY

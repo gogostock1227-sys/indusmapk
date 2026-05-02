@@ -45,13 +45,7 @@
     font-size: 0.95rem;
     line-height: 1.5;
   }
-  .turnstile-wrap {
-    margin: 1.5rem 0;
-    min-height: 65px;
-    display: flex;
-    justify-content: center;
-  }
-  button.google {
+button.google {
     width: 100%;
     padding: 0.85rem 1rem;
     background: white;
@@ -101,17 +95,15 @@
 
     <div id="error-box" class="error" style="display:none"></div>
 
-    <div class="turnstile-wrap">
-      <div
-        class="cf-turnstile"
-        data-sitekey="0x4AAAAAADHw9r3wqz3KVByo"
-        data-callback="onTurnstileSuccess"
-        data-error-callback="onTurnstileError"
-        data-theme="dark"
-      ></div>
-    </div>
+    <div
+      id="cf-turnstile"
+      class="cf-turnstile"
+      data-sitekey="0x4AAAAAADHw9r3wqz3KVByo"
+      data-size="invisible"
+      data-theme="dark"
+    ></div>
 
-    <button class="google" id="login-btn" disabled>
+    <button class="google" id="login-btn">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path fill="#EA4335" d="M12 5c1.6 0 3.1.6 4.2 1.6l3.1-3.1C17.4 1.7 14.9 0 12 0 7.4 0 3.4 2.6 1.4 6.5l3.6 2.8C6 6.6 8.8 5 12 5z"/>
         <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.7-2.3 3.5l3.5 2.7c2.1-1.9 3.3-4.8 3.3-8.4z"/>
@@ -129,7 +121,7 @@
 <script>
   const errorBox = document.getElementById('error-box');
   const loginBtn = document.getElementById('login-btn');
-  let turnstileToken = null;
+  const googleBtnInner = loginBtn.innerHTML;
 
   // 顯示 query string error（從 callback 跳回來）
   const params = new URLSearchParams(location.search);
@@ -147,21 +139,21 @@
     errorBox.style.display = 'block';
   }
 
-  function onTurnstileSuccess(token) {
-    turnstileToken = token;
-    loginBtn.disabled = false;
-  }
-
-  function onTurnstileError() {
-    errorBox.textContent = '驗證機器人保護失敗，請重新整理頁面。';
-    errorBox.style.display = 'block';
-    loginBtn.disabled = true;
-  }
-
   loginBtn.addEventListener('click', () => {
-    if (!turnstileToken) return;
+    loginBtn.disabled = true;
+    loginBtn.textContent = '驗證中...';
     const next = params.get('next') || '/';
-    location.href = `/api/auth/login?ts=${encodeURIComponent(turnstileToken)}&next=${encodeURIComponent(next)}`;
+    turnstile.execute('#cf-turnstile', {
+      callback(token) {
+        location.href = `/api/auth/login?ts=${encodeURIComponent(token)}&next=${encodeURIComponent(next)}`;
+      },
+      'error-callback'() {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = googleBtnInner;
+        errorBox.textContent = '驗證機器人保護失敗，請重新整理頁面。';
+        errorBox.style.display = 'block';
+      },
+    });
   });
 </script>
 </body>
