@@ -13,13 +13,16 @@ database_id = "54e2631a-09a1-460d-90ba-bdf976a986ff"
 NODE_ENV = "production"
 APP_BASE_URL = "https://indusmapk.com"
 
-# Secrets（不寫在這裡，用 dashboard 或 wrangler pages secret put 設）：
-#   GOOGLE_CLIENT_ID
-#   GOOGLE_CLIENT_SECRET
-#   JWT_SECRET
-#   GITHUB_TOKEN
-#   GITHUB_REPO          (= gogostock1227-sys/indusmapk)
-#   TURNSTILE_SECRET
-#   TURNSTILE_SITE_KEY   (public 但統一管理)
-#   FINLAB_TOKEN         (Phase 4)
-#   ANTHROPIC_API_KEY    (Phase 4)
+# 公開 ID / key（可入 git，CF 會把 [vars] 視為 single source of truth）
+GOOGLE_CLIENT_ID = "730652455267-rh5f9cfrqc8nevpbsjq8ce1129e3v7ql.apps.googleusercontent.com"
+TURNSTILE_SITE_KEY = "0x4AAAAAADHw9r3wqz3KVByo"
+GITHUB_REPO = "gogostock1227-sys/indusmapk"
+
+# Secrets（絕不寫這裡，用 Cloudflare Dashboard → Pages → Settings → Variables 的
+# 「Secrets」區塊設定，或用 `wrangler pages secret put NAME --project-name=indusmapk`）：
+#   GOOGLE_CLIENT_SECRET   (Google Cloud Console → Credentials 取得)
+#   JWT_SECRET             (用 `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` 產一組 64-char hex)
+#   TURNSTILE_SECRET       (Cloudflare Dashboard → Turnstile widget 設定取得)
+#   GITHUB_TOKEN           (GitHub Settings → Personal access tokens → Fine-grained 建立)
+#   FINLAB_TOKEN           (Phase 4)
+#   ANTHROPIC_API_KEY      (Phase 4)
