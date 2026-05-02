@@ -54,12 +54,20 @@
   .from-path {
     display: inline-block;
     margin-top: 0.5rem;
-    padding: 0.35rem 0.75rem;
-    background: rgba(255,255,255,0.05);
-    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 6px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  .from-path-raw {
+    display: block;
+    margin-top: 0.4rem;
+    color: var(--muted);
+    font-size: 0.75rem;
     font-family: ui-monospace, SF Mono, Menlo, monospace;
-    font-size: 0.85rem;
-    color: var(--text);
   }
   .role-info {
     margin: 1.5rem 0;
@@ -91,8 +99,7 @@
   .btn-primary { background: var(--accent); color: white; }
   .btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border) !important; }
   .role-name {
-    text-transform: lowercase;
-    font-family: ui-monospace, SF Mono, Menlo, monospace;
+    font-weight: 600;
   }
 </style>
 </head>
@@ -102,6 +109,7 @@
     <h1>此內容需要升級權限</h1>
     <p>你嘗試訪問的頁面：</p>
     <div class="from-path" id="from-path">—</div>
+    <div class="from-path-raw" id="from-path-raw"></div>
 
     <div class="role-info" id="role-info" style="display:none">
       <p style="margin-top:0">你目前的角色：<strong class="role-name" id="current-role">—</strong></p>
@@ -123,23 +131,61 @@
   </div>
 
 <script>
+  // 路徑 → 中文名稱反查（與 admin/access-rules.html 的 PAGE_PRESETS 對齊）
+  const PAGE_LABELS = {
+    "/heatmap.html":       "熱力圖",
+    "/database.html":      "個股資料庫",
+    "/compare.html":       "個股比較",
+    "/ai.html":            "AI 助手",
+    "/stock-futures.html": "股期儀表板",
+    "/rs.html":            "RS 評分",
+    "/rankings.html":      "排行榜",
+    "/today.html":         "今日盤勢",
+    "/memo.html":          "備忘錄",
+    "/index.html":         "首頁",
+    "/":                   "首頁",
+  };
+  const ROLE_LABELS = {
+    guest:       "訪客",
+    member:      "免費會員",
+    premium:     "進階用戶",
+    admin:       "管理員",
+    super_admin: "超級管理員",
+  };
+
+  function pathLabel(path) {
+    if (!path) return "（未知頁面）";
+    if (PAGE_LABELS[path]) return PAGE_LABELS[path];
+    let m;
+    if ((m = path.match(/^\/company\/(.+?)\.html$/))) return `個股 ${decodeURIComponent(m[1])}`;
+    if ((m = path.match(/^\/topic\/(.+?)\.html$/)))   return `題材族群「${decodeURIComponent(m[1])}」`;
+    if ((m = path.match(/^\/limit-up-(\d{4}-\d{2}-\d{2})\.html$/))) return `漲停分析（${m[1]}）`;
+    if (path.startsWith("/admin/"))                   return "後台管理頁";
+    return path;
+  }
+  function roleLabel(role) { return ROLE_LABELS[role] || role; }
+
   const params = new URLSearchParams(location.search);
   const fromPath = params.get('from') || '';
   const need = params.get('need') || 'premium';
 
-  document.getElementById('from-path').textContent = fromPath || '（未知頁面）';
-  document.getElementById('need-role').textContent = need;
+  document.getElementById('from-path').textContent = pathLabel(fromPath);
+  // 路徑後面同時顯示 raw URL 給工程除錯用，但小字隱身
+  document.getElementById('from-path-raw').textContent = fromPath ? fromPath : '';
+  document.getElementById('need-role').textContent = roleLabel(need);
 
   fetch('/api/auth/me')
     .then(r => r.json())
     .then(me => {
       const loginBtn = document.getElementById('login-btn');
       if (me.authenticated) {
-        document.getElementById('current-role').textContent = me.role;
+        document.getElementById('current-role').textContent = roleLabel(me.role);
         document.getElementById('role-info').style.display = 'block';
         document.getElementById('member-msg').style.display = 'block';
         loginBtn.textContent = '聯絡管理員';
-        loginBtn.href = `mailto:linliusan.claude0823@gmail.com?subject=申請升級為 ${need}&body=希望升級權限存取：${fromPath}`;
+        const subject = `申請升級為${roleLabel(need)}`;
+        const body = `Hi，\n\n我是 ${me.email}，想要存取「${pathLabel(fromPath)}」這個頁面。\n請協助升級為${roleLabel(need)}，謝謝！\n\n— 來源頁面：${fromPath}`;
+        loginBtn.href = `mailto:gogostock1227@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       } else {
         document.getElementById('guest-msg').style.display = 'block';
         loginBtn.href = `/admin/login.html?next=${encodeURIComponent(fromPath)}`;
