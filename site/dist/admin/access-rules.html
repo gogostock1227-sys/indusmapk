@@ -221,24 +221,65 @@
     } catch (e) { IM.flash(e.message, "error"); }
   }
 
+  // 測試用代表性具體路徑（GLOB 規則用具體例子代替，否則不能直接送進 test API）
+  const TEST_PRESETS = [
+    { label: "熱力圖",                          path: "/heatmap.html" },
+    { label: "個股資料庫",                      path: "/database.html" },
+    { label: "個股比較",                        path: "/compare.html" },
+    { label: "AI 助手",                         path: "/ai.html" },
+    { label: "股期儀表板",                      path: "/stock-futures.html" },
+    { label: "RS 評分",                         path: "/rs.html" },
+    { label: "排行榜",                          path: "/rankings.html" },
+    { label: "今日盤勢",                        path: "/today.html" },
+    { label: "備忘錄",                          path: "/memo.html" },
+    { label: "漲停分析範例（2026-04-30）",       path: "/limit-up-2026-04-30.html" },
+    { label: "題材族群範例（AI伺服器）",          path: "/topic/AI伺服器.html" },
+    { label: "個股範例（2330 台積電）",           path: "/company/2330.html" },
+  ];
+
   function openTester() {
     $("#modal").innerHTML = `
-      <h3>測試 pattern 命中</h3>
-      <p class="muted">輸入路徑，看會命中哪條 active 規則。</p>
+      <h3>測試保護規則</h3>
+      <p class="muted">選一個頁面，看訪客連這頁時會被哪條規則擋住。</p>
+
       <div class="form-row">
-        <label>測試路徑</label>
-        <input type="text" id="t-path" placeholder="/heatmap.html">
+        <label>選擇要測試的頁面</label>
+        <select id="t-preset">
+          <option value="">— 請從下拉選擇 —</option>
+          ${TEST_PRESETS.map(p => `<option value="${p.path}">${p.label}（${p.path}）</option>`).join("")}
+          <option value="__custom__">🛠️ 自訂路徑（手動輸入）</option>
+        </select>
       </div>
+
+      <div class="form-row" id="t-custom-row" style="display:none">
+        <label>自訂路徑</label>
+        <input type="text" id="t-path" placeholder="例如 /topic/輝達概念股.html">
+      </div>
+
       <div id="t-result" class="muted">尚未測試</div>
       <div class="actions">
         <button class="btn-secondary" id="t-close">關閉</button>
         <button id="t-run">執行測試</button>
       </div>
     `;
+
+    $("#t-preset").addEventListener("change", () => {
+      const v = $("#t-preset").value;
+      $("#t-custom-row").style.display = v === "__custom__" ? "block" : "none";
+      if (v === "__custom__") $("#t-path").focus();
+    });
+
     $("#t-close").addEventListener("click", closeModal);
     $("#t-run").addEventListener("click", async () => {
-      const path = $("#t-path").value.trim();
-      if (!path) { IM.flash("路徑必填", "error"); return; }
+      const presetVal = $("#t-preset").value;
+      let path;
+      if (!presetVal) { IM.flash("請從下拉選擇要測試的頁面", "error"); return; }
+      if (presetVal === "__custom__") {
+        path = $("#t-path").value.trim();
+        if (!path) { IM.flash("自訂路徑必填", "error"); return; }
+      } else {
+        path = presetVal;
+      }
       try {
         const r = await IM.fetchJson("/api/admin/access-rules/test", {
           method: "POST", body: JSON.stringify({ path }),
