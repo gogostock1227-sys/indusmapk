@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memo 管理 · 族群寶</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="static/logo.png">
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="static/logo.png" alt="族群寶">
+      <span class="logo-text">
+        <strong>族群寶</strong>
+        <em>Memo 管理</em>
+      </span>
+    </a>
+    <nav class="primary-nav">
+      <a href="index.html" class="">← 返回首頁</a>
+      <a href="index.html#memo-board" class="">公佈欄</a>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main">
+<div class="admin-wrap">
+
+  <!-- 新增表單 -->
+  <div class="admin-form-card">
+    <h2 class="admin-section-title">新增 Memo</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="admin-field">
+        <label for="f-date">日期</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="admin-field">
+        <label for="f-stock-id">股票代號</label>
+        <input type="text" id="f-stock-id" placeholder="例：6510">
+      </div>
+      <div class="admin-field">
+        <label for="f-stock-name">股名</label>
+        <input type="text" id="f-stock-name" placeholder="例：精測">
+      </div>
+      <div class="admin-field">
+        <label for="f-tags">標籤（逗號分隔，可留空）</label>
+        <input type="text" id="f-tags" placeholder="例：TPU, 探針卡, 法說">
+      </div>
+    </div>
+    <div class="admin-field">
+      <label for="f-title">標題摘要</label>
+      <input type="text" id="f-title" placeholder="例：法說：TPU 帶動探針卡需求，長線仍可追蹤">
+    </div>
+    <div class="admin-field">
+      <label for="f-content">內容</label>
+      <textarea id="f-content" placeholder="詳細備忘內容…"></textarea>
+    </div>
+    <div class="admin-btn-row">
+      <button class="admin-btn primary" id="btn-add">新增 Memo</button>
+      <button class="admin-btn secondary" id="btn-clear-form">清空表單</button>
+    </div>
+  </div>
+
+  <!-- 匯入 / 匯出 -->
+  <div style="margin-bottom:28px;">
+    <h2 class="admin-section-title">資料備份</h2>
+    <div class="admin-io-row">
+      <button class="admin-btn secondary" id="btn-export">匯出 memos.json</button>
+      <label class="admin-btn secondary" style="cursor:pointer;margin:0;">
+        匯入 memos.json
+        <input type="file" id="file-import" accept=".json" style="display:none;">
+      </label>
+      <span id="io-hint" style="font-size:13px;color:var(--text-mute);">匯出後儲存至 site/memos.json 作為備份</span>
+    </div>
+  </div>
+
+  <!-- 已存 memo 列表 -->
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 class="admin-section-title" style="margin:0;">已存 Memo <span id="memo-count" style="font-weight:400;color:var(--text-mute);"></span></h2>
+      <button class="admin-btn danger-sm" id="btn-clear-all" style="font-size:12px;">清空全部</button>
+    </div>
+    <div id="admin-memo-list"></div>
+  </div>
+
+</div>
+</main>
+
+<div class="admin-toast" id="toast"></div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'memo_board_data';
+
+  // ── 工具函式 ──
+  function esc(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function toast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(function () { el.classList.remove('show'); }, 2200);
+  }
+
+  function loadAll() {
+    try {
+      var s = localStorage.getItem(STORAGE_KEY);
+      return s ? JSON.parse(s) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveAll(arr) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  }
+
+  // ── 渲染列表 ──
+  function renderList() {
+    var all = loadAll();
+    var el = document.getElementById('admin-memo-list');
+    var countEl = document.getElementById('memo-count');
+    countEl.textContent = '(' + all.length + ' 筆)';
+    if (!all.length) {
+      el.innerHTML = '<div class="admin-empty">尚無 memo，請用上方表單新增。</div>';
+      return;
+    }
+    // 倒序顯示
+    var sorted = all.slice().sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+    var html = sorted.map(function (m, i) {
+      var origIdx = all.indexOf(m);
+      return (
+        '<div class="admin-memo-item">' +
+          '<div class="admin-memo-top">' +
+            '<div>' +
+              '<div class="admin-memo-badge">' +
+                '<span class="admin-memo-id">' + esc(m.stock_id) + '</span>' +
+                '<span class="admin-memo-name">' + esc(m.stock_name) + '</span>' +
+              '</div>' +
+              '<div class="admin-memo-date">' + esc(m.date) + (m.tags && m.tags.length ? ' · ' + m.tags.map(esc).join(', ') : '') + '</div>' +
+              '<div class="admin-memo-title">' + esc(m.title) + '</div>' +
+            '</div>' +
+            '<button class="admin-btn danger-sm" data-idx="' + origIdx + '">刪除</button>' +
+          '</div>' +
+        '</div>'
+      );
+    });
+    el.innerHTML = html.join('');
+  }
+
+  // ── 新增 ──
+  function getTodayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+
+  document.getElementById('f-date').value = getTodayStr();
+
+  document.getElementById('btn-add').addEventListener('click', function () {
+    var stockId = document.getElementById('f-stock-id').value.trim();
+    var stockName = document.getElementById('f-stock-name').value.trim();
+    var date = document.getElementById('f-date').value.trim();
+    var title = document.getElementById('f-title').value.trim();
+    var content = document.getElementById('f-content').value.trim();
+    var tagsRaw = document.getElementById('f-tags').value.trim();
+
+    if (!stockId || !stockName || !date || !title || !content) {
+      toast('請填寫：日期、股票代號、股名、標題、內容');
+      return;
+    }
+
+    var tags = tagsRaw ? tagsRaw.split(/[,，]+/).map(function (t) { return t.trim(); }).filter(Boolean) : [];
+    var memo = { date: date, stock_id: stockId, stock_name: stockName, title: title, content: content };
+    if (tags.length) memo.tags = tags;
+
+    var all = loadAll();
+    all.push(memo);
+    saveAll(all);
+    renderList();
+    toast('✓ 已新增 ' + stockId + ' ' + stockName);
+
+    // 清空部分欄位（保留日期）
+    document.getElementById('f-stock-id').value = '';
+    document.getElementById('f-stock-name').value = '';
+    document.getElementById('f-title').value = '';
+    document.getElementById('f-content').value = '';
+    document.getElementById('f-tags').value = '';
+    document.getElementById('f-stock-id').focus();
+  });
+
+  document.getElementById('btn-clear-form').addEventListener('click', function () {
+    document.getElementById('f-stock-id').value = '';
+    document.getElementById('f-stock-name').value = '';
+    document.getElementById('f-title').value = '';
+    document.getElementById('f-content').value = '';
+    document.getElementById('f-tags').value = '';
+    document.getElementById('f-date').value = getTodayStr();
+  });
+
+  // ── 刪除（事件委派）──
+  document.getElementById('admin-memo-list').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-idx]');
+    if (!btn) return;
+    var idx = parseInt(btn.getAttribute('data-idx'), 10);
+    var all = loadAll();
+    var m = all[idx];
+    if (!m) return;
+    if (!confirm('確定刪除「' + m.stock_id + ' ' + m.stock_name + ' - ' + m.title + '」？')) return;
+    all.splice(idx, 1);
+    saveAll(all);
+    renderList();
+    toast('已刪除');
+  });
+
+  // ── 清空全部 ──
+  document.getElementById('btn-clear-all').addEventListener('click', function () {
+    var all = loadAll();
+    if (!all.length) { toast('目前無資料'); return; }
+    if (!confirm('確定清空所有 ' + all.length + ' 筆 memo？此操作無法復原。')) return;
+    saveAll([]);
+    renderList();
+    toast('已清空所有 memo');
+  });
+
+  // ── 匯出 ──
+  document.getElementById('btn-export').addEventListener('click', function () {
+    var all = loadAll();
+    if (!all.length) { toast('目前無資料可匯出'); return; }
+    var blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'memos.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('✓ 已下載 memos.json（' + all.length + ' 筆）');
+  });
+
+  // ── 匯入 ──
+  document.getElementById('file-import').addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      try {
+        var imported = JSON.parse(ev.target.result);
+        if (!Array.isArray(imported)) { toast('格式錯誤：應為 JSON 陣列'); return; }
+        var valid = imported.filter(function (m) {
+          return m && m.stock_id && m.stock_name && m.date && m.content;
+        });
+        if (!valid.length) { toast('檔案中無有效資料'); return; }
+
+        // Merge：以 date+stock_id+title 去重
+        var existing = loadAll();
+        var existingKeys = new Set(existing.map(function (m) {
+          return (m.date || '') + '|' + (m.stock_id || '') + '|' + (m.title || '');
+        }));
+        var added = 0;
+        valid.forEach(function (m) {
+          var key = (m.date || '') + '|' + (m.stock_id || '') + '|' + (m.title || '');
+          if (!existingKeys.has(key)) {
+            existing.push(m);
+            existingKeys.add(key);
+            added++;
+          }
+        });
+        saveAll(existing);
+        renderList();
+        toast('✓ 匯入完成：新增 ' + added + ' 筆（跳過重複 ' + (valid.length - added) + ' 筆）');
+      } catch (err) {
+        toast('JSON 解析失敗：' + err.message);
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+
+  // ── 初始化 ──
+  renderList();
+})();
+</script>
+
+</body>
+</html>

@@ -67,7 +67,7 @@ def write_text_retry(path: Path, text: str, encoding: str = "utf-8", retries: in
 CACHE_META = SITE_DIR / ".cache_meta.json"
 
 from concept_groups import CONCEPT_GROUPS
-from industry_meta import INDUSTRY_META, CATEGORY_COLORS, get_meta
+from industry_meta import INDUSTRY_META, CATEGORY_COLORS, CONCEPT_STOCK_TOPICS, get_meta
 try:
     from stock_highlights import STOCK_HIGHLIGHTS
 except ImportError:
@@ -77,12 +77,15 @@ RICH_PKL = SITE_DIR / ".company_rich.pkl"
 EXTRAS_JSON = SITE_DIR / ".cache_extras.json"
 TRENDING_JSON = SITE_DIR / ".cache_trending.json"
 FUTURES_JSON = SITE_DIR / ".cache_futures.json"
+STOCK_FUTURES_RANKING_JSON = SITE_DIR / ".cache_stock_futures_ranking.json"
+INDEX_MARGINING_URL = "https://www.taifex.com.tw/cht/5/indexMarging"
 DAILY_CHIP_JSON = SITE_DIR / ".cache_daily_chip_report.json"
 RS_HISTORY = SITE_DIR / ".cache_rs_history.parquet"
 RS_HISTORY_QUARTER = SITE_DIR / ".cache_rs_history_quarter.parquet"
 TAIEX_CACHE = SITE_DIR / ".cache_taiex.parquet"  # 舊：只存加權指數，保留以利向後兼容
 INDICES_CACHE = SITE_DIR / ".cache_market_indices.parquet"  # 新：上市加權 + 櫃買
 NAME_OVERRIDES_JSON = SITE_DIR / "stock_name_overrides.json"
+MEMOS_JSON = SITE_DIR / "memos.json"
 COVERAGE_DIR = ROOT_DIR / "My-TW-Coverage" / "Pilot_Reports"
 TAIPEI_TZ = timezone(timedelta(hours=8))
 
@@ -182,6 +185,73 @@ def refresh_futures_list(max_age_days: float = 1.0) -> None:
         print("[futures] 抓取逾時 60s，沿用前次 cache")
     except Exception as e:
         print(f"[futures] 抓取例外：{e}（沿用前次 cache）")
+
+
+def refresh_stock_futures_ranking(max_age_hours: float = 6.0) -> None:
+    """跑 fetch_stock_futures_ranking.py，建立股期曝險頁使用的排行資料。
+
+    任何異常都不中斷 build；若沒有 cache，頁面會用站內股價資料建立降級樣板。
+    """
+    import subprocess, time
+    if STOCK_FUTURES_RANKING_JSON.exists():
+        age_hours = (time.time() - STOCK_FUTURES_RANKING_JSON.stat().st_mtime) / 3600
+        if age_hours < max_age_hours:
+            print(f"[stock-futures] cache {age_hours:.1f} 小時內，跳過抓取（{STOCK_FUTURES_RANKING_JSON.name}）")
+            return
+    script = SITE_DIR / "fetch_stock_futures_ranking.py"
+    if not script.exists():
+        print(f"[stock-futures] 跳過：找不到 {script.name}")
+        return
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script)],
+            timeout=120,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        tail = [l for l in proc.stdout.splitlines() if l.strip()][-8:]
+        for l in tail:
+            print(f"  {l}")
+        if proc.returncode != 0:
+            print(f"[stock-futures] exit {proc.returncode}（沿用前次 cache / 降級資料）")
+            if proc.stderr:
+                print(proc.stderr[-400:])
+    except subprocess.TimeoutExpired:
+        print("[stock-futures] 抓取逾時 120s，沿用前次 cache / 降級資料")
+    except Exception as e:
+        print(f"[stock-futures] 抓取例外：{e}（沿用前次 cache / 降級資料）")
+
+
+def refresh_stock_futures_finlab_history(max_age_hours: float = 22.0) -> None:
+    """跑 fetch_stock_futures_history.py，從 FinLab 拉股期「收盤價 + OI」近 1 年。
+
+    用途：
+      1. ranking 的 OI 增減 fallback（解決本地 80 天 cache 空白問題）
+      2. 前端「以歷史價修正全部」按鈕的修正源
+    任何異常都不中斷 build。
+    """
+    import subprocess
+    script = SITE_DIR / "fetch_stock_futures_history.py"
+    if not script.exists():
+        return
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script)],
+            timeout=300,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        tail = [l for l in proc.stdout.splitlines() if l.strip()][-4:]
+        for l in tail:
+            print(f"  {l}")
+        if proc.returncode != 0 and proc.stderr:
+            print(proc.stderr[-400:])
+    except subprocess.TimeoutExpired:
+        print("[stock-futures-history] 抓取逾時 300s（不致命，沿用前次 cache）")
+    except Exception as e:
+        print(f"[stock-futures-history] 例外：{e}（不致命）")
 
 
 def today_taipei() -> date:
@@ -571,6 +641,362 @@ def load_futures_flags() -> dict:
     return flags
 
 
+def _safe_num(value, default=None):
+    """把 JSON / pandas 裡的數字轉成 float；空值回傳 default。"""
+    if value is None:
+        return default
+    try:
+        if pd.isna(value):
+            return default
+    except Exception:
+        pass
+    if isinstance(value, str):
+        text = value.strip().replace(",", "").replace("%", "")
+        if not text or text in {"-", "—", "nan", "NaN"}:
+            return default
+        value = text
+    try:
+        return float(value)
+    except Exception:
+        return default
+
+
+def _safe_int(value, default=None):
+    num = _safe_num(value, default=None)
+    if num is None:
+        return default
+    return int(round(num))
+
+
+def _stock_future_category_rows(sym: str, flags: dict, name: str, spot_price: float | None) -> list[dict]:
+    """官方排行 cache 不存在時，依既有股期清單建立可操作的降級列。"""
+    rows = []
+    specs = [
+        ("stock", "個股期貨", 2000, flags.get("stock"), f"{name}期貨"),
+        ("mini_stock", "小型個股期貨", 100, flags.get("mini"), f"小型{name}期貨"),
+        ("etf", "ETF期貨", 10000, flags.get("etf"), f"{name}ETF期貨"),
+        ("mini_etf", "小型ETF期貨", 1000, flags.get("mini_etf"), f"小型{name}ETF期貨"),
+    ]
+    for category, label, multiplier, enabled, product_name in specs:
+        if not enabled:
+            continue
+        price = spot_price
+        margin_rate = 0.135
+        initial_margin = round(price * multiplier * margin_rate) if price is not None else None
+        rows.append({
+            "product_id": f"{sym}-{category}",
+            "product_code": "",
+            "product_name": product_name,
+            "category": category,
+            "type_label": label,
+            "underlying_symbol": sym,
+            "underlying_name": name,
+            "underlying_short_name": name,
+            "contract_month": "",
+            "future_price": price,
+            "change": None,
+            "change_pct": None,
+            "volume": None,
+            "avg_volume_20d": None,
+            "avg_volume_days": 0,
+            "amplitude": None,
+            "open_interest": None,
+            "open_interest_change": None,
+            "spot_price": spot_price,
+            "basis": 0 if spot_price is not None and price is not None else None,
+            "contract_multiplier": multiplier,
+            "initial_margin": initial_margin,
+            "initial_margin_rate": margin_rate,
+            "notional": price * multiplier if price is not None else None,
+            "leverage": (price * multiplier / initial_margin) if price is not None and initial_margin else None,
+            "data_time": "",
+            "source_status": "fallback",
+            "search_key": f"{sym} {name} {product_name}".lower(),
+        })
+    return rows
+
+
+INDEX_FUTURE_SPECS = {
+    "TX": {
+        "product_name": "臺股期貨",
+        "contract_multiplier": 200,
+        "aliases": "台指 臺指 台股指數期貨 臺股指數期貨 加權指數",
+    },
+    "MTX": {
+        "product_name": "小型臺指期貨",
+        "contract_multiplier": 50,
+        "aliases": "小台 小臺 小型台指 小型臺指 台指 臺指 加權指數",
+    },
+    "TMF": {
+        "product_name": "微型臺指期貨",
+        "contract_multiplier": 10,
+        "aliases": "微台 微臺 微型台指 微型臺指 台指 臺指 加權指數",
+    },
+}
+
+
+def load_stock_futures_page_data(
+    data: dict,
+    stock_metrics: pd.DataFrame,
+    futures_flags: dict,
+    company_topics: dict | None = None,
+    market_indices: dict | None = None,
+) -> dict:
+    """載入股期排行 cache，並補上現貨價、名目金額、槓桿等頁面欄位。"""
+    raw = {}
+    if STOCK_FUTURES_RANKING_JSON.exists():
+        try:
+            raw = json.loads(STOCK_FUTURES_RANKING_JSON.read_text(encoding="utf-8"))
+        except Exception as e:
+            print(f"[stock-futures] 讀取 cache 失敗：{e}")
+            raw = {}
+
+    name_map = data.get("name_map", {})
+    close_df = data.get("close")
+
+    def spot_for(sym: str) -> float | None:
+        if sym in stock_metrics.index and "close" in stock_metrics.columns:
+            val = _safe_num(stock_metrics.at[sym, "close"])
+            if val is not None:
+                return val
+        if close_df is not None and sym in close_df.columns:
+            s = close_df[sym].dropna()
+            if len(s):
+                return _safe_num(s.iloc[-1])
+        return None
+
+    def latest_market_index(name: str) -> tuple[str, float | None]:
+        series = (market_indices or {}).get(name)
+        if series is None or len(series) == 0:
+            return "", None
+        try:
+            s = series.dropna()
+            if len(s) == 0:
+                return "", None
+            idx = s.index[-1]
+            dt = idx.strftime("%Y-%m-%d") if hasattr(idx, "strftime") else str(idx)[:10]
+            return dt, _safe_num(s.iloc[-1])
+        except Exception:
+            return "", None
+
+    def make_index_future_rows() -> list[dict]:
+        index_rows = raw.get("index_futures", []) if isinstance(raw.get("index_futures"), list) else []
+        index_by_code = {
+            str(item.get("product_code") or item.get("product_id") or "").strip().upper(): item
+            for item in index_rows
+            if item
+        }
+        margin_by_code = raw.get("index_margins", {}) if isinstance(raw.get("index_margins"), dict) else {}
+        taiex_date, taiex_value = latest_market_index("taiex")
+        out = []
+        for code, spec in INDEX_FUTURE_SPECS.items():
+            item = index_by_code.get(code, {})
+            margin_info = margin_by_code.get(code, {}) if isinstance(margin_by_code.get(code), dict) else {}
+            multiplier = spec["contract_multiplier"]
+            future_price = _safe_num(item.get("future_price") or item.get("last_price") or item.get("settlement_price"))
+            price_source = item.get("source_status") or "official"
+            if future_price is None:
+                future_price = taiex_value
+                price_source = "fallback_index"
+            spot_price = taiex_value
+            initial_margin = _safe_num(item.get("initial_margin") or margin_info.get("initial_margin"))
+            notional = future_price * multiplier if future_price is not None else None
+            leverage = notional / initial_margin if notional is not None and initial_margin else None
+            change = _safe_num(item.get("change"))
+            basis = (future_price - spot_price) if future_price is not None and spot_price is not None else None
+            out.append({
+                "product_id": code,
+                "product_code": code,
+                "product_name": spec["product_name"],
+                "category": "index_future",
+                "type_label": "指數期貨",
+                "underlying_symbol": "TAIEX",
+                "underlying_name": "臺灣加權股價指數",
+                "underlying_short_name": "加權指數",
+                "contract_month": item.get("contract_month") or "",
+                "future_price": future_price,
+                "change": change,
+                "change_pct": _safe_num(item.get("change_pct")),
+                "volume": _safe_int(item.get("volume")),
+                "avg_volume_20d": _safe_int(item.get("avg_volume_20d")),
+                "avg_volume_days": _safe_int(item.get("avg_volume_days"), 0) or 0,
+                "amplitude": None,
+                "open_interest": _safe_int(item.get("open_interest")),
+                "open_interest_change": _safe_int(item.get("open_interest_change")),
+                "spot_price": spot_price,
+                "basis": basis,
+                "contract_multiplier": multiplier,
+                "initial_margin": initial_margin,
+                "initial_margin_rate": None,
+                "notional": notional,
+                "leverage": leverage,
+                "data_time": item.get("trade_date") or taiex_date or raw.get("as_of") or "",
+                "source_status": price_source,
+                "search_key": f"{code} {spec['product_name']} TAIEX 加權指數 {spec['aliases']} 指數期貨".lower(),
+            })
+        return out
+
+    rows = []
+    raw_rows = raw.get("rows", []) if isinstance(raw.get("rows"), list) else []
+    for item in raw_rows:
+        sym = str(item.get("underlying_symbol") or "").strip().upper()
+        if not sym:
+            continue
+        name = name_map.get(sym) if isinstance(name_map.get(sym), str) and name_map.get(sym).strip() else item.get("underlying_short_name") or sym
+        future_price = _safe_num(item.get("future_price") or item.get("last_price") or item.get("settlement_price"))
+        spot_price = spot_for(sym)
+        multiplier = _safe_int(item.get("contract_multiplier"), 0) or 0
+        initial_margin = _safe_num(item.get("initial_margin"))
+        margin_rate = _safe_num(item.get("initial_margin_rate"))
+        if initial_margin is None and margin_rate is not None and future_price is not None and multiplier:
+            initial_margin = round(future_price * multiplier * margin_rate)
+        notional = future_price * multiplier if future_price is not None and multiplier else None
+        leverage = notional / initial_margin if notional is not None and initial_margin else None
+        change = _safe_num(item.get("change"))
+        prev_price = (future_price - change) if future_price is not None and change is not None else None
+        high_price = _safe_num(item.get("high_price"))
+        low_price = _safe_num(item.get("low_price"))
+        amplitude = None
+        if high_price is not None and low_price is not None and prev_price not in (None, 0):
+            amplitude = (high_price - low_price) / prev_price
+        basis = (future_price - spot_price) if future_price is not None and spot_price is not None else None
+        product_name = item.get("product_name") or f"{name}期貨"
+        product_code = str(item.get("product_code") or "").strip().upper()
+        category = item.get("category") or ""
+        type_label = item.get("type_label") or category or "股票期貨"
+        row = {
+            "product_id": product_code or f"{sym}-{category}-{len(rows)}",
+            "product_code": product_code,
+            "product_name": product_name,
+            "category": category,
+            "type_label": type_label,
+            "underlying_symbol": sym,
+            "underlying_name": item.get("underlying_name") or name,
+            "underlying_short_name": name,
+            "contract_month": item.get("contract_month") or "",
+            "future_price": future_price,
+            "change": change,
+            "change_pct": _safe_num(item.get("change_pct")),
+            "volume": _safe_int(item.get("volume")),
+            "avg_volume_20d": _safe_int(item.get("avg_volume_20d")),
+            "avg_volume_days": _safe_int(item.get("avg_volume_days"), 0) or 0,
+            "amplitude": amplitude,
+            "open_interest": _safe_int(item.get("open_interest")),
+            "open_interest_change": _safe_int(item.get("open_interest_change")),
+            "spot_price": spot_price,
+            "basis": basis,
+            "contract_multiplier": multiplier,
+            "initial_margin": initial_margin,
+            "initial_margin_rate": margin_rate,
+            "notional": notional,
+            "leverage": leverage,
+            "data_time": item.get("trade_date") or raw.get("as_of") or "",
+            "source_status": item.get("source_status") or "official",
+            "search_key": f"{product_code} {product_name} {sym} {name} {type_label}".lower(),
+        }
+        rows.append(row)
+
+    if not rows:
+        for sym, flags in sorted(futures_flags.items()):
+            spot = spot_for(sym)
+            nm = name_map.get(sym) if isinstance(name_map.get(sym), str) and name_map.get(sym).strip() else sym
+            rows.extend(_stock_future_category_rows(sym, flags, nm, spot))
+
+    rows.sort(key=lambda r: (-(r.get("volume") or 0), r.get("product_name") or ""))
+    selectable_products = rows + make_index_future_rows()
+    status = "official" if raw.get("rows") and rows else "fallback"
+    symbols = sorted({str(r.get("underlying_symbol") or "").strip().upper() for r in rows if r.get("underlying_symbol")})
+    topic_payload = {
+        sym: list((company_topics or {}).get(sym, []))[:8]
+        for sym in symbols
+        if (company_topics or {}).get(sym)
+    }
+
+    def _series_tail_payload(series, limit: int = 260) -> list[dict]:
+        if series is None or len(series) == 0:
+            return []
+        try:
+            s = series.dropna().tail(limit)
+        except Exception:
+            return []
+        out = []
+        for idx, val in s.items():
+            try:
+                dt = idx.strftime("%Y-%m-%d") if hasattr(idx, "strftime") else str(idx)[:10]
+                out.append({"date": dt, "value": float(val)})
+            except Exception:
+                continue
+        return out
+
+    def _market_payload(indices: dict | None) -> dict:
+        indices = indices or {}
+        taiex = _series_tail_payload(indices.get("taiex"))
+        tpex = _series_tail_payload(indices.get("tpex"))
+        by_date: dict[str, dict] = {}
+        for item in taiex:
+            by_date.setdefault(item["date"], {"date": item["date"]})["taiex"] = item["value"]
+        for item in tpex:
+            by_date.setdefault(item["date"], {"date": item["date"]})["tpex"] = item["value"]
+
+        def _current(items):
+            if not items:
+                return {"date": "", "value": None}
+            last = items[-1]
+            return {"date": last["date"], "value": last["value"]}
+
+        return {
+            "current": {
+                "taiex": _current(taiex),
+                "tpex": _current(tpex),
+            },
+            "history": [by_date[d] for d in sorted(by_date.keys())],
+        }
+
+    source_payload = {
+        "daily_market": "https://www.taifex.com.tw/data_gov/taifex_open_data.asp?data_name=DailyMarketReportFut",
+        "stock_lists": "https://www.taifex.com.tw/cht/2/stockLists",
+        "margining": "https://www.taifex.com.tw/cht/5/stockMarginingDetail",
+        "index_margining": INDEX_MARGINING_URL,
+    }
+    if isinstance(raw.get("source"), dict):
+        source_payload.update(raw.get("source") or {})
+    source_payload["index_margining"] = source_payload.get("index_margining") or INDEX_MARGINING_URL
+
+    # FinLab history（只塞 close 給前端用，OI 已被 ranking 預處理進 row.open_interest_change）
+    futures_history_payload: dict[str, dict] = {}
+    finlab_history_path = SITE_DIR / ".cache_stock_futures_finlab_history.json"
+    if finlab_history_path.exists():
+        try:
+            finlab_raw = json.loads(finlab_history_path.read_text(encoding="utf-8"))
+            if isinstance(finlab_raw, dict):
+                futures_history_payload = {
+                    k: (v.get("close") or {})
+                    for k, v in finlab_raw.items()
+                    if isinstance(v, dict)
+                }
+        except Exception as e:
+            print(f"[stock-futures] 讀取 FinLab history 失敗：{e}")
+
+    return {
+        "as_of": raw.get("as_of") or data["close"].index[-1].strftime("%Y-%m-%d"),
+        "generated_at": raw.get("generated_at") or datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "status": status,
+        "source": source_payload,
+        "rows": rows,
+        "selectable_products": selectable_products,
+        "company_topics": topic_payload,
+        "concept_topics": sorted(CONCEPT_STOCK_TOPICS),
+        "market_indices": _market_payload(market_indices),
+        "futures_history": futures_history_payload,
+        "counts": {
+            "rows": len(rows),
+            "selectable_products": len(selectable_products),
+            "official_rows": len(raw.get("rows", [])) if isinstance(raw.get("rows"), list) else 0,
+            "futures_history_products": len(futures_history_payload),
+        },
+    }
+
+
 def load_hot_topics(top_n: int = 6) -> list[dict]:
     """讀 .cache_trending.json，回傳 [{'name': ..., 'slug': ..., 'score': ...}, ...]。
 
@@ -613,6 +1039,29 @@ def load_hot_topics(top_n: int = 6) -> list[dict]:
     gen = d.get("generated_at", "?")
     print(f"[hot_topics] 從 cache 取 {len(picked)} 題材（@ {gen}）: {[t['name'] for t in picked]}")
     return picked
+
+
+def load_memos() -> list[dict]:
+    """讀取使用者手動維護的個股 Memo（site/memos.json）作為 fallback 備份。
+    主要資料源為前端 localStorage；此處僅供 localStorage 清空時作保底。
+    """
+    if not MEMOS_JSON.exists():
+        return []
+    try:
+        raw = json.loads(MEMOS_JSON.read_text(encoding="utf-8"))
+        if not isinstance(raw, list):
+            return []
+        valid = [
+            m for m in raw
+            if isinstance(m, dict)
+            and m.get("stock_id") and m.get("stock_name")
+            and m.get("date") and m.get("content")
+        ]
+        valid.sort(key=lambda m: m.get("date", ""), reverse=True)
+        print(f"[memos] 載入 {len(valid)} 筆備份資料")
+        return valid
+    except Exception:
+        return []
 
 
 def load_extras() -> dict:
@@ -2489,6 +2938,18 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         "topic_card_desc": lambda group, limit=96: get_topic_summary_text(group, ai_summaries, limit=limit),
     }
 
+    stock_futures_payload = load_stock_futures_page_data(
+        data,
+        stock_metrics,
+        futures_flags,
+        company_topics=company_topics,
+        market_indices={"taiex": taiex_series, "tpex": tpex_series},
+    )
+    print(
+        f"       ✓ 股期曝險資料：{len(stock_futures_payload.get('rows', []))} 筆"
+        f"（{stock_futures_payload.get('status', 'unknown')}，as_of={stock_futures_payload.get('as_of', '—')}）"
+    )
+
     # Index（每日焦點）
     total_groups = len(CONCEPT_GROUPS)
     listed_otc_symbols = get_listed_otc_symbols(stock_metrics, name_map, data["market_map"])
@@ -2545,6 +3006,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
 
     hot_topics = load_hot_topics(top_n=6)
     daily_chip_report = load_daily_chip_report()
+    memo_data = load_memos()
     index_html = env.get_template("index.html").render(
         **base_ctx,
         total_groups=total_groups,
@@ -2555,6 +3017,7 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         category_aggs=category_aggs,
         hot_topics=hot_topics,
         daily_chip_report=daily_chip_report,
+        memo_data=memo_data,
     )
     write_text_retry(DIST_DIR / "index.html", index_html)
 
@@ -2757,6 +3220,20 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         get_meta=get_meta,
     )
     write_text_retry(DIST_DIR / "ai.html", ai_html)
+
+    # 股期曝險頁（個人部位試算 + 股票期貨排行）
+    stock_futures_html = env.get_template("stock_futures.html").render(
+        **base_ctx,
+        stock_futures=stock_futures_payload,
+    )
+    write_text_retry(DIST_DIR / "stock-futures.html", stock_futures_html)
+
+    # 個股 Memo 公佈欄（獨立頁面）
+    memo_html = env.get_template("memo.html").render(
+        **base_ctx,
+        memo_data=load_memos(),
+    )
+    write_text_retry(DIST_DIR / "memo.html", memo_html)
 
     # 每個題材頁 + 快取 topic_series 供 compare 頁共用
     topic_dir = DIST_DIR / "topic"
@@ -3377,6 +3854,11 @@ def main():
 
     print("\n[0/5] 更新個股期貨清單（期交所，週更）...")
     refresh_futures_list()
+
+    print("\n[0/5] 更新股票期貨排行資料（公開資料，每日收盤）...")
+    print("       · 先拉 FinLab 近 1 年歷史「收盤價 + OI」（給 ranking OI 增減 fallback + 前端歷史價修正）...")
+    refresh_stock_futures_finlab_history()
+    refresh_stock_futures_ranking()
 
     print("\n[0b/5] 每日籌碼報告：等待主行情確認最新交易日...")
 

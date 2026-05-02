@@ -1927,6 +1927,17 @@ INDUSTRY_META = {
 }
 
 
+# 概念股／供應鏈題材：屬於跨產業的「主題包」，不是單一產業分類。
+# 用於股期儀表板等場景，需要過濾掉避免污染「族群分布」之類圖表。
+CONCEPT_STOCK_TOPICS = frozenset({
+    "CPU 概念股",
+    "輝達概念股",
+    "Google TPU",
+    "蘋果概念股",
+    "特斯拉概念股",
+})
+
+
 # Category 顏色（側邊導覽用）
 CATEGORY_COLORS = {
     "AI / 半導體":    "#ff7847",

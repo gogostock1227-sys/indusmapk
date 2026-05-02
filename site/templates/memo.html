@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% set page = "memo" %}
+{% block title %}個股 Memo 公佈欄 · 族群寶{% endblock %}
+
+{% block content %}
+
+<!-- 黑板公佈欄 -->
+<div class="chalk-board-wrap">
+  <div class="chalk-board">
+    <div class="chalk-board-inner">
+      <div class="chalk-board-title">個股 Memo</div>
+      <div class="chalk-board-sub">研究筆記 · 不定期更新</div>
+    </div>
+  </div>
+</div>
+
+<!-- 日期歷史選單 + 搜尋 -->
+<div class="memo-toolbar">
+  <div class="memo-date-bar" id="memo-date-bar">
+    <!-- JS 動態填入 -->
+  </div>
+  <div class="memo-search-wrap">
+    <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+    </svg>
+    <input type="text" id="memo-search" placeholder="搜尋股號、名稱或關鍵字…" autocomplete="off">
+  </div>
+</div>
+
+<!-- Memo 卡片列表 -->
+<div id="memo-board-list" class="memo-board-list" style="margin-top:20px;"></div>
+<p id="memo-empty-msg" class="memo-empty-msg" hidden>此日期無 memo 資料。</p>
+
+<script>
+(function () {
+  var FALLBACK = {{ memo_data | tojson }};
+  var ALL = [];
+  var activeDate = 'all';
+
+  function loadData() {
+    try {
+      var stored = localStorage.getItem('memo_board_data');
+      var local = stored ? JSON.parse(stored) : [];
+      ALL = (local && local.length) ? local : (FALLBACK || []);
+    } catch (e) {
+      ALL = FALLBACK || [];
+    }
+    ALL.forEach(function (m) {
+      m._k = [m.stock_id, m.stock_name, (m.tags || []).join(' '), m.title || '', m.content || ''].join(' ').toLowerCase();
+    });
+    ALL.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+  }
+
+  // ── 日期選單 ──
+  function buildDateBar() {
+    var bar = document.getElementById('memo-date-bar');
+    if (!bar) return;
+    var dates = [];
+    ALL.forEach(function (m) { if (m.date && dates.indexOf(m.date) < 0) dates.push(m.date); });
+    dates.sort(function (a, b) { return b.localeCompare(a); });
+
+    // 預設選最新日期
+    if (activeDate === 'all' && dates.length) activeDate = dates[0];
+
+    var html = '<button class="memo-date-chip' + (activeDate === 'all' ? ' active' : '') + '" data-date="all">全部</button>';
+    dates.forEach(function (d) {
+      html += '<button class="memo-date-chip' + (activeDate === d ? ' active' : '') + '" data-date="' + d + '">' + d + '</button>';
+    });
+    bar.innerHTML = html;
+
+    bar.addEventListener('click', function (e) {
+      var btn = e.target.closest('.memo-date-chip');
+      if (!btn) return;
+      activeDate = btn.getAttribute('data-date');
+      bar.querySelectorAll('.memo-date-chip').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      applyFilters();
+    });
+  }
+
+  // ── 過濾（日期 + 搜尋同時作用）──
+  function applyFilters() {
+    var q = (document.getElementById('memo-search').value || '').toLowerCase().trim();
+    var tokens = q ? q.split(/\s+/).filter(Boolean) : [];
+    var filtered = ALL.filter(function (m) {
+      var dateOk = (activeDate === 'all') || (m.date === activeDate);
+      var searchOk = !tokens.length || tokens.every(function (t) { return m._k.includes(t); });
+      return dateOk && searchOk;
+    });
+    render(filtered);
+  }
+
+  var list = document.getElementById('memo-board-list');
+  var emptyMsg = document.getElementById('memo-empty-msg');
+
+  function esc(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function render(memos) {
+    if (!memos.length) { list.innerHTML = ''; emptyMsg.hidden = false; return; }
+    emptyMsg.hidden = true;
+    var groups = {}, order = [];
+    memos.forEach(function (m) {
+      var d = m.date || '未標日期';
+      if (!groups[d]) { groups[d] = []; order.push(d); }
+      groups[d].push(m);
+    });
+    var html = [];
+    order.forEach(function (d) {
+      html.push('<div class="memo-date-group"><div class="memo-date-label">' + esc(d) + '</div><div class="memo-cards">');
+      groups[d].forEach(function (m, i) {
+        var id = 'mc-' + d.replace(/-/g, '') + '-' + i;
+        var href = 'company/' + esc(m.stock_id) + '.html';
+        html.push(
+          '<div class="memo-card" id="' + id + '">' +
+            '<div class="memo-card-header">' +
+              '<div class="memo-card-stock">' +
+                '<a href="' + href + '" class="memo-stock-id">' + esc(m.stock_id) + '</a>' +
+                '<span class="memo-stock-name">' + esc(m.stock_name) + '</span>' +
+              '</div>' +
+              '<button class="memo-toggle-btn" data-body="' + id + '-body" aria-expanded="false">' +
+                '<span>展開</span>' +
+                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+              '</button>' +
+            '</div>' +
+            '<div class="memo-card-title">' + esc(m.title) + '</div>' +
+            (m.tags && m.tags.length ? '<div class="memo-tags">' + m.tags.map(function (t) { return '<span class="memo-tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
+            '<div class="memo-card-body" id="' + id + '-body" hidden>' +
+              '<p class="memo-content">' + esc(m.content).replace(/\n/g, '<br>') + '</p>' +
+            '</div>' +
+          '</div>'
+        );
+      });
+      html.push('</div></div>');
+    });
+    list.innerHTML = html.join('');
+  }
+
+  list.addEventListener('click', function (e) {
+    var btn = e.target.closest('.memo-toggle-btn');
+    if (!btn) return;
+    var body = document.getElementById(btn.getAttribute('data-body'));
+    if (!body) return;
+    var open = btn.getAttribute('aria-expanded') === 'true';
+    body.hidden = open;
+    btn.setAttribute('aria-expanded', String(!open));
+    btn.querySelector('span').textContent = open ? '展開' : '收合';
+    btn.classList.toggle('is-open', !open);
+  });
+
+  var debounce;
+  document.getElementById('memo-search').addEventListener('input', function () {
+    clearTimeout(debounce);
+    debounce = setTimeout(applyFilters, 100);
+  });
+
+  loadData();
+  buildDateBar();
+  applyFilters();
+})();
+</script>
+{% endblock %}

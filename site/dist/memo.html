@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>個股 Memo 公佈欄 · 族群寶</title>
+<meta name="description" content="族群寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="static/logo.png">
+<link rel="apple-touch-icon" href="static/logo.png">
+<link rel="stylesheet" href="static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="static/logo.png" alt="族群寶 IndusMap">
+      <span class="logo-text">
+        <strong>族群寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="index.html" class="">首頁</a>
+      <a href="today.html" class="">今日焦點</a>
+      <a href="limit-up.html" class="">漲停分析</a>
+      <a href="topics.html" class="">題材列表</a>
+      <a href="heatmap.html" class="">產業地圖</a>
+      <a href="database.html" class="">公司資料庫</a>
+      <div class="nav-dropdown">
+        <a href="ai.html" class="nav-dropdown-toggle ">市場觀察</a>
+        <div class="nav-dropdown-menu">
+          <a href="ai.html" class="">AI 分析</a>
+          <a href="rs.html" class="">RS 評分</a>
+          <a href="rankings.html" class="">排行榜</a>
+          <a href="compare.html" class="">題材對比</a>
+        </div>
+      </div>
+      <a href="stock-futures.html" class="">股期儀表板</a>
+      <a href="memo.html" class="active">個股Memo</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+
+<!-- 黑板公佈欄 -->
+<div class="chalk-board-wrap">
+  <div class="chalk-board">
+    <div class="chalk-board-inner">
+      <div class="chalk-board-title">個股 Memo</div>
+      <div class="chalk-board-sub">研究筆記 · 不定期更新</div>
+    </div>
+  </div>
+</div>
+
+<!-- 日期歷史選單 + 搜尋 -->
+<div class="memo-toolbar">
+  <div class="memo-date-bar" id="memo-date-bar">
+    <!-- JS 動態填入 -->
+  </div>
+  <div class="memo-search-wrap">
+    <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+    </svg>
+    <input type="text" id="memo-search" placeholder="搜尋股號、名稱或關鍵字…" autocomplete="off">
+  </div>
+</div>
+
+<!-- Memo 卡片列表 -->
+<div id="memo-board-list" class="memo-board-list" style="margin-top:20px;"></div>
+<p id="memo-empty-msg" class="memo-empty-msg" hidden>此日期無 memo 資料。</p>
+
+<script>
+(function () {
+  var FALLBACK = [{"content": "\u7cbe\u6e2c\u6cd5\u8aaa\u63d0\u5230 TPU \u5c0d\u63a2\u91dd\u5361\u9700\u6c42\u7684\u5e36\u52d5\u76f8\u7576\u660e\u986f\uff0c\u82e5\u4e0d\u8a08 TPU\uff0cHPC \u63a2\u91dd\u5361\u5e02\u5834\u5230 2027 \u5e74\u6210\u9577\u5e45\u5ea6\u53ef\u80fd\u53ea\u6709\u5341\u591a\u8db4\uff0c\u4f46\u82e5\u52a0\u5165 TPU\uff0c\u6210\u9577\u5e45\u5ea6\u6709\u6a5f\u6703\u63d0\u9ad8\u5230\u4e09\u6210\u3002Google TPU \u7522\u503c\u5728 2026 \u5e74\u7d04 900 \u5104\u7f8e\u5143\uff0c2027 \u5e74\u53ef\u80fd\u63d0\u5347\u81f3 2,080 \u5104\u7f8e\u5143\uff0c\u986f\u793a TPU \u4f9b\u61c9\u93c8\u53ef\u80fd\u662f NVIDIA \u4e4b\u5916\uff0c\u672a\u4f86\u5169\u5e74\u6210\u9577\u6700\u5feb\u7684\u5340\u584a\u3002\u4e0d\u904e\u77ed\u7dda\u80a1\u50f9\u53cd\u61c9\u8f03\u5f31\uff0c\u4e3b\u56e0\u5e02\u5834\u50b3\u51fa Google TPU \u524d\u6bb5 CP \u63a2\u91dd\u5361\u53ef\u80fd\u90e8\u5206\u7531\u5176\u4ed6\u4f9b\u61c9\u5546\u53d6\u5f97\uff0c\u7cbe\u6e2c\u672a\u5fc5\u80fd\u62ff\u5230\u5168\u90e8\u589e\u91cf\uff1b\u4f46\u516c\u53f8\u5f8c\u6bb5\u8207\u5176\u4ed6\u6e2c\u8a66\u76f8\u95dc\u7522\u80fd\u4ecd\u4f9b\u4e0d\u61c9\u6c42\uff0c\u4e0b\u534a\u5e74\u8207 2028 \u5e74\u4e5f\u4ecd\u6709\u64f4\u7522\u8a08\u756b\uff0c\u56e0\u6b64\u9577\u7dda\u4ecd\u53ef\u6301\u7e8c\u8ffd\u8e64\u3002", "date": "2026-05-02", "stock_id": "6510", "stock_name": "\u7cbe\u6e2c", "tags": ["TPU", "\u63a2\u91dd\u5361", "\u6cd5\u8aaa"], "title": "\u6cd5\u8aaa\uff1aTPU \u5e36\u52d5\u63a2\u91dd\u5361\u9700\u6c42\uff0c\u9577\u7dda\u4ecd\u53ef\u8ffd\u8e64"}, {"content": "\u96cd\u667a\u88ab\u8a0e\u8ad6\u7684\u6838\u5fc3\u5728\u65bc Google TPU \u524d\u6bb5 CP \u63a2\u91dd\u5361\u53ef\u80fd\u51fa\u73fe\u4f9b\u61c9\u93c8\u8f49\u79fb\u3002TPU \u67d0\u9846\u6676\u7247\u53ef\u80fd\u6709\u56db\u500b\u63a2\u91dd\u5361\u7248\u578b\uff0c\u5176\u4e2d\u4e09\u500b\u53ef\u80fd\u7531\u96cd\u667a\u8207\u570b\u969b\u5ee0\u62ff\u4e0b\uff0c\u53e6\u4e00\u500b\u5247\u7531\u65fa\u77fd\u4f9b\u61c9\u3002\u82e5\u4ee5 2028 \u5e74\u7d04 600 \u842c\u9846 TPU\u3001\u6bcf\u9846\u63a2\u91dd\u5361\u7d04 300 \u5957\u3001\u55ae\u5957\u50f9\u683c\u7d04 1,000 \u842c\u5143\u53f0\u5e63\u4f30\u7b97\uff0c\u96cd\u667a\u5728 CP \u63a2\u91dd\u5361\u71df\u6536\u8ca2\u737b\u7406\u8ad6\u4e0a\u53ef\u80fd\u9054\u5230\u76f8\u7576\u5927\u7684\u898f\u6a21\u3002\u4e0d\u904e\u6700\u5927\u554f\u984c\u5728 PCB \u7522\u80fd\u662f\u5426\u8db3\u4ee5\u627f\u63a5\uff0c\u4e14\u516c\u53f8\u672c\u8eab\u672a\u5fc5\u6703\u660e\u78ba\u56de\u61c9\u7d30\u7bc0\uff0c\u56e0\u6b64\u80a1\u50f9\u6703\u504f\u5411\u6d88\u606f\u8207\u9810\u671f\u9a45\u52d5\u3002\u82e5\u5e02\u5834\u771f\u7684\u4e0a\u4fee\u5230 80 \u81f3 100 \u5143 EPS\uff0c\u8a55\u50f9\u7a7a\u9593\u4ecd\u5927\uff0c\u4f46\u9700\u518d\u78ba\u8a8d\u4f9b\u61c9\u93c8\u7d30\u7bc0\u8207\u7522\u80fd\u74f6\u9838\u3002", "date": "2026-05-02", "stock_id": "6683", "stock_name": "\u96cd\u667a\u79d1\u6280", "tags": ["Google TPU", "CP\u63a2\u91dd\u5361", "\u4f9b\u61c9\u93c8\u8f49\u79fb"], "title": "Google TPU CP \u63a2\u91dd\u5361\u4f9b\u61c9\u93c8\u8f49\u79fb\u8a0e\u8ad6\uff0cEPS \u4e0a\u4fee\u7a7a\u9593\u5927"}];
+  var ALL = [];
+  var activeDate = 'all';
+
+  function loadData() {
+    try {
+      var stored = localStorage.getItem('memo_board_data');
+      var local = stored ? JSON.parse(stored) : [];
+      ALL = (local && local.length) ? local : (FALLBACK || []);
+    } catch (e) {
+      ALL = FALLBACK || [];
+    }
+    ALL.forEach(function (m) {
+      m._k = [m.stock_id, m.stock_name, (m.tags || []).join(' '), m.title || '', m.content || ''].join(' ').toLowerCase();
+    });
+    ALL.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+  }
+
+  // ── 日期選單 ──
+  function buildDateBar() {
+    var bar = document.getElementById('memo-date-bar');
+    if (!bar) return;
+    var dates = [];
+    ALL.forEach(function (m) { if (m.date && dates.indexOf(m.date) < 0) dates.push(m.date); });
+    dates.sort(function (a, b) { return b.localeCompare(a); });
+
+    // 預設選最新日期
+    if (activeDate === 'all' && dates.length) activeDate = dates[0];
+
+    var html = '<button class="memo-date-chip' + (activeDate === 'all' ? ' active' : '') + '" data-date="all">全部</button>';
+    dates.forEach(function (d) {
+      html += '<button class="memo-date-chip' + (activeDate === d ? ' active' : '') + '" data-date="' + d + '">' + d + '</button>';
+    });
+    bar.innerHTML = html;
+
+    bar.addEventListener('click', function (e) {
+      var btn = e.target.closest('.memo-date-chip');
+      if (!btn) return;
+      activeDate = btn.getAttribute('data-date');
+      bar.querySelectorAll('.memo-date-chip').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      applyFilters();
+    });
+  }
+
+  // ── 過濾（日期 + 搜尋同時作用）──
+  function applyFilters() {
+    var q = (document.getElementById('memo-search').value || '').toLowerCase().trim();
+    var tokens = q ? q.split(/\s+/).filter(Boolean) : [];
+    var filtered = ALL.filter(function (m) {
+      var dateOk = (activeDate === 'all') || (m.date === activeDate);
+      var searchOk = !tokens.length || tokens.every(function (t) { return m._k.includes(t); });
+      return dateOk && searchOk;
+    });
+    render(filtered);
+  }
+
+  var list = document.getElementById('memo-board-list');
+  var emptyMsg = document.getElementById('memo-empty-msg');
+
+  function esc(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function render(memos) {
+    if (!memos.length) { list.innerHTML = ''; emptyMsg.hidden = false; return; }
+    emptyMsg.hidden = true;
+    var groups = {}, order = [];
+    memos.forEach(function (m) {
+      var d = m.date || '未標日期';
+      if (!groups[d]) { groups[d] = []; order.push(d); }
+      groups[d].push(m);
+    });
+    var html = [];
+    order.forEach(function (d) {
+      html.push('<div class="memo-date-group"><div class="memo-date-label">' + esc(d) + '</div><div class="memo-cards">');
+      groups[d].forEach(function (m, i) {
+        var id = 'mc-' + d.replace(/-/g, '') + '-' + i;
+        var href = 'company/' + esc(m.stock_id) + '.html';
+        html.push(
+          '<div class="memo-card" id="' + id + '">' +
+            '<div class="memo-card-header">' +
+              '<div class="memo-card-stock">' +
+                '<a href="' + href + '" class="memo-stock-id">' + esc(m.stock_id) + '</a>' +
+                '<span class="memo-stock-name">' + esc(m.stock_name) + '</span>' +
+              '</div>' +
+              '<button class="memo-toggle-btn" data-body="' + id + '-body" aria-expanded="false">' +
+                '<span>展開</span>' +
+                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+              '</button>' +
+            '</div>' +
+            '<div class="memo-card-title">' + esc(m.title) + '</div>' +
+            (m.tags && m.tags.length ? '<div class="memo-tags">' + m.tags.map(function (t) { return '<span class="memo-tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
+            '<div class="memo-card-body" id="' + id + '-body" hidden>' +
+              '<p class="memo-content">' + esc(m.content).replace(/\n/g, '<br>') + '</p>' +
+            '</div>' +
+          '</div>'
+        );
+      });
+      html.push('</div></div>');
+    });
+    list.innerHTML = html.join('');
+  }
+
+  list.addEventListener('click', function (e) {
+    var btn = e.target.closest('.memo-toggle-btn');
+    if (!btn) return;
+    var body = document.getElementById(btn.getAttribute('data-body'));
+    if (!body) return;
+    var open = btn.getAttribute('aria-expanded') === 'true';
+    body.hidden = open;
+    btn.setAttribute('aria-expanded', String(!open));
+    btn.querySelector('span').textContent = open ? '展開' : '收合';
+    btn.classList.toggle('is-open', !open);
+  });
+
+  var debounce;
+  document.getElementById('memo-search').addEventListener('input', function () {
+    clearTimeout(debounce);
+    debounce = setTimeout(applyFilters, 100);
+  });
+
+  loadData();
+  buildDateBar();
+  applyFilters();
+})();
+</script>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 族群寶 · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-30</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "";
+</script>
+<script src="data/search-data.js" defer></script>
+<script src="static/app.js" defer></script>
+
+</body>
+</html>

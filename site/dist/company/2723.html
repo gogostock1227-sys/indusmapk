@@ -30,12 +30,19 @@
       <a href="../today.html" class="">今日焦點</a>
       <a href="../limit-up.html" class="">漲停分析</a>
       <a href="../topics.html" class="">題材列表</a>
-      <a href="../compare.html" class="">題材對比</a>
-      <a href="../rankings.html" class="">排行榜</a>
-      <a href="../rs.html" class="">RS 評分</a>
       <a href="../heatmap.html" class="">產業地圖</a>
       <a href="../database.html" class="active">公司資料庫</a>
-      <a href="../ai.html" class="">市場觀察</a>
+      <div class="nav-dropdown">
+        <a href="../ai.html" class="nav-dropdown-toggle ">市場觀察</a>
+        <div class="nav-dropdown-menu">
+          <a href="../ai.html" class="">AI 分析</a>
+          <a href="../rs.html" class="">RS 評分</a>
+          <a href="../rankings.html" class="">排行榜</a>
+          <a href="../compare.html" class="">題材對比</a>
+        </div>
+      </div>
+      <a href="../stock-futures.html" class="">股期儀表板</a>
+      <a href="../memo.html" class="">個股Memo</a>
     </nav>
 
     <div class="search-box">
@@ -1222,16 +1229,21 @@
       const el = document.getElementById('chip_inst_chart_'+sym);
       const ch = echarts.init(el, 'dark', { renderer: 'canvas' });
       const series = [];
-      const instBar = (name, data, color, z) => ({
+      // 外資最大 → z=1 最後面；自營商最小 → z=3 最前面，寬度也由寬到窄讓三條都能露出
+      const instBar = (name, data, color, z, maxWidth) => ({
         name, type:'bar', data,
-        barGap:'-100%', barCategoryGap:'46%', barMaxWidth:18,
-        itemStyle:{ color, opacity:0.76, borderRadius:[2,2,0,0] },
-        emphasis:{ focus:'series', itemStyle:{ opacity:0.96 } },
+        barGap:'-100%', barCategoryGap:'38%', barMaxWidth: maxWidth,
+        itemStyle:{
+          color, opacity:0.92,
+          borderColor:'rgba(0,0,0,0.55)', borderWidth:1,
+          borderRadius:[2,2,0,0]
+        },
+        emphasis:{ focus:'series', itemStyle:{ opacity:1, borderWidth:1.5 } },
         z
       });
-      if (chip.foreign_net) series.push(instBar('外資', chip.foreign_net, '#10b981', 3));
-      if (chip.trust_net)   series.push(instBar('投信', chip.trust_net,   '#ff7847', 2));
-      if (chip.dealer_net)  series.push(instBar('自營商', chip.dealer_net,'#f472b6', 1));
+      if (chip.foreign_net) series.push(instBar('外資',   chip.foreign_net, '#10b981', 1, 20));
+      if (chip.trust_net)   series.push(instBar('投信',   chip.trust_net,   '#ff7847', 2, 20));
+      if (chip.dealer_net)  series.push(instBar('自營商', chip.dealer_net,  '#a855f7', 3, 20));
       ch.setOption({
         backgroundColor:'transparent', animation:false,
         legend:{ data:['外資','投信','自營商'], top:0, textStyle:{color:'#9ca3af'} },

@@ -134,4 +134,22 @@
       if (first) first.focus();
     }
   });
+
+  // Nav dropdown（position:fixed 繞過 overflow 截斷，JS 計算座標）
+  document.querySelectorAll('.nav-dropdown').forEach(wrapper => {
+    const menu = wrapper.querySelector('.nav-dropdown-menu');
+    if (!menu) return;
+    let timer;
+    function showMenu() {
+      clearTimeout(timer);
+      const r = wrapper.getBoundingClientRect();
+      menu.style.top = (r.bottom + 2) + 'px';
+      menu.style.left = r.left + 'px';
+      menu.style.display = 'block';
+    }
+    wrapper.addEventListener('mouseenter', showMenu);
+    wrapper.addEventListener('mouseleave', () => { timer = setTimeout(() => { menu.style.display = ''; }, 120); });
+    menu.addEventListener('mouseenter', () => clearTimeout(timer));
+    menu.addEventListener('mouseleave', () => { timer = setTimeout(() => { menu.style.display = ''; }, 120); });
+  });
 })();

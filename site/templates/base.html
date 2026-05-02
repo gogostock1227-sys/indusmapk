@@ -30,12 +30,19 @@
       <a href="{{ static_prefix|default('') }}today.html" class="{% if page=='today' %}active{% endif %}">今日焦點</a>
       {% if has_limit_up %}<a href="{{ static_prefix|default('') }}limit-up.html" class="{% if page=='limit_up' or page=='limit_up_stats' %}active{% endif %}">漲停分析</a>{% endif %}
       <a href="{{ static_prefix|default('') }}topics.html" class="{% if page=='topics' %}active{% endif %}">題材列表</a>
-      <a href="{{ static_prefix|default('') }}compare.html" class="{% if page=='compare' %}active{% endif %}">題材對比</a>
-      <a href="{{ static_prefix|default('') }}rankings.html" class="{% if page=='rankings' %}active{% endif %}">排行榜</a>
-      <a href="{{ static_prefix|default('') }}rs.html" class="{% if page=='rs' %}active{% endif %}">RS 評分</a>
       <a href="{{ static_prefix|default('') }}heatmap.html" class="{% if page=='heatmap' %}active{% endif %}">產業地圖</a>
       <a href="{{ static_prefix|default('') }}database.html" class="{% if page=='database' %}active{% endif %}">公司資料庫</a>
-      <a href="{{ static_prefix|default('') }}ai.html" class="{% if page=='ai' %}active{% endif %}">市場觀察</a>
+      <div class="nav-dropdown">
+        <a href="{{ static_prefix|default('') }}ai.html" class="nav-dropdown-toggle {% if page in ['ai','rs','rankings','compare'] %}active{% endif %}">市場觀察</a>
+        <div class="nav-dropdown-menu">
+          <a href="{{ static_prefix|default('') }}ai.html" class="{% if page=='ai' %}active{% endif %}">AI 分析</a>
+          <a href="{{ static_prefix|default('') }}rs.html" class="{% if page=='rs' %}active{% endif %}">RS 評分</a>
+          <a href="{{ static_prefix|default('') }}rankings.html" class="{% if page=='rankings' %}active{% endif %}">排行榜</a>
+          <a href="{{ static_prefix|default('') }}compare.html" class="{% if page=='compare' %}active{% endif %}">題材對比</a>
+        </div>
+      </div>
+      <a href="{{ static_prefix|default('') }}stock-futures.html" class="{% if page=='stock_futures' %}active{% endif %}">股期儀表板</a>
+      <a href="{{ static_prefix|default('') }}memo.html" class="{% if page=='memo' %}active{% endif %}">個股Memo</a>
     </nav>
 
     <div class="search-box">

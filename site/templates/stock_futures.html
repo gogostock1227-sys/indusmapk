@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+{% set page = "stock_futures" %}
+{% block title %}股期儀表板 · 族群寶{% endblock %}
+
+{% block content %}
+<section class="hero sf-hero">
+  <h1>股期儀表板 <small>{{ stock_futures.as_of }}</small></h1>
+  <p>股票期貨部位試算、保證金槓桿、歷史明細與公開資料排行。個人部位只保存在本機瀏覽器，排行資料以期交所公開資料與站內收盤價計算。</p>
+</section>
+
+<div class="filter-bar sf-tabs" id="sf-tabs">
+  <button class="filter-chip active" data-tab="positions">部位總覽</button>
+  <button class="filter-chip" data-tab="ranking">股期排行</button>
+  <button class="filter-chip" data-tab="portfolio">檢視部位</button>
+  <button class="filter-chip" data-tab="sources">資料說明</button>
+</div>
+
+<section class="sf-tab-body" data-body="positions">
+  <div class="sf-workbench">
+    <aside class="panel sf-summary">
+      <div class="panel-header">
+        <h2>部位總覽</h2>
+        <span class="muted" id="sf-position-count">0 筆</span>
+      </div>
+      <div class="sf-account-row">
+        <label for="sf-account-equity">帳戶權益數</label>
+        <input id="sf-account-equity" type="number" min="0" step="1000" placeholder="自行輸入">
+      </div>
+      <div class="sf-kpi-grid">
+        <div class="sf-kpi"><span>總多方曝險</span><strong id="sf-total-long">—</strong></div>
+        <div class="sf-kpi"><span>總空方曝險</span><strong id="sf-total-short">—</strong></div>
+        <div class="sf-kpi"><span>總曝險</span><strong id="sf-gross-exposure">—</strong></div>
+        <div class="sf-kpi"><span>淨曝險</span><strong id="sf-net-exposure">—</strong></div>
+        <div class="sf-kpi"><span>總保證金</span><strong id="sf-total-margin">—</strong></div>
+        <div class="sf-kpi"><span>保證金使用率</span><strong id="sf-margin-usage">—</strong></div>
+        <div class="sf-kpi"><span>保證金槓桿</span><strong id="sf-margin-leverage">—</strong></div>
+        <div class="sf-kpi"><span>權益槓桿</span><strong id="sf-equity-leverage">—</strong></div>
+      </div>
+    </aside>
+
+    <section class="panel sf-builder">
+      <div class="panel-header">
+        <h2>建立資料</h2>
+        <span class="muted">商品 / 方向 / 口數</span>
+      </div>
+      <div class="sf-form-grid">
+        <label class="sf-field sf-field-wide">
+          <span>商品或股號</span>
+          <input id="sf-product-query" type="text" list="sf-product-list" placeholder="例：2330、台積電、台指、TX">
+          <datalist id="sf-product-list">
+            {% for r in stock_futures.selectable_products|default(stock_futures.rows) %}
+            <option value="{{ r.underlying_symbol }} {{ r.product_name }}{% if r.product_code %} {{ r.product_code }}{% endif %}"></option>
+            {% endfor %}
+          </datalist>
+        </label>
+        <label class="sf-field">
+          <span>方向</span>
+          <select id="sf-direction">
+            <option value="long">買進(多)</option>
+            <option value="short">賣出(空)</option>
+          </select>
+        </label>
+        <label class="sf-field">
+          <span>目標曝險</span>
+          <input id="sf-target-exposure" type="number" step="1000" placeholder="可空白">
+        </label>
+        <label class="sf-field">
+          <span>手動口數</span>
+          <input id="sf-manual-lots" type="number" min="0" step="1" placeholder="優先採用">
+        </label>
+        <label class="sf-field">
+          <span>持倉價格</span>
+          <input id="sf-holding-price" type="number" min="0" step="0.01" placeholder="開倉成本價">
+        </label>
+        <label class="sf-field sf-field-wide">
+          <span>備註</span>
+          <input id="sf-note" type="text" placeholder="策略、帳戶或風控備註">
+        </label>
+        <button type="button" class="sf-add-btn" id="sf-add-position">加入部位</button>
+      </div>
+      <div class="sf-match-list" id="sf-product-matches" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <section class="panel sf-actions-panel">
+    <div class="panel-header">
+      <h2>修改與備份</h2>
+      <span class="muted" id="sf-storage-status">本機保存</span>
+    </div>
+    <div class="sf-action-grid">
+      <button type="button" class="sf-add-btn" id="sf-save-today">儲存今日快照</button>
+      <label class="sf-field sf-date-field">
+        <span>補登舊日期</span>
+        <input id="sf-backfill-date" type="date">
+      </label>
+      <button type="button" class="sf-text-btn sf-action-strong" id="sf-save-backfill">舊日期新增/覆蓋</button>
+      <button type="button" class="sf-text-btn" id="sf-open-historic-price">填入歷史價...</button>
+      <button type="button" class="sf-text-btn" id="sf-export-json">匯出完整 JSON</button>
+      <button type="button" class="sf-text-btn" id="sf-export-xlsx">匯出 Excel 歷史明細 XLSX</button>
+      <button type="button" class="sf-text-btn" id="sf-import-trigger">匯入 JSON/XLSX</button>
+      <input id="sf-import-file" type="file" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+    </div>
+
+    <div class="sf-historic-panel" id="sf-historic-panel" hidden>
+      <div class="sf-historic-panel__head">
+        <strong>歷史期貨價補登 — <span id="sf-historic-date">—</span></strong>
+        <span class="muted">站台只有最新收盤價，補登舊日期時系統會用今天的價格回算曝險。請填入該日各商品的實際收盤價，系統會以此重算當日快照，避免歷史資料失真。</span>
+      </div>
+      <div class="table-scroll">
+        <table class="table compact sf-table" id="sf-historic-price-table">
+          <thead>
+            <tr>
+              <th>商品</th>
+              <th>方向</th>
+              <th>口數</th>
+              <th>當前價（站台）</th>
+              <th>持倉成本</th>
+              <th>該日期貨收盤價</th>
+              <th>名目曝險</th>
+              <th>未實現損益</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="sf-historic-panel__actions">
+        <button type="button" class="sf-text-btn" id="sf-historic-cancel">取消</button>
+        <button type="button" class="sf-add-btn" id="sf-historic-save">以歷史價儲存快照</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>我的部位</h2>
+      <button type="button" class="sf-text-btn" id="sf-clear-positions">清空</button>
+    </div>
+    <div class="table-scroll sf-position-scroll">
+      <table class="table compact sf-table" id="sf-position-table">
+        <thead>
+          <tr>
+            <th>商品</th><th>方向</th><th>目標曝險</th><th>手動口數</th><th>建議口數</th><th>使用口數</th>
+            <th>期貨市價</th><th>持倉價格</th><th>未實現損益</th><th>損益%</th>
+            <th>契約乘數</th><th>單口保證金</th><th>總保證金</th><th>名目曝險</th>
+            <th>淨曝險</th><th>單筆槓桿</th><th>價格變動 1% 損益</th><th>成交量</th><th>未平倉 OI</th>
+            <th>資料時間</th><th>備註</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+<section class="sf-tab-body" data-body="ranking" hidden>
+  <section class="panel">
+    <div class="panel-header">
+      <h2>股期排行</h2>
+      <span class="muted" id="sf-rank-count">{{ stock_futures.rows|length }} 筆</span>
+    </div>
+    <div class="sf-rank-toolbar">
+      <div class="sf-tb-group">
+        <div class="sf-tb-group__title">搜尋與排序</div>
+        <div class="sf-tb-fields sf-tb-fields--search">
+          <label class="sf-tb-field sf-tb-field--grow">
+            <span class="sf-tb-label">搜尋商品</span>
+            <input id="sf-rank-search" type="text" placeholder="輸入股號、代碼或商品名稱">
+          </label>
+          <label class="sf-tb-field">
+            <span class="sf-tb-label">商品類型</span>
+            <select id="sf-rank-type">
+              <option value="">全部類型</option>
+              <option value="stock">個股期貨</option>
+              <option value="mini_stock">小型個股期貨</option>
+              <option value="etf">ETF 期貨</option>
+              <option value="mini_etf">小型 ETF 期貨</option>
+            </select>
+          </label>
+          <label class="sf-tb-field">
+            <span class="sf-tb-label">排行依據</span>
+            <select id="sf-rank-sort">
+              <option value="volume">成交量</option>
+              <option value="open_interest">未平倉</option>
+              <option value="open_interest_change">OI 增減</option>
+              <option value="leverage">槓桿倍數</option>
+              <option value="initial_margin">原始保證金</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="sf-tb-group">
+        <div class="sf-tb-group__title">數值門檻 <span class="sf-tb-group__hint">留空表示不限</span></div>
+        <div class="sf-tb-fields sf-tb-fields--threshold">
+          <label class="sf-tb-field">
+            <span class="sf-tb-label">成交量 ≥</span>
+            <input id="sf-volume-min" type="number" min="0" placeholder="例：10000">
+          </label>
+          <label class="sf-tb-field">
+            <span class="sf-tb-label">未平倉 OI ≥</span>
+            <input id="sf-oi-min" type="number" min="0" placeholder="例：500">
+          </label>
+          <label class="sf-tb-field">
+            <span class="sf-tb-label">原始保證金 ≤</span>
+            <input id="sf-margin-max" type="number" min="0" placeholder="例：50000">
+          </label>
+          <label class="sf-tb-field">
+            <span class="sf-tb-label">槓桿倍數 ≥</span>
+            <input id="sf-leverage-min" type="number" min="0" step="0.1" placeholder="例：5">
+          </label>
+        </div>
+      </div>
+
+      <div class="sf-tb-group">
+        <div class="sf-tb-group__title">進階篩選 <span class="sf-tb-group__hint">針對單一欄位做條件比對</span></div>
+        <div class="sf-tb-fields sf-tb-fields--advanced">
+          <label class="sf-tb-field">
+            <span class="sf-tb-label">欄位</span>
+            <select id="sf-filter-field">
+              <option value="">— 不啟用 —</option>
+              <option value="product_name">期貨近月</option>
+              <option value="future_price">成交價</option>
+              <option value="change">漲跌</option>
+              <option value="change_pct">漲跌幅</option>
+              <option value="volume">成交量</option>
+              <option value="avg_volume_20d">20日均量</option>
+              <option value="amplitude">振幅</option>
+              <option value="open_interest">未平倉</option>
+              <option value="open_interest_change">OI 增減</option>
+              <option value="underlying_symbol">現貨標的</option>
+              <option value="spot_price">現貨價格</option>
+              <option value="basis">期現價差</option>
+              <option value="initial_margin">原始保證金</option>
+              <option value="contract_multiplier">契約乘數</option>
+              <option value="leverage">槓桿倍數</option>
+            </select>
+          </label>
+          <label class="sf-tb-field">
+            <span class="sf-tb-label">條件</span>
+            <select id="sf-filter-op">
+              <option value="contains">包含</option>
+              <option value="eq">等於</option>
+              <option value="gte">大於等於</option>
+              <option value="lte">小於等於</option>
+            </select>
+          </label>
+          <label class="sf-tb-field sf-tb-field--grow">
+            <span class="sf-tb-label">值</span>
+            <input id="sf-filter-value" type="text" placeholder="輸入比對值">
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="table-scroll sf-ranking-scroll">
+      <table class="table compact sf-table sf-sortable-table" id="sf-ranking-table">
+        <thead>
+          <tr>
+            <th data-sort="product_name">期貨近月</th>
+            <th data-sort="future_price">成交價</th>
+            <th data-sort="change">漲跌</th>
+            <th data-sort="change_pct">漲跌幅</th>
+            <th data-sort="volume">成交量</th>
+            <th data-sort="avg_volume_20d">20日均量</th>
+            <th data-sort="amplitude">振幅</th>
+            <th data-sort="open_interest">未平倉</th>
+            <th data-sort="open_interest_change">OI 增減</th>
+            <th data-sort="underlying_symbol">現貨標的</th>
+            <th data-sort="spot_price">現貨價格</th>
+            <th data-sort="basis">期現價差</th>
+            <th data-sort="initial_margin">原始保證金</th>
+            <th data-sort="contract_multiplier">契約乘數</th>
+            <th data-sort="leverage">槓桿倍數</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+<section class="sf-tab-body" data-body="portfolio" hidden>
+  <div class="sf-portfolio-shell">
+    <header class="sf-portfolio-header">
+      <div class="sf-portfolio-header__title">
+        <div class="sf-portfolio-header__title-row">
+          <h2>檢視部位</h2>
+          <span class="sf-portfolio-header__tag">PORTFOLIO MONITOR</span>
+        </div>
+        <div class="sf-portfolio-header__sub" id="sf-portfolio-summary">股票期貨 · 即時試算 · 0 檔持倉</div>
+      </div>
+      <div class="sf-portfolio-actions">
+        <div class="sf-portfolio-metric" role="tablist" aria-label="指標切換">
+          <span class="sf-portfolio-metric__label">指標</span>
+          <button type="button" data-metric="notional">名目曝險</button>
+          <button type="button" data-metric="margin">保證金</button>
+          <button type="button" data-metric="lots">口數</button>
+        </div>
+        <span class="sf-pulse-dot" aria-hidden="true"></span>
+        <span class="sf-portfolio-live" id="sf-portfolio-live">LIVE · —</span>
+      </div>
+    </header>
+
+    <div class="sf-kpi-rail" id="sf-kpi-rail" aria-label="關鍵指標"></div>
+
+    <section class="sf-card">
+      <span class="sf-card__sweep" style="background: linear-gradient(90deg, transparent, var(--sfA-navy), transparent);"></span>
+      <div class="sf-card__head">
+        <div class="sf-card__title">指標歷史 vs 大盤</div>
+        <div class="sf-card__legend" id="sf-leverage-legend">
+          <span><span style="color: var(--sfA-navy);">━</span> 保證金槓桿</span>
+          <span><span style="color: var(--sfA-gold);">┄</span> 加權指數</span>
+        </div>
+      </div>
+      <div class="sf-trend-toggles" id="sf-trend-toggles"></div>
+      <div class="sf-chart-wrap">
+        <div class="sf-yaxis sf-yaxis-left" id="sf-leverage-yaxis-left"></div>
+        <div class="sf-chart-inner">
+          <div id="sf-leverage-trend" class="sf-leverage-chart"></div>
+          <div class="sf-leverage-axis" id="sf-leverage-axis"><span>—</span><span>—</span><span>—</span><span>—</span></div>
+        </div>
+        <div class="sf-yaxis sf-yaxis-right" id="sf-leverage-yaxis-right"></div>
+      </div>
+    </section>
+
+    <div class="sf-portfolio-mid">
+      <section class="sf-card">
+        <span class="sf-card__sweep" style="background: linear-gradient(90deg, transparent, var(--sfA-navy), transparent);"></span>
+        <div class="sf-card__head">
+          <div class="sf-card__title">槓桿錶</div>
+          <div class="sf-card__sub">LEVERAGE</div>
+        </div>
+        <div class="sf-gauge-grid">
+          <div class="sf-gauge"><div id="sf-gauge-equity"></div><div class="sf-gauge__label">權益槓桿</div></div>
+          <div class="sf-gauge"><div id="sf-gauge-margin"></div><div class="sf-gauge__label">保證金槓桿</div></div>
+        </div>
+      </section>
+
+      <section class="sf-card">
+        <span class="sf-card__sweep" style="background: linear-gradient(90deg, transparent, var(--sfA-gold), transparent);"></span>
+        <div class="sf-card__head">
+          <div class="sf-card__title">族群分布 <span class="sf-card__chip sf-card__chip--accent" id="sf-flow-metric-chip">依 名目曝險</span></div>
+          <div class="sf-card__sub" id="sf-flow-metric-sub">SECTOR · NOTIONAL</div>
+        </div>
+        <div class="sf-flowbar" id="sf-flowbar"></div>
+        <div class="sf-flow-legend" id="sf-flow-legend"></div>
+        <div class="sf-flow-stats">
+          <div class="sf-flow-stats__item">
+            <label>多空比</label>
+            <strong id="sf-stats-ls">—</strong>
+          </div>
+          <div class="sf-flow-stats__item">
+            <label>VaR (95%)</label>
+            <strong id="sf-stats-var">—</strong>
+          </div>
+          <div class="sf-flow-stats__item">
+            <label>未實現損益</label>
+            <strong id="sf-stats-pnl">—</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="sf-portfolio-bottom">
+      <section class="sf-card">
+        <span class="sf-card__sweep" style="background: linear-gradient(90deg, transparent, var(--sfA-navy), transparent);"></span>
+        <div class="sf-card__head">
+          <div class="sf-card__title">個股部位占比 <span class="sf-card__chip sf-card__chip--accent" id="sf-donut-metric-chip">依 名目曝險</span> <span class="sf-card__chip" id="sf-donut-count">0 檔</span></div>
+          <div class="sf-card__sub">POSITION ALLOCATION</div>
+        </div>
+        <div class="sf-donut-wrap">
+          <div class="sf-donut" id="sf-donut" style="position: relative;"></div>
+          <div class="sf-donut__legend" id="sf-donut-legend"></div>
+        </div>
+      </section>
+
+      <section class="sf-card">
+        <span class="sf-card__sweep sf-card__sweep--delay" style="background: linear-gradient(90deg, transparent, var(--sfA-gold), transparent);"></span>
+        <div class="sf-card__head">
+          <div class="sf-card__title">帳戶資金水位</div>
+          <div class="sf-card__sub">LIQUIDITY</div>
+        </div>
+        <div class="sf-liquid-list" id="sf-liquid-list"></div>
+        <div class="sf-liquid-foot">
+          <div class="sf-liquid-foot__item" id="sf-margin-call-wrap">
+            <label>追繳警戒</label>
+            <strong id="sf-margin-call">—</strong>
+          </div>
+          <div class="sf-liquid-foot__item">
+            <label>可加碼空間</label>
+            <strong id="sf-add-room">—</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="sf-card">
+      <span class="sf-card__sweep" style="background: linear-gradient(90deg, transparent, var(--sfA-up), transparent);"></span>
+      <div class="sf-card__head">
+        <div class="sf-card__title">持倉族群熱力 <span class="sf-card__chip sf-card__chip--accent" id="sf-tree-metric-chip">面積：名目曝險</span> <span class="sf-card__chip">顏色：當日績效</span></div>
+        <div class="sf-card__sub">SECTOR HEATMAP</div>
+      </div>
+      <div id="sf-treemap"></div>
+      <div class="sf-treemap-legend">
+        <span>績效色階</span>
+        <div class="sf-treemap-legend__bar"></div>
+        <span style="color: var(--sfA-down);">-2%</span>
+        <span>0</span>
+        <span style="color: var(--sfA-up);">+2%</span>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>歷史明細</h2>
+      <span class="muted" id="sf-snapshot-count">0 筆</span>
+      <button type="button" class="sf-text-btn sf-action-strong" id="sf-historic-correct-btn">以歷史價修正全部</button>
+      <button type="button" class="sf-text-btn sf-action-danger" id="sf-clear-snapshots-btn">清空快照</button>
+    </div>
+    <div class="table-scroll sf-snapshot-scroll">
+      <table class="table compact sf-table" id="sf-snapshot-table">
+        <thead>
+          <tr>
+            <th>日期</th><th>帳戶權益</th><th>總曝險</th><th>淨曝險</th><th>總保證金</th>
+            <th>保證金槓桿</th><th>權益槓桿</th><th>未實現損益</th><th>持倉數</th><th>資料來源</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+<section class="sf-tab-body" data-body="sources" hidden>
+  <section class="panel sf-notes-panel">
+    <div class="panel-header"><h2>資料說明</h2><span class="muted">每日收盤版</span></div>
+    <div class="sf-notes-grid">
+      <div>
+        <h3>資料來源</h3>
+        <ul class="notes">
+          <li>期貨行情：期交所政府開放資料「期貨每日交易行情」。</li>
+          <li>商品清單：期交所「股票期貨/股票選擇權交易標的」。</li>
+          <li>保證金：期交所「股票類保證金一覽表」與「股價指數類保證金一覽表」。</li>
+          <li>現貨價格、族群、大盤指數：站內每日收盤資料。</li>
+        </ul>
+      </div>
+      <div>
+        <h3>計算公式</h3>
+        <ul class="notes">
+          <li>名目金額 = 期貨成交價 × 契約乘數。</li>
+          <li>保證金槓桿 = 總曝險 ÷ 總保證金。</li>
+          <li>權益槓桿 = 總曝險 ÷ 帳戶權益數。</li>
+          <li>部位圓餅圖 = 各標的絕對名目曝險 ÷ 全部持倉絕對名目曝險。</li>
+          <li>大盤對比槓桿圖的大盤線使用加權指數與櫃買指數原始點位，不轉成報酬率。</li>
+          <li>舊日期補登保存的是目前畫面上的部位與總覽，不自動回推當日歷史價格。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sf-source-links">
+      <a href="{{ stock_futures.source.daily_market }}" target="_blank" rel="noopener">期貨每日交易行情</a>
+      <a href="{{ stock_futures.source.stock_lists }}" target="_blank" rel="noopener">交易標的</a>
+      <a href="{{ stock_futures.source.margining }}" target="_blank" rel="noopener">保證金</a>
+      <a href="{{ stock_futures.source.index_margining }}" target="_blank" rel="noopener">指數類保證金</a>
+    </div>
+  </section>
+</section>
+</section>
+
+<script>
+window.STOCK_FUTURES_PAYLOAD = {{ stock_futures|tojson }};
+</script>
+<script src="static/simple_xlsx.js"></script>
+<script src="static/stock_futures.js"></script>
+{% endblock %}

@@ -1073,16 +1073,21 @@
       const el = document.getElementById('chip_inst_chart_'+sym);
       const ch = echarts.init(el, 'dark', { renderer: 'canvas' });
       const series = [];
-      const instBar = (name, data, color, z) => ({
+      // 外資最大 → z=1 最後面；自營商最小 → z=3 最前面，寬度也由寬到窄讓三條都能露出
+      const instBar = (name, data, color, z, maxWidth) => ({
         name, type:'bar', data,
-        barGap:'-100%', barCategoryGap:'46%', barMaxWidth:18,
-        itemStyle:{ color, opacity:0.76, borderRadius:[2,2,0,0] },
-        emphasis:{ focus:'series', itemStyle:{ opacity:0.96 } },
+        barGap:'-100%', barCategoryGap:'38%', barMaxWidth: maxWidth,
+        itemStyle:{
+          color, opacity:0.92,
+          borderColor:'rgba(0,0,0,0.55)', borderWidth:1,
+          borderRadius:[2,2,0,0]
+        },
+        emphasis:{ focus:'series', itemStyle:{ opacity:1, borderWidth:1.5 } },
         z
       });
-      if (chip.foreign_net) series.push(instBar('外資', chip.foreign_net, '#10b981', 3));
-      if (chip.trust_net)   series.push(instBar('投信', chip.trust_net,   '#ff7847', 2));
-      if (chip.dealer_net)  series.push(instBar('自營商', chip.dealer_net,'#f472b6', 1));
+      if (chip.foreign_net) series.push(instBar('外資',   chip.foreign_net, '#10b981', 1, 20));
+      if (chip.trust_net)   series.push(instBar('投信',   chip.trust_net,   '#ff7847', 2, 20));
+      if (chip.dealer_net)  series.push(instBar('自營商', chip.dealer_net,  '#a855f7', 3, 20));
       ch.setOption({
         backgroundColor:'transparent', animation:false,
         legend:{ data:['外資','投信','自營商'], top:0, textStyle:{color:'#9ca3af'} },
