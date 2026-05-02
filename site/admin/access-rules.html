@@ -13,9 +13,7 @@
     <h1>進階內容規則</h1>
 
     <div class="card">
-      <p class="muted">設定哪些路徑要 premium / admin 才能訪問。pattern 支援 GLOB 通配符（<code>*</code> 表示任意字元）。<br>
-      範例：<code class="mono">/heatmap.html</code>（單頁）、<code class="mono">/concept/*.html</code>（concept 目錄下所有頁）、<code class="mono">/company/2330.html</code>（特定個股）。
-      多條規則命中時，<b>pattern 越長越優先</b>。</p>
+      <p class="muted">選擇哪些頁面要升級成「進階用戶」或「管理員」才能看。從下拉清單直接選頁面，不用自己寫路徑。多條規則命中時，最具體的優先生效。</p>
 
       <div class="toolbar">
         <button id="add-btn">+ 新增規則</button>
@@ -91,27 +89,61 @@
     });
   }
 
+  // 預設可選頁面清單（從 build_site.py 實際產出對齊；新增頁面時更新這份就好）
+  const PAGE_PRESETS = [
+    { label: "熱力圖",                path: "/heatmap.html" },
+    { label: "個股資料庫",            path: "/database.html" },
+    { label: "個股比較",              path: "/compare.html" },
+    { label: "AI 助手",               path: "/ai.html" },
+    { label: "股期儀表板",            path: "/stock-futures.html" },
+    { label: "RS 評分",               path: "/rs.html" },
+    { label: "排行榜",                path: "/rankings.html" },
+    { label: "今日盤勢",              path: "/today.html" },
+    { label: "備忘錄",                path: "/memo.html" },
+    { label: "漲停分析（所有日期）",  path: "/limit-up*" },
+    { label: "所有題材族群頁",        path: "/topic/*" },
+    { label: "所有個股詳細頁",        path: "/company/*" },
+  ];
+
   function openEdit(id) {
     const r = id ? rules.find(x => x.id === id) : null;
     const isNew = !r;
+    const presetMatch = r ? PAGE_PRESETS.find(p => p.path === r.path_pattern) : null;
+    const isCustom = !!r && !presetMatch;
 
     $("#modal").innerHTML = `
-      <h3>${isNew ? "新增" : "編輯"}規則</h3>
+      <h3>${isNew ? "新增" : "編輯"}保護規則</h3>
+
       <div class="form-row">
-        <label>路徑 pattern（支援 GLOB）</label>
-        <input type="text" id="m-pattern" value="${r?.path_pattern || ""}" placeholder="/concept/*.html">
-      </div>
-      <div class="form-row">
-        <label>需要的 role</label>
-        <select id="m-role">
-          <option value="member" ${r?.required_role==="member"?"selected":""}>免費會員 (member)</option>
-          <option value="premium" ${r?.required_role==="premium"?"selected":""}>進階用戶 (premium)</option>
-          <option value="admin" ${r?.required_role==="admin"?"selected":""}>管理員 (admin)</option>
+        <label>選擇要保護的頁面</label>
+        <select id="m-preset">
+          <option value="">— 請從下拉選擇 —</option>
+          ${PAGE_PRESETS.map(p => `
+            <option value="${p.path}" ${presetMatch?.path === p.path ? "selected" : ""}>
+              ${p.label}（${p.path}）
+            </option>`).join("")}
+          <option value="__custom__" ${isCustom ? "selected" : ""}>🛠️ 自訂路徑（進階）</option>
         </select>
       </div>
+
+      <div class="form-row" id="custom-row" style="display:${isCustom ? "block" : "none"}">
+        <label>自訂路徑 pattern</label>
+        <input type="text" id="m-pattern" value="${isCustom ? (r?.path_pattern || "") : ""}" placeholder="例如 /heatmap.html 或 /topic/*">
+        <p class="muted" style="margin-top:0.4rem; font-size:11px">支援 <code>*</code> 通配符（GLOB）。範例：<code class="mono">/heatmap.html</code>、<code class="mono">/topic/*</code>、<code class="mono">/company/2330.html</code></p>
+      </div>
+
+      <div class="form-row">
+        <label>誰才能看這個頁面？</label>
+        <select id="m-role">
+          <option value="member"  ${r?.required_role==="member"  ?"selected":""}>免費會員以上（member）</option>
+          <option value="premium" ${(r?.required_role==="premium" || isNew) ?"selected":""}>進階用戶以上（premium）— 最常用</option>
+          <option value="admin"   ${r?.required_role==="admin"   ?"selected":""}>管理員以上（admin）</option>
+        </select>
+      </div>
+
       <div class="form-row">
         <label>備註（可選）</label>
-        <textarea id="m-comment">${r?.comment || ""}</textarea>
+        <textarea id="m-comment" placeholder="例如：付費會員專屬內容">${r?.comment || ""}</textarea>
       </div>
       ${!isNew ? `
         <div class="form-row">
@@ -124,17 +156,41 @@
       ` : ""}
       <div class="actions">
         <button class="btn-secondary" id="m-cancel">取消</button>
-        <button id="m-save">${isNew ? "建立" : "儲存"}</button>
+        <button id="m-save">${isNew ? "建立規則" : "儲存"}</button>
       </div>
     `;
 
+    // preset 切換時 → 顯示/隱藏自訂輸入框
+    $("#m-preset").addEventListener("change", () => {
+      const v = $("#m-preset").value;
+      const customRow = $("#custom-row");
+      if (v === "__custom__") {
+        customRow.style.display = "block";
+        $("#m-pattern").focus();
+      } else {
+        customRow.style.display = "none";
+      }
+    });
+
     $("#m-cancel").addEventListener("click", closeModal);
     $("#m-save").addEventListener("click", async () => {
-      const pattern = $("#m-pattern").value.trim();
+      // 取出 pattern：preset 直接用 value，自訂模式從 m-pattern 取
+      const presetVal = $("#m-preset").value;
+      let pattern;
+      if (!presetVal) {
+        IM.flash("請從下拉選擇要保護的頁面", "error");
+        return;
+      }
+      if (presetVal === "__custom__") {
+        pattern = $("#m-pattern").value.trim();
+        if (!pattern) { IM.flash("自訂路徑必填", "error"); return; }
+      } else {
+        pattern = presetVal;
+      }
+
       const role = $("#m-role").value;
       const comment = $("#m-comment").value.trim();
       const active = $("#m-active") ? parseInt($("#m-active").value, 10) : 1;
-      if (!pattern) { IM.flash("pattern 必填", "error"); return; }
 
       try {
         if (isNew) {
