@@ -39,12 +39,13 @@
   };
 
   const TREND_METRICS = [
-    { key: 'marginLeverage', label: '保證金槓桿', fmt: (v) => v.toFixed(2) + 'x', get: (s) => num(s.summary.marginLeverage) },
-    { key: 'equityLeverage', label: '權益槓桿',   fmt: (v) => v.toFixed(2) + 'x', get: (s) => num(s.summary.equityLeverage) },
-    { key: 'accountEquity',  label: '帳戶權益',   fmt: (v) => money(v),           get: (s) => num(s.accountEquity) },
-    { key: 'grossExposure',  label: '總曝險',      fmt: (v) => money(v),           get: (s) => num(s.summary.grossExposure) },
-    { key: 'netExposure',    label: '淨曝險',      fmt: (v) => money(v),           get: (s) => num(s.summary.netExposure) },
-    { key: 'totalMargin',    label: '總保證金',    fmt: (v) => money(v),           get: (s) => num(s.summary.totalMargin) },
+    { key: 'marginLeverage',  label: '保證金槓桿', fmt: (v) => v.toFixed(2) + 'x', get: (s) => num(s.summary.marginLeverage) },
+    { key: 'equityLeverage',  label: '權益槓桿',   fmt: (v) => v.toFixed(2) + 'x', get: (s) => num(s.summary.equityLeverage) },
+    { key: 'unrealizedPnl',   label: '未實現損益', fmt: (v) => money(v),           get: (s) => num(s.summary.unrealizedPnl) },
+    { key: 'accountEquity',   label: '帳戶權益數', fmt: (v) => money(v),           get: (s) => num(s.accountEquity) },
+    { key: 'grossExposure',   label: '總曝險',      fmt: (v) => money(v),           get: (s) => num(s.summary.grossExposure) },
+    { key: 'netExposure',     label: '淨曝險',      fmt: (v) => money(v),           get: (s) => num(s.summary.netExposure) },
+    { key: 'totalMargin',     label: '總保證金',    fmt: (v) => money(v),           get: (s) => num(s.summary.totalMargin) },
   ];
   const trendMetricKey = 'indusmap.stockFutures.trendMetrics.v1';
   let activeTrendMetrics = (() => {

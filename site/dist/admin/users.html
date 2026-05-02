@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用戶管理 — indusmapk admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <h1>用戶管理</h1>
+
+    <div class="card">
+      <div class="toolbar">
+        <input type="search" id="q" placeholder="搜尋 email / 姓名…">
+        <select id="role-filter">
+          <option value="">所有 role</option>
+          <option value="member">免費會員</option>
+          <option value="premium">進階用戶</option>
+          <option value="admin">管理員</option>
+          <option value="super_admin">超級管理員</option>
+        </select>
+        <select id="status-filter">
+          <option value="">所有狀態</option>
+          <option value="active">啟用</option>
+          <option value="suspended">停權</option>
+        </select>
+        <select id="expiring-filter">
+          <option value="">不限到期</option>
+          <option value="7">7 天內到期</option>
+          <option value="30">30 天內到期</option>
+        </select>
+        <button id="reload-btn" class="btn-secondary">重新整理</button>
+      </div>
+
+      <div id="users-table">
+        <div class="muted">載入中…</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 編輯 user modal -->
+<div id="user-modal-backdrop" class="modal-backdrop" style="display:none">
+  <div class="modal" id="user-modal"></div>
+</div>
+
+<script src="/admin/app.js"></script>
+<script>
+(async function () {
+  await IM.renderSidebar("users");
+  const me = await IM.me();
+  const isSuper = me.role === "super_admin";
+
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+
+  let users = [];
+
+  async function load() {
+    const params = new URLSearchParams();
+    if ($("#q").value.trim()) params.set("q", $("#q").value.trim());
+    if ($("#role-filter").value) params.set("role", $("#role-filter").value);
+    if ($("#status-filter").value) params.set("status", $("#status-filter").value);
+    if ($("#expiring-filter").value) params.set("expiring", $("#expiring-filter").value);
+
+    try {
+      const r = await IM.fetchJson("/api/admin/users?" + params);
+      users = r.users;
+      render();
+    } catch (e) {
+      $("#users-table").innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
+    }
+  }
+
+  function render() {
+    if (users.length === 0) {
+      $("#users-table").innerHTML = '<div class="empty">沒有符合條件的用戶</div>';
+      return;
+    }
+    const rows = users.map(u => {
+      const exp = IM.expiryStatus(u.role_expires_at);
+      const expHtml = exp.className
+        ? `<span class="tag ${exp.className}">${exp.label}</span>`
+        : `<span class="muted">${exp.label}</span>`;
+      const perms = u.data_permissions
+        ? Object.entries(u.data_permissions).filter(([k,v]) => v).map(([k]) => IM.DATA_CATEGORY_LABEL[k] || k).join("、")
+        : "";
+      return `
+        <tr data-id="${u.id}">
+          <td>
+            ${u.picture ? `<img class="avatar" src="${u.picture}" alt="">` : ""}
+          </td>
+          <td>
+            <div>${u.name || ""}</div>
+            <div class="muted mono" style="font-size:11px">${u.email}</div>
+          </td>
+          <td>${IM.tag(u.role)}</td>
+          <td>${expHtml}</td>
+          <td class="muted" style="font-size:12px">${perms || "—"}</td>
+          <td>${u.status === "active"
+                ? '<span class="tag tag-active">啟用</span>'
+                : '<span class="tag tag-suspended">停權</span>'}</td>
+          <td class="mono muted" style="font-size:11px">${u.last_login_at ? IM.fmtDate(u.last_login_at) : "—"}</td>
+          <td><button class="btn-sm btn-secondary edit-btn" data-id="${u.id}">編輯</button></td>
+        </tr>`;
+    }).join("");
+
+    $("#users-table").innerHTML = `
+      <table>
+        <thead><tr>
+          <th></th><th>用戶</th><th>角色</th><th>到期</th><th>資料權限</th><th>狀態</th><th>最後登入</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+    $$(".edit-btn").forEach(b => {
+      b.addEventListener("click", () => openEdit(parseInt(b.dataset.id, 10)));
+    });
+  }
+
+  function openEdit(id) {
+    const u = users.find(x => x.id === id);
+    if (!u) return;
+
+    const canModify = isSuper || (u.role !== "admin" && u.role !== "super_admin");
+    if (!canModify) {
+      IM.flash("admin 不能修改其他 admin / super_admin", "error");
+      return;
+    }
+
+    const isTargetSuper = u.role === "super_admin";
+    const roleOptions = isSuper
+      ? ["member", "premium", "admin"].map(r => `<option value="${r}" ${u.role===r?"selected":""}>${IM.ROLE_LABEL[r]}</option>`).join("")
+      : ["member", "premium"].map(r => `<option value="${r}" ${u.role===r?"selected":""}>${IM.ROLE_LABEL[r]}</option>`).join("");
+
+    const permsCheckboxes = IM.DATA_CATEGORIES.map(k => {
+      const checked = u.data_permissions?.[k] ? "checked" : "";
+      return `<label class="checkbox-row"><input type="checkbox" name="perm-${k}" ${checked}> ${IM.DATA_CATEGORY_LABEL[k]} <span class="muted mono">(${k})</span></label>`;
+    }).join("");
+
+    const expiryISO = u.role_expires_at ? new Date(u.role_expires_at).toISOString().slice(0, 16) : "";
+
+    $("#user-modal").innerHTML = `
+      <h3>編輯用戶 — ${u.email}</h3>
+      ${isTargetSuper ? '<p class="muted">⚠ 這是 super_admin。系統不允許從 UI 降權；只允許改備註。</p>' : ""}
+
+      <div class="form-row">
+        <label>角色</label>
+        <select id="m-role" ${isTargetSuper ? "disabled" : ""}>
+          ${isTargetSuper ? `<option selected>super_admin</option>` : roleOptions}
+        </select>
+      </div>
+
+      <div class="form-row" id="perms-row" style="display:none">
+        <label>資料權限（admin role 才有作用，僅 super_admin 可改）</label>
+        <div ${isSuper ? "" : "style='opacity:0.5;pointer-events:none'"}>
+          ${permsCheckboxes}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>到期日</label>
+        <input type="datetime-local" id="m-expiry" value="${expiryISO}">
+        <div style="margin-top:0.4rem; display:flex; gap:0.4rem; flex-wrap:wrap">
+          <button class="btn-sm btn-secondary" data-days="30">+30 天</button>
+          <button class="btn-sm btn-secondary" data-days="90">+90 天</button>
+          <button class="btn-sm btn-secondary" data-days="365">+1 年</button>
+          <button class="btn-sm btn-secondary" data-days="0">永久</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>備註</label>
+        <textarea id="m-notes">${u.notes || ""}</textarea>
+      </div>
+
+      ${(!isTargetSuper && (isSuper || u.role !== "admin")) ? `
+        <div class="form-row">
+          <label>狀態</label>
+          <select id="m-status">
+            <option value="active" ${u.status==="active"?"selected":""}>啟用</option>
+            <option value="suspended" ${u.status==="suspended"?"selected":""}>停權</option>
+          </select>
+        </div>
+      ` : ""}
+
+      <div class="actions">
+        <button class="btn-secondary" id="m-cancel">取消</button>
+        <button id="m-save">儲存</button>
+      </div>
+    `;
+
+    function updatePermsRow() {
+      const role = $("#m-role").value;
+      $("#perms-row").style.display = role === "admin" ? "block" : "none";
+    }
+    updatePermsRow();
+    $("#m-role").addEventListener("change", updatePermsRow);
+
+    // 快捷鍵
+    $$('button[data-days]').forEach(b => {
+      b.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const days = parseInt(b.dataset.days, 10);
+        try {
+          await IM.fetchJson("/api/admin/users/extend", {
+            method: "POST",
+            body: JSON.stringify({ id: u.id, days }),
+          });
+          IM.flash("到期日已更新", "success");
+          closeModal();
+          load();
+        } catch (e) { IM.flash(e.message, "error"); }
+      });
+    });
+
+    $("#m-cancel").addEventListener("click", closeModal);
+    $("#m-save").addEventListener("click", async () => {
+      const role = $("#m-role").value;
+      const expiryVal = $("#m-expiry").value;
+      const notes = $("#m-notes").value;
+      const statusEl = $("#m-status");
+      const status = statusEl ? statusEl.value : undefined;
+
+      const payload = { notes };
+      if (!isTargetSuper) {
+        payload.role = role;
+        payload.role_expires_at = expiryVal ? new Date(expiryVal).toISOString() : null;
+        if (status) payload.status = status;
+      }
+
+      try {
+        await IM.fetchJson(`/api/admin/users/${u.id}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+
+        // 如果改成 admin 且勾了 perms → 同時送 data-permissions
+        if (isSuper && role === "admin") {
+          const permPayload = {};
+          IM.DATA_CATEGORIES.forEach(k => {
+            permPayload[k] = $(`input[name=perm-${k}]`).checked;
+          });
+          await IM.fetchJson("/api/admin/users/data-permissions", {
+            method: "PUT",
+            body: JSON.stringify({ id: u.id, permissions: permPayload }),
+          });
+        }
+
+        IM.flash("已儲存", "success");
+        closeModal();
+        load();
+      } catch (e) {
+        IM.flash(e.message, "error");
+      }
+    });
+
+    $("#user-modal-backdrop").style.display = "grid";
+  }
+
+  function closeModal() { $("#user-modal-backdrop").style.display = "none"; }
+  $("#user-modal-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "user-modal-backdrop") closeModal();
+  });
+
+  // 即時搜尋
+  ["q", "role-filter", "status-filter", "expiring-filter"].forEach(id => {
+    const el = $("#"+id);
+    el.addEventListener("input", debounce(load, 250));
+    el.addEventListener("change", load);
+  });
+  $("#reload-btn").addEventListener("click", load);
+
+  function debounce(fn, ms) {
+    let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

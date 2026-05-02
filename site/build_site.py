@@ -3628,6 +3628,20 @@ def copy_static():
         shutil.rmtree(dst)
     shutil.copytree(STATIC_SRC, dst)
 
+    # admin SPA / 共用組件 / paywall — Cloudflare Pages Functions 後台需要
+    for sub in ("admin", "components"):
+        src = SITE_DIR / sub
+        if not src.exists():
+            continue
+        target = DIST_DIR / sub
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(src, target)
+
+    paywall_src = SITE_DIR / "paywall.html"
+    if paywall_src.exists():
+        shutil.copy2(paywall_src, DIST_DIR / "paywall.html")
+
 
 ROBOTS_TXT_CONTENT = """# 族群寶 robots.txt
 # 允許：主流搜尋引擎（Google / Bing / DuckDuckGo 等）
