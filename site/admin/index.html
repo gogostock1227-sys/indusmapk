@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — indusmapk admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <h1>Dashboard</h1>
+
+    <div class="card" id="welcome">
+      <h3>歡迎回來</h3>
+      <p class="muted">這是 indusmapk 管理後台。從左側導覽選擇功能。</p>
+    </div>
+
+    <div class="card">
+      <h3>快速統計</h3>
+      <div id="stats" class="muted">載入中…</div>
+    </div>
+
+    <div class="card">
+      <h3>近期操作</h3>
+      <div id="recent-audit" class="muted">載入中…</div>
+    </div>
+  </main>
+</div>
+
+<script src="/admin/app.js"></script>
+<script>
+(async function () {
+  await IM.renderSidebar("dashboard");
+
+  // 統計
+  try {
+    const usersRes = await IM.fetchJson("/api/admin/users?limit=500");
+    const total = usersRes.users.length;
+    const byRole = usersRes.users.reduce((acc, u) => {
+      acc[u.role] = (acc[u.role] || 0) + 1; return acc;
+    }, {});
+    const expiring = usersRes.users.filter(u => {
+      if (!u.role_expires_at) return false;
+      const ms = Date.parse(u.role_expires_at);
+      return ms - Date.now() < 7 * 86400000 && ms - Date.now() > 0;
+    }).length;
+
+    document.getElementById("stats").innerHTML = `
+      <table>
+        <tr><th>總用戶</th><td><b>${total}</b></td></tr>
+        <tr><th>免費會員</th><td>${byRole.member || 0}</td></tr>
+        <tr><th>進階用戶</th><td>${byRole.premium || 0}</td></tr>
+        <tr><th>管理員</th><td>${byRole.admin || 0}</td></tr>
+        <tr><th>超級管理員</th><td>${byRole.super_admin || 0}</td></tr>
+        <tr><th>7 天內到期</th><td>${expiring > 0 ? `<span class="tag tag-expiring">${expiring} 人</span>` : 0}</td></tr>
+      </table>`;
+  } catch (e) {
+    document.getElementById("stats").textContent = "載入失敗：" + e.message;
+  }
+
+  // 近期 audit
+  try {
+    const auditRes = await IM.fetchJson("/api/admin/users/audit?limit=10");
+    if (auditRes.entries.length === 0) {
+      document.getElementById("recent-audit").innerHTML = '<div class="empty">尚無紀錄</div>';
+    } else {
+      document.getElementById("recent-audit").innerHTML = `
+        <table>
+          <thead><tr><th>時間</th><th>用戶</th><th>動作</th><th>對象</th><th>摘要</th></tr></thead>
+          <tbody>
+            ${auditRes.entries.map(e => `
+              <tr>
+                <td class="mono">${IM.fmtDate(e.created_at)}</td>
+                <td>${e.user_email}</td>
+                <td><code>${e.action}</code></td>
+                <td class="mono">${e.target || "—"}</td>
+                <td class="muted">${e.diff_summary || "—"}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>`;
+    }
+  } catch (e) {
+    document.getElementById("recent-audit").textContent = "載入失敗：" + e.message;
+  }
+})();
+</script>
+</body>
+</html>

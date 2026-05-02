@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>操作紀錄 — indusmapk admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <h1>操作紀錄</h1>
+
+    <div class="card">
+      <div class="toolbar">
+        <select id="action-filter">
+          <option value="">所有動作</option>
+          <option value="login">登入</option>
+          <option value="logout">登出</option>
+          <option value="role_change">角色異動</option>
+          <option value="data_perm_change">資料權限異動</option>
+          <option value="extend_expiry">延長到期</option>
+          <option value="suspend">停權</option>
+          <option value="unsuspend">解除停權</option>
+          <option value="access_rule_change">規則異動</option>
+          <option value="data_edit">資料編輯</option>
+          <option value="build_trigger">觸發 build</option>
+        </select>
+        <button id="reload-btn" class="btn-secondary">重新整理</button>
+      </div>
+      <div id="audit-table"><div class="muted">載入中…</div></div>
+      <div style="margin-top:1rem; text-align:center">
+        <button id="more-btn" class="btn-secondary" style="display:none">載入更多</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/admin/app.js"></script>
+<script>
+(async function () {
+  await IM.renderSidebar("audit");
+  const $ = (s) => document.querySelector(s);
+  let entries = [];
+  let offset = 0;
+  const LIMIT = 100;
+
+  async function load(reset = true) {
+    if (reset) { offset = 0; entries = []; }
+    const params = new URLSearchParams({ limit: LIMIT, offset });
+    const action = $("#action-filter").value;
+    if (action) params.set("action", action);
+
+    try {
+      const r = await IM.fetchJson("/api/admin/users/audit?" + params);
+      entries = entries.concat(r.entries);
+      offset += r.entries.length;
+      render();
+      $("#more-btn").style.display = r.entries.length === LIMIT ? "inline-block" : "none";
+    } catch (e) {
+      $("#audit-table").innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
+    }
+  }
+
+  function render() {
+    if (entries.length === 0) {
+      $("#audit-table").innerHTML = '<div class="empty">尚無紀錄</div>';
+      return;
+    }
+    $("#audit-table").innerHTML = `
+      <table>
+        <thead><tr>
+          <th>時間</th><th>用戶</th><th>動作</th><th>對象</th><th>變更摘要</th><th>IP</th>
+        </tr></thead>
+        <tbody>
+          ${entries.map(e => `
+            <tr>
+              <td class="mono" style="white-space:nowrap">${IM.fmtDate(e.created_at)}</td>
+              <td>${e.user_email}</td>
+              <td><code>${e.action}</code></td>
+              <td class="mono" style="font-size:12px">${e.target || "—"}</td>
+              <td class="muted" style="max-width:480px">${e.diff_summary || "—"}</td>
+              <td class="mono muted" style="font-size:11px">${e.ip || "—"}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>`;
+  }
+
+  $("#action-filter").addEventListener("change", () => load(true));
+  $("#reload-btn").addEventListener("click", () => load(true));
+  $("#more-btn").addEventListener("click", () => load(false));
+
+  load();
+})();
+</script>
+</body>
+</html>

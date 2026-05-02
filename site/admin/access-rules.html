@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>進階內容規則 — indusmapk admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <h1>進階內容規則</h1>
+
+    <div class="card">
+      <p class="muted">設定哪些路徑要 premium / admin 才能訪問。pattern 支援 GLOB 通配符（<code>*</code> 表示任意字元）。<br>
+      範例：<code class="mono">/heatmap.html</code>（單頁）、<code class="mono">/concept/*.html</code>（concept 目錄下所有頁）、<code class="mono">/company/2330.html</code>（特定個股）。
+      多條規則命中時，<b>pattern 越長越優先</b>。</p>
+
+      <div class="toolbar">
+        <button id="add-btn">+ 新增規則</button>
+        <button id="test-btn" class="btn-secondary">測試 pattern</button>
+        <button id="reload-btn" class="btn-secondary">重新整理</button>
+      </div>
+
+      <div id="rules-table"><div class="muted">載入中…</div></div>
+    </div>
+  </main>
+</div>
+
+<div id="modal-backdrop" class="modal-backdrop" style="display:none">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="/admin/app.js"></script>
+<script>
+(async function () {
+  await IM.renderSidebar("access-rules");
+  const me = await IM.me();
+  if (me.role !== "super_admin") {
+    document.querySelector(".main").innerHTML = '<h1>進階內容規則</h1><div class="card"><div class="empty">僅 super_admin 可訪問此頁</div></div>';
+    return;
+  }
+
+  const $ = (s) => document.querySelector(s);
+  let rules = [];
+
+  async function load() {
+    try {
+      const r = await IM.fetchJson("/api/admin/access-rules");
+      rules = r.rules;
+      render();
+    } catch (e) {
+      $("#rules-table").innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
+    }
+  }
+
+  function render() {
+    if (rules.length === 0) {
+      $("#rules-table").innerHTML = '<div class="empty">尚無規則。點「+ 新增規則」建立第一條。</div>';
+      return;
+    }
+    $("#rules-table").innerHTML = `
+      <table>
+        <thead><tr>
+          <th>#</th><th>路徑 pattern</th><th>需要 role</th><th>備註</th><th>狀態</th><th>建立時間</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${rules.map(r => `
+            <tr data-id="${r.id}">
+              <td class="mono muted">${r.id}</td>
+              <td class="mono">${r.path_pattern}</td>
+              <td>${IM.tag(r.required_role)}</td>
+              <td class="muted">${r.comment || ""}</td>
+              <td>${r.active ? '<span class="tag tag-active">啟用</span>' : '<span class="tag tag-suspended">停用</span>'}</td>
+              <td class="mono muted" style="font-size:11px">${IM.fmtDate(r.created_at)}</td>
+              <td>
+                <button class="btn-sm btn-secondary edit-btn" data-id="${r.id}">編輯</button>
+                ${r.active ? `<button class="btn-sm btn-danger del-btn" data-id="${r.id}">停用</button>` : ""}
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>`;
+
+    document.querySelectorAll(".edit-btn").forEach(b => {
+      b.addEventListener("click", () => openEdit(parseInt(b.dataset.id, 10)));
+    });
+    document.querySelectorAll(".del-btn").forEach(b => {
+      b.addEventListener("click", () => deleteRule(parseInt(b.dataset.id, 10)));
+    });
+  }
+
+  function openEdit(id) {
+    const r = id ? rules.find(x => x.id === id) : null;
+    const isNew = !r;
+
+    $("#modal").innerHTML = `
+      <h3>${isNew ? "新增" : "編輯"}規則</h3>
+      <div class="form-row">
+        <label>路徑 pattern（支援 GLOB）</label>
+        <input type="text" id="m-pattern" value="${r?.path_pattern || ""}" placeholder="/concept/*.html">
+      </div>
+      <div class="form-row">
+        <label>需要的 role</label>
+        <select id="m-role">
+          <option value="member" ${r?.required_role==="member"?"selected":""}>免費會員 (member)</option>
+          <option value="premium" ${r?.required_role==="premium"?"selected":""}>進階用戶 (premium)</option>
+          <option value="admin" ${r?.required_role==="admin"?"selected":""}>管理員 (admin)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>備註（可選）</label>
+        <textarea id="m-comment">${r?.comment || ""}</textarea>
+      </div>
+      ${!isNew ? `
+        <div class="form-row">
+          <label>狀態</label>
+          <select id="m-active">
+            <option value="1" ${r.active?"selected":""}>啟用</option>
+            <option value="0" ${!r.active?"selected":""}>停用</option>
+          </select>
+        </div>
+      ` : ""}
+      <div class="actions">
+        <button class="btn-secondary" id="m-cancel">取消</button>
+        <button id="m-save">${isNew ? "建立" : "儲存"}</button>
+      </div>
+    `;
+
+    $("#m-cancel").addEventListener("click", closeModal);
+    $("#m-save").addEventListener("click", async () => {
+      const pattern = $("#m-pattern").value.trim();
+      const role = $("#m-role").value;
+      const comment = $("#m-comment").value.trim();
+      const active = $("#m-active") ? parseInt($("#m-active").value, 10) : 1;
+      if (!pattern) { IM.flash("pattern 必填", "error"); return; }
+
+      try {
+        if (isNew) {
+          await IM.fetchJson("/api/admin/access-rules", {
+            method: "POST",
+            body: JSON.stringify({ path_pattern: pattern, required_role: role, comment }),
+          });
+        } else {
+          await IM.fetchJson(`/api/admin/access-rules/${r.id}`, {
+            method: "PUT",
+            body: JSON.stringify({ path_pattern: pattern, required_role: role, comment, active }),
+          });
+        }
+        IM.flash("已儲存", "success");
+        closeModal();
+        load();
+      } catch (e) { IM.flash(e.message, "error"); }
+    });
+    $("#modal-backdrop").style.display = "grid";
+  }
+
+  async function deleteRule(id) {
+    if (!confirm("確定要停用這條規則？（軟刪除，仍保留紀錄）")) return;
+    try {
+      await IM.fetchJson(`/api/admin/access-rules/${id}`, { method: "DELETE" });
+      IM.flash("已停用", "success");
+      load();
+    } catch (e) { IM.flash(e.message, "error"); }
+  }
+
+  function openTester() {
+    $("#modal").innerHTML = `
+      <h3>測試 pattern 命中</h3>
+      <p class="muted">輸入路徑，看會命中哪條 active 規則。</p>
+      <div class="form-row">
+        <label>測試路徑</label>
+        <input type="text" id="t-path" placeholder="/heatmap.html">
+      </div>
+      <div id="t-result" class="muted">尚未測試</div>
+      <div class="actions">
+        <button class="btn-secondary" id="t-close">關閉</button>
+        <button id="t-run">執行測試</button>
+      </div>
+    `;
+    $("#t-close").addEventListener("click", closeModal);
+    $("#t-run").addEventListener("click", async () => {
+      const path = $("#t-path").value.trim();
+      if (!path) { IM.flash("路徑必填", "error"); return; }
+      try {
+        const r = await IM.fetchJson("/api/admin/access-rules/test", {
+          method: "POST", body: JSON.stringify({ path }),
+        });
+        $("#t-result").innerHTML = r.matched
+          ? `<div class="card"><b>${r.note}</b><br><br>命中規則 #${r.rule.id}：<code class="mono">${r.rule.path_pattern}</code> → ${IM.tag(r.rule.required_role)}</div>`
+          : `<div class="card">${r.note}</div>`;
+      } catch (e) { IM.flash(e.message, "error"); }
+    });
+    $("#modal-backdrop").style.display = "grid";
+  }
+
+  function closeModal() { $("#modal-backdrop").style.display = "none"; }
+  $("#modal-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "modal-backdrop") closeModal();
+  });
+  $("#add-btn").addEventListener("click", () => openEdit(null));
+  $("#test-btn").addEventListener("click", openTester);
+  $("#reload-btn").addEventListener("click", load);
+
+  load();
+})();
+</script>
+</body>
+</html>
