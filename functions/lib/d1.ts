@@ -118,13 +118,31 @@ export interface AccessRule {
 }
 
 export async function findMatchingRule(env: Env, path: string): Promise<AccessRule | null> {
-  // SQLite GLOB：path_pattern 是 GLOB 模式，path 是要比對的字串
+  // SQLite GLOB：path_pattern 是 GLOB 模式，path 是要比對的字串。
+  //
+  // 雙向歸一化：Cloudflare Pages 服務同一個頁面有兩個 URL 變體：
+  //   • /foo.html  （直接帶 .html）
+  //   • /foo       （pretty URL，內部 rewrite 服務 /foo.html）
+  // middleware 看到的 path 取決於用戶輸入哪個變體。為了避免規則寫
+  // /foo.html 但用戶訪問 /foo 不被擋，這裡同時試兩個變體：
+  //   • 原 path
+  //   • 若 path 沒有 .html 後綴且不是目錄 → path + ".html"
+  //   • 若 path 有 .html 後綴 → 也試去掉 .html 的版本（反方向歸一化）
+  const variants: string[] = [path];
+  if (path && !path.endsWith("/")) {
+    if (path.endsWith(".html")) {
+      variants.push(path.slice(0, -5));
+    } else {
+      variants.push(path + ".html");
+    }
+  }
+  const placeholders = variants.map(() => "? GLOB path_pattern").join(" OR ");
   const row = await env.DB.prepare(
     `SELECT * FROM access_rules
-     WHERE active = 1 AND ? GLOB path_pattern
+     WHERE active = 1 AND (${placeholders})
      ORDER BY length(path_pattern) DESC, id DESC
      LIMIT 1`,
-  ).bind(path).first();
+  ).bind(...variants).first();
   return row ? (row as unknown as AccessRule) : null;
 }
 
