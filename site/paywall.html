@@ -62,13 +62,6 @@
     font-weight: 600;
     color: var(--gold);
   }
-  .from-path-raw {
-    display: block;
-    margin-top: 0.4rem;
-    color: var(--muted);
-    font-size: 0.75rem;
-    font-family: ui-monospace, SF Mono, Menlo, monospace;
-  }
   .role-info {
     margin: 1.5rem 0;
     padding: 1rem;
@@ -109,7 +102,6 @@
     <h1>此內容需要升級權限</h1>
     <p>你嘗試訪問的頁面：</p>
     <div class="from-path" id="from-path">—</div>
-    <div class="from-path-raw" id="from-path-raw"></div>
 
     <div class="role-info" id="role-info" style="display:none">
       <p style="margin-top:0">你目前的角色：<strong class="role-name" id="current-role">—</strong></p>
@@ -155,13 +147,20 @@
 
   function pathLabel(path) {
     if (!path) return "（未知頁面）";
-    if (PAGE_LABELS[path]) return PAGE_LABELS[path];
+    // 雙向歸一化：CF Pages 同一頁有 /foo 跟 /foo.html 兩種 URL 變體
+    // 用兩個查 key 都試一次，避免 map 重複定義
+    const withHtml    = path.endsWith(".html") ? path           : path + ".html";
+    const withoutHtml = path.endsWith(".html") ? path.slice(0, -5) : path;
+    if (PAGE_LABELS[path])        return PAGE_LABELS[path];
+    if (PAGE_LABELS[withHtml])    return PAGE_LABELS[withHtml];
+    if (PAGE_LABELS[withoutHtml]) return PAGE_LABELS[withoutHtml];
     let m;
-    if ((m = path.match(/^\/company\/(.+?)\.html$/))) return `個股 ${decodeURIComponent(m[1])}`;
-    if ((m = path.match(/^\/topic\/(.+?)\.html$/)))   return `題材族群「${decodeURIComponent(m[1])}」`;
-    if ((m = path.match(/^\/limit-up-(\d{4}-\d{2}-\d{2})\.html$/))) return `漲停分析（${m[1]}）`;
-    if (path.startsWith("/admin/"))                   return "後台管理頁";
-    return path;
+    if ((m = withHtml.match(/^\/company\/(.+?)\.html$/))) return `個股 ${decodeURIComponent(m[1])}`;
+    if ((m = withHtml.match(/^\/topic\/(.+?)\.html$/)))   return `題材族群「${decodeURIComponent(m[1])}」`;
+    if ((m = withHtml.match(/^\/topics\/(.+?)\.html$/)))  return `題材族群「${decodeURIComponent(m[1])}」`;
+    if ((m = withHtml.match(/^\/limit-up-(\d{4}-\d{2}-\d{2})\.html$/))) return `漲停分析（${m[1]}）`;
+    if (path.startsWith("/admin/"))                       return "後台管理頁";
+    return "受保護頁面";
   }
   function roleLabel(role) { return ROLE_LABELS[role] || role; }
 
@@ -170,8 +169,6 @@
   const need = params.get('need') || 'premium';
 
   document.getElementById('from-path').textContent = pathLabel(fromPath);
-  // 路徑後面同時顯示 raw URL 給工程除錯用，但小字隱身
-  document.getElementById('from-path-raw').textContent = fromPath ? fromPath : '';
   document.getElementById('need-role').textContent = roleLabel(need);
 
   fetch('/api/auth/me')
