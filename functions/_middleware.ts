@@ -11,12 +11,18 @@ import { getUserById, downgradeIfExpired, findMatchingRule } from "./lib/d1";
 // 不需要 access rules 檢查的路徑（靜態資源 / API 自管 / 系統頁）
 const STATIC_EXT = /\.(css|js|mjs|map|png|jpe?g|gif|svg|webp|avif|ico|woff2?|ttf|otf|eot|json|txt|xml|webmanifest)$/i;
 
+// Cloudflare Pages 預設會把 /foo.html 308 redirect 到 /foo，
+// 所以同一個檔的兩個 URL 變體都要列進公開清單，否則 admin 區會陷入 redirect loop
 const PUBLIC_PATHS = new Set<string>([
   "/paywall.html",
-  "/admin/login.html",         // 登入頁本身要可訪問
+  "/paywall",
+  "/admin/login.html",
+  "/admin/login",
   "/favicon.ico",
   "/robots.txt",
 ]);
+
+const ADMIN_LOGIN_PATHS = new Set<string>(["/admin/login.html", "/admin/login"]);
 
 function isApiPath(pathname: string): boolean {
   return pathname.startsWith("/api/");
@@ -81,8 +87,8 @@ export const onRequest = async (ctx: RequestCtx) => {
     return res;
   }
 
-  // 3. /admin/* 路徑：要求 admin+ 才能進（除了 login.html）
-  if (path.startsWith("/admin/") && path !== "/admin/login.html") {
+  // 3. /admin/* 路徑：要求 admin+ 才能進（除了登入頁的兩種變體）
+  if (path.startsWith("/admin/") && !ADMIN_LOGIN_PATHS.has(path) && !ADMIN_LOGIN_PATHS.has(path + ".html")) {
     const userRank = ROLE_RANK[ctx.data.role];
     if (userRank < ROLE_RANK.admin) {
       // 未登入 → 跳到 login；已登入但 role 不足 → 跳 paywall（提示要 admin 權限）
