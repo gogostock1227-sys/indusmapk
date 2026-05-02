@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}需要升級權限 — 族群寶{% endblock %}
+{% block content %}
+<div class="paywall-wrap">
+  <div class="paywall-card">
+    <div class="paywall-icon">🔒</div>
+    <h2 class="paywall-title">解鎖<span id="page-name">所有內容</span></h2>
+    <p class="paywall-sub">登入以查看完整<span id="page-name-sub">內容</span>與分析</p>
+    <a href="/admin/login.html" class="paywall-btn" id="paywall-btn">前往登入</a>
+    <p class="paywall-meta" id="paywall-meta"></p>
+  </div>
+</div>
+
+<script>
+(function () {
+  // 路徑 → 中文名稱（與 admin/access-rules.html 的 PAGE_PRESETS 對齊）
+  const PAGE_LABELS = {
+    "/heatmap.html":       "市場熱力圖",
+    "/database.html":      "公司資料庫",
+    "/compare.html":       "題材對比",
+    "/ai.html":            "AI 分析",
+    "/stock-futures.html": "股期儀表板",
+    "/rs.html":            "RS 評分",
+    "/rankings.html":      "排行榜",
+    "/today.html":         "今日焦點",
+    "/memo.html":          "個股 Memo",
+    "/topics.html":        "題材列表",
+    "/limit-up.html":      "漲停分析",
+  };
+  const ROLE_LABELS = {
+    member:      "免費會員",
+    premium:     "進階用戶",
+    admin:       "管理員",
+    super_admin: "超級管理員",
+  };
+
+  function pathLabel(path) {
+    if (!path) return "所有內容";
+    // 雙向歸一化：CF Pages 同一頁有 /foo 跟 /foo.html 兩個 URL 變體
+    const withHtml    = path.endsWith(".html") ? path              : path + ".html";
+    const withoutHtml = path.endsWith(".html") ? path.slice(0, -5) : path;
+    if (PAGE_LABELS[path])        return PAGE_LABELS[path];
+    if (PAGE_LABELS[withHtml])    return PAGE_LABELS[withHtml];
+    if (PAGE_LABELS[withoutHtml]) return PAGE_LABELS[withoutHtml];
+    let m;
+    if ((m = withHtml.match(/^\/company\/(.+?)\.html$/))) return `個股 ${decodeURIComponent(m[1])}`;
+    if ((m = withHtml.match(/^\/topic\/(.+?)\.html$/)))   return `題材族群「${decodeURIComponent(m[1])}」`;
+    if ((m = withHtml.match(/^\/topics\/(.+?)\.html$/)))  return `題材族群「${decodeURIComponent(m[1])}」`;
+    if ((m = withHtml.match(/^\/limit-up-(\d{4}-\d{2}-\d{2})\.html$/))) return `漲停分析（${m[1]}）`;
+    return "受保護內容";
+  }
+  function roleLabel(role) { return ROLE_LABELS[role] || role; }
+
+  const params = new URLSearchParams(location.search);
+  const fromPath = params.get("from") || "";
+  const need = params.get("need") || "premium";
+  const pageName = pathLabel(fromPath);
+
+  document.getElementById("page-name").textContent = pageName;
+  document.getElementById("page-name-sub").textContent = pageName;
+
+  fetch("/api/auth/me", { credentials: "same-origin" })
+    .then(r => r.json())
+    .then(me => {
+      const btn  = document.getElementById("paywall-btn");
+      const meta = document.getElementById("paywall-meta");
+      if (!me.authenticated) {
+        btn.textContent = "前往登入";
+        btn.href = "/admin/login.html?next=" + encodeURIComponent(fromPath);
+      } else {
+        btn.textContent = "聯絡管理員升級";
+        const subject = `申請升級為${roleLabel(need)}`;
+        const body =
+          `Hi，\n\n我是 ${me.email}，希望能存取「${pageName}」這個頁面。\n` +
+          `請協助升級為${roleLabel(need)}，謝謝！\n\n— 來源頁面：${fromPath}`;
+        btn.href = `mailto:gogostock1227@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        meta.textContent = `你目前是「${roleLabel(me.role)}」，需要升級為「${roleLabel(need)}」`;
+      }
+    })
+    .catch(() => { /* fetch 失敗保留預設「前往登入」 */ });
+})();
+</script>
+{% endblock %}

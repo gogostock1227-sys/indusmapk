@@ -1,144 +1,89 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>需要升級權限 — indusmapk</title>
-<style>
-  :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --border: #334155;
-    --text: #f1f5f9;
-    --muted: #94a3b8;
-    --accent: #3b82f6;
-    --gold: #f59e0b;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: grid;
-    place-items: center;
-    padding: 1rem;
-  }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 3rem 2.5rem;
-    max-width: 480px;
-    width: 100%;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-  }
-  .lock {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.3));
-  }
-  h1 {
-    margin: 0 0 0.75rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-  }
-  p {
-    color: var(--muted);
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin: 0.5rem 0;
-  }
-  .from-path {
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    border-radius: 6px;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--gold);
-  }
-  .role-info {
-    margin: 1.5rem 0;
-    padding: 1rem;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid var(--accent);
-    border-radius: 8px;
-    font-size: 0.9rem;
-  }
-  .role-info strong { color: var(--gold); }
-  .actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-  }
-  .actions a, .actions button {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    border: 0;
-    text-align: center;
-    transition: opacity 0.15s;
-  }
-  .actions a:hover, .actions button:hover { opacity: 0.85; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border) !important; }
-  .role-name {
-    font-weight: 600;
-  }
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>需要升級權限 — 族群寶</title>
+<meta name="description" content="族群寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="static/logo.png">
+<link rel="apple-touch-icon" href="static/logo.png">
+<link rel="stylesheet" href="static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
 </head>
 <body>
-  <div class="card">
-    <div class="lock">🔒</div>
-    <h1>此內容需要升級權限</h1>
-    <p>你嘗試訪問的頁面：</p>
-    <div class="from-path" id="from-path">—</div>
 
-    <div class="role-info" id="role-info" style="display:none">
-      <p style="margin-top:0">你目前的角色：<strong class="role-name" id="current-role">—</strong></p>
-      <p style="margin-bottom:0">需要的角色：<strong class="role-name" id="need-role">—</strong></p>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="static/logo.png" alt="族群寶 IndusMap">
+      <span class="logo-text">
+        <strong>族群寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="index.html" class="">首頁</a>
+      <a href="today.html" class="">今日焦點</a>
+      <a href="limit-up.html" class="">漲停分析</a>
+      <a href="topics.html" class="">題材列表</a>
+      <a href="heatmap.html" class="">產業地圖</a>
+      <a href="database.html" class="">公司資料庫</a>
+      <div class="nav-dropdown">
+        <a href="ai.html" class="nav-dropdown-toggle ">市場觀察</a>
+        <div class="nav-dropdown-menu">
+          <a href="ai.html" class="">AI 分析</a>
+          <a href="rs.html" class="">RS 評分</a>
+          <a href="rankings.html" class="">排行榜</a>
+          <a href="compare.html" class="">題材對比</a>
+        </div>
+      </div>
+      <a href="stock-futures.html" class="">股期儀表板</a>
+      <a href="memo.html" class="">個股Memo</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股（例：CPO、台積電、2330）" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
     </div>
 
-    <div id="guest-msg" style="display:none">
-      <p>請先用 Google 登入，並聯絡管理員協助升級權限。</p>
-    </div>
-
-    <div id="member-msg" style="display:none">
-      <p>你已經登入。請聯絡管理員協助升級為進階用戶。</p>
-    </div>
-
-    <div class="actions">
-      <a href="/" class="btn-secondary">回首頁</a>
-      <a href="/admin/login.html" id="login-btn" class="btn-primary">用 Google 登入</a>
-    </div>
+    <div class="auth-area" id="indusmapk-auth"></div>
   </div>
+</header>
+
+<main class="site-main">
+  
+<div class="paywall-wrap">
+  <div class="paywall-card">
+    <div class="paywall-icon">🔒</div>
+    <h2 class="paywall-title">解鎖<span id="page-name">所有內容</span></h2>
+    <p class="paywall-sub">登入以查看完整<span id="page-name-sub">內容</span>與分析</p>
+    <a href="/admin/login.html" class="paywall-btn" id="paywall-btn">前往登入</a>
+    <p class="paywall-meta" id="paywall-meta"></p>
+  </div>
+</div>
 
 <script>
-  // 路徑 → 中文名稱反查（與 admin/access-rules.html 的 PAGE_PRESETS 對齊）
+(function () {
+  // 路徑 → 中文名稱（與 admin/access-rules.html 的 PAGE_PRESETS 對齊）
   const PAGE_LABELS = {
-    "/heatmap.html":       "熱力圖",
-    "/database.html":      "個股資料庫",
-    "/compare.html":       "個股比較",
-    "/ai.html":            "AI 助手",
+    "/heatmap.html":       "市場熱力圖",
+    "/database.html":      "公司資料庫",
+    "/compare.html":       "題材對比",
+    "/ai.html":            "AI 分析",
     "/stock-futures.html": "股期儀表板",
     "/rs.html":            "RS 評分",
     "/rankings.html":      "排行榜",
-    "/today.html":         "今日盤勢",
-    "/memo.html":          "備忘錄",
-    "/index.html":         "首頁",
-    "/":                   "首頁",
+    "/today.html":         "今日焦點",
+    "/memo.html":          "個股 Memo",
+    "/topics.html":        "題材列表",
+    "/limit-up.html":      "漲停分析",
   };
   const ROLE_LABELS = {
-    guest:       "訪客",
     member:      "免費會員",
     premium:     "進階用戶",
     admin:       "管理員",
@@ -146,10 +91,9 @@
   };
 
   function pathLabel(path) {
-    if (!path) return "（未知頁面）";
-    // 雙向歸一化：CF Pages 同一頁有 /foo 跟 /foo.html 兩種 URL 變體
-    // 用兩個查 key 都試一次，避免 map 重複定義
-    const withHtml    = path.endsWith(".html") ? path           : path + ".html";
+    if (!path) return "所有內容";
+    // 雙向歸一化：CF Pages 同一頁有 /foo 跟 /foo.html 兩個 URL 變體
+    const withHtml    = path.endsWith(".html") ? path              : path + ".html";
     const withoutHtml = path.endsWith(".html") ? path.slice(0, -5) : path;
     if (PAGE_LABELS[path])        return PAGE_LABELS[path];
     if (PAGE_LABELS[withHtml])    return PAGE_LABELS[withHtml];
@@ -159,38 +103,55 @@
     if ((m = withHtml.match(/^\/topic\/(.+?)\.html$/)))   return `題材族群「${decodeURIComponent(m[1])}」`;
     if ((m = withHtml.match(/^\/topics\/(.+?)\.html$/)))  return `題材族群「${decodeURIComponent(m[1])}」`;
     if ((m = withHtml.match(/^\/limit-up-(\d{4}-\d{2}-\d{2})\.html$/))) return `漲停分析（${m[1]}）`;
-    if (path.startsWith("/admin/"))                       return "後台管理頁";
-    return "受保護頁面";
+    return "受保護內容";
   }
   function roleLabel(role) { return ROLE_LABELS[role] || role; }
 
   const params = new URLSearchParams(location.search);
-  const fromPath = params.get('from') || '';
-  const need = params.get('need') || 'premium';
+  const fromPath = params.get("from") || "";
+  const need = params.get("need") || "premium";
+  const pageName = pathLabel(fromPath);
 
-  document.getElementById('from-path').textContent = pathLabel(fromPath);
-  document.getElementById('need-role').textContent = roleLabel(need);
+  document.getElementById("page-name").textContent = pageName;
+  document.getElementById("page-name-sub").textContent = pageName;
 
-  fetch('/api/auth/me')
+  fetch("/api/auth/me", { credentials: "same-origin" })
     .then(r => r.json())
     .then(me => {
-      const loginBtn = document.getElementById('login-btn');
-      if (me.authenticated) {
-        document.getElementById('current-role').textContent = roleLabel(me.role);
-        document.getElementById('role-info').style.display = 'block';
-        document.getElementById('member-msg').style.display = 'block';
-        loginBtn.textContent = '聯絡管理員';
-        const subject = `申請升級為${roleLabel(need)}`;
-        const body = `Hi，\n\n我是 ${me.email}，想要存取「${pathLabel(fromPath)}」這個頁面。\n請協助升級為${roleLabel(need)}，謝謝！\n\n— 來源頁面：${fromPath}`;
-        loginBtn.href = `mailto:gogostock1227@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const btn  = document.getElementById("paywall-btn");
+      const meta = document.getElementById("paywall-meta");
+      if (!me.authenticated) {
+        btn.textContent = "前往登入";
+        btn.href = "/admin/login.html?next=" + encodeURIComponent(fromPath);
       } else {
-        document.getElementById('guest-msg').style.display = 'block';
-        loginBtn.href = `/admin/login.html?next=${encodeURIComponent(fromPath)}`;
+        btn.textContent = "聯絡管理員升級";
+        const subject = `申請升級為${roleLabel(need)}`;
+        const body =
+          `Hi，\n\n我是 ${me.email}，希望能存取「${pageName}」這個頁面。\n` +
+          `請協助升級為${roleLabel(need)}，謝謝！\n\n— 來源頁面：${fromPath}`;
+        btn.href = `mailto:gogostock1227@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        meta.textContent = `你目前是「${roleLabel(me.role)}」，需要升級為「${roleLabel(need)}」`;
       }
     })
-    .catch(() => {
-      document.getElementById('guest-msg').style.display = 'block';
-    });
+    .catch(() => { /* fetch 失敗保留預設「前往登入」 */ });
+})();
 </script>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 族群寶 · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-04-30</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "";
+</script>
+<script src="data/search-data.js" defer></script>
+<script src="static/app.js" defer></script>
+<script src="components/login-button.js" defer></script>
+
 </body>
 </html>

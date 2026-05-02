@@ -3235,6 +3235,13 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
     )
     write_text_retry(DIST_DIR / "memo.html", memo_html)
 
+    # Paywall 頁（access_rules middleware 攔截無權限時跳這頁；繼承主站 nav + footer）
+    paywall_html = env.get_template("paywall.html").render(
+        **base_ctx,
+        page="paywall",
+    )
+    write_text_retry(DIST_DIR / "paywall.html", paywall_html)
+
     # 每個題材頁 + 快取 topic_series 供 compare 頁共用
     topic_dir = DIST_DIR / "topic"
     topic_dir.mkdir(exist_ok=True)
@@ -3628,7 +3635,10 @@ def copy_static():
         shutil.rmtree(dst)
     shutil.copytree(STATIC_SRC, dst)
 
-    # admin SPA / 共用組件 / paywall — Cloudflare Pages Functions 後台需要
+    # admin SPA / 共用組件 — Cloudflare Pages Functions 後台需要
+    # 注意：paywall.html 改成 jinja template（site/templates/paywall.html），
+    # 由 build_site.py 內部 env.get_template("paywall.html").render(...) 產出，
+    # 不再從 site/paywall.html 直接 copy。
     for sub in ("admin", "components"):
         src = SITE_DIR / sub
         if not src.exists():
@@ -3637,10 +3647,6 @@ def copy_static():
         if target.exists():
             shutil.rmtree(target)
         shutil.copytree(src, target)
-
-    paywall_src = SITE_DIR / "paywall.html"
-    if paywall_src.exists():
-        shutil.copy2(paywall_src, DIST_DIR / "paywall.html")
 
 
 ROBOTS_TXT_CONTENT = """# 族群寶 robots.txt
