@@ -3879,8 +3879,28 @@ a:hover { color: var(--accent); }
   align-items: end;
 }
 
+.sf-action-grid > * { min-width: 0; }
 .sf-action-grid .sf-date-field {
   min-width: 0;
+}
+.sf-action-grid .sf-add-btn,
+.sf-action-grid .sf-text-btn {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.25;
+}
+
+/* 手機：縮小最小欄寬，允許 2 欄；極窄螢幕單欄 */
+@media (max-width: 640px) {
+  .sf-action-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+  }
+}
+@media (max-width: 380px) {
+  .sf-action-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .sf-action-strong {
