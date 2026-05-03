@@ -359,8 +359,8 @@ def save_history(history: list[dict]) -> None:
     HISTORY.write_text(json.dumps(trimmed, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def load_finlab_history_oi() -> dict[str, dict[str, int]]:
-    """Load FinLab cached OI series（{product_code: {date: oi}}），找不到則回空 dict。"""
+def _load_finlab_history_field(field: str) -> dict[str, dict]:
+    """從 FinLab 歷史 cache 讀取指定欄位（close/open_interest/volume）。"""
     cache = SITE_DIR / ".cache_stock_futures_finlab_history.json"
     if not cache.exists():
         return {}
@@ -370,13 +370,21 @@ def load_finlab_history_oi() -> dict[str, dict[str, int]]:
         return {}
     if not isinstance(raw, dict):
         return {}
-    out: dict[str, dict[str, int]] = {}
+    out: dict[str, dict] = {}
     for code, slot in raw.items():
         if isinstance(slot, dict):
-            oi_map = slot.get("open_interest")
-            if isinstance(oi_map, dict):
-                out[str(code)] = oi_map
+            field_map = slot.get(field)
+            if isinstance(field_map, dict):
+                out[str(code)] = field_map
     return out
+
+
+def load_finlab_history_oi() -> dict[str, dict[str, int]]:
+    return _load_finlab_history_field("open_interest")
+
+
+def load_finlab_history_volume() -> dict[str, dict[str, int]]:
+    return _load_finlab_history_field("volume")
 
 
 def enrich_with_history(rows: dict[str, dict], trade_date: str | None) -> None:
@@ -400,16 +408,25 @@ def enrich_with_history(rows: dict[str, dict], trade_date: str | None) -> None:
 
     # FinLab cache：優先用，解決本地 80 天累積 cache 在第一次跑或假日空白的問題
     finlab_oi = load_finlab_history_oi()
+    finlab_vol = load_finlab_history_volume()
 
     by_code: dict[str, list[dict]] = {}
     for row in history:
         by_code.setdefault(str(row.get("product_code")), []).append(row)
     for code, row in rows.items():
-        series = sorted(by_code.get(code, []), key=lambda r: str(r.get("trade_date")))
-        vols = [to_float(r.get("volume")) for r in series if to_float(r.get("volume")) is not None]
-        last20 = vols[-20:]
-        row["avg_volume_20d"] = round(sum(last20) / len(last20)) if last20 else None
-        row["avg_volume_days"] = len(last20)
+        # 20日均量：優先用 FinLab 365 天歷史；fallback 本地累積 cache
+        fl_vol_series = finlab_vol.get(code) or {}
+        if fl_vol_series:
+            relevant = [d for d in sorted(fl_vol_series.keys()) if d <= trade_date][-20:]
+            vols = [int(fl_vol_series[d]) for d in relevant if fl_vol_series[d] is not None]
+            row["avg_volume_20d"] = round(sum(vols) / len(vols)) if vols else None
+            row["avg_volume_days"] = len(vols)
+        else:
+            series = sorted(by_code.get(code, []), key=lambda r: str(r.get("trade_date")))
+            vols = [to_float(r.get("volume")) for r in series if to_float(r.get("volume")) is not None]
+            last20 = vols[-20:]
+            row["avg_volume_20d"] = round(sum(last20) / len(last20)) if last20 else None
+            row["avg_volume_days"] = len(last20)
 
         # OI 增減：先試 FinLab → 找不到回退到本地 80 天 cache
         oi_change = None

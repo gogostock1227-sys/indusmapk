@@ -757,7 +757,16 @@
         const mult = num(m.contractMultiplier) || 0;
         const lots = num(m.lots) || 0;
         const sideSign = m.direction === 'short' ? -1 : 1;
-        const cost = num(m.holdingPrice);
+        let cost = num(m.holdingPrice);
+        if (cost == null) {
+          const snapPos = (snap.positions || []).find((p) => p.productId === c.productId);
+          if (snapPos) cost = num(snapPos.holdingPrice);
+        }
+        if (cost == null) {
+          const curPos = positions.find((p) => p.productId === c.productId);
+          if (curPos) cost = num(curPos.holdingPrice);
+        }
+        if (cost != null) m.holdingPrice = cost;
         m.futurePrice = c.newPrice;
         m.grossExposure = c.newPrice * mult * lots;
         m.netExposure = sideSign * m.grossExposure;

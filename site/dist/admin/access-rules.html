@@ -100,7 +100,10 @@
     { label: "排行榜",                path: "/rankings.html" },
     { label: "今日盤勢",              path: "/today.html" },
     { label: "備忘錄",                path: "/memo.html" },
-    { label: "漲停分析（所有日期）",  path: "/limit-up*" },
+    { label: "漲停分析歷史（不含最新，推薦）",  path: "/limit-up-*" },
+    { label: "漲停分析（含最新，需配合放行規則）", path: "/limit-up*" },
+    { label: "漲停分析最新（單日，可公開）",   path: "/limit-up.html" },
+    { label: "漲停分析統計總頁",                path: "/limit-up-stats.html" },
     { label: "所有題材族群頁",        path: "/topic/*" },
     { label: "所有個股詳細頁",        path: "/company/*" },
   ];
@@ -135,10 +138,12 @@
       <div class="form-row">
         <label>誰才能看這個頁面？</label>
         <select id="m-role">
+          <option value="guest"   ${r?.required_role==="guest"   ?"selected":""}>完全公開（guest）— 任何人含未登入訪客</option>
           <option value="member"  ${r?.required_role==="member"  ?"selected":""}>免費會員以上（member）</option>
           <option value="premium" ${(r?.required_role==="premium" || isNew) ?"selected":""}>進階用戶以上（premium）— 最常用</option>
           <option value="admin"   ${r?.required_role==="admin"   ?"selected":""}>管理員以上（admin）</option>
         </select>
+        <p class="muted" style="margin-top:0.4rem; font-size:11px">選 <code>guest</code> 是放行用——當你想用 <code>/foo*</code> 鎖整族但要把其中某幾個檔開放給所有人看時用（更具體的規則會 override）。</p>
       </div>
 
       <div class="form-row">
@@ -232,7 +237,9 @@
     { label: "排行榜",                          path: "/rankings.html" },
     { label: "今日盤勢",                        path: "/today.html" },
     { label: "備忘錄",                          path: "/memo.html" },
-    { label: "漲停分析範例（2026-04-30）",       path: "/limit-up-2026-04-30.html" },
+    { label: "漲停分析最新（公開）",              path: "/limit-up.html" },
+    { label: "漲停分析歷史範例（2026-04-30）",    path: "/limit-up-2026-04-30.html" },
+    { label: "漲停分析統計總頁",                  path: "/limit-up-stats.html" },
     { label: "題材族群範例（AI伺服器）",          path: "/topic/AI伺服器.html" },
     { label: "個股範例（2330 台積電）",           path: "/company/2330.html" },
   ];

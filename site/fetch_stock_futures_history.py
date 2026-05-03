@@ -70,9 +70,11 @@ def fetch_via_finlab(codes: set[str], days_back: int) -> tuple[dict, list]:
 
     df_close = fl_data.get("futures_price:收盤價")
     df_oi = fl_data.get("futures_price:未沖銷契約數")
+    df_vol = fl_data.get("futures_price:成交量")
     cutoff = (date.today() - timedelta(days=days_back)).isoformat()
     df_close = df_close[df_close.index >= cutoff]
     df_oi = df_oi[df_oi.index >= cutoff]
+    df_vol = df_vol[df_vol.index >= cutoff]
 
     out: dict[str, dict] = {}
     miss: list[str] = []
@@ -88,6 +90,7 @@ def fetch_via_finlab(codes: set[str], days_back: int) -> tuple[dict, list]:
             continue
         close_series = df_close[col].dropna()
         oi_series = df_oi[col].dropna() if col in df_oi.columns else None
+        vol_series = df_vol[col].dropna() if col in df_vol.columns else None
         if close_series.empty:
             miss.append(code)
             continue
@@ -98,6 +101,12 @@ def fetch_via_finlab(codes: set[str], days_back: int) -> tuple[dict, list]:
             slot["open_interest"] = {
                 str(d.date() if hasattr(d, "date") else d)[:10]: int(v)
                 for d, v in oi_series.items()
+                if v == v  # NaN guard
+            }
+        if vol_series is not None and not vol_series.empty:
+            slot["volume"] = {
+                str(d.date() if hasattr(d, "date") else d)[:10]: int(v)
+                for d, v in vol_series.items()
                 if v == v  # NaN guard
             }
         out[code] = slot
@@ -128,8 +137,9 @@ def main(max_age_hours: float = 22.0, force: bool = False, days_back: int = DEFA
     )
     close_pts = sum(len((v.get("close") or {})) for v in history.values())
     oi_pts = sum(len((v.get("open_interest") or {})) for v in history.values())
+    vol_pts = sum(len((v.get("volume") or {})) for v in history.values())
     print(
-        f"[history] ✓ 寫入 {len(history)} 商品 / 收盤價 {close_pts} 點 / OI {oi_pts} 點 → {OUT.name}"
+        f"[history] ✓ 寫入 {len(history)} 商品 / 收盤價 {close_pts} 點 / OI {oi_pts} 點 / 成交量 {vol_pts} 點 → {OUT.name}"
     )
     if missing:
         head = missing[:10]

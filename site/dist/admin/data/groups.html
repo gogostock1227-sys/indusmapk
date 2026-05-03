@@ -3,65 +3,456 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>族群定義 — indusmapk admin</title>
+<title>族群管理 — indusmapk admin</title>
 <link rel="stylesheet" href="/admin/style.css">
 <style>
+  /* ───────── Header 操作列 ───────── */
+  .page-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;
+  }
+  .page-head .title-block h1 { margin: 0 0 0.35rem; font-size: 1.4rem; font-weight: 600; }
+  .page-head .title-block p { margin: 0; color: var(--muted); font-size: 13px; }
+  .page-head .global-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .change-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 12px;
+    background: rgba(245,158,11,0.15); color: var(--gold);
+    border: 1px solid rgba(245,158,11,0.35);
+  }
+  .change-badge.clean { background: rgba(16,185,129,0.12); color: var(--green); border-color: rgba(16,185,129,0.3); }
+  .change-badge .seg { display: inline-flex; align-items: center; gap: 0.2rem; }
+  .change-badge .seg.add { color: var(--green); }
+  .change-badge .seg.del { color: var(--red); }
+  .change-badge .seg.mod { color: var(--gold); }
+
+  /* ───────── 統計卡 ───────── */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.6rem; margin-bottom: 1rem;
+  }
+  .stat-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.85rem 1rem;
+  }
+  .stat-card .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .stat-card .value { font-size: 1.4rem; font-weight: 600; margin-top: 0.2rem; }
+  .stat-card .sub { color: var(--muted); font-size: 11px; margin-top: 0.2rem; }
+  .stat-card.warn .value { color: var(--gold); }
+  .stat-card.danger .value { color: var(--red); }
+
+  /* ───────── 主編輯區 ───────── */
   .groups-layout {
-    display: grid; grid-template-columns: 280px 1fr; gap: 1rem; height: calc(100vh - 7rem);
+    display: grid; grid-template-columns: 360px 1fr; gap: 1rem;
+    height: calc(100vh - 19rem); min-height: 480px;
   }
   .groups-list-panel, .group-edit-panel {
     background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
     overflow: hidden; display: flex; flex-direction: column;
   }
-  .groups-list-panel header { padding: 0.75rem; border-bottom: 1px solid var(--border); }
-  .groups-list-panel input { width: 100%; }
+  .groups-list-panel header {
+    padding: 0.75rem; border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .groups-list-panel header input,
+  .groups-list-panel header select { width: 100%; }
+
+  .list-toolbar {
+    display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;
+  }
+  .list-toolbar .ck-all { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 12px; color: var(--muted); cursor: pointer; }
+  .list-toolbar .spacer { flex: 1; }
+
+  .selection-bar {
+    padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border);
+    background: rgba(239,68,68,0.08); color: var(--text);
+    display: none; align-items: center; gap: 0.5rem; font-size: 12px;
+  }
+  .selection-bar.show { display: flex; }
+  .selection-bar .count { color: var(--red); font-weight: 600; }
+  .selection-bar .spacer { flex: 1; }
+
   .groups-list { overflow-y: auto; flex: 1; padding: 0.4rem; }
   .group-row {
-    padding: 0.55rem 0.75rem; border-radius: 6px; cursor: pointer;
-    font-size: 13px; display: flex; justify-content: space-between; gap: 0.5rem;
+    padding: 0.55rem 0.6rem; border-radius: 6px; cursor: pointer;
+    font-size: 13px; display: flex; align-items: center; gap: 0.55rem;
   }
   .group-row:hover { background: var(--panel-hover); }
   .group-row.active { background: var(--accent); color: #fff; }
-  .group-row .count { color: var(--muted); font-size: 11px; }
-  .group-row.active .count { color: rgba(255,255,255,0.7); }
+  .group-row .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .group-row .meta { color: var(--muted); font-size: 11px; flex-shrink: 0; }
+  .group-row.active .meta { color: rgba(255,255,255,0.78); }
+  .group-row input[type=checkbox] { width: auto; margin: 0; cursor: pointer; }
+  .group-row .badge-mini {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .group-row .badge-mini.added { background: var(--green); }
+  .group-row .badge-mini.modified { background: var(--gold); }
+  .group-row.empty-grp .name { color: var(--gold); }
+  .group-row.tiny-grp .name::after { content: " (僅 " attr(data-cnt) " 檔)"; color: var(--muted); font-size: 11px; }
 
+  /* ───────── 右側編輯器 ───────── */
   .group-edit-panel { padding: 1.25rem; overflow-y: auto; }
-  .editor-empty { display: grid; place-items: center; flex: 1; color: var(--muted); }
-  .editor-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 0.75rem; flex-wrap: wrap; }
-  .editor-head h3 { margin: 0; font-size: 1.1rem; }
+  .editor-empty {
+    display: grid; place-items: center; flex: 1; color: var(--muted);
+    text-align: center; padding: 2rem; font-size: 14px;
+  }
+  .editor-empty .hint { font-size: 12px; color: var(--muted-2); margin-top: 0.5rem; }
+  .editor-head { margin-bottom: 1rem; }
+  .editor-head .name-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .editor-head .name-input {
+    flex: 1; min-width: 220px; max-width: 460px;
+    background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.55rem 0.75rem;
+    font-size: 1rem; font-weight: 600; font-family: inherit;
+  }
+  .editor-head .name-input:focus { outline: 0; border-color: var(--accent); }
+  .editor-head .name-input.dirty { border-color: var(--gold); }
+  .editor-head .badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .editor-head .badge {
+    padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 11px;
+    background: rgba(148,163,184,0.15); color: var(--muted);
+  }
+  .editor-head .badge.added { background: rgba(16,185,129,0.15); color: var(--green); }
+  .editor-head .badge.modified { background: rgba(245,158,11,0.15); color: var(--gold); }
+
   textarea.tickers {
-    width: 100%; min-height: 50vh; font-family: ui-monospace, SF Mono, Menlo, monospace;
+    width: 100%; min-height: 38vh; font-family: ui-monospace, SF Mono, Menlo, monospace;
     font-size: 13px; background: var(--bg); color: var(--text);
     border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; resize: vertical;
+    line-height: 1.55;
   }
   textarea.tickers:focus { outline: 0; border-color: var(--accent); }
   .editor-help { color: var(--muted); font-size: 12px; margin: 0.5rem 0 0; }
-  .editor-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
-  .dirty-badge { color: var(--gold); font-size: 12px; }
+  .editor-actions {
+    display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; align-items: center;
+  }
+  .editor-actions .spacer { flex: 1; }
+  .btn-purple {
+    background: rgba(168,85,247,0.18); color: #c4b5fd;
+    border: 1px solid rgba(168,85,247,0.55);
+  }
+  .btn-purple:hover { background: rgba(168,85,247,0.28); }
+
+  /* ───────── 新增族群 modal ───────── */
+  .modal h3 .muted { font-size: 12px; font-weight: 400; }
+  .form-help { color: var(--muted); font-size: 12px; margin-top: 0.3rem; }
+  .name-conflict { color: var(--red); font-size: 12px; margin-top: 0.3rem; display: none; }
+  .name-conflict.show { display: block; }
+
+  /* ───────── Save preview modal ───────── */
+  .preview-list { max-height: 50vh; overflow-y: auto; margin: 0.75rem 0; font-size: 13px; }
+  .preview-list .seg-title { font-size: 12px; color: var(--muted); margin: 0.6rem 0 0.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .preview-list ul { list-style: none; margin: 0; padding: 0; }
+  .preview-list li {
+    padding: 0.35rem 0.6rem; border-radius: 4px; margin-bottom: 0.2rem;
+    font-family: ui-monospace, SF Mono, Menlo, monospace; font-size: 12px;
+  }
+  .preview-list li.added { background: rgba(16,185,129,0.10); color: var(--green); }
+  .preview-list li.removed { background: rgba(239,68,68,0.10); color: var(--red); }
+  .preview-list li.modified { background: rgba(245,158,11,0.08); color: var(--gold); }
+  .preview-list li .delta { color: var(--muted); margin-left: 0.4rem; font-size: 11px; }
+
+  /* ───────── v2: 建議審查面板 ───────── */
+  .rec-panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    margin-bottom: 1rem; overflow: hidden;
+  }
+  .rec-panel.empty { display: none; }
+  .rec-panel .rec-head {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1rem; cursor: pointer; user-select: none;
+    border-bottom: 1px solid transparent;
+  }
+  .rec-panel.expanded .rec-head { border-bottom-color: var(--border); }
+  .rec-panel .rec-head h3 {
+    margin: 0; font-size: 0.95rem; font-weight: 600; flex: 1;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .rec-panel .rec-head .pulse {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold); box-shadow: 0 0 0 0 rgba(245,158,11,0.5);
+    animation: pulse 1.6s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(245,158,11,0.55); }
+    70% { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+    100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+  }
+  .rec-panel .rec-head .chevron {
+    transition: transform 0.15s; color: var(--muted); font-size: 12px;
+  }
+  .rec-panel.expanded .rec-head .chevron { transform: rotate(180deg); }
+  .rec-panel .rec-head .meta { color: var(--muted); font-size: 12px; }
+  .rec-panel .rec-body { display: none; padding: 0.5rem 0.5rem 0.75rem; }
+  .rec-panel.expanded .rec-body { display: block; }
+  .rec-panel .rec-actions {
+    display: flex; gap: 0.5rem; padding: 0.5rem 0.75rem 0.25rem;
+    align-items: center; flex-wrap: wrap;
+  }
+  .rec-panel .rec-actions .spacer { flex: 1; }
+  .rec-panel table { width: 100%; }
+  .rec-panel table th, .rec-panel table td { padding: 0.45rem 0.6rem; }
+  .rec-panel table tr { cursor: default; }
+  .rec-panel .col-name { font-weight: 500; color: var(--text); }
+  .rec-panel .col-score {
+    font-family: ui-monospace, SF Mono, Menlo, monospace;
+    color: var(--gold); text-align: right; font-size: 12px;
+  }
+  .rec-panel .col-reason { color: var(--muted); font-size: 12px; }
+  .rec-panel .col-cnt {
+    font-family: ui-monospace, SF Mono, Menlo, monospace;
+    color: var(--muted); text-align: right;
+  }
+  .rec-panel .row-actions { display: flex; gap: 0.3rem; justify-content: flex-end; }
+
+  /* ───────── v2: 列表徽章 ───────── */
+  .group-row .row-tags { display: flex; gap: 0.25rem; flex-shrink: 0; }
+  .row-tag {
+    display: inline-block; padding: 0.05rem 0.4rem; border-radius: 999px;
+    font-size: 10px; font-weight: 500; line-height: 1.5;
+    white-space: nowrap;
+  }
+  .row-tag.macro {
+    background: rgba(245,158,11,0.15); color: var(--gold);
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+  .row-tag.overlap {
+    background: rgba(239,68,68,0.15); color: var(--red);
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .row-tag.huge {
+    background: rgba(168,85,247,0.15); color: var(--purple);
+    border: 1px solid rgba(168,85,247,0.3);
+  }
+  .group-row.active .row-tag { opacity: 0.85; }
+
+  /* ───────── v2: 編輯器鄰居面板 ───────── */
+  .neighbor-panel {
+    margin-top: 1rem; padding: 0.85rem 1rem;
+    background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 6px;
+  }
+  .neighbor-panel.normal {
+    background: rgba(59,130,246,0.06); border-color: rgba(59,130,246,0.25);
+  }
+  .neighbor-panel .np-title {
+    font-size: 12px; color: var(--muted);
+    margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;
+  }
+  .neighbor-panel .np-title strong { color: var(--text); font-weight: 600; }
+  .neighbor-panel ul { list-style: none; margin: 0; padding: 0; }
+  .neighbor-panel li {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.35rem 0.5rem; border-radius: 4px;
+    font-size: 13px; cursor: pointer;
+  }
+  .neighbor-panel li:hover { background: rgba(255,255,255,0.04); }
+  .neighbor-panel li .pct {
+    font-family: ui-monospace, SF Mono, Menlo, monospace;
+    font-size: 12px; color: var(--gold); min-width: 3.5em; text-align: right;
+  }
+  .neighbor-panel li .pct.high { color: var(--red); font-weight: 600; }
+  .neighbor-panel li .pct.med { color: var(--gold); }
+  .neighbor-panel li .pct.low { color: var(--muted); }
+  .neighbor-panel li .arrow { color: var(--muted-2); font-size: 11px; }
+  .neighbor-panel .np-empty { color: var(--muted); font-size: 12px; padding: 0.25rem 0.5rem; }
+
+  /* ───────── v2: 排序下拉 ───────── */
+  .sort-pill {
+    display: inline-flex; gap: 0.3rem; align-items: center;
+    color: var(--muted); font-size: 11px;
+  }
+  .sort-pill select {
+    padding: 0.25rem 0.4rem; font-size: 11px;
+  }
+
+  @media (max-width: 980px) {
+    .groups-layout { grid-template-columns: 1fr; height: auto; }
+    .groups-list-panel { height: 380px; }
+  }
 </style>
 </head>
 <body>
 <div class="layout">
   <aside class="sidebar"></aside>
   <main class="main">
-    <h1>族群定義</h1>
-    <p class="muted" style="margin-top:-0.5rem">編輯 <code class="mono">data/concept_groups.json</code>。每個族群一個 ticker 列表（一行一個）。改完按發布觸發 GitHub Actions 重 build。</p>
+
+    <div class="page-head">
+      <div class="title-block">
+        <h1>族群管理</h1>
+        <p>新增、刪除或編輯 <code class="mono">data/concept_groups.json</code> 中的概念股族群。所有改動會以單一 GitHub commit 提交，並自動寫入操作紀錄。</p>
+      </div>
+      <div class="global-actions">
+        <span id="change-badge" class="change-badge clean" title="目前未儲存的改動">
+          <span class="seg">尚未變更</span>
+        </span>
+        <button class="btn-secondary" id="g-reload" title="重新從 GitHub 載入">重新載入</button>
+        <button id="g-save" disabled title="把目前所有改動一次提交到 GitHub">儲存全部變更</button>
+      </div>
+    </div>
+
+    <!-- 統計卡 -->
+    <div class="stat-grid" id="stat-grid">
+      <div class="stat-card"><div class="label">總族群數</div><div class="value" id="stat-total">—</div></div>
+      <div class="stat-card"><div class="label">總成分股</div><div class="value" id="stat-tickers">—</div><div class="sub">含跨族群重複計算</div></div>
+      <div class="stat-card warn"><div class="label">空族群</div><div class="value" id="stat-empty">—</div><div class="sub">建議刪除</div></div>
+      <div class="stat-card"><div class="label">最大族群</div><div class="value" id="stat-largest">—</div><div class="sub" id="stat-largest-name">—</div></div>
+      <div class="stat-card" id="stat-card-redundant" title="點擊切換到「高重疊」過濾" style="cursor:pointer">
+        <div class="label">冗餘對</div>
+        <div class="value" id="stat-redundant">—</div>
+        <div class="sub">Jaccard ≥ 70% 的族群對</div>
+      </div>
+      <div class="stat-card"><div class="label">本次改動</div><div class="value" id="stat-dirty">0</div><div class="sub" id="stat-dirty-detail">尚未變更</div></div>
+    </div>
+
+    <!-- v2: 建議審查 TOP 10 面板 -->
+    <div class="rec-panel empty" id="rec-panel">
+      <div class="rec-head" id="rec-head">
+        <h3><span class="pulse" aria-hidden="true"></span>建議審查 TOP <span id="rec-count">10</span></h3>
+        <span class="meta" id="rec-meta">綜合考量「檔數過大、跨族群重疊、籠統命名」三項指標</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="rec-body">
+        <div class="rec-actions">
+          <span class="muted" style="font-size:12px">提示：點族群名直接編輯、或用「全選」一鍵勾選後批量刪除。</span>
+          <span class="spacer"></span>
+          <button class="btn-sm btn-secondary" id="rec-select-all">全部勾選</button>
+          <button class="btn-sm btn-secondary" id="rec-refresh" title="重新計算（資料異動後）">重算</button>
+        </div>
+        <div id="rec-table-wrap" style="padding:0 0.5rem 0.5rem">
+          <div class="muted" style="padding:0.5rem">計算中…</div>
+        </div>
+      </div>
+    </div>
 
     <div class="groups-layout">
+
+      <!-- 左欄：族群清單 -->
       <div class="groups-list-panel">
         <header>
-          <input type="search" id="q" placeholder="搜尋族群…">
+          <input type="search" id="q" placeholder="搜尋族群名稱或 ticker（如 2330）…" autocomplete="off">
+          <div class="list-toolbar">
+            <select id="filter-mode" title="過濾條件" style="flex:1">
+              <option value="all">顯示全部</option>
+              <option value="empty">僅空族群</option>
+              <option value="tiny">少於 3 檔</option>
+              <optgroup label="── 大型族群 ──">
+                <option value="size30">≥ 30 檔</option>
+                <option value="size50">≥ 50 檔</option>
+                <option value="size100">≥ 100 檔</option>
+                <option value="custom">自訂門檻 N…</option>
+              </optgroup>
+              <optgroup label="── 籠統 / 冗餘 ──">
+                <option value="macro">含籠統關鍵字</option>
+                <option value="overlap">高重疊（Jaccard ≥ 70%）</option>
+                <option value="recommended">出現在建議審查 TOP 10</option>
+              </optgroup>
+              <optgroup label="── 改動 ──">
+                <option value="dirty">僅未儲存</option>
+                <option value="added">僅新增</option>
+              </optgroup>
+            </select>
+            <button class="btn-sm" id="btn-new" title="新增一個族群">＋ 新增</button>
+          </div>
+          <div class="list-toolbar">
+            <span class="sort-pill">
+              排序
+              <select id="sort-mode" title="排序方式">
+                <option value="name">按名稱</option>
+                <option value="count-desc" selected>檔數多 → 少</option>
+                <option value="count-asc">檔數少 → 多</option>
+                <option value="score-desc">建議分數高 → 低</option>
+              </select>
+            </span>
+            <span class="spacer"></span>
+            <span class="muted" style="font-size:11px" id="visible-count">—</span>
+          </div>
+          <div class="list-toolbar">
+            <label class="ck-all"><input type="checkbox" id="ck-all"> 全選顯示中</label>
+            <span class="spacer"></span>
+            <span class="muted" style="font-size:11px" id="custom-n-label"></span>
+          </div>
         </header>
+
+        <div class="selection-bar" id="selection-bar">
+          <span>已勾選 <span class="count" id="sel-count">0</span> 個族群</span>
+          <span class="spacer"></span>
+          <button class="btn-sm btn-secondary" id="btn-clear-sel">取消勾選</button>
+          <button class="btn-sm btn-danger" id="btn-bulk-delete">批量刪除</button>
+        </div>
+
         <div class="groups-list" id="groups-list">
           <div class="muted" style="padding:0.75rem">載入中…</div>
         </div>
       </div>
 
+      <!-- 右欄：編輯器 -->
       <div class="group-edit-panel" id="edit-panel">
-        <div class="editor-empty">← 從左側選一個族群開始編輯</div>
+        <div class="editor-empty">
+          <div>← 從左側選一個族群開始編輯</div>
+          <div class="hint">或點上方「＋ 新增族群」建立新的概念股清單</div>
+        </div>
       </div>
+
     </div>
   </main>
+</div>
+
+<!-- 新增族群 modal -->
+<div id="new-modal-backdrop" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h3>新增族群 <span class="muted">會出現在前台族群清單</span></h3>
+    <div class="form-row">
+      <label>族群名稱</label>
+      <input type="text" id="nm-name" placeholder="例：低軌衛星概念股">
+      <div class="form-help">建議用「XX 概念股」「YY 設備」「ZZ 鏈」等可辨識的名稱。</div>
+      <div class="name-conflict" id="nm-conflict">⚠ 此族群名稱已存在</div>
+    </div>
+    <div class="form-row">
+      <label>成分股 ticker（一行一個，或用空白／逗號／頓號分隔）</label>
+      <textarea id="nm-tickers" placeholder="2330&#10;2317&#10;3034" style="min-height:140px; font-family: ui-monospace, SF Mono, Menlo, monospace; font-size: 13px;"></textarea>
+      <div class="form-help">系統會自動去除空白、去除重複，並按輸入順序保留。可留空，事後再編輯。</div>
+    </div>
+    <div class="actions">
+      <button class="btn-secondary" id="nm-cancel">取消</button>
+      <button id="nm-confirm">建立族群</button>
+    </div>
+  </div>
+</div>
+
+<!-- v2: 自訂門檻 N modal -->
+<div id="customn-modal-backdrop" class="modal-backdrop" style="display:none">
+  <div class="modal" style="width:min(420px,92vw)">
+    <h3>自訂大型族群門檻 <span class="muted">≥ N 檔</span></h3>
+    <div class="form-row">
+      <label>請輸入最小 ticker 數（過濾出 ≥ N 檔的族群）</label>
+      <input type="number" id="cn-input" min="1" max="500" value="50" style="font-family:ui-monospace,SF Mono,Menlo,monospace">
+      <div class="form-help">參考：本資料集中 ≥30 檔有 46 群、≥50 檔有 21 群、≥100 檔有 3 群。</div>
+    </div>
+    <div class="actions">
+      <button class="btn-secondary" id="cn-cancel">取消</button>
+      <button id="cn-confirm">套用</button>
+    </div>
+  </div>
+</div>
+
+<!-- 儲存預覽 modal -->
+<div id="preview-modal-backdrop" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h3>儲存變更預覽 <span class="muted">確認無誤後提交 GitHub commit</span></h3>
+    <div id="preview-summary" class="muted" style="margin:0 0 0.5rem 0; font-size:13px"></div>
+    <div class="preview-list" id="preview-list"></div>
+    <div class="form-row">
+      <label>提交說明（可選，會寫入 commit message 與操作紀錄）</label>
+      <input type="text" id="prev-summary" placeholder="例：清理停止追蹤的舊概念股族群">
+    </div>
+    <div class="actions">
+      <button class="btn-secondary" id="prev-cancel">返回</button>
+      <button id="prev-confirm">確認儲存</button>
+    </div>
+  </div>
 </div>
 
 <script src="/admin/app.js"></script>
@@ -69,77 +460,656 @@
 (async function () {
   await IM.renderSidebar("data-groups");
   const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-  let allData = {};   // {group: [tickers]}
-  let sha = null;
+  // ───────────── 狀態 ─────────────
+  let allData = {};          // 當前狀態 { group: [tickers] }
+  let original = {};         // 載入時 snapshot，用來比對 diff
   let activeGroup = null;
-  let dirty = {};     // {group: true} 標記哪些族群被改過
+  let selected = new Set();  // checkbox 多選
+  let nameRenameMap = {};    // { newName: originalName } — 追蹤被改名的族群
+  let visibleGroups = [];    // 當前過濾後顯示的族群名稱
 
+  // ───────────── v2: 籠統 / 重疊 / 推薦 狀態 ─────────────
+  // 「籠統名稱」關鍵字 — 命中即視為較難辨識的廣義族群
+  const BLANKET_KEYWORDS = ["半導體", "AI", "概念股", "相關", "鏈", "電子", "產業"];
+  // Jaccard 鄰居索引：group → [{ peer, jaccard, intersect }]，每群保留 top-5
+  let jaccardMap = new Map();
+  // 該族群跟最高鄰居的 jaccard（取 max）— 給評分用
+  let maxJaccardOf = new Map();
+  // 全域 Jaccard ≥ 0.7 的「冗餘對」總數
+  let redundantPairCount = 0;
+  // 推薦審查 TOP 10 結果
+  let recommendList = [];
+  // 自訂 size 門檻
+  let customSizeN = 50;
+
+  // ───────────── 核心：Diff 計算 ─────────────
+  function computeDiff() {
+    const added = [];
+    const removed = [];
+    const modified = [];   // { name, tickerDelta, renamedFrom? }
+
+    const origKeys = new Set(Object.keys(original));
+    const currKeys = new Set(Object.keys(allData));
+
+    // renamedFrom：透過 nameRenameMap 找回原名
+    for (const name of currKeys) {
+      const fromName = nameRenameMap[name];
+      if (fromName && origKeys.has(fromName)) {
+        // 改名 → 視為 modified
+        const before = original[fromName] || [];
+        const after = allData[name] || [];
+        if (fromName !== name || !arrayEqual(before, after)) {
+          modified.push({
+            name, renamedFrom: fromName,
+            tickerDelta: after.length - before.length,
+            beforeCount: before.length, afterCount: after.length,
+          });
+        }
+        continue;
+      }
+      if (origKeys.has(name)) {
+        const before = original[name] || [];
+        const after = allData[name] || [];
+        if (!arrayEqual(before, after)) {
+          modified.push({
+            name,
+            tickerDelta: after.length - before.length,
+            beforeCount: before.length, afterCount: after.length,
+          });
+        }
+      } else {
+        added.push({ name, count: (allData[name] || []).length });
+      }
+    }
+    // 算 removed：原本有但現在沒有，且沒被改名到別的 key
+    const renamedOrigSet = new Set(Object.values(nameRenameMap));
+    for (const name of origKeys) {
+      if (!currKeys.has(name) && !renamedOrigSet.has(name)) {
+        removed.push({ name, count: (original[name] || []).length });
+      }
+    }
+    return { added, removed, modified };
+  }
+
+  function arrayEqual(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
+  }
+
+  function dirtyCount() {
+    const d = computeDiff();
+    return d.added.length + d.removed.length + d.modified.length;
+  }
+
+  // ───────────── v2: Jaccard 鄰居矩陣 ─────────────
+  // 只算「兩邊都 ≥ MIN_SIZE_FOR_JACCARD」的 pair，控制成本
+  const MIN_SIZE_FOR_JACCARD = 10;
+  const JACCARD_NEIGHBOR_TOPK = 5;
+  const JACCARD_REDUNDANT_THRESHOLD = 0.7;
+
+  function computeJaccard() {
+    jaccardMap = new Map();
+    maxJaccardOf = new Map();
+    redundantPairCount = 0;
+
+    // 1) 預建 ticker Set，過濾出 ≥ MIN_SIZE 的族群
+    const sets = [];
+    for (const [name, tickers] of Object.entries(allData)) {
+      if ((tickers || []).length >= MIN_SIZE_FOR_JACCARD) {
+        sets.push({ name, set: new Set(tickers) });
+      }
+    }
+
+    // 2) 暫存：每群的全部鄰居（後面再排序取 top-K）
+    const neighborsTmp = new Map(sets.map(s => [s.name, []]));
+
+    for (let i = 0; i < sets.length; i++) {
+      const a = sets[i];
+      for (let j = i + 1; j < sets.length; j++) {
+        const b = sets[j];
+        // 計算交集
+        const small = a.set.size <= b.set.size ? a.set : b.set;
+        const big = small === a.set ? b.set : a.set;
+        let inter = 0;
+        for (const t of small) if (big.has(t)) inter++;
+        if (inter === 0) continue;
+        const union = a.set.size + b.set.size - inter;
+        const jac = inter / union;
+        if (jac < 0.05) continue; // 噪音剪枝
+        neighborsTmp.get(a.name).push({ peer: b.name, jaccard: jac, intersect: inter });
+        neighborsTmp.get(b.name).push({ peer: a.name, jaccard: jac, intersect: inter });
+        if (jac >= JACCARD_REDUNDANT_THRESHOLD) redundantPairCount++;
+      }
+    }
+
+    // 3) 排序取 top-K + 記錄 max
+    for (const [name, list] of neighborsTmp) {
+      list.sort((x, y) => y.jaccard - x.jaccard);
+      const top = list.slice(0, JACCARD_NEIGHBOR_TOPK);
+      jaccardMap.set(name, top);
+      maxJaccardOf.set(name, top.length > 0 ? top[0].jaccard : 0);
+    }
+  }
+
+  function topNeighbor(group) {
+    const list = jaccardMap.get(group);
+    return list && list.length > 0 ? list[0] : null;
+  }
+
+  function isMacroName(name) {
+    return BLANKET_KEYWORDS.some(kw => name.includes(kw));
+  }
+
+  function isRedundant(group) {
+    return (maxJaccardOf.get(group) || 0) >= JACCARD_REDUNDANT_THRESHOLD;
+  }
+
+  function fmtPct(v) {
+    return Math.round(v * 100) + "%";
+  }
+
+  // ───────────── v2: 推薦審查評分（三軸加權） ─────────────
+  function scoreGroup(name) {
+    const cnt = (allData[name] || []).length;
+    // size：100 檔 = 1.0、150+ = 1.5（上限）
+    const sizeScore = Math.min(cnt / 100, 1.5);
+    // overlap：取最大鄰居 Jaccard
+    const overlapScore = maxJaccardOf.get(name) || 0;
+    // keyword：命中籠統關鍵字 +1，否則 0
+    const keywordScore = isMacroName(name) ? 1 : 0;
+    const total = 0.4 * sizeScore + 0.4 * overlapScore + 0.2 * keywordScore;
+    return { total, sizeScore, overlapScore, keywordScore, cnt };
+  }
+
+  function reasonFor(name, s) {
+    const parts = [];
+    if (s.cnt >= 100) parts.push(`${s.cnt} 檔過大`);
+    else if (s.cnt >= 50) parts.push(`${s.cnt} 檔偏大`);
+    if (s.overlapScore >= JACCARD_REDUNDANT_THRESHOLD) {
+      const top = topNeighbor(name);
+      if (top) parts.push(`與「${top.peer}」${fmtPct(top.jaccard)} 重疊`);
+    } else if (s.overlapScore >= 0.4) {
+      const top = topNeighbor(name);
+      if (top) parts.push(`與「${top.peer}」${fmtPct(top.jaccard)} 部分重疊`);
+    }
+    if (s.keywordScore > 0) {
+      const hit = BLANKET_KEYWORDS.find(kw => name.includes(kw));
+      parts.push(`含籠統字「${hit}」`);
+    }
+    return parts.length ? parts.join("、") : "綜合分數較高，建議檢視";
+  }
+
+  function computeRecommend(topN = 10) {
+    const scored = [];
+    for (const name of Object.keys(allData)) {
+      const cnt = (allData[name] || []).length;
+      if (cnt < 20) continue;  // 太小不入榜
+      const s = scoreGroup(name);
+      scored.push({ name, ...s });
+    }
+    scored.sort((a, b) => b.total - a.total);
+    recommendList = scored.slice(0, topN);
+  }
+
+  // ───────────── 載入 ─────────────
   async function load() {
     try {
       const r = await IM.fetchJson("/api/data/concept-groups");
       allData = r.data;
-      sha = r.sha;
-      renderList();
+      original = JSON.parse(JSON.stringify(r.data));
+      nameRenameMap = {};
+      selected.clear();
+      activeGroup = null;
+      // v2: 載入後一次算 Jaccard + 推薦
+      const t0 = performance.now();
+      computeJaccard();
+      computeRecommend(10);
+      console.log(`[groups v2] Jaccard + recommend computed in ${(performance.now() - t0).toFixed(1)}ms`);
+      renderAll();
     } catch (e) {
       $("#groups-list").innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
+      IM.flash("載入失敗：" + e.message, "error");
     }
   }
 
-  function renderList() {
-    const q = $("#q").value.trim().toLowerCase();
-    const groups = Object.keys(allData)
-      .filter(g => !q || g.toLowerCase().includes(q))
-      .sort((a, b) => a.localeCompare(b, "zh-Hant"));
-    if (groups.length === 0) {
-      $("#groups-list").innerHTML = '<div class="empty">沒有符合條件的族群</div>';
+  // 即時觸發重算（族群增刪改時呼叫）
+  function recomputeAnalytics() {
+    computeJaccard();
+    computeRecommend(10);
+  }
+
+  // ───────────── 渲染：總控 ─────────────
+  function renderAll() {
+    renderStats();
+    renderRecommendPanel();
+    renderList();
+    renderChangeBadge();
+    renderSelectionBar();
+    if (activeGroup && !(activeGroup in allData)) {
+      activeGroup = null;
+    }
+    if (activeGroup) renderEditor(activeGroup);
+    else renderEmptyEditor();
+  }
+
+  // ───────────── 渲染：統計卡 ─────────────
+  function renderStats() {
+    const groups = Object.keys(allData);
+    const tickerCounts = groups.map(g => allData[g].length);
+    const totalTickers = tickerCounts.reduce((a, b) => a + b, 0);
+    const emptyCount = tickerCounts.filter(c => c === 0).length;
+    let largestIdx = -1, largestCount = -1;
+    tickerCounts.forEach((c, i) => { if (c > largestCount) { largestCount = c; largestIdx = i; } });
+
+    $("#stat-total").textContent = groups.length.toLocaleString();
+    $("#stat-tickers").textContent = totalTickers.toLocaleString();
+    $("#stat-empty").textContent = emptyCount.toLocaleString();
+    $("#stat-empty").parentElement.classList.toggle("danger", emptyCount > 0);
+    $("#stat-empty").parentElement.classList.toggle("warn", emptyCount === 0);
+    $("#stat-largest").textContent = largestIdx >= 0 ? largestCount + " 檔" : "—";
+    $("#stat-largest-name").textContent = largestIdx >= 0 ? groups[largestIdx] : "—";
+
+    // v2: 冗餘對 stat
+    $("#stat-redundant").textContent = redundantPairCount.toLocaleString();
+    $("#stat-card-redundant").classList.toggle("danger", redundantPairCount > 0);
+    $("#stat-card-redundant").classList.toggle("warn", redundantPairCount === 0);
+
+    const d = computeDiff();
+    const total = d.added.length + d.removed.length + d.modified.length;
+    $("#stat-dirty").textContent = total.toLocaleString();
+    if (total === 0) {
+      $("#stat-dirty-detail").textContent = "尚未變更";
+      $("#stat-dirty").parentElement.classList.remove("warn", "danger");
+    } else {
+      const parts = [];
+      if (d.added.length) parts.push(`+${d.added.length} 新增`);
+      if (d.removed.length) parts.push(`−${d.removed.length} 刪除`);
+      if (d.modified.length) parts.push(`✏ ${d.modified.length} 修改`);
+      $("#stat-dirty-detail").textContent = parts.join("、");
+      $("#stat-dirty").parentElement.classList.add("warn");
+    }
+  }
+
+  // ───────────── 渲染：dirty badge ─────────────
+  function renderChangeBadge() {
+    const d = computeDiff();
+    const total = d.added.length + d.removed.length + d.modified.length;
+    const badge = $("#change-badge");
+    if (total === 0) {
+      badge.className = "change-badge clean";
+      badge.innerHTML = `<span class="seg">尚未變更</span>`;
+      $("#g-save").disabled = true;
+      $("#g-save").textContent = "儲存全部變更";
+    } else {
+      badge.className = "change-badge";
+      const parts = [];
+      if (d.added.length) parts.push(`<span class="seg add">＋${d.added.length} 新增</span>`);
+      if (d.removed.length) parts.push(`<span class="seg del">－${d.removed.length} 刪除</span>`);
+      if (d.modified.length) parts.push(`<span class="seg mod">✏ ${d.modified.length} 修改</span>`);
+      badge.innerHTML = parts.join(" · ");
+      $("#g-save").disabled = false;
+      $("#g-save").textContent = `儲存全部變更（${total}）`;
+    }
+  }
+
+  // ───────────── v2: 推薦審查面板 ─────────────
+  function renderRecommendPanel() {
+    const wrap = $("#rec-table-wrap");
+    const panel = $("#rec-panel");
+    if (!recommendList || recommendList.length === 0) {
+      panel.classList.add("empty");
       return;
     }
-    $("#groups-list").innerHTML = groups.map(g => {
-      const cnt = allData[g].length;
-      const isActive = g === activeGroup;
-      const isDirty = dirty[g];
-      return `<div class="group-row ${isActive ? "active" : ""}" data-group="${g}">
-        <span>${g}${isDirty ? ' <span class="dirty-badge">●</span>' : ""}</span>
-        <span class="count">${cnt}</span>
-      </div>`;
+    panel.classList.remove("empty");
+
+    // 還原摺疊狀態（記憶 localStorage）
+    const collapsed = localStorage.getItem("imrec-collapsed") === "1";
+    panel.classList.toggle("expanded", !collapsed);
+    $("#rec-count").textContent = recommendList.length;
+
+    const rows = recommendList.map((it, i) => {
+      const reason = reasonFor(it.name, it);
+      const isSel = selected.has(it.name);
+      return `<tr data-rec-name="${escapeAttr(it.name)}">
+        <td><input type="checkbox" class="rec-ck" data-name="${escapeAttr(it.name)}" ${isSel ? "checked" : ""}></td>
+        <td class="muted" style="text-align:right; width:32px">${i + 1}</td>
+        <td class="col-name">${escapeHtml(it.name)}</td>
+        <td class="col-cnt">${it.cnt} 檔</td>
+        <td class="col-score">${it.total.toFixed(2)}</td>
+        <td class="col-reason">${escapeHtml(reason)}</td>
+        <td class="row-actions">
+          <button class="btn-sm btn-secondary rec-edit" data-name="${escapeAttr(it.name)}" title="進入該族群編輯">編輯</button>
+        </td>
+      </tr>`;
     }).join("");
-    document.querySelectorAll(".group-row").forEach(r => {
-      r.addEventListener("click", () => openEditor(r.dataset.group));
+
+    wrap.innerHTML = `
+      <table>
+        <thead><tr>
+          <th style="width:36px"></th>
+          <th>#</th>
+          <th>族群名稱</th>
+          <th class="right">檔數</th>
+          <th class="right">建議分</th>
+          <th>主要原因</th>
+          <th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+    // 綁事件
+    $$(".rec-edit").forEach(b => {
+      b.addEventListener("click", () => openEditor(b.dataset.name));
     });
+    $$(".rec-ck").forEach(c => {
+      c.addEventListener("change", () => {
+        if (c.checked) selected.add(c.dataset.name);
+        else selected.delete(c.dataset.name);
+        renderSelectionBar();
+        renderList();
+      });
+    });
+  }
+
+  // ───────────── 渲染：清單 ─────────────
+  function renderList() {
+    const q = $("#q").value.trim().toLowerCase();
+    const mode = $("#filter-mode").value;
+    const sortMode = $("#sort-mode").value;
+    const d = computeDiff();
+    const addedSet = new Set(d.added.map(x => x.name));
+    const modifiedSet = new Set(d.modified.map(x => x.name));
+    const recommendSet = new Set(recommendList.map(x => x.name));
+
+    let groups = Object.keys(allData);
+
+    // 過濾
+    if (q) {
+      groups = groups.filter(g => {
+        if (g.toLowerCase().includes(q)) return true;
+        return (allData[g] || []).some(t => t.toLowerCase().includes(q));
+      });
+    }
+    if (mode === "empty") groups = groups.filter(g => allData[g].length === 0);
+    else if (mode === "tiny") groups = groups.filter(g => allData[g].length > 0 && allData[g].length < 3);
+    else if (mode === "size30") groups = groups.filter(g => allData[g].length >= 30);
+    else if (mode === "size50") groups = groups.filter(g => allData[g].length >= 50);
+    else if (mode === "size100") groups = groups.filter(g => allData[g].length >= 100);
+    else if (mode === "custom") groups = groups.filter(g => allData[g].length >= customSizeN);
+    else if (mode === "macro") groups = groups.filter(g => isMacroName(g));
+    else if (mode === "overlap") groups = groups.filter(g => isRedundant(g));
+    else if (mode === "recommended") groups = groups.filter(g => recommendSet.has(g));
+    else if (mode === "dirty") groups = groups.filter(g => addedSet.has(g) || modifiedSet.has(g));
+    else if (mode === "added") groups = groups.filter(g => addedSet.has(g));
+
+    // 排序
+    if (sortMode === "name") {
+      groups.sort((a, b) => a.localeCompare(b, "zh-Hant"));
+    } else if (sortMode === "count-desc") {
+      groups.sort((a, b) => allData[b].length - allData[a].length || a.localeCompare(b, "zh-Hant"));
+    } else if (sortMode === "count-asc") {
+      groups.sort((a, b) => allData[a].length - allData[b].length || a.localeCompare(b, "zh-Hant"));
+    } else if (sortMode === "score-desc") {
+      groups.sort((a, b) => scoreGroup(b).total - scoreGroup(a).total);
+    }
+    // 在 dirty 模式或一般模式下，把新增/已修改的擠到最前（不影響其他模式）
+    if (sortMode === "name" || sortMode === "count-desc" || sortMode === "count-asc") {
+      groups.sort((a, b) => {
+        const ra = addedSet.has(a) ? 0 : modifiedSet.has(a) ? 1 : 2;
+        const rb = addedSet.has(b) ? 0 : modifiedSet.has(b) ? 1 : 2;
+        return ra - rb;
+      });
+    }
+
+    visibleGroups = groups;
+    $("#visible-count").textContent = `顯示 ${groups.length} / ${Object.keys(allData).length}`;
+
+    if (groups.length === 0) {
+      $("#groups-list").innerHTML = '<div class="empty">沒有符合條件的族群</div>';
+    } else {
+      $("#groups-list").innerHTML = groups.map(g => {
+        const cnt = allData[g].length;
+        const isActive = g === activeGroup;
+        const isAdded = addedSet.has(g);
+        const isMod = !isAdded && modifiedSet.has(g);
+        const isSel = selected.has(g);
+        const empty = cnt === 0 ? "empty-grp" : "";
+        const tiny = (cnt > 0 && cnt < 3) ? "tiny-grp" : "";
+        const badgeClass = isAdded ? "added" : (isMod ? "modified" : "");
+        const dirtyDot = badgeClass ? `<span class="badge-mini ${badgeClass}" title="${isAdded ? '新增' : '已修改'}"></span>` : '';
+
+        // v2: 行內徽章（重疊／籠統／巨型）
+        const tags = [];
+        if (cnt >= 100) tags.push(`<span class="row-tag huge" title="超大族群（≥100 檔）">巨</span>`);
+        else if (cnt >= 50) tags.push(`<span class="row-tag huge" title="大型族群（≥50 檔）">大</span>`);
+        if (isRedundant(g)) {
+          const top = topNeighbor(g);
+          if (top) tags.push(`<span class="row-tag overlap" title="與「${top.peer}」${fmtPct(top.jaccard)} 重疊">⚠ ${fmtPct(top.jaccard)}</span>`);
+        }
+        if (isMacroName(g)) tags.push(`<span class="row-tag macro" title="名稱含籠統關鍵字">籠統</span>`);
+        const tagsHtml = tags.length ? `<span class="row-tags">${tags.join("")}</span>` : "";
+
+        return `<div class="group-row ${isActive ? "active" : ""} ${empty} ${tiny}" data-group="${g}" data-cnt="${cnt}">
+          <input type="checkbox" data-ck="${g}" ${isSel ? "checked" : ""}>
+          ${dirtyDot}
+          <span class="name">${escapeHtml(g)}</span>
+          ${tagsHtml}
+          <span class="meta">${cnt}</span>
+        </div>`;
+      }).join("");
+
+      // 綁事件
+      $$(".group-row").forEach(r => {
+        r.addEventListener("click", (e) => {
+          if (e.target.matches('input[type=checkbox]')) return;
+          openEditor(r.dataset.group);
+        });
+      });
+      $$('.group-row input[type=checkbox]').forEach(c => {
+        c.addEventListener("change", (e) => {
+          const name = c.dataset.ck;
+          if (c.checked) selected.add(name); else selected.delete(name);
+          renderSelectionBar();
+          syncCkAll();
+        });
+      });
+    }
+    syncCkAll();
+  }
+
+  function syncCkAll() {
+    if (visibleGroups.length === 0) {
+      $("#ck-all").checked = false;
+      $("#ck-all").indeterminate = false;
+      return;
+    }
+    const visSelected = visibleGroups.filter(g => selected.has(g)).length;
+    if (visSelected === 0) {
+      $("#ck-all").checked = false; $("#ck-all").indeterminate = false;
+    } else if (visSelected === visibleGroups.length) {
+      $("#ck-all").checked = true; $("#ck-all").indeterminate = false;
+    } else {
+      $("#ck-all").checked = false; $("#ck-all").indeterminate = true;
+    }
+  }
+
+  function renderSelectionBar() {
+    const n = selected.size;
+    $("#sel-count").textContent = n;
+    $("#selection-bar").classList.toggle("show", n > 0);
+  }
+
+  // ───────────── 編輯器 ─────────────
+  function renderEmptyEditor() {
+    $("#edit-panel").innerHTML = `
+      <div class="editor-empty">
+        <div>← 從左側選一個族群開始編輯</div>
+        <div class="hint">或點上方「＋ 新增族群」建立新的概念股清單</div>
+      </div>`;
   }
 
   function openEditor(group) {
     activeGroup = group;
     renderList();
+    renderEditor(group);
+  }
+
+  function renderEditor(group) {
     const tickers = allData[group] || [];
+    const d = computeDiff();
+    const isAdded = d.added.some(x => x.name === group);
+    const modEntry = d.modified.find(x => x.name === group);
+    const isMod = !!modEntry;
+
+    const badges = [];
+    if (isAdded) badges.push(`<span class="badge added">新增族群</span>`);
+    if (isMod) {
+      const renamedFrom = modEntry.renamedFrom;
+      const delta = modEntry.tickerDelta;
+      const txt = renamedFrom
+        ? `已修改 · 由「${renamedFrom}」改名${delta !== 0 ? `、ticker ${delta > 0 ? '+' : ''}${delta}` : ''}`
+        : `已修改 · ticker ${delta > 0 ? '+' : ''}${delta}（${modEntry.beforeCount} → ${modEntry.afterCount}）`;
+      badges.push(`<span class="badge modified">${txt}</span>`);
+    }
+
+    // v2: 內建情報徽章 — 巨型 / 籠統 / 重疊
+    const intelBadges = [];
+    if (tickers.length >= 100) intelBadges.push(`<span class="badge" style="background:rgba(168,85,247,0.15); color:var(--purple)">巨型族群（${tickers.length} 檔）</span>`);
+    else if (tickers.length >= 50) intelBadges.push(`<span class="badge" style="background:rgba(168,85,247,0.15); color:var(--purple)">大型族群（${tickers.length} 檔）</span>`);
+    if (isMacroName(group)) {
+      const hit = BLANKET_KEYWORDS.find(kw => group.includes(kw));
+      intelBadges.push(`<span class="badge" style="background:rgba(245,158,11,0.15); color:var(--gold)">籠統名稱（含「${hit}」）</span>`);
+    }
+    if (isRedundant(group)) {
+      const top = topNeighbor(group);
+      if (top) intelBadges.push(`<span class="badge" style="background:rgba(239,68,68,0.15); color:var(--red)">⚠ 與「${top.peer}」${fmtPct(top.jaccard)} 重疊</span>`);
+    }
+
+    // v2: 鄰居面板（jaccardMap top-5）
+    const neighbors = jaccardMap.get(group) || [];
+    let neighborHtml = "";
+    if (neighbors.length > 0) {
+      const isHigh = neighbors[0].jaccard >= JACCARD_REDUNDANT_THRESHOLD;
+      const items = neighbors.map(n => {
+        const lvl = n.jaccard >= 0.7 ? "high" : (n.jaccard >= 0.4 ? "med" : "low");
+        return `<li data-jump="${escapeAttr(n.peer)}">
+          <span class="pct ${lvl}">${fmtPct(n.jaccard)}</span>
+          <span style="flex:1">${escapeHtml(n.peer)}</span>
+          <span class="muted" style="font-size:11px">交集 ${n.intersect} 檔</span>
+          <span class="arrow">→ 編輯</span>
+        </li>`;
+      }).join("");
+      neighborHtml = `
+        <div class="neighbor-panel ${isHigh ? "" : "normal"}">
+          <div class="np-title"><strong>跟它最像的族群</strong>（依 Jaccard 重疊度排序）${isHigh ? "<span class='muted'>· 紅色為高度重疊，建議擇一保留</span>" : ""}</div>
+          <ul>${items}</ul>
+        </div>`;
+    } else if (tickers.length >= MIN_SIZE_FOR_JACCARD) {
+      neighborHtml = `<div class="neighbor-panel normal"><div class="np-empty">未找到 ticker 重疊度可觀的近鄰族群 — 此族群相對獨立。</div></div>`;
+    } else {
+      neighborHtml = `<div class="neighbor-panel normal"><div class="np-empty">族群檔數過少（< ${MIN_SIZE_FOR_JACCARD}），未納入重疊比對。</div></div>`;
+    }
+
     $("#edit-panel").innerHTML = `
       <div class="editor-head">
-        <h3>${group}</h3>
-        <div class="muted">共 <b id="t-count">${tickers.length}</b> 個 ticker</div>
+        <div class="name-row">
+          <input type="text" class="name-input" id="g-name" value="${escapeAttr(group)}" maxlength="80" autocomplete="off">
+          <span class="muted" style="font-size:12px">共 <b id="t-count">${tickers.length}</b> 檔</span>
+        </div>
+        ${(badges.length || intelBadges.length) ? `<div class="badges" style="margin-top:0.5rem">${[...badges, ...intelBadges].join("")}</div>` : ""}
       </div>
+
       <textarea class="tickers" id="t-area" spellcheck="false"></textarea>
-      <p class="editor-help">每行一個 ticker（如 <code>2330</code>、<code>2317</code>）。空行自動忽略。</p>
+      <p class="editor-help">每行一個 ticker（如 <code class="mono">2330</code>、<code class="mono">2317</code>）。系統會自動去重、忽略空行；亦可貼入空白／逗號／頓號分隔的清單。</p>
+
+      ${neighborHtml}
+
       <div class="editor-actions">
-        <button class="btn-secondary" id="t-ai" style="background:rgba(168,85,247,0.15); color:#a855f7; border:1px solid #a855f7; margin-right:auto" title="組好分析 prompt 複製到剪貼板，貼到 Claude Code 用 Max quota">✨ 複製分析 prompt</button>
+        <button class="btn-purple" id="t-ai" title="組好分析 prompt 複製到剪貼板，貼到 Claude Code 用 Max quota">✨ 複製分析 prompt</button>
+        <span class="spacer"></span>
+        <button class="btn-danger" id="t-delete-grp" title="從族群清單中移除整個族群（仍可在儲存前還原）">刪除此族群</button>
         <button class="btn-secondary" id="t-reset">還原</button>
         <button id="t-apply">套用變更</button>
       </div>
     `;
-    const ta = $("#t-area");
-    ta.value = tickers.join("\n");
-    ta.addEventListener("input", () => {
-      const lines = ta.value.split("\n").map(s => s.trim()).filter(Boolean);
-      $("#t-count").textContent = lines.length;
-    });
-    $("#t-reset").addEventListener("click", () => {
-      ta.value = (allData[group] || []).join("\n");
-      $("#t-count").textContent = (allData[group] || []).length;
+
+    // 鄰居跳轉
+    $$(".neighbor-panel li[data-jump]").forEach(li => {
+      li.addEventListener("click", () => {
+        openEditor(li.dataset.jump);
+      });
     });
 
-    // ✨ 複製分析 prompt（C 方案：Claude Code Max quota）
+    const ta = $("#t-area");
+    ta.value = tickers.join("\n");
+
+    function refreshCount() {
+      const lines = parseTickerInput(ta.value);
+      $("#t-count").textContent = lines.length;
+    }
+    ta.addEventListener("input", refreshCount);
+
+    // 名字變動 → 視覺提示（套用時才真的改 key）
+    const nameInput = $("#g-name");
+    nameInput.addEventListener("input", () => {
+      nameInput.classList.toggle("dirty", nameInput.value.trim() !== group);
+    });
+
+    $("#t-reset").addEventListener("click", () => {
+      ta.value = (allData[group] || []).join("\n");
+      nameInput.value = group;
+      nameInput.classList.remove("dirty");
+      refreshCount();
+    });
+
+    $("#t-delete-grp").addEventListener("click", () => {
+      if (!confirm(`確定要從清單中刪除族群「${group}」？\n\n（仍可按「重新載入」還原；正式生效要等「儲存全部變更」。）`)) return;
+      delete allData[group];
+      // 若是被改名的族群，連同 rename 紀錄一併清掉
+      if (group in nameRenameMap) delete nameRenameMap[group];
+      selected.delete(group);
+      activeGroup = null;
+      recomputeAnalytics();
+      renderAll();
+      IM.flash(`已從清單移除「${group}」（尚未提交）`, "info");
+    });
+
+    $("#t-apply").addEventListener("click", () => {
+      const newName = nameInput.value.trim();
+      if (!newName) { IM.flash("族群名稱不能為空", "error"); return; }
+      const lines = parseTickerInput(ta.value);
+
+      if (newName !== group) {
+        if (newName in allData) {
+          IM.flash(`已有族群叫「${newName}」，請改用其他名稱或先刪除既有族群`, "error");
+          return;
+        }
+        // 改名：搬資料，更新 rename map
+        delete allData[group];
+        allData[newName] = lines;
+        // 追蹤原始名稱（即使連續改名 A→B→C，最終仍指向 A）
+        const origAnchor = nameRenameMap[group] || group;
+        delete nameRenameMap[group];
+        // 只有當改後名稱跟原始名稱不同時，才記 rename
+        if (newName !== origAnchor) {
+          nameRenameMap[newName] = origAnchor;
+        }
+        if (selected.has(group)) { selected.delete(group); selected.add(newName); }
+        activeGroup = newName;
+      } else {
+        allData[group] = lines;
+      }
+      recomputeAnalytics();
+      renderAll();
+      IM.flash(`「${newName}」已套用（${lines.length} 檔），記得「儲存全部變更」`, "success");
+    });
+
+    // ✨ AI prompt
     $("#t-ai").addEventListener("click", () => {
-      const tickers = ta.value.split("\n").map(s => s.trim()).filter(Boolean).slice(0, 30);
+      const promptTickers = parseTickerInput(ta.value).slice(0, 30);
       const promptText =
 `你是台股產業分析師。請分析下方族群，輸出結構化 JSON（可直接放進 industry_meta.json）：
 
@@ -164,79 +1134,284 @@
 - 不要憑空製造 ticker，只用提供的成分股
 
 ──────────────────────────
-族群名：${group}
-成分股 ticker（${tickers.length} 檔）：${tickers.length > 0 ? tickers.join(", ") : "（未提供）"}`;
-
+族群名：${nameInput.value.trim() || group}
+成分股 ticker（${promptTickers.length} 檔）：${promptTickers.length > 0 ? promptTickers.join(", ") : "（未提供）"}`;
       IM.copyPromptModal({
-        title: `產業分析 prompt — ${group}`,
+        title: `產業分析 prompt — ${nameInput.value.trim() || group}`,
         intro: "貼到 Claude Code 後，AI 會回完整 industry_meta JSON。複製回 /admin/data/industries.html 編輯器即可。",
         prompt: promptText,
       });
     });
-
-    $("#t-apply").addEventListener("click", () => {
-      const lines = ta.value.split("\n").map(s => s.trim()).filter(Boolean);
-      // 去重保留順序
-      const seen = new Set(); const out = [];
-      for (const t of lines) { if (!seen.has(t)) { seen.add(t); out.push(t); } }
-      allData[group] = out;
-      dirty[group] = true;
-      renderList();
-      IM.flash(`「${group}」已暫存（共 ${out.length} 個 ticker），記得點上方「儲存全部」。`, "info");
-    });
   }
 
-  function dirtyCount() { return Object.keys(dirty).length; }
-
-  // 上方加全域儲存按鈕
-  function injectGlobalActions() {
-    const h1 = document.querySelector(".main > h1");
-    const actions = document.createElement("div");
-    actions.style.cssText = "float:right; display:flex; gap:0.5rem;";
-    actions.innerHTML = `
-      <button class="btn-secondary" id="g-reload">重新載入</button>
-      <button id="g-save">儲存全部 <span id="g-dirty-count" class="muted" style="margin-left:0.25rem"></span></button>
-    `;
-    h1.parentElement.insertBefore(actions, h1.nextSibling);
-    document.getElementById("g-reload").addEventListener("click", async () => {
-      if (dirtyCount() > 0 && !confirm(`有 ${dirtyCount()} 個族群暫存改動未儲存，確定捨棄？`)) return;
-      dirty = {}; activeGroup = null;
-      $("#edit-panel").innerHTML = '<div class="editor-empty">← 從左側選一個族群開始編輯</div>';
-      await load();
-    });
-    document.getElementById("g-save").addEventListener("click", saveAll);
+  // ───────────── ticker 輸入 normalize ─────────────
+  function parseTickerInput(text) {
+    // 支援換行、空白、逗號、全形逗號、頓號分隔
+    const parts = text.split(/[\s,，、]+/).map(s => s.trim()).filter(Boolean);
+    const seen = new Set(); const out = [];
+    for (const t of parts) {
+      if (!seen.has(t)) { seen.add(t); out.push(t); }
+    }
+    return out;
   }
 
-  async function saveAll() {
-    const n = dirtyCount();
-    if (n === 0) { IM.flash("沒有改動需要儲存", "info"); return; }
-    if (!confirm(`要儲存 ${n} 個族群的改動？這會在 GitHub 建立新的 commit。`)) return;
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  // ───────────── 新增族群 modal ─────────────
+  function openNewModal() {
+    $("#nm-name").value = "";
+    $("#nm-tickers").value = "";
+    $("#nm-conflict").classList.remove("show");
+    $("#new-modal-backdrop").style.display = "grid";
+    setTimeout(() => $("#nm-name").focus(), 50);
+  }
+  function closeNewModal() { $("#new-modal-backdrop").style.display = "none"; }
+
+  $("#btn-new").addEventListener("click", openNewModal);
+  $("#nm-cancel").addEventListener("click", closeNewModal);
+  $("#new-modal-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "new-modal-backdrop") closeNewModal();
+  });
+  $("#nm-name").addEventListener("input", () => {
+    const v = $("#nm-name").value.trim();
+    $("#nm-conflict").classList.toggle("show", v && (v in allData));
+  });
+  $("#nm-confirm").addEventListener("click", () => {
+    const name = $("#nm-name").value.trim();
+    if (!name) { IM.flash("請填族群名稱", "error"); return; }
+    if (name in allData) {
+      IM.flash(`「${name}」已存在，請改用其他名稱`, "error");
+      return;
+    }
+    const tickers = parseTickerInput($("#nm-tickers").value);
+    allData[name] = tickers;
+    activeGroup = name;
+    recomputeAnalytics();
+    renderAll();
+    closeNewModal();
+    IM.flash(`已新增族群「${name}」（${tickers.length} 檔），記得「儲存全部變更」提交`, "success");
+  });
+
+  // ───────────── 批量刪除 ─────────────
+  $("#btn-clear-sel").addEventListener("click", () => {
+    selected.clear();
+    renderAll();
+  });
+  $("#btn-bulk-delete").addEventListener("click", () => {
+    if (selected.size === 0) return;
+    const items = Array.from(selected);
+    const sample = items.slice(0, 10).join("、");
+    const more = items.length > 10 ? `…等 ${items.length} 個族群` : "";
+    if (!confirm(`確定刪除以下 ${items.length} 個族群？\n\n${sample}${more}\n\n（仍可按「重新載入」還原；正式生效要等「儲存全部變更」。）`)) return;
+    items.forEach(g => {
+      delete allData[g];
+      if (g in nameRenameMap) delete nameRenameMap[g];
+      if (g === activeGroup) activeGroup = null;
+    });
+    selected.clear();
+    recomputeAnalytics();
+    renderAll();
+    IM.flash(`已從清單移除 ${items.length} 個族群（尚未提交）`, "info");
+  });
+
+  // ───────────── 全選 ─────────────
+  $("#ck-all").addEventListener("change", () => {
+    const checked = $("#ck-all").checked;
+    if (checked) visibleGroups.forEach(g => selected.add(g));
+    else visibleGroups.forEach(g => selected.delete(g));
+    renderList();
+    renderSelectionBar();
+  });
+
+  // ───────────── 過濾 / 搜尋 / 排序 ─────────────
+  function debounce(fn, ms) {
+    let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  }
+  $("#q").addEventListener("input", debounce(renderList, 200));
+
+  // 過濾下拉：選 custom 時開 modal；其他直接 render
+  let lastFilterMode = "all";
+  $("#filter-mode").addEventListener("change", (e) => {
+    const v = $("#filter-mode").value;
+    if (v === "custom") {
+      openCustomNModal();
+      // 不立刻 render，等 modal 確認後再切
+      return;
+    }
+    lastFilterMode = v;
+    $("#custom-n-label").textContent = "";
+    renderList();
+  });
+  // 排序下拉
+  $("#sort-mode").addEventListener("change", renderList);
+
+  // ───────────── v2: 自訂 N modal ─────────────
+  function openCustomNModal() {
+    $("#cn-input").value = customSizeN;
+    $("#customn-modal-backdrop").style.display = "grid";
+    setTimeout(() => $("#cn-input").focus(), 50);
+  }
+  function closeCustomNModal() {
+    $("#customn-modal-backdrop").style.display = "none";
+    // 若用戶取消而不確認，把過濾下拉切回上次值
+    if ($("#filter-mode").value === "custom" && !$("#custom-n-label").textContent) {
+      $("#filter-mode").value = lastFilterMode;
+    }
+  }
+  $("#cn-cancel").addEventListener("click", closeCustomNModal);
+  $("#customn-modal-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "customn-modal-backdrop") closeCustomNModal();
+  });
+  $("#cn-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") $("#cn-confirm").click();
+  });
+  $("#cn-confirm").addEventListener("click", () => {
+    const v = parseInt($("#cn-input").value, 10);
+    if (!Number.isFinite(v) || v < 1) {
+      IM.flash("請輸入大於 0 的整數", "error"); return;
+    }
+    customSizeN = v;
+    $("#customn-modal-backdrop").style.display = "none";
+    $("#filter-mode").value = "custom";
+    lastFilterMode = "custom";
+    $("#custom-n-label").textContent = `（≥ ${v} 檔）`;
+    renderList();
+  });
+
+  // ───────────── v2: 推薦面板互動 ─────────────
+  $("#rec-head").addEventListener("click", () => {
+    const panel = $("#rec-panel");
+    const isExpanded = panel.classList.toggle("expanded");
+    localStorage.setItem("imrec-collapsed", isExpanded ? "0" : "1");
+  });
+  $("#rec-select-all").addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!recommendList.length) return;
+    recommendList.forEach(it => selected.add(it.name));
+    renderRecommendPanel();
+    renderList();
+    renderSelectionBar();
+    IM.flash(`已勾選建議審查 ${recommendList.length} 個族群，可下捲到清單批量刪除`, "success");
+  });
+  $("#rec-refresh").addEventListener("click", (e) => {
+    e.stopPropagation();
+    recomputeAnalytics();
+    renderAll();
+    IM.flash("已重算 Jaccard 與建議分數", "info");
+  });
+
+  // ───────────── v2: 統計卡「冗餘對」點擊 → 切到高重疊過濾 ─────────────
+  $("#stat-card-redundant").addEventListener("click", () => {
+    if (redundantPairCount === 0) {
+      IM.flash("目前沒有 Jaccard ≥ 70% 的高重疊族群對", "info");
+      return;
+    }
+    $("#filter-mode").value = "overlap";
+    lastFilterMode = "overlap";
+    $("#sort-mode").value = "score-desc";
+    $("#custom-n-label").textContent = "";
+    renderList();
+    document.querySelector(".groups-list-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  // ───────────── 重新載入 ─────────────
+  $("#g-reload").addEventListener("click", async () => {
+    if (dirtyCount() > 0 && !confirm(`目前有 ${dirtyCount()} 項未儲存變更，確定捨棄並重新載入？`)) return;
+    await load();
+    IM.flash("已重新載入", "info");
+  });
+
+  // ───────────── 儲存（預覽 → 提交） ─────────────
+  $("#g-save").addEventListener("click", () => {
+    const d = computeDiff();
+    const total = d.added.length + d.removed.length + d.modified.length;
+    if (total === 0) { IM.flash("沒有改動需要儲存", "info"); return; }
+
+    // 渲染預覽
+    const parts = [];
+    if (d.added.length) {
+      parts.push(`<div class="seg-title">新增 ${d.added.length} 個族群</div><ul>${d.added.map(x =>
+        `<li class="added">＋ ${escapeHtml(x.name)} <span class="delta">${x.count} 檔</span></li>`).join("")}</ul>`);
+    }
+    if (d.removed.length) {
+      parts.push(`<div class="seg-title">刪除 ${d.removed.length} 個族群</div><ul>${d.removed.map(x =>
+        `<li class="removed">－ ${escapeHtml(x.name)} <span class="delta">原 ${x.count} 檔</span></li>`).join("")}</ul>`);
+    }
+    if (d.modified.length) {
+      parts.push(`<div class="seg-title">修改 ${d.modified.length} 個族群</div><ul>${d.modified.map(x => {
+        const tag = x.renamedFrom ? `（${escapeHtml(x.renamedFrom)} → ${escapeHtml(x.name)}）` : "";
+        const dlt = x.tickerDelta;
+        const dlts = dlt === 0 ? "ticker 未變" : `ticker ${dlt > 0 ? '+' : ''}${dlt}`;
+        return `<li class="modified">✏ ${escapeHtml(x.name)} ${tag} <span class="delta">${x.beforeCount} → ${x.afterCount}（${dlts}）</span></li>`;
+      }).join("")}</ul>`);
+    }
+    $("#preview-list").innerHTML = parts.join("");
+    $("#preview-summary").textContent = `共 ${total} 項變更，將以單一 GitHub commit 提交。`;
+    $("#prev-summary").value = "";
+    $("#preview-modal-backdrop").style.display = "grid";
+  });
+
+  $("#prev-cancel").addEventListener("click", () => {
+    $("#preview-modal-backdrop").style.display = "none";
+  });
+  $("#preview-modal-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "preview-modal-backdrop") $("#preview-modal-backdrop").style.display = "none";
+  });
+
+  $("#prev-confirm").addEventListener("click", async () => {
+    const d = computeDiff();
+    const userSummary = $("#prev-summary").value.trim();
+    const autoSummary = [
+      d.added.length ? `+${d.added.length} 新增` : "",
+      d.removed.length ? `-${d.removed.length} 刪除` : "",
+      d.modified.length ? `✏ ${d.modified.length} 修改` : "",
+    ].filter(Boolean).join("、");
+    const summary = userSummary
+      ? `${userSummary}（${autoSummary}）`
+      : autoSummary;
+
+    const btn = $("#prev-confirm");
+    const oldText = btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 儲存中…';
+
     try {
-      const summary = `改動 ${n} 個族群：${Object.keys(dirty).slice(0, 5).join("、")}${n > 5 ? "..." : ""}`;
       const r = await IM.fetchJson("/api/data/concept-groups", {
         method: "PUT",
         body: JSON.stringify({ data: allData, summary }),
       });
-      IM.flash(`已儲存 (commit ${r.commit.slice(0,7)})`, "success");
-      dirty = {};
-      sha = null;
-      renderList();
+      $("#preview-modal-backdrop").style.display = "none";
+      IM.flash(`已儲存（commit ${r.commit.slice(0,7)}）— 等 GitHub Actions 重新 build 站台後即可生效`, "success");
+      // 重新對齊 original snapshot
+      original = JSON.parse(JSON.stringify(allData));
+      nameRenameMap = {};
+      selected.clear();
+      renderAll();
     } catch (e) {
+      btn.disabled = false;
+      btn.textContent = oldText;
       if (e.status === 409) {
-        IM.flash("資料已被他人改動，請點重新載入。", "error");
+        IM.flash("資料已被他人改動，請點「重新載入」後再儲存。", "error");
+      } else if (e.status === 403) {
+        IM.flash("權限不足：你的帳號沒有族群定義的編輯權限。", "error");
       } else {
-        IM.flash(e.message, "error");
+        IM.flash("儲存失敗：" + e.message, "error");
       }
     }
-  }
+  });
 
-  setInterval(() => {
-    const el = document.getElementById("g-dirty-count");
-    if (el) el.textContent = dirtyCount() ? `(${dirtyCount()})` : "";
-  }, 500);
+  // ───────────── 離頁警告 ─────────────
+  window.addEventListener("beforeunload", (e) => {
+    if (dirtyCount() > 0) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
 
-  $("#q").addEventListener("input", renderList);
-  injectGlobalActions();
+  // ───────────── 啟動 ─────────────
   load();
 })();
 </script>
