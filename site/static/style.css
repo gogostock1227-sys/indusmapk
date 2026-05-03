@@ -60,6 +60,11 @@ html, body {
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'palt';
 }
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 h1, h2, h3, h4 {
   font-family: 'Noto Serif TC', 'Source Serif 4', 'Source Serif Pro',
                'PingFang TC', 'Microsoft JhengHei', serif;
@@ -79,9 +84,9 @@ a:hover { color: var(--accent); }
   max-width: 1400px; margin: 0 auto;
   padding: 12px 24px;
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 32px;
+  gap: 16px;
 }
 .logo {
   display: flex; align-items: center; gap: 12px;
@@ -108,18 +113,18 @@ a:hover { color: var(--accent); }
 
 .primary-nav {
   display: flex; gap: 2px;
-  justify-self: start;
   overflow-x: auto;
   scrollbar-width: none;
+  min-width: 0;
 }
 .primary-nav::-webkit-scrollbar { display: none; }
 .primary-nav a {
-  padding: 9px 12px;
+  padding: 8px 9px;
   border-radius: 8px;
   color: var(--text-soft);
   font-weight: 500;
   transition: all 0.15s;
-  font-size: 14.5px;
+  font-size: 13.5px;
   position: relative;
   white-space: nowrap;
 }
@@ -156,7 +161,11 @@ a:hover { color: var(--accent); }
 
 .search-box {
   position: relative;
-  min-width: 240px;
+  width: 200px;
+  transition: width 0.2s;
+}
+.search-box:focus-within {
+  width: 260px;
 }
 .search-box input {
   width: 100%;
