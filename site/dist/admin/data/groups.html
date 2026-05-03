@@ -120,9 +120,8 @@
       </div>
       <textarea class="tickers" id="t-area" spellcheck="false"></textarea>
       <p class="editor-help">每行一個 ticker（如 <code>2330</code>、<code>2317</code>）。空行自動忽略。</p>
-      <div id="ai-analysis-panel" style="display:none; margin-top:1rem; padding:1rem; background:rgba(168,85,247,0.05); border:1px dashed #a855f7; border-radius:8px"></div>
       <div class="editor-actions">
-        <button class="btn-secondary" id="t-ai" style="background:rgba(168,85,247,0.15); color:#a855f7; border:1px solid #a855f7; margin-right:auto">✨ AI 分析族群</button>
+        <button class="btn-secondary" id="t-ai" style="background:rgba(168,85,247,0.15); color:#a855f7; border:1px solid #a855f7; margin-right:auto" title="組好分析 prompt 複製到剪貼板，貼到 Claude Code 用 Max quota">✨ 複製分析 prompt</button>
         <button class="btn-secondary" id="t-reset">還原</button>
         <button id="t-apply">套用變更</button>
       </div>
@@ -138,34 +137,41 @@
       $("#t-count").textContent = (allData[group] || []).length;
     });
 
-    // ✨ AI 分析族群
-    $("#t-ai").addEventListener("click", async () => {
+    // ✨ 複製分析 prompt（C 方案：Claude Code Max quota）
+    $("#t-ai").addEventListener("click", () => {
       const tickers = ta.value.split("\n").map(s => s.trim()).filter(Boolean).slice(0, 30);
-      const panel = $("#ai-analysis-panel");
-      panel.style.display = "block";
-      panel.innerHTML = '<span class="spinner"></span> Claude 分析中（10-20 秒）…';
-      try {
-        const r = await IM.fetchJson("/api/ai/analyze-industry", {
-          method: "POST",
-          body: JSON.stringify({ group, tickers }),
-        });
-        let html = `<div style="margin-bottom:0.5rem"><b>✨ AI 分析「${group}」（可複製到 industry_meta.json）</b></div>`;
-        if (r.summary) html += `<div><b>族群介紹：</b><div style="margin-top:0.3rem; line-height:1.6">${r.summary}</div></div>`;
-        if (r.outlook) html += `<div style="margin-top:0.6rem"><b>展望：</b> ${r.outlook}</div>`;
-        if (r.drivers?.length) html += `<div style="margin-top:0.6rem"><b>驅動：</b><ul style="margin:0.3rem 0">${r.drivers.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
-        if (r.risks?.length)   html += `<div><b>風險：</b><ul style="margin:0.3rem 0">${r.risks.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
-        if (r.key_players?.length) html += `<div><b>關鍵公司：</b><ul style="margin:0.3rem 0">${r.key_players.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
-        if (r.indicators?.length) {
-          html += `<div style="margin-top:0.6rem"><b>indicators：</b><pre style="margin:0.3rem 0; font-size:11px; background:var(--bg); padding:0.5rem; border-radius:4px; max-height:200px; overflow:auto">${JSON.stringify(r.indicators, null, 2)}</pre></div>`;
-        }
-        if (r.cache_stats) {
-          html += `<div style="color:var(--muted); font-size:11px; margin-top:0.5rem">tokens: in ${r.cache_stats.input} / out ${r.cache_stats.output}</div>`;
-        }
-        html += `<div style="margin-top:0.5rem"><a href="/admin/data/industries.html" target="_blank" style="font-size:12px">→ 進產業文案編輯頁套用此 JSON</a></div>`;
-        panel.innerHTML = html;
-      } catch (e) {
-        panel.innerHTML = `<span style="color:#ef4444">AI 分析失敗：${e.message}</span>`;
-      }
+      const promptText =
+`你是台股產業分析師。請分析下方族群，輸出結構化 JSON（可直接放進 industry_meta.json）：
+
+{
+  "summary": "100-150 字族群介紹（事件驅動 / 技術趨勢 / 主要受惠對象）",
+  "drivers": ["驅動因素 1", "驅動因素 2", "驅動因素 3"],
+  "risks": ["風險 1", "風險 2"],
+  "key_players": ["關鍵公司 1（為什麼）", "關鍵公司 2（為什麼）"],
+  "outlook": "未來 1-2 年展望（50-80 字）",
+  "indicators": [
+    { "label": "事件 / 技術", "value": "具體名詞" },
+    { "label": "市場規模", "value": "USD XXB" },
+    { "label": "CAGR", "value": "XX%" },
+    { "label": "毛利水準", "value": "XX-XX%" }
+  ]
+}
+
+規則：
+- 內容須對齊台灣產業實際情況（不要套用美國案例）
+- 引用具體公司名 / 技術名 / 客戶名
+- 數字若無確定來源用區間（如「20-30%」）並標 (估)
+- 不要憑空製造 ticker，只用提供的成分股
+
+──────────────────────────
+族群名：${group}
+成分股 ticker（${tickers.length} 檔）：${tickers.length > 0 ? tickers.join(", ") : "（未提供）"}`;
+
+      IM.copyPromptModal({
+        title: `產業分析 prompt — ${group}`,
+        intro: "貼到 Claude Code 後，AI 會回完整 industry_meta JSON。複製回 /admin/data/industries.html 編輯器即可。",
+        prompt: promptText,
+      });
     });
 
     $("#t-apply").addEventListener("click", () => {

@@ -134,9 +134,102 @@ window.IM = (function () {
     return `<span class="tag tag-${role}">${ROLE_LABEL[role] || role}</span>`;
   }
 
+  // ─── AI prompt 複製 modal（C 方案：用 Claude Code Max quota，不打 API）─────
+  function copyPromptModal({ title, intro, prompt, claudeUrl }) {
+    claudeUrl = claudeUrl || "https://claude.ai/new";
+    document.getElementById("indusmapk-prompt-modal-overlay")?.remove();
+    if (!document.getElementById("indusmapk-prompt-modal-style")) {
+      const style = document.createElement("style");
+      style.id = "indusmapk-prompt-modal-style";
+      style.textContent = `
+        #indusmapk-prompt-modal-overlay {
+          position: fixed; inset: 0; z-index: 11000;
+          background: rgba(15,23,42,0.65);
+          display: grid; place-items: center; padding: 1rem;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+          animation: imp-fade 0.15s ease-out;
+        }
+        @keyframes imp-fade { from { opacity: 0 } to { opacity: 1 } }
+        #indusmapk-prompt-modal {
+          background: var(--panel, #1e293b); color: var(--text, #f1f5f9);
+          border: 1px solid var(--border, #334155);
+          border-radius: 12px; padding: 1.5rem;
+          max-width: 720px; width: 100%; max-height: 90vh;
+          display: flex; flex-direction: column; gap: 0.85rem;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        #indusmapk-prompt-modal h3 { margin: 0; font-size: 1.1rem; }
+        #indusmapk-prompt-modal .intro { color: var(--muted, #94a3b8); font-size: 13px; margin: 0; }
+        #indusmapk-prompt-modal textarea {
+          flex: 1; width: 100%; min-height: 280px;
+          background: var(--bg, #0f172a); color: var(--text, #f1f5f9);
+          border: 1px solid var(--border, #334155); border-radius: 8px;
+          padding: 0.75rem; font-family: ui-monospace, SF Mono, Menlo, monospace;
+          font-size: 12px; line-height: 1.5; resize: vertical;
+        }
+        #indusmapk-prompt-modal .actions {
+          display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;
+        }
+        #indusmapk-prompt-modal button, #indusmapk-prompt-modal a {
+          padding: 0.55rem 1.1rem; border-radius: 8px; border: 0;
+          font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none;
+          font-family: inherit; display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        #indusmapk-prompt-modal .btn-copy { background: #a855f7; color: #fff; }
+        #indusmapk-prompt-modal .btn-copy:hover { background: #9333ea; }
+        #indusmapk-prompt-modal .btn-claude { background: #d97706; color: #fff; }
+        #indusmapk-prompt-modal .btn-claude:hover { background: #b45309; }
+        #indusmapk-prompt-modal .btn-close {
+          background: transparent; color: var(--muted, #94a3b8);
+          border: 1px solid var(--border, #334155);
+        }
+        #indusmapk-prompt-modal .stats { color: var(--muted, #94a3b8); font-size: 11px; }
+      `;
+      document.head.appendChild(style);
+    }
+    const overlay = document.createElement("div");
+    overlay.id = "indusmapk-prompt-modal-overlay";
+    overlay.innerHTML = `
+      <div id="indusmapk-prompt-modal" role="dialog" aria-modal="true">
+        <h3>✨ ${title || "AI prompt"}</h3>
+        ${intro ? `<p class="intro">${intro}</p>` : ""}
+        <textarea id="imp-prompt-text" spellcheck="false" readonly></textarea>
+        <div class="stats" id="imp-stats">— 字符</div>
+        <div class="actions">
+          <button class="btn-close" id="imp-close">關閉</button>
+          <button class="btn-copy" id="imp-copy">📋 複製到剪貼板</button>
+          <a class="btn-claude" id="imp-open-claude" target="_blank" href="${claudeUrl}">↗ 打開 Claude Code</a>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const ta = document.getElementById("imp-prompt-text");
+    ta.value = prompt;
+    document.getElementById("imp-stats").textContent =
+      `${prompt.length.toLocaleString()} 字符 · 約 ${Math.ceil(prompt.length / 4).toLocaleString()} tokens（估）`;
+    document.getElementById("imp-close").addEventListener("click", () => overlay.remove());
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+    document.addEventListener("keydown", function escH(e) {
+      if (e.key === "Escape") { overlay.remove(); document.removeEventListener("keydown", escH); }
+    });
+    document.getElementById("imp-copy").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(prompt);
+        flash("已複製到剪貼板，貼到 Claude Code 對話即可", "success");
+      } catch (e) {
+        ta.removeAttribute("readonly");
+        ta.select();
+        document.execCommand("copy");
+        ta.setAttribute("readonly", "");
+        flash("已複製（fallback 模式）", "success");
+      }
+    });
+  }
+
   return {
     fetchJson, flash, fmtDate, fmtDateOnly, expiryStatus,
     me, bustMeCache, renderSidebar, tag,
+    copyPromptModal,
     ROLE_LABEL, DATA_CATEGORIES, DATA_CATEGORY_LABEL,
   };
 })();

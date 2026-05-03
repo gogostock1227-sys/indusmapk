@@ -46,7 +46,7 @@
   <aside class="sidebar"></aside>
   <main class="main">
     <h1>✨ AI 工具</h1>
-    <p class="muted" style="margin-top:-0.5rem">Claude API + finlab/finmind 集中入口。AI 推薦永遠是<b>建議</b>不會自動套用，admin 看完手動 confirm 後才寫進資料。</p>
+    <p class="muted" style="margin-top:-0.5rem">AI section 採 <b>複製 prompt 模式</b>：點按鈕後組好 prompt 給你複製到 Claude Code（Max quota），AI 回覆後自己貼回對應欄位。finmind 行情 section 仍走後端代理。</p>
 
     <!-- ─── 1. AI 個股分類推薦 ──────────────────── -->
     <details class="tool" open>
@@ -58,8 +58,8 @@
           <label>TWSE 產業</label>   <input type="text" id="c-twse" placeholder="例：半導體業">
           <label>業務描述</label>    <textarea id="c-summary" placeholder="從 stock_profiles.json 拿 business_summary 貼上"></textarea>
         </div>
-        <button id="c-run">送 Claude 推薦</button>
-        <div class="result-panel" id="c-result"><span class="muted">尚未執行</span></div>
+        <button id="c-run">📋 複製分類 prompt</button>
+        <div class="result-panel" id="c-result"><span class="muted">點按鈕產 prompt 後彈視窗複製</span></div>
       </div>
     </details>
 
@@ -72,8 +72,8 @@
           <label>名稱</label>       <input type="text" id="p-name">
           <label>業務描述</label>   <textarea id="p-summary"></textarea>
         </div>
-        <button id="p-run">送 Claude 判斷</button>
-        <div class="result-panel" id="p-result"><span class="muted">尚未執行</span></div>
+        <button id="p-run">📋 複製位階 prompt</button>
+        <div class="result-panel" id="p-result"><span class="muted">點按鈕產 prompt 後彈視窗複製</span></div>
       </div>
     </details>
 
@@ -86,8 +86,8 @@
           <label>成分股 ticker</label>  <input type="text" id="i-tickers" placeholder="2382, 2330, 2317（逗號分隔）">
           <label>補充 context</label>   <textarea id="i-context" placeholder="（可選）市場新聞 / 法說會重點 / 你想 AI 知道的特殊條件"></textarea>
         </div>
-        <button id="i-run">送 Claude 分析</button>
-        <div class="result-panel" id="i-result"><span class="muted">尚未執行</span></div>
+        <button id="i-run">📋 複製分析 prompt</button>
+        <div class="result-panel" id="i-result"><span class="muted">點按鈕產 prompt 後彈視窗複製</span></div>
       </div>
     </details>
 
@@ -128,82 +128,121 @@
     panel.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>${stats}`;
   }
 
-  // ── 1. 分類推薦 ──
-  $("#c-run").addEventListener("click", async () => {
+  // ── 1. 分類推薦（C 方案：複製 prompt） ──
+  $("#c-run").addEventListener("click", () => {
     const ticker = $("#c-ticker").value.trim();
     const summary = $("#c-summary").value.trim();
     if (!ticker || !summary) { IM.flash("ticker + 業務描述必填", "error"); return; }
-    $("#c-result").innerHTML = '<span class="spinner"></span> Claude 思考中（約 5-10 秒）…';
-    try {
-      const r = await IM.fetchJson("/api/ai/suggest-classification", {
-        method: "POST",
-        body: JSON.stringify({
-          ticker, name: $("#c-name").value.trim(),
-          twse_industry: $("#c-twse").value.trim(),
-          business_summary: summary,
-        }),
-      });
-      let html = "";
-      if (r.recommended_groups?.length) {
-        html += "<b>推薦族群：</b><br>" + r.recommended_groups.map(g =>
-          `<div style="padding:0.4rem 0; border-bottom:1px solid var(--border)">
-            <b>${g.name}</b>${confidenceBadge(g.confidence)}
-            <div class="muted" style="font-size:12px;margin-top:0.2rem">${g.reasoning || ""}</div>
-          </div>`).join("");
-      }
-      if (r.suggested_segment) html += `<div style="margin-top:0.6rem"><b>建議產業段：</b> <code>${r.suggested_segment}</code></div>`;
-      if (r.suggested_position) html += `<div><b>建議供應鏈位階：</b> <code>${r.suggested_position}</code></div>`;
-      if (r.notes) html += `<div class="muted" style="margin-top:0.5rem">${r.notes}</div>`;
-      const stats = r.cache_stats
-        ? `<div class="stat-line">tokens: in ${r.cache_stats.input} / out ${r.cache_stats.output}` +
-          (r.cache_stats.cache_read > 0 ? ` / cache hit ${r.cache_stats.cache_read}` : "") + `</div>`
-        : "";
-      $("#c-result").innerHTML = html + stats;
-    } catch (e) { $("#c-result").innerHTML = `<span style="color:#ef4444">${e.message}</span>`; }
+    const promptText =
+`你是台股族群分類專家。給定下方個股，請推薦：
+1. 核心題材族群歸屬（從你已知的台股族群中選，按信心降序，至多 5 個）
+2. 產業段 (industry_segment)
+3. 供應鏈位階 (supply_chain_position)
+
+請輸出 JSON：
+{
+  "recommended_groups": [{"name": "族群名", "confidence": 0.0-1.0, "reasoning": "引用業務描述具體文字"}],
+  "suggested_segment": "...",
+  "suggested_position": "...",
+  "notes": "整體判斷簡述（< 80 字）"
+}
+
+──────────────────────────
+個股：${ticker} ${$("#c-name").value.trim()}
+TWSE 產業：${$("#c-twse").value.trim() || "（未提供）"}
+
+業務描述：
+${summary}`;
+    $("#c-result").innerHTML = '<b>已彈視窗，點視窗內「📋 複製到剪貼板」</b>';
+    IM.copyPromptModal({
+      title: `分類推薦 prompt — ${ticker}`,
+      intro: "貼到 Claude Code 後 AI 回 JSON，自己填回 admin/data/stock.html 對應欄位。",
+      prompt: promptText,
+    });
   });
 
-  // ── 2. 位階 ──
-  $("#p-run").addEventListener("click", async () => {
+  // ── 2. 位階（C 方案：複製 prompt） ──
+  $("#p-run").addEventListener("click", () => {
     const ticker = $("#p-ticker").value.trim();
     const summary = $("#p-summary").value.trim();
     if (!ticker || !summary) { IM.flash("ticker + 業務描述必填", "error"); return; }
-    $("#p-result").innerHTML = '<span class="spinner"></span> Claude 判斷中…';
-    try {
-      const r = await IM.fetchJson("/api/ai/suggest-position", {
-        method: "POST",
-        body: JSON.stringify({
-          ticker, name: $("#p-name").value.trim(), business_summary: summary,
-        }),
-      });
-      $("#p-result").innerHTML = `
-        <div><b>建議位階：</b> <code>${r.suggested_position}</code> ${confidenceBadge(r.confidence)}</div>
-        <div><b>建議段：</b> <code>${r.suggested_segment || "—"}</code></div>
-        <div class="muted" style="margin-top:0.5rem">${r.reasoning || ""}</div>`;
-    } catch (e) { $("#p-result").innerHTML = `<span style="color:#ef4444">${e.message}</span>`; }
+    const promptText =
+`你是台股供應鏈位階分類專家。給定個股業務描述，判斷供應鏈位階。
+
+供應鏈位階白名單：
+- IP            (IP 矽智財：智原、力旺、創意 — 提供電路設計授權)
+- IC_DESIGN     (IC 設計：聯發科、瑞昱、聯詠 — 純設計，不做晶圓)
+- FOUNDRY       (晶圓代工：台積電、聯電、世界先進)
+- OSAT_ADV      (先進封裝：日月光投控、矽品 — CoWoS / SoIC / FOPLP)
+- OSAT          (傳統封測：京元電、超豐)
+- SUBSTRATE     (IC 載板：欣興、南電、景碩 — ABF / BT 載板)
+- PCB           (PCB / HDI：健鼎、定穎、台光電)
+- EMS           (代工製造：鴻海、和碩 — Tier 1 ODM/EMS)
+- ODM           (品牌代設計：廣達、英業達 — 含設計能力)
+- BRAND         (品牌：華碩、宏碁 — 自有品牌)
+- DISTRIBUTOR   (通路：大聯大、文曄 — 半導體通路)
+- OTHER         (其他/不適用)
+
+請輸出 JSON：
+{
+  "suggested_position": "上述白名單之一",
+  "suggested_segment": "AI_SEMI / ELEC_COMP / NETCOM / 等",
+  "confidence": 0.0-1.0,
+  "reasoning": "判斷依據（引用業務描述具體文字）"
+}
+
+──────────────────────────
+個股：${ticker} ${$("#p-name").value.trim()}
+
+業務描述：
+${summary}`;
+    $("#p-result").innerHTML = '<b>已彈視窗，點視窗內「📋 複製到剪貼板」</b>';
+    IM.copyPromptModal({
+      title: `供應鏈位階 prompt — ${ticker}`,
+      intro: "貼到 Claude Code 後 AI 回 JSON，自己填回 supply_chain_position 欄位。",
+      prompt: promptText,
+    });
   });
 
-  // ── 3. 產業分析 ──
-  $("#i-run").addEventListener("click", async () => {
+  // ── 3. 產業分析（C 方案：複製 prompt） ──
+  $("#i-run").addEventListener("click", () => {
     const group = $("#i-group").value.trim();
     if (!group) { IM.flash("族群名必填", "error"); return; }
     const tickers = $("#i-tickers").value.split(",").map(s=>s.trim()).filter(Boolean);
-    $("#i-result").innerHTML = '<span class="spinner"></span> Claude 分析中（約 10-20 秒）…';
-    try {
-      const r = await IM.fetchJson("/api/ai/analyze-industry", {
-        method: "POST",
-        body: JSON.stringify({ group, tickers, context: $("#i-context").value.trim() }),
-      });
-      let html = "";
-      if (r.summary)  html += `<div><b>族群介紹：</b><div style="margin-top:0.3rem">${r.summary}</div></div>`;
-      if (r.outlook)  html += `<div style="margin-top:0.6rem"><b>展望：</b> ${r.outlook}</div>`;
-      if (r.drivers?.length)  html += `<div style="margin-top:0.6rem"><b>驅動：</b><ul style="margin:0.3rem 0">${r.drivers.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
-      if (r.risks?.length)    html += `<div><b>風險：</b><ul style="margin:0.3rem 0">${r.risks.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
-      if (r.key_players?.length) html += `<div><b>關鍵公司：</b><ul style="margin:0.3rem 0">${r.key_players.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
-      if (r.indicators?.length) {
-        html += `<div style="margin-top:0.6rem"><b>indicators (可貼進 industry_meta.json)：</b><pre style="margin:0.3rem 0;font-size:11px">${JSON.stringify(r.indicators, null, 2)}</pre></div>`;
-      }
-      $("#i-result").innerHTML = html || `<pre>${JSON.stringify(r, null, 2)}</pre>`;
-    } catch (e) { $("#i-result").innerHTML = `<span style="color:#ef4444">${e.message}</span>`; }
+    const context = $("#i-context").value.trim();
+    const promptText =
+`你是台股產業分析師。請分析下方族群，輸出可直接放進 industry_meta.json 的結構化 JSON：
+
+{
+  "summary": "100-150 字族群介紹（事件驅動 / 技術趨勢 / 主要受惠對象）",
+  "drivers": ["驅動因素 1", "驅動因素 2", "驅動因素 3"],
+  "risks": ["風險 1", "風險 2"],
+  "key_players": ["關鍵公司 1（為什麼）", "關鍵公司 2（為什麼）"],
+  "outlook": "未來 1-2 年展望（50-80 字）",
+  "indicators": [
+    { "label": "事件 / 技術", "value": "具體名詞" },
+    { "label": "市場規模", "value": "USD XXB" },
+    { "label": "CAGR", "value": "XX%" },
+    { "label": "毛利水準", "value": "XX-XX%" }
+  ]
+}
+
+規則：
+- 內容須對齊台灣產業實際情況
+- 引用具體公司名 / 技術名 / 客戶名
+- 數字若無確定來源用區間並標 (估)
+- 不要憑空製造 ticker
+
+──────────────────────────
+族群名：${group}
+成分股 ticker：${tickers.length > 0 ? tickers.join(", ") : "（未提供）"}
+${context ? `\n補充 context：\n${context}` : ""}`;
+    $("#i-result").innerHTML = '<b>已彈視窗，點視窗內「📋 複製到剪貼板」</b>';
+    IM.copyPromptModal({
+      title: `產業分析 prompt — ${group}`,
+      intro: "貼到 Claude Code 後 AI 回完整 industry_meta JSON，自己填回 admin/data/industries.html。",
+      prompt: promptText,
+    });
   });
 
   // ── 4. 行情查詢 ──
