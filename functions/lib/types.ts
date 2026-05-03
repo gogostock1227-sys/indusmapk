@@ -53,6 +53,7 @@ export interface Env {
   TURNSTILE_SITE_KEY: string;
   APP_BASE_URL: string;           // "https://indusmapk.com"
   FINLAB_TOKEN?: string;
+  FINMIND_TOKEN?: string;
   ANTHROPIC_API_KEY?: string;
 }
 

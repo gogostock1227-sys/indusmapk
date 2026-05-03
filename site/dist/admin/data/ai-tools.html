@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 工具 — indusmapk admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+<style>
+  details.tool {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 1rem; padding: 0;
+  }
+  details.tool > summary {
+    padding: 1rem 1.25rem; cursor: pointer; font-weight: 600; font-size: 1rem;
+    list-style: none; display: flex; align-items: center; gap: 0.6rem;
+  }
+  details.tool > summary::-webkit-details-marker { display: none; }
+  details.tool > summary::after { content: "▾"; margin-left: auto; color: var(--muted); transition: transform 0.15s; }
+  details.tool[open] > summary::after { transform: rotate(180deg); }
+  details.tool .tool-body { padding: 0 1.25rem 1.25rem; }
+  details.tool .icon { font-size: 1.3rem; }
+  .form-grid { display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem 0.75rem; align-items: start; margin-bottom: 0.85rem; }
+  .form-grid label { color: var(--muted); padding-top: 0.5rem; font-size: 13px; }
+  .form-grid input, .form-grid textarea {
+    background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.5rem 0.65rem; font-size: 13px; font-family: inherit; width: 100%;
+  }
+  .form-grid textarea { min-height: 80px; resize: vertical; }
+  .result-panel {
+    margin-top: 1rem; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem; font-size: 13px; min-height: 60px;
+  }
+  .result-panel pre {
+    margin: 0; white-space: pre-wrap; word-break: break-word;
+    font-family: ui-monospace, SF Mono, Menlo, monospace; font-size: 12px; color: var(--text);
+  }
+  .badge-conf { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 11px; margin-left: 0.4rem; }
+  .badge-conf.high { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge-conf.mid  { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .badge-conf.low  { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .stat-line { color: var(--muted); font-size: 11px; margin-top: 0.5rem; font-family: ui-monospace, SF Mono, Menlo, monospace; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar"></aside>
+  <main class="main">
+    <h1>✨ AI 工具</h1>
+    <p class="muted" style="margin-top:-0.5rem">Claude API + finlab/finmind 集中入口。AI 推薦永遠是<b>建議</b>不會自動套用，admin 看完手動 confirm 後才寫進資料。</p>
+
+    <!-- ─── 1. AI 個股分類推薦 ──────────────────── -->
+    <details class="tool" open>
+      <summary><span class="icon">✨</span>個股分類推薦（族群 + 段 + 位階）</summary>
+      <div class="tool-body">
+        <div class="form-grid">
+          <label>Ticker</label>     <input type="text" id="c-ticker" placeholder="例：2330">
+          <label>名稱</label>        <input type="text" id="c-name" placeholder="例：台積電">
+          <label>TWSE 產業</label>   <input type="text" id="c-twse" placeholder="例：半導體業">
+          <label>業務描述</label>    <textarea id="c-summary" placeholder="從 stock_profiles.json 拿 business_summary 貼上"></textarea>
+        </div>
+        <button id="c-run">送 Claude 推薦</button>
+        <div class="result-panel" id="c-result"><span class="muted">尚未執行</span></div>
+      </div>
+    </details>
+
+    <!-- ─── 2. AI 供應鏈位階 ──────────────────── -->
+    <details class="tool">
+      <summary><span class="icon">🔗</span>供應鏈位階單獨判斷</summary>
+      <div class="tool-body">
+        <div class="form-grid">
+          <label>Ticker</label>    <input type="text" id="p-ticker" placeholder="2330">
+          <label>名稱</label>       <input type="text" id="p-name">
+          <label>業務描述</label>   <textarea id="p-summary"></textarea>
+        </div>
+        <button id="p-run">送 Claude 判斷</button>
+        <div class="result-panel" id="p-result"><span class="muted">尚未執行</span></div>
+      </div>
+    </details>
+
+    <!-- ─── 3. AI 產業分析 ──────────────────── -->
+    <details class="tool">
+      <summary><span class="icon">🏭</span>族群產業分析（生成 industry_meta）</summary>
+      <div class="tool-body">
+        <div class="form-grid">
+          <label>族群名</label>        <input type="text" id="i-group" placeholder="例：AI伺服器">
+          <label>成分股 ticker</label>  <input type="text" id="i-tickers" placeholder="2382, 2330, 2317（逗號分隔）">
+          <label>補充 context</label>   <textarea id="i-context" placeholder="（可選）市場新聞 / 法說會重點 / 你想 AI 知道的特殊條件"></textarea>
+        </div>
+        <button id="i-run">送 Claude 分析</button>
+        <div class="result-panel" id="i-result"><span class="muted">尚未執行</span></div>
+      </div>
+    </details>
+
+    <!-- ─── 4. finmind 即時行情 ──────────────────── -->
+    <details class="tool">
+      <summary><span class="icon">📈</span>finmind 即時行情查詢</summary>
+      <div class="tool-body">
+        <div class="form-grid">
+          <label>Ticker</label>  <input type="text" id="q-ticker" placeholder="2330">
+          <label>近 N 天</label>  <input type="number" id="q-days" value="30" min="1" max="365">
+        </div>
+        <button id="q-run">查 finmind</button>
+        <button id="ql-run" class="btn-secondary">查 finlab（非穩定）</button>
+        <div class="result-panel" id="q-result"><span class="muted">尚未執行</span></div>
+      </div>
+    </details>
+  </main>
+</div>
+
+<script src="/admin/app.js"></script>
+<script>
+(async function () {
+  await IM.renderSidebar("data-ai-tools");
+  const $ = (s) => document.querySelector(s);
+
+  function confidenceBadge(c) {
+    if (c == null) return "";
+    const cls = c >= 0.8 ? "high" : c >= 0.6 ? "mid" : "low";
+    return `<span class="badge-conf ${cls}">信心 ${(c*100).toFixed(0)}%</span>`;
+  }
+
+  function renderJson(panel, data, raw) {
+    const stats = data.cache_stats
+      ? `<div class="stat-line">tokens: in ${data.cache_stats.input} / out ${data.cache_stats.output}` +
+        (data.cache_stats.cache_read > 0 ? ` / cache hit ${data.cache_stats.cache_read}` : "") +
+        `</div>`
+      : "";
+    panel.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>${stats}`;
+  }
+
+  // ── 1. 分類推薦 ──
+  $("#c-run").addEventListener("click", async () => {
+    const ticker = $("#c-ticker").value.trim();
+    const summary = $("#c-summary").value.trim();
+    if (!ticker || !summary) { IM.flash("ticker + 業務描述必填", "error"); return; }
+    $("#c-result").innerHTML = '<span class="spinner"></span> Claude 思考中（約 5-10 秒）…';
+    try {
+      const r = await IM.fetchJson("/api/ai/suggest-classification", {
+        method: "POST",
+        body: JSON.stringify({
+          ticker, name: $("#c-name").value.trim(),
+          twse_industry: $("#c-twse").value.trim(),
+          business_summary: summary,
+        }),
+      });
+      let html = "";
+      if (r.recommended_groups?.length) {
+        html += "<b>推薦族群：</b><br>" + r.recommended_groups.map(g =>
+          `<div style="padding:0.4rem 0; border-bottom:1px solid var(--border)">
+            <b>${g.name}</b>${confidenceBadge(g.confidence)}
+            <div class="muted" style="font-size:12px;margin-top:0.2rem">${g.reasoning || ""}</div>
+          </div>`).join("");
+      }
+      if (r.suggested_segment) html += `<div style="margin-top:0.6rem"><b>建議產業段：</b> <code>${r.suggested_segment}</code></div>`;
+      if (r.suggested_position) html += `<div><b>建議供應鏈位階：</b> <code>${r.suggested_position}</code></div>`;
+      if (r.notes) html += `<div class="muted" style="margin-top:0.5rem">${r.notes}</div>`;
+      const stats = r.cache_stats
+        ? `<div class="stat-line">tokens: in ${r.cache_stats.input} / out ${r.cache_stats.output}` +
+          (r.cache_stats.cache_read > 0 ? ` / cache hit ${r.cache_stats.cache_read}` : "") + `</div>`
+        : "";
+      $("#c-result").innerHTML = html + stats;
+    } catch (e) { $("#c-result").innerHTML = `<span style="color:#ef4444">${e.message}</span>`; }
+  });
+
+  // ── 2. 位階 ──
+  $("#p-run").addEventListener("click", async () => {
+    const ticker = $("#p-ticker").value.trim();
+    const summary = $("#p-summary").value.trim();
+    if (!ticker || !summary) { IM.flash("ticker + 業務描述必填", "error"); return; }
+    $("#p-result").innerHTML = '<span class="spinner"></span> Claude 判斷中…';
+    try {
+      const r = await IM.fetchJson("/api/ai/suggest-position", {
+        method: "POST",
+        body: JSON.stringify({
+          ticker, name: $("#p-name").value.trim(), business_summary: summary,
+        }),
+      });
+      $("#p-result").innerHTML = `
+        <div><b>建議位階：</b> <code>${r.suggested_position}</code> ${confidenceBadge(r.confidence)}</div>
+        <div><b>建議段：</b> <code>${r.suggested_segment || "—"}</code></div>
+        <div class="muted" style="margin-top:0.5rem">${r.reasoning || ""}</div>`;
+    } catch (e) { $("#p-result").innerHTML = `<span style="color:#ef4444">${e.message}</span>`; }
+  });
+
+  // ── 3. 產業分析 ──
+  $("#i-run").addEventListener("click", async () => {
+    const group = $("#i-group").value.trim();
+    if (!group) { IM.flash("族群名必填", "error"); return; }
+    const tickers = $("#i-tickers").value.split(",").map(s=>s.trim()).filter(Boolean);
+    $("#i-result").innerHTML = '<span class="spinner"></span> Claude 分析中（約 10-20 秒）…';
+    try {
+      const r = await IM.fetchJson("/api/ai/analyze-industry", {
+        method: "POST",
+        body: JSON.stringify({ group, tickers, context: $("#i-context").value.trim() }),
+      });
+      let html = "";
+      if (r.summary)  html += `<div><b>族群介紹：</b><div style="margin-top:0.3rem">${r.summary}</div></div>`;
+      if (r.outlook)  html += `<div style="margin-top:0.6rem"><b>展望：</b> ${r.outlook}</div>`;
+      if (r.drivers?.length)  html += `<div style="margin-top:0.6rem"><b>驅動：</b><ul style="margin:0.3rem 0">${r.drivers.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
+      if (r.risks?.length)    html += `<div><b>風險：</b><ul style="margin:0.3rem 0">${r.risks.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
+      if (r.key_players?.length) html += `<div><b>關鍵公司：</b><ul style="margin:0.3rem 0">${r.key_players.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
+      if (r.indicators?.length) {
+        html += `<div style="margin-top:0.6rem"><b>indicators (可貼進 industry_meta.json)：</b><pre style="margin:0.3rem 0;font-size:11px">${JSON.stringify(r.indicators, null, 2)}</pre></div>`;
+      }
+      $("#i-result").innerHTML = html || `<pre>${JSON.stringify(r, null, 2)}</pre>`;
+    } catch (e) { $("#i-result").innerHTML = `<span style="color:#ef4444">${e.message}</span>`; }
+  });
+
+  // ── 4. 行情查詢 ──
+  async function queryQuote(api) {
+    const ticker = $("#q-ticker").value.trim();
+    const days = parseInt($("#q-days").value, 10) || 30;
+    if (!ticker) { IM.flash("ticker 必填", "error"); return; }
+    $("#q-result").innerHTML = `<span class="spinner"></span> 抓 ${api} 中…`;
+    try {
+      const r = await IM.fetchJson(`/api/${api}/quote?ticker=${encodeURIComponent(ticker)}&days=${days}`);
+      const latest = r.latest || (r.history?.[r.history.length - 1]);
+      let html = "";
+      if (latest) {
+        html += `<div><b>最新一筆 (${latest.date || "—"})</b></div>
+          <table style="margin-top:0.4rem">
+            <tr><td>開</td><td>${latest.open}</td><td style="padding-left:1rem">高</td><td>${latest.max}</td></tr>
+            <tr><td>收</td><td>${latest.close}</td><td style="padding-left:1rem">低</td><td>${latest.min}</td></tr>
+            <tr><td>量</td><td colspan="3">${latest.Trading_Volume || latest.volume || "—"}</td></tr>
+          </table>`;
+      }
+      html += `<div class="stat-line">共 ${r.days_returned || (r.history?.length) || "?"} 個交易日</div>
+        <details style="margin-top:0.6rem"><summary class="muted" style="cursor:pointer;font-size:12px">完整 raw response</summary>
+          <pre style="margin-top:0.3rem;font-size:11px;max-height:300px;overflow:auto">${JSON.stringify(r, null, 2)}</pre>
+        </details>`;
+      $("#q-result").innerHTML = html;
+    } catch (e) { $("#q-result").innerHTML = `<span style="color:#ef4444">${e.message}</span>`; }
+  }
+  $("#q-run").addEventListener("click", () => queryQuote("finmind"));
+  $("#ql-run").addEventListener("click", () => queryQuote("finlab"));
+})();
+</script>
+</body>
+</html>

@@ -120,7 +120,9 @@
       </div>
       <textarea class="tickers" id="t-area" spellcheck="false"></textarea>
       <p class="editor-help">每行一個 ticker（如 <code>2330</code>、<code>2317</code>）。空行自動忽略。</p>
+      <div id="ai-analysis-panel" style="display:none; margin-top:1rem; padding:1rem; background:rgba(168,85,247,0.05); border:1px dashed #a855f7; border-radius:8px"></div>
       <div class="editor-actions">
+        <button class="btn-secondary" id="t-ai" style="background:rgba(168,85,247,0.15); color:#a855f7; border:1px solid #a855f7; margin-right:auto">✨ AI 分析族群</button>
         <button class="btn-secondary" id="t-reset">還原</button>
         <button id="t-apply">套用變更</button>
       </div>
@@ -135,6 +137,37 @@
       ta.value = (allData[group] || []).join("\n");
       $("#t-count").textContent = (allData[group] || []).length;
     });
+
+    // ✨ AI 分析族群
+    $("#t-ai").addEventListener("click", async () => {
+      const tickers = ta.value.split("\n").map(s => s.trim()).filter(Boolean).slice(0, 30);
+      const panel = $("#ai-analysis-panel");
+      panel.style.display = "block";
+      panel.innerHTML = '<span class="spinner"></span> Claude 分析中（10-20 秒）…';
+      try {
+        const r = await IM.fetchJson("/api/ai/analyze-industry", {
+          method: "POST",
+          body: JSON.stringify({ group, tickers }),
+        });
+        let html = `<div style="margin-bottom:0.5rem"><b>✨ AI 分析「${group}」（可複製到 industry_meta.json）</b></div>`;
+        if (r.summary) html += `<div><b>族群介紹：</b><div style="margin-top:0.3rem; line-height:1.6">${r.summary}</div></div>`;
+        if (r.outlook) html += `<div style="margin-top:0.6rem"><b>展望：</b> ${r.outlook}</div>`;
+        if (r.drivers?.length) html += `<div style="margin-top:0.6rem"><b>驅動：</b><ul style="margin:0.3rem 0">${r.drivers.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
+        if (r.risks?.length)   html += `<div><b>風險：</b><ul style="margin:0.3rem 0">${r.risks.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
+        if (r.key_players?.length) html += `<div><b>關鍵公司：</b><ul style="margin:0.3rem 0">${r.key_players.map(d=>`<li>${d}</li>`).join("")}</ul></div>`;
+        if (r.indicators?.length) {
+          html += `<div style="margin-top:0.6rem"><b>indicators：</b><pre style="margin:0.3rem 0; font-size:11px; background:var(--bg); padding:0.5rem; border-radius:4px; max-height:200px; overflow:auto">${JSON.stringify(r.indicators, null, 2)}</pre></div>`;
+        }
+        if (r.cache_stats) {
+          html += `<div style="color:var(--muted); font-size:11px; margin-top:0.5rem">tokens: in ${r.cache_stats.input} / out ${r.cache_stats.output}</div>`;
+        }
+        html += `<div style="margin-top:0.5rem"><a href="/admin/data/industries.html" target="_blank" style="font-size:12px">→ 進產業文案編輯頁套用此 JSON</a></div>`;
+        panel.innerHTML = html;
+      } catch (e) {
+        panel.innerHTML = `<span style="color:#ef4444">AI 分析失敗：${e.message}</span>`;
+      }
+    });
+
     $("#t-apply").addEventListener("click", () => {
       const lines = ta.value.split("\n").map(s => s.trim()).filter(Boolean);
       // 去重保留順序

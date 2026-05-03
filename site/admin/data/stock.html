@@ -165,13 +165,74 @@
         </div>
       </div>
 
-      <div style="display:flex; gap:0.5rem; justify-content:flex-end; margin-top:1.25rem">
-        <button class="btn-secondary" id="f-reset">還原</button>
-        <button id="f-save">儲存（會建立 GitHub commit）</button>
+      <div id="ai-suggest-panel" style="display:none; margin-top:1rem; padding:1rem; background:rgba(168,85,247,0.05); border:1px dashed #a855f7; border-radius:8px"></div>
+
+      <div style="display:flex; gap:0.5rem; justify-content:space-between; align-items:center; margin-top:1.25rem; flex-wrap:wrap">
+        <button class="btn-secondary" id="f-ai" style="background:rgba(168,85,247,0.15); color:#a855f7; border:1px solid #a855f7">✨ AI 推薦分類</button>
+        <div style="display:flex; gap:0.5rem">
+          <button class="btn-secondary" id="f-reset">還原</button>
+          <button id="f-save">儲存（會建立 GitHub commit）</button>
+        </div>
       </div>
     `;
 
     $("#f-reset").addEventListener("click", () => openEditor(ticker));
+
+    // ✨ AI 推薦分類按鈕
+    $("#f-ai").addEventListener("click", async () => {
+      const summary = $("#f-bizsummary").value.trim();
+      if (!summary) { IM.flash("先填業務簡介摘要再推薦", "error"); return; }
+      const panel = $("#ai-suggest-panel");
+      panel.style.display = "block";
+      panel.innerHTML = '<span class="spinner"></span> Claude 思考中（5-10 秒）…';
+      try {
+        const r = await IM.fetchJson("/api/ai/suggest-classification", {
+          method: "POST",
+          body: JSON.stringify({
+            ticker, name: $("#f-name").value.trim(),
+            twse_industry: $("#f-twse").value.trim(),
+            business_summary: summary,
+            current_groups: [], // stock 編輯頁不知道目前歸屬，留空
+          }),
+        });
+        const conf = (c) => c >= 0.8 ? "#10b981" : c >= 0.6 ? "#f59e0b" : "#ef4444";
+        let html = '<div style="margin-bottom:0.5rem"><b>✨ AI 推薦（不會自動套用，你看完手動填到欄位）</b></div>';
+        if (r.recommended_groups?.length) {
+          html += "<div><b>推薦族群：</b></div><ul style='margin:0.3rem 0; padding-left:1.4rem'>" +
+            r.recommended_groups.map(g =>
+              `<li><b>${g.name}</b> <span style="color:${conf(g.confidence)}; font-size:11px">(信心 ${(g.confidence*100).toFixed(0)}%)</span><br>
+               <span class="muted" style="font-size:12px">${g.reasoning || ""}</span></li>`
+            ).join("") + "</ul>";
+        }
+        if (r.suggested_segment) {
+          html += `<div style="margin-top:0.5rem">建議產業段：<code>${r.suggested_segment}</code>
+            <button class="btn-sm btn-secondary" id="apply-seg" style="margin-left:0.5rem">套用</button></div>`;
+        }
+        if (r.suggested_position) {
+          html += `<div>建議供應鏈位階：<code>${r.suggested_position}</code>
+            <button class="btn-sm btn-secondary" id="apply-pos" style="margin-left:0.5rem">套用</button></div>`;
+        }
+        if (r.notes) html += `<div class="muted" style="margin-top:0.4rem; font-size:12px">${r.notes}</div>`;
+        if (r.cache_stats) {
+          html += `<div style="color:var(--muted); font-size:11px; margin-top:0.5rem">tokens: in ${r.cache_stats.input} / out ${r.cache_stats.output}` +
+            (r.cache_stats.cache_read > 0 ? ` / cache hit ${r.cache_stats.cache_read}` : "") + `</div>`;
+        }
+        panel.innerHTML = html;
+        if (r.suggested_segment) {
+          document.getElementById("apply-seg").addEventListener("click", () => {
+            $("#f-seg").value = r.suggested_segment; IM.flash("已套用 segment", "success");
+          });
+        }
+        if (r.suggested_position) {
+          document.getElementById("apply-pos").addEventListener("click", () => {
+            $("#f-pos").value = r.suggested_position; IM.flash("已套用 position", "success");
+          });
+        }
+      } catch (e) {
+        panel.innerHTML = `<span style="color:#ef4444">AI 推薦失敗：${e.message}</span>`;
+      }
+    });
+
     $("#f-save").addEventListener("click", async () => {
       const profile = {
         ...p,

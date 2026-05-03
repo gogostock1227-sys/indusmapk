@@ -102,6 +102,7 @@ window.IM = (function () {
       { key: "data-industries", label: "產業文案", href: "/admin/data/industries.html" },
       { key: "data-master-patch", label: "Master Patch", href: "/admin/data/master-patch.html" },
       { key: "data-validation", label: "驗證審核", href: "/admin/data/validation.html" },
+      { key: "data-ai-tools", label: "✨ AI 工具", href: "/admin/data/ai-tools.html" },
       { key: "data-publish", label: "🚀 發布", href: "/admin/data/publish.html" },
     ];
 
