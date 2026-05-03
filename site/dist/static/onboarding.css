@@ -1,0 +1,434 @@
+/* ═══════════════════════════════════════════
+   族群寶 — 更新公告 Modal + driver.js 主題
+   設計語言：白底雜誌風、橘+寶藍主色、4px 銳利圓角、頂部漸層條
+   ═══════════════════════════════════════════ */
+
+#idmk-changelog-modal[hidden] { display: none; }
+
+#idmk-changelog-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  font-family: 'Source Sans 3', 'Inter', -apple-system, BlinkMacSystemFont,
+               'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  animation: idmk-cl-fadein 0.18s ease-out;
+}
+
+@keyframes idmk-cl-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.idmk-cl-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 18, 32, 0.45);
+  cursor: pointer;
+}
+
+.idmk-cl-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 24px 60px rgba(11, 18, 32, 0.22),
+              0 4px 12px rgba(11, 18, 32, 0.08);
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: idmk-cl-pop 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
+  /* 頂部站台招牌漸層條（橘 → 黃 → 寶藍） */
+  border-top: 3px solid transparent;
+  border-image: linear-gradient(90deg, #ea580c 0%, #f59e0b 45%, #2563eb 100%) 1;
+}
+
+@keyframes idmk-cl-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ─── Section Header（雜誌風：英文小標 + 中文大標） ─── */
+.idmk-cl-head {
+  padding: 1.1rem 1.4rem 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.idmk-cl-eyebrow {
+  display: inline-block;
+  font-size: 0.68rem;
+  letter-spacing: 2.4px;
+  font-weight: 600;
+  color: #ea580c;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.idmk-cl-eyebrow::before {
+  content: "● ";
+  color: #ea580c;
+  margin-right: 2px;
+}
+
+.idmk-cl-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #0b1220;
+  margin: 0 0 0.15rem;
+  line-height: 1.35;
+  letter-spacing: -0.3px;
+}
+
+.idmk-cl-subtitle {
+  font-size: 0.82rem;
+  color: #475569;
+  margin: 0;
+}
+
+.idmk-cl-subtitle strong {
+  color: #1e40af;
+  font-weight: 600;
+}
+
+/* ─── Body 主體可捲動區 ─── */
+.idmk-cl-body {
+  padding: 1rem 1.4rem 0.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.idmk-cl-welcome p {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  color: #1f2937;
+  line-height: 1.7;
+}
+
+.idmk-cl-welcome p:last-child {
+  margin-bottom: 0.85rem;
+}
+
+/* 站台連結（雜誌底欄風） */
+.idmk-cl-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: #475569;
+  background: #fbf7f2;
+  padding: 0.5rem 0.7rem;
+  border-left: 2px solid #ea580c;
+  margin: 0.5rem 0 0.85rem;
+}
+
+.idmk-cl-meta a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.idmk-cl-meta a:hover {
+  text-decoration: underline;
+}
+
+/* 加入主畫面提示 */
+.idmk-cl-tip {
+  font-size: 0.78rem;
+  color: #475569;
+  background: #f3f7fb;
+  padding: 0.55rem 0.7rem;
+  border-radius: 2px;
+  line-height: 1.55;
+  margin: 0 0 1rem;
+}
+
+/* ─── 版本歷史 ─── */
+.idmk-cl-section-label {
+  font-size: 0.7rem;
+  letter-spacing: 1.8px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin: 0 0 0.55rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.idmk-cl-section-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.idmk-cl-version {
+  margin-bottom: 0.85rem;
+  padding-left: 0.65rem;
+  border-left: 2px solid #fbbf8a;
+}
+
+.idmk-cl-version:last-child {
+  margin-bottom: 0.25rem;
+}
+
+.idmk-cl-ver-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  margin-bottom: 0.4rem;
+}
+
+.idmk-cl-ver-num {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.95rem;
+  color: #0b1220;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.idmk-cl-ver-date {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.idmk-cl-ver-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.85rem;
+  color: #1f2937;
+  line-height: 1.65;
+}
+
+.idmk-cl-ver-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.idmk-cl-tag {
+  display: inline-block;
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 0.06rem 0.4rem;
+  border-radius: 2px;
+  letter-spacing: 0.4px;
+  margin-top: 4px;
+  font-family: 'Source Sans 3', sans-serif;
+  text-transform: uppercase;
+}
+
+.idmk-cl-tag-add     { background: #fff1e3; color: #c2410c; border: 1px solid #fbbf8a; }
+.idmk-cl-tag-improve { background: #e5efff; color: #1d4ed8; border: 1px solid #93c5fd; }
+.idmk-cl-tag-fix     { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+.idmk-cl-tag-default { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+/* ─── Footer Actions ─── */
+.idmk-cl-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.4rem;
+  background: #fbf7f2;
+  border-top: 1px solid #f1f5f9;
+}
+
+.idmk-cl-actions-btns {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* 「不再顯示」勾選框 */
+.idmk-cl-dismiss {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #64748b;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s;
+}
+
+.idmk-cl-dismiss:hover {
+  color: #1d4ed8;
+}
+
+.idmk-cl-dismiss input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #ea580c;
+}
+
+.idmk-cl-btn-primary,
+.idmk-cl-btn-secondary {
+  font-size: 0.85rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 2px;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  border: 0;
+  font-family: inherit;
+}
+
+.idmk-cl-btn-primary {
+  background: #ea580c;
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(234, 88, 12, 0.3);
+}
+
+.idmk-cl-btn-primary:hover {
+  background: #c2410c;
+  box-shadow: 0 2px 6px rgba(234, 88, 12, 0.4);
+}
+
+.idmk-cl-btn-primary:active {
+  transform: translateY(1px);
+}
+
+.idmk-cl-btn-secondary {
+  background: transparent;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.idmk-cl-btn-secondary:hover {
+  background: #ffffff;
+  color: #1d4ed8;
+  border-color: #2563eb;
+}
+
+/* ─── 手機 RWD ─── */
+@media (max-width: 600px) {
+  #idmk-changelog-modal { padding: 0.5rem; align-items: flex-end; }
+  .idmk-cl-card {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 4px 4px 0 0;
+  }
+  .idmk-cl-head { padding: 1rem 1.1rem 0.7rem; }
+  .idmk-cl-body { padding: 0.85rem 1.1rem 0.5rem; }
+  .idmk-cl-actions {
+    padding: 0.75rem 1.1rem;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+  .idmk-cl-actions-btns {
+    flex-direction: column-reverse;
+    width: 100%;
+    margin-left: 0;
+    gap: 0.45rem;
+  }
+  .idmk-cl-dismiss {
+    align-self: center;
+    padding-top: 0.2rem;
+  }
+  .idmk-cl-btn-primary,
+  .idmk-cl-btn-secondary { width: 100%; padding: 0.7rem; }
+  .idmk-cl-title { font-size: 1.2rem; }
+}
+
+/* ═══════════════════════════════════════════
+   driver.js 導覽主題（對齊站台 design system）
+   ═══════════════════════════════════════════ */
+
+.driver-popover {
+  font-family: 'Source Sans 3', 'Noto Sans TC', sans-serif !important;
+  border-radius: 4px !important;
+  box-shadow: 0 16px 40px rgba(11, 18, 32, 0.22),
+              0 3px 8px rgba(11, 18, 32, 0.08) !important;
+  border: 0 !important;
+  border-top: 3px solid #ea580c !important;
+  padding: 1rem 1.2rem !important;
+}
+
+.driver-popover-title {
+  font-family: 'Noto Serif TC', serif !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  color: #0b1220 !important;
+  letter-spacing: -0.2px !important;
+  margin-bottom: 0.4rem !important;
+}
+
+.driver-popover-description {
+  font-size: 0.86rem !important;
+  color: #1f2937 !important;
+  line-height: 1.7 !important;
+}
+
+.driver-popover-progress-text {
+  font-size: 0.7rem !important;
+  letter-spacing: 1.5px !important;
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-family: 'Source Sans 3', sans-serif !important;
+}
+
+.driver-popover-footer {
+  margin-top: 0.85rem !important;
+}
+
+.driver-popover-next-btn,
+.driver-popover-prev-btn,
+.driver-popover-close-btn {
+  font-size: 0.82rem !important;
+  border-radius: 2px !important;
+  padding: 0.45rem 0.95rem !important;
+  font-family: inherit !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  text-shadow: none !important;
+  border: 1px solid transparent !important;
+}
+
+.driver-popover-next-btn {
+  background: #ea580c !important;
+  color: #ffffff !important;
+  border-color: #ea580c !important;
+}
+
+.driver-popover-next-btn:hover {
+  background: #c2410c !important;
+  border-color: #c2410c !important;
+}
+
+.driver-popover-prev-btn {
+  background: transparent !important;
+  color: #475569 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.driver-popover-prev-btn:hover {
+  background: #ffffff !important;
+  color: #1d4ed8 !important;
+  border-color: #2563eb !important;
+}
+
+.driver-popover-close-btn {
+  color: #94a3b8 !important;
+  background: transparent !important;
+}
+
+.driver-popover-close-btn:hover {
+  color: #ea580c !important;
+}
