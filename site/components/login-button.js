@@ -143,6 +143,73 @@
           max-width: 320px;
         }
       }
+
+      /* 到期警告 modal — 視窗正中央顯示，半透明 overlay 加強引導 */
+      #indusmapk-expiry-overlay {
+        position: fixed; inset: 0; z-index: 10000;
+        background: rgba(15, 23, 42, 0.55);
+        display: grid; place-items: center;
+        padding: 1rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+        animation: indusmapk-fade-in 0.2s ease-out;
+        backdrop-filter: blur(2px);
+      }
+      @keyframes indusmapk-fade-in {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      #indusmapk-expiry-modal {
+        background: #fff; border-radius: 14px;
+        padding: 2rem 2.25rem 1.5rem;
+        max-width: 440px; width: 100%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: indusmapk-pop-in 0.25s cubic-bezier(.34,1.56,.64,1);
+      }
+      @keyframes indusmapk-pop-in {
+        from { opacity: 0; transform: scale(0.85); }
+        to   { opacity: 1; transform: scale(1); }
+      }
+      #indusmapk-expiry-modal .icon {
+        font-size: 3rem; line-height: 1; margin-bottom: 0.75rem;
+      }
+      #indusmapk-expiry-modal .title {
+        font-size: 1.25rem; font-weight: 700; color: #0f172a;
+        margin: 0 0 0.5rem;
+      }
+      #indusmapk-expiry-modal .title.warn   { color: #92400e; }
+      #indusmapk-expiry-modal .title.danger { color: #991b1b; }
+      #indusmapk-expiry-modal .days-big {
+        display: inline-block; padding: 0 0.4rem;
+        font-size: 1.6rem; font-weight: 800;
+      }
+      #indusmapk-expiry-modal .sub {
+        color: #475569; font-size: 14px; line-height: 1.6;
+        margin: 0.75rem 0 1.25rem;
+      }
+      #indusmapk-expiry-modal .role-pill {
+        display: inline-block; background: #f1f5f9; color: #334155;
+        padding: 0.15rem 0.65rem; border-radius: 999px;
+        font-size: 12px; font-weight: 500;
+      }
+      #indusmapk-expiry-modal .actions {
+        display: flex; gap: 0.6rem; justify-content: center;
+        flex-wrap: wrap; margin-top: 0.75rem;
+      }
+      #indusmapk-expiry-modal .extend-btn {
+        background: #3b82f6; color: #fff; border: 0;
+        padding: 0.65rem 1.4rem; border-radius: 8px;
+        font-size: 14px; font-weight: 500; cursor: pointer;
+        text-decoration: none;
+      }
+      #indusmapk-expiry-modal .extend-btn:hover { background: #2563eb; }
+      #indusmapk-expiry-modal .close-btn {
+        background: transparent; color: #64748b; border: 1px solid #cbd5e1;
+        padding: 0.65rem 1.4rem; border-radius: 8px;
+        font-size: 14px; font-weight: 500; cursor: pointer;
+      }
+      #indusmapk-expiry-modal .close-btn:hover { background: #f8fafc; }
+      #indusmapk-expiry-overlay .danger-tint { background: rgba(127, 29, 29, 0.55); }
     `;
     const style = document.createElement("style");
     style.id = "indusmapk-auth-style";
@@ -253,10 +320,79 @@
     fetch("/api/auth/me", { credentials: "same-origin" })
       .then(r => r.json())
       .then(me => {
-        if (me.authenticated) renderUser(root, me);
-        else renderGuest(root);
+        if (me.authenticated) {
+          renderUser(root, me);
+          showExpiryWarning(me);
+        } else {
+          renderGuest(root);
+        }
       })
       .catch(() => renderGuest(root));
+  }
+
+  // ── 到期警告 banner（5 天內快過期才顯示） ──────────────────────
+  function showExpiryWarning(me) {
+    // super_admin 永久不需要警告
+    if (me.role === "super_admin") return;
+    // member / guest 沒到期日概念
+    if (!me.role_expires_at) return;
+
+    const ms = Date.parse(me.role_expires_at);
+    if (isNaN(ms)) return;
+    const now = Date.now();
+    const days = Math.ceil((ms - now) / 86400000);
+
+    // 已過期：middleware 會自動降為 member 並重發 cookie，這裡不警告
+    if (days <= 0) return;
+    // 大於 5 天：暫不打擾
+    if (days > 5) return;
+
+    if (document.getElementById("indusmapk-expiry-overlay")) return; // 已存在不重複插入
+
+    const isDanger = days <= 2;
+    const roleText = ROLE_LABELS[me.role] || me.role;
+    const overlay = el("div", {
+      id: "indusmapk-expiry-overlay",
+      class: isDanger ? "danger-tint" : "",
+    });
+    overlay.innerHTML = `
+      <div id="indusmapk-expiry-modal" role="dialog" aria-modal="true">
+        <div class="icon">${isDanger ? "⚠️" : "⏰"}</div>
+        <h3 class="title ${isDanger ? "danger" : "warn"}">
+          你的權限<span class="days-big">${days}</span>天後到期
+        </h3>
+        <div class="sub">
+          <span class="role-pill">${roleText}</span>
+          <br><br>
+          ${isDanger
+            ? "⚠ 即將失效，請盡快聯絡管理員延長使用期限。"
+            : "請聯絡管理員協助續期，避免影響你的使用權限。"}
+        </div>
+        <div class="actions">
+          <button class="close-btn" id="indusmapk-close-modal">我知道了</button>
+          <a class="extend-btn" id="indusmapk-extend-btn">聯絡管理員續期</a>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    document.getElementById("indusmapk-extend-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      const subject = `申請延長${roleText}權限`;
+      const body = `Hi，\n\n我是 ${me.email}，目前是「${roleText}」，將於 ${days} 天後到期。\n` +
+                   `麻煩協助延長使用期限，謝謝！\n\n（自動發送自 indusmapk.com）`;
+      location.href = `mailto:gogostock1227@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      overlay.remove();
+    });
+    document.getElementById("indusmapk-close-modal").addEventListener("click", () => {
+      overlay.remove();
+    });
+    // 點 overlay 空白處也可關閉（modal 本身吃掉 click 不冒泡）
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+    document.getElementById("indusmapk-expiry-modal").addEventListener("click", (e) => e.stopPropagation());
+    // ESC 鍵關閉
+    const escHandler = (e) => { if (e.key === "Escape") { overlay.remove(); document.removeEventListener("keydown", escHandler); } };
+    document.addEventListener("keydown", escHandler);
   }
 
   if (document.readyState === "loading") {
