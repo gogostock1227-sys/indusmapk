@@ -1381,7 +1381,11 @@ def _safe_get(data_mod, key: str):
 
 def _load_finlab_data():
     """從 FinLab 載入必要資料"""
+    import finlab
     from finlab import data
+    token = os.environ.get('FINLAB_TOKEN')
+    if token:
+        finlab.login(token)
     print("  [FinLab] 下載 price/成交股數/成交金額...")
     d = {}
     d["close"]  = data.get("price:收盤價")
