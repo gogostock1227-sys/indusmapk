@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="../static/logo.png">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
-<script src="https://unpkg.com/lightweight-charts@5.0.5/dist/lightweight-charts.standalone.production.js" defer></script>
+<script src="https://unpkg.com/lightweight-charts@5.2.0/dist/lightweight-charts.standalone.production.js" defer></script>
 </head>
 <body>
 
@@ -378,16 +378,23 @@
   </div>
   <div class="tech-indicator-bar" id="tech_indicators_1813"
        style="display:flex; flex-wrap:wrap; gap:6px 10px; padding:6px 4px 0; font-size:12px; color:#374151;">
+    <span style="color:#9ca3af; margin-right:4px;">主圖：</span>
+    <label class="ind-chip"><input type="checkbox" data-ind="ma5"> <span style="color:#db2777">MA5</span></label>
+    <label class="ind-chip"><input type="checkbox" data-ind="ma10"> <span style="color:#eab308">MA10</span></label>
+    <label class="ind-chip"><input type="checkbox" data-ind="ma20"> <span style="color:#c2410c">MA20</span></label>
+    <label class="ind-chip"><input type="checkbox" data-ind="ma60"> <span style="color:#1e40af">MA60</span></label>
+    <label class="ind-chip"><input type="checkbox" data-ind="bb"> <span style="color:#64748b">Bollinger</span></label>
+    <span style="color:#d1d5db; margin:0 2px;">｜</span>
     <span style="color:#9ca3af; margin-right:4px;">副圖（最多 3 個 · 成交量固定）：</span>
     <label class="ind-chip"><input type="checkbox" data-ind="kd"> <span>KD</span></label>
-    <label class="ind-chip"><input type="checkbox" data-ind="macd" checked> <span>MACD</span></label>
+    <label class="ind-chip"><input type="checkbox" data-ind="macd"> <span>MACD</span></label>
     <label class="ind-chip"><input type="checkbox" data-ind="rsi"> <span>RSI</span></label>
-    <label class="ind-chip"><input type="checkbox" data-ind="main" checked> <span>主力買賣超</span></label>
-    <label class="ind-chip"><input type="checkbox" data-ind="foreign" checked> <span>外資</span></label>
+    <label class="ind-chip"><input type="checkbox" data-ind="main"> <span>主力買賣超</span></label>
+    <label class="ind-chip"><input type="checkbox" data-ind="foreign"> <span>外資</span></label>
     <label class="ind-chip"><input type="checkbox" data-ind="trust"> <span>投信</span></label>
     <label class="ind-chip"><input type="checkbox" data-ind="dealer"> <span>自營</span></label>
   </div>
-  <div id="tech_chart_1813" style="height:720px; width:100%; padding:4px 4px 12px; position:relative;"></div>
+  <div id="tech_chart_1813" style="width:100%; padding:4px 4px 12px; position:relative;"></div>
   <dialog id="sub_replace_modal_1813" class="lwc-replace-modal" style="
     border:1px solid #d1d5db; border-radius:8px; padding:20px 24px;
     box-shadow:0 12px 32px rgba(0,0,0,0.18);
@@ -440,6 +447,7 @@
     function start(){
       if (typeof LightweightCharts === 'undefined') return setTimeout(start, 120);
       try {
+      // ★ 架構：多 chart instance（v5.2.0 multi-pane 在這環境跑不通，改成主圖 1 chart + 副圖 7 lazy chart instances）
       const LC = LightweightCharts;
       const el = containerEl;
       const UP = '#dc2626', DOWN = '#059669';   // 台股紅漲綠跌
@@ -448,7 +456,18 @@
       // === 設定 ===
       const TOGGLE_KEYS = ['kd','macd','rsi','main','foreign','trust','dealer'];
       const MAX_VISIBLE = 3;
-      const DEFAULT_VISIBLE = ['macd','main','foreign'];
+      const MAIN_TOGGLE_KEYS = ['ma5','ma10','ma20','ma60','bb'];
+      const MAIN_HEIGHT = 480;
+      const SUB_HEIGHT = 100;
+      const PANE_LABELS = {
+        kd:      { text: 'KD (9,3,3)',       color: '#0ea5e9' },
+        macd:    { text: 'MACD (12,26,9)',  color: '#a855f7' },
+        rsi:     { text: 'RSI (14)',         color: '#14b8a6' },
+        main:    { text: '主力買賣超',       color: '#ff7847' },
+        foreign: { text: '外資買賣超',       color: '#dc2626' },
+        trust:   { text: '投信買賣超',       color: '#059669' },
+        dealer:  { text: '自營買賣超',       color: '#7c3aed' },
+      };
 
       // === Helpers ===
       const fmtNum = (v, d=2) => (v == null || isNaN(v)) ? '—' : Number(v).toFixed(d);
@@ -475,11 +494,12 @@
         dealer:  { label: '自營', available: !!hasChip.dealer,  dataKey: 'dealer_net',  color: '#7c3aed' },
       };
 
-      // === 初始化 chip checkbox（disabled 邏輯沿用） ===
+      // === 初始化 chip checkbox（只對副圖判斷 disabled，主圖 chip 永遠 enabled） ===
       const indBar = document.getElementById('tech_indicators_' + SYM);
       if (indBar) {
         indBar.querySelectorAll('input[type="checkbox"]').forEach(cb => {
           const k = cb.dataset.ind;
+          if (MAIN_TOGGLE_KEYS.includes(k)) return;  // 主圖永遠 enabled
           if (!SUB_DEFS[k] || !SUB_DEFS[k].available) {
             cb.disabled = true;
             cb.checked = false;
@@ -489,34 +509,48 @@
         });
       }
 
-      // === 建 chart（lightweight-charts v5 multi-pane） ===
-      const chart = LC.createChart(el, {
-        width: el.clientWidth || 800,
-        height: 720,
+      // === Layout: 清空 chart container，建主圖 div + 副圖 div × 7 ===
+      el.innerHTML = '';
+      el.style.width = '100%';
+      el.style.position = 'relative';
+
+      const mainDiv = document.createElement('div');
+      mainDiv.id = 'lwc_main_' + SYM;
+      mainDiv.style.cssText = 'width:100%; height:' + MAIN_HEIGHT + 'px; position:relative;';
+      el.appendChild(mainDiv);
+
+      const subContainers = {};
+      TOGGLE_KEYS.forEach(key => {
+        const subDiv = document.createElement('div');
+        subDiv.id = 'lwc_sub_' + key + '_' + SYM;
+        subDiv.dataset.subKey = key;
+        subDiv.style.cssText = 'width:100%; height:0; position:relative; overflow:hidden; border-top:1px solid #e5e7eb;';
+        el.appendChild(subDiv);
+        subContainers[key] = subDiv;
+      });
+
+      // === Helper: chart 共用設定 ===
+      const sharedChartOpts = {
         layout: {
           background: { color: '#fafaf7' },
           textColor: '#6b7280',
           fontSize: 11,
           fontFamily: "'Source Sans 3', 'Noto Sans TC', sans-serif",
-          panes: { separatorColor: '#e5e7eb', separatorHoverColor: 'rgba(194,65,12,0.25)' },
         },
-        grid: {
-          vertLines: { color: '#f1f3f5' },
-          horzLines: { color: '#f1f3f5' },
-        },
+        grid: { vertLines: { color: '#f1f3f5' }, horzLines: { color: '#f1f3f5' } },
         crosshair: { mode: LC.CrosshairMode.Normal },
         rightPriceScale: { borderColor: '#e0e0e0' },
-        timeScale: {
-          borderColor: '#e0e0e0',
-          timeVisible: false,
-          rightOffset: 4,
-          barSpacing: 6,
-        },
         handleScroll: true,
         handleScale: true,
-      });
+      };
 
-      // === Pane 0: K 棒 + MA + Bollinger ===
+      // === 主圖 chart（K + MA + BB + 成交量 overlay） ===
+      const mainChart = LC.createChart(mainDiv, Object.assign({}, sharedChartOpts, {
+        width: mainDiv.clientWidth || el.clientWidth || 800,
+        height: MAIN_HEIGHT,
+        timeScale: { borderColor: '#e0e0e0', timeVisible: false, rightOffset: 4, barSpacing: 6 },
+      }));
+
       // chartData.ohlc 順序：[open, close, low, high]（對齊 echarts candlestick 慣例）
       const ohlcData = chartData.dates.map((dt, i) => {
         const oh = chartData.ohlc[i];
@@ -524,106 +558,130 @@
         return { time: dt, open: oh[0], high: oh[3], low: oh[2], close: oh[1] };
       }).filter(Boolean);
 
-      const candle = chart.addSeries(LC.CandlestickSeries, {
+      const candle = mainChart.addSeries(LC.CandlestickSeries, {
         upColor: UP, downColor: DOWN,
         borderUpColor: UP, borderDownColor: DOWN,
         wickUpColor: UP, wickDownColor: DOWN,
       });
       candle.setData(ohlcData);
 
+      // 主圖 indicators 預設全 invisible，使用者勾 chip 才顯示
       const overlays = {
-        ma5:   chart.addSeries(LC.LineSeries, { color: '#db2777', lineWidth: 1,   priceLineVisible: false, lastValueVisible: false }),
-        ma10:  chart.addSeries(LC.LineSeries, { color: '#eab308', lineWidth: 1,   priceLineVisible: false, lastValueVisible: false }),
-        ma20:  chart.addSeries(LC.LineSeries, { color: '#c2410c', lineWidth: 2,   priceLineVisible: false, lastValueVisible: false }),
-        ma60:  chart.addSeries(LC.LineSeries, { color: '#1e40af', lineWidth: 2,   priceLineVisible: false, lastValueVisible: false }),
-        bb_up: chart.addSeries(LC.LineSeries, { color: '#64748b', lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false }),
-        bb_lo: chart.addSeries(LC.LineSeries, { color: '#64748b', lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false }),
+        ma5:   mainChart.addSeries(LC.LineSeries, { color: '#db2777', lineWidth: 1, priceLineVisible: false, lastValueVisible: false, visible: false }),
+        ma10:  mainChart.addSeries(LC.LineSeries, { color: '#eab308', lineWidth: 1, priceLineVisible: false, lastValueVisible: false, visible: false }),
+        ma20:  mainChart.addSeries(LC.LineSeries, { color: '#c2410c', lineWidth: 2, priceLineVisible: false, lastValueVisible: false, visible: false }),
+        ma60:  mainChart.addSeries(LC.LineSeries, { color: '#1e40af', lineWidth: 2, priceLineVisible: false, lastValueVisible: false, visible: false }),
+        bb_up: mainChart.addSeries(LC.LineSeries, { color: '#64748b', lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false, visible: false }),
+        bb_lo: mainChart.addSeries(LC.LineSeries, { color: '#64748b', lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false, visible: false }),
       };
       Object.entries(overlays).forEach(([k, s]) => s.setData(toLW(chartData.dates, chartData[k])));
 
-      // === Pane 1: 成交量（固定，不在 toggle 範圍） ===
-      const volSeries = chart.addSeries(LC.HistogramSeries, {
+      // 成交量 overlay（priceScaleId='vol' + scaleMargins 推主圖底部 22%）
+      const volSeries = mainChart.addSeries(LC.HistogramSeries, {
         priceFormat: { type: 'volume' },
-        priceScaleId: 'vol_scale',
+        priceScaleId: 'vol',
         priceLineVisible: false, lastValueVisible: false,
-      }, 1);
-      volSeries.priceScale().applyOptions({ scaleMargins: { top: 0.1, bottom: 0.0 } });
-      const volData = chartData.dates.map((dt, i) => {
+      });
+      volSeries.setData(chartData.dates.map((dt, i) => {
         const oh = chartData.ohlc[i];
         if (!oh || chartData.volume[i] == null) return null;
-        return {
-          time: dt,
-          value: chartData.volume[i],
-          color: oh[1] >= oh[0] ? 'rgba(220,38,38,0.55)' : 'rgba(5,150,105,0.55)',
-        };
-      }).filter(Boolean);
-      volSeries.setData(volData);
-      chart.panes()[1].setHeight(80);
+        return { time: dt, value: chartData.volume[i], color: oh[1] >= oh[0] ? 'rgba(220,38,38,0.55)' : 'rgba(5,150,105,0.55)' };
+      }).filter(Boolean));
+      mainChart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.78, bottom: 0 } });
 
-      // === Pane 2~8: 7 個副圖預建（預設全收起） ===
-      const paneRefs = {};
-      TOGGLE_KEYS.forEach((key, i) => {
-        const paneIdx = i + 2;
-        paneRefs[key] = buildSubPane(key, paneIdx);
-        if (chart.panes()[paneIdx]) chart.panes()[paneIdx].setHeight(0);
-      });
+      // === 副圖 chart instances（lazy create）===
+      const subCharts = {};
 
-      function buildSubPane(key, paneIdx) {
+      function buildSubChart(key) {
+        if (subCharts[key]) return subCharts[key];
         const def = SUB_DEFS[key];
-        if (!def || !def.available) return { paneIdx, series: [] };
+        if (!def || !def.available) return null;
+        const div = subContainers[key];
+        const chart = LC.createChart(div, Object.assign({}, sharedChartOpts, {
+          width: div.clientWidth || mainDiv.clientWidth || 800,
+          height: SUB_HEIGHT,
+          timeScale: { borderColor: '#e0e0e0', visible: false },
+        }));
 
         if (key === 'kd') {
-          const k = chart.addSeries(LC.LineSeries, { color: '#0ea5e9', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false }, paneIdx);
-          const d = chart.addSeries(LC.LineSeries, { color: '#f59e0b', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false }, paneIdx);
+          const k = chart.addSeries(LC.LineSeries, { color: '#0ea5e9', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false });
+          const d = chart.addSeries(LC.LineSeries, { color: '#f59e0b', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false });
           k.setData(toLW(chartData.dates, chartData.k));
           d.setData(toLW(chartData.dates, chartData.d));
-          return { paneIdx, series: [k, d] };
-        }
-
-        if (key === 'macd') {
+        } else if (key === 'macd') {
           const histData = chartData.dates.map((dt, i) => {
             const v = (chartData.macd_hist || [])[i];
             if (v == null) return null;
             return { time: dt, value: v, color: v >= 0 ? 'rgba(220,38,38,0.8)' : 'rgba(5,150,105,0.8)' };
           }).filter(Boolean);
-          const hist = chart.addSeries(LC.HistogramSeries, { priceLineVisible: false, lastValueVisible: false }, paneIdx);
-          const dif  = chart.addSeries(LC.LineSeries, { color: '#a855f7', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false }, paneIdx);
-          const dea  = chart.addSeries(LC.LineSeries, { color: '#f59e0b', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false }, paneIdx);
+          const hist = chart.addSeries(LC.HistogramSeries, { priceLineVisible: false, lastValueVisible: false });
+          const dif  = chart.addSeries(LC.LineSeries, { color: '#a855f7', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false });
+          const dea  = chart.addSeries(LC.LineSeries, { color: '#f59e0b', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false });
           hist.setData(histData);
           dif.setData(toLW(chartData.dates, chartData.macd_dif));
           dea.setData(toLW(chartData.dates, chartData.macd_dea));
-          return { paneIdx, series: [hist, dif, dea] };
-        }
-
-        if (key === 'rsi') {
-          const r = chart.addSeries(LC.LineSeries, { color: '#14b8a6', lineWidth: 1.3, priceLineVisible: false, lastValueVisible: false }, paneIdx);
+        } else if (key === 'rsi') {
+          const r = chart.addSeries(LC.LineSeries, { color: '#14b8a6', lineWidth: 1.3, priceLineVisible: false, lastValueVisible: false });
           r.setData(toLW(chartData.dates, chartData.rsi));
-          return { paneIdx, series: [r] };
+        } else {
+          // main / foreign / trust / dealer
+          const arr = chartData[def.dataKey] || [];
+          const data = chartData.dates.map((dt, i) => {
+            const v = arr[i];
+            if (v == null) return null;
+            return { time: dt, value: v, color: v >= 0 ? 'rgba(220,38,38,0.8)' : 'rgba(5,150,105,0.8)' };
+          }).filter(Boolean);
+          const hg = chart.addSeries(LC.HistogramSeries, { priceLineVisible: false, lastValueVisible: false });
+          hg.setData(data);
         }
 
-        // main / foreign / trust / dealer：histogram 買紅賣綠
-        const arr = chartData[def.dataKey] || [];
-        const data = chartData.dates.map((dt, i) => {
-          const v = arr[i];
-          if (v == null) return null;
-          return { time: dt, value: v, color: v >= 0 ? 'rgba(220,38,38,0.8)' : 'rgba(5,150,105,0.8)' };
-        }).filter(Boolean);
-        const hg = chart.addSeries(LC.HistogramSeries, { priceLineVisible: false, lastValueVisible: false }, paneIdx);
-        hg.setData(data);
-        return { paneIdx, series: [hg] };
+        // 加 label 到 div 左上角
+        const label = document.createElement('div');
+        label.className = 'lwc-pane-label';
+        label.dataset.paneKey = key;
+        label.textContent = PANE_LABELS[key].text;
+        label.style.cssText = 'position:absolute; top:4px; left:8px; z-index:5;'
+          + ' background:rgba(255,255,255,0.85); color:' + PANE_LABELS[key].color + ';'
+          + ' padding:1px 6px; border-radius:3px; font-size:11.5px; font-weight:700;'
+          + ' pointer-events:none; font-family:\'Source Sans 3\',\'Noto Sans TC\',sans-serif;';
+        div.appendChild(label);
+
+        // 同步主圖目前的 visibleRange
+        const range = mainChart.timeScale().getVisibleLogicalRange();
+        if (range) chart.timeScale().setVisibleLogicalRange(range);
+
+        subCharts[key] = chart;
+        return chart;
       }
 
-      // === visibleQueue + toggle 邏輯 ===
+      // === 同步 timeScale（主圖 ↔ 各副圖） ===
+      let syncing = false;
+      mainChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+        if (syncing || !range) return;
+        syncing = true;
+        Object.values(subCharts).forEach(c => {
+          try { c.timeScale().setVisibleLogicalRange(range); } catch(e) {}
+        });
+        syncing = false;
+      });
+
+      // === visibleQueue + chip toggle ===
       const visibleQueue = [];
 
-      function expandPane(key) {
-        const ref = paneRefs[key];
-        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setHeight(95);
+      function expandSub(key) {
+        const div = subContainers[key];
+        if (!div) return;
+        div.style.height = SUB_HEIGHT + 'px';
+        buildSubChart(key);
+        const w = div.clientWidth || mainDiv.clientWidth || 800;
+        if (subCharts[key]) subCharts[key].resize(w, SUB_HEIGHT);
       }
-      function collapsePane(key) {
-        const ref = paneRefs[key];
-        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setHeight(0);
+
+      function collapseSub(key) {
+        const div = subContainers[key];
+        if (div) div.style.height = '0';
       }
+
       function flashChip(key) {
         const cb = indBar && indBar.querySelector('input[data-ind="'+key+'"]');
         if (!cb) return;
@@ -633,9 +691,17 @@
         wrap.classList.add('flash-warn');
       }
 
+      function setMainOverlayVisible(key, visible) {
+        if (key === 'bb') {
+          if (overlays.bb_up) overlays.bb_up.applyOptions({ visible });
+          if (overlays.bb_lo) overlays.bb_lo.applyOptions({ visible });
+        } else if (overlays[key]) {
+          overlays[key].applyOptions({ visible });
+        }
+      }
+
       function onChipChange(key, checked) {
         if (!SUB_DEFS[key] || !SUB_DEFS[key].available) return;
-
         if (checked) {
           if (visibleQueue.includes(key)) return;
           if (visibleQueue.length >= MAX_VISIBLE) {
@@ -645,11 +711,11 @@
             return;
           }
           visibleQueue.push(key);
-          expandPane(key);
+          expandSub(key);
         } else {
           const i = visibleQueue.indexOf(key);
           if (i > -1) visibleQueue.splice(i, 1);
-          collapsePane(key);
+          collapseSub(key);
         }
       }
 
@@ -671,11 +737,9 @@
         body.querySelectorAll('button[data-replace]').forEach(btn => {
           btn.onclick = () => {
             const oldKey = btn.dataset.replace;
-            // 先取消舊的
             const oldCb = indBar && indBar.querySelector('input[data-ind="'+oldKey+'"]');
             if (oldCb) oldCb.checked = false;
             onChipChange(oldKey, false);
-            // 再啟用新的
             const newCb = indBar && indBar.querySelector('input[data-ind="'+newKey+'"]');
             if (newCb) newCb.checked = true;
             onChipChange(newKey, true);
@@ -689,43 +753,32 @@
         else dialog.setAttribute('open', '');
       }
 
-      // === 綁 chip 事件 ===
+      // === 綁 chip 事件（主圖 overlay 直接 toggle、副圖走 modal 流程） ===
       if (indBar) {
         indBar.addEventListener('change', e => {
           const cb = e.target;
           if (!cb || !cb.matches || !cb.matches('input[data-ind]')) return;
-          if (!TOGGLE_KEYS.includes(cb.dataset.ind)) return;
-          onChipChange(cb.dataset.ind, cb.checked);
+          const key = cb.dataset.ind;
+          if (MAIN_TOGGLE_KEYS.includes(key)) {
+            setMainOverlayVisible(key, cb.checked);
+          } else if (TOGGLE_KEYS.includes(key)) {
+            onChipChange(key, cb.checked);
+          }
         });
       }
 
-      // === 預設展開 3 個（DEFAULT_VISIBLE） ===
-      DEFAULT_VISIBLE.forEach(k => {
-        if (SUB_DEFS[k] && SUB_DEFS[k].available) {
-          const cb = indBar && indBar.querySelector('input[data-ind="'+k+'"]');
-          if (cb && !cb.disabled) {
-            cb.checked = true;
-            visibleQueue.push(k);
-            expandPane(k);
-          }
-        }
-      });
-
-      // === Tooltip 浮動 div + subscribeCrosshairMove ===
+      // === Tooltip on 主圖 ===
       const tooltipEl = document.createElement('div');
       tooltipEl.className = 'lwc-tooltip';
       el.appendChild(tooltipEl);
 
-      chart.subscribeCrosshairMove(param => {
+      mainChart.subscribeCrosshairMove(param => {
         if (!param.time || !param.point) {
           tooltipEl.style.display = 'none';
           return;
         }
         const idx = chartData.dates.indexOf(param.time);
-        if (idx < 0) {
-          tooltipEl.style.display = 'none';
-          return;
-        }
+        if (idx < 0) { tooltipEl.style.display = 'none'; return; }
 
         const oh = chartData.ohlc[idx] || [];
         const o = oh[0], c = oh[1], l = oh[2], h = oh[3];
@@ -739,19 +792,22 @@
         html += '<em>最低</em><strong style="color:'+DOWN+'">' + fmtNum(l) + '</strong>';
         html += '<em>收盤</em><strong style="color:'+color+'">' + fmtNum(c) + ' (' + (pct == null ? '—' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%') + ')</strong>';
         html += '<em>量</em><strong>' + fmtVol(chartData.volume[idx]) + '</strong>';
-        html += '</div><hr/>';
-
-        // MA / BB
-        html += '<div class="grid">';
-        html += '<em>MA5</em><strong style="color:#db2777">' + fmtNum(chartData.ma5[idx]) + '</strong>';
-        html += '<em>MA10</em><strong style="color:#eab308">' + fmtNum(chartData.ma10[idx]) + '</strong>';
-        html += '<em>MA20</em><strong style="color:#c2410c">' + fmtNum(chartData.ma20[idx]) + '</strong>';
-        html += '<em>MA60</em><strong style="color:#1e40af">' + fmtNum(chartData.ma60[idx]) + '</strong>';
-        html += '<em>BB上軌</em><strong style="color:#64748b">' + fmtNum(chartData.bb_up[idx]) + '</strong>';
-        html += '<em>BB下軌</em><strong style="color:#64748b">' + fmtNum(chartData.bb_lo[idx]) + '</strong>';
         html += '</div>';
 
-        // 已展開副圖
+        // 主圖 indicators (依 chip checked 狀態)
+        const isCk = (k) => indBar && indBar.querySelector('input[data-ind="'+k+'"]') && indBar.querySelector('input[data-ind="'+k+'"]').checked;
+        const mainRows = [];
+        if (isCk('ma5'))  mainRows.push('<em>MA5</em><strong style="color:#db2777">' + fmtNum(chartData.ma5[idx]) + '</strong>');
+        if (isCk('ma10')) mainRows.push('<em>MA10</em><strong style="color:#eab308">' + fmtNum(chartData.ma10[idx]) + '</strong>');
+        if (isCk('ma20')) mainRows.push('<em>MA20</em><strong style="color:#c2410c">' + fmtNum(chartData.ma20[idx]) + '</strong>');
+        if (isCk('ma60')) mainRows.push('<em>MA60</em><strong style="color:#1e40af">' + fmtNum(chartData.ma60[idx]) + '</strong>');
+        if (isCk('bb')) {
+          mainRows.push('<em>BB上</em><strong style="color:#64748b">' + fmtNum(chartData.bb_up[idx]) + '</strong>');
+          mainRows.push('<em>BB下</em><strong style="color:#64748b">' + fmtNum(chartData.bb_lo[idx]) + '</strong>');
+        }
+        if (mainRows.length) html += '<hr/><div class="grid">' + mainRows.join('') + '</div>';
+
+        // 副圖 indicators (展開的)
         const subRows = [];
         visibleQueue.forEach(k => {
           if (k === 'kd' && chartData.k) {
@@ -760,31 +816,29 @@
           } else if (k === 'macd' && chartData.macd_dif) {
             subRows.push('<em>DIF</em><strong style="color:#a855f7">' + fmtNum(chartData.macd_dif[idx]) + '</strong>');
             subRows.push('<em>DEA</em><strong style="color:#f59e0b">' + fmtNum(chartData.macd_dea[idx]) + '</strong>');
-            const hv = (chartData.macd_hist || [])[idx];
-            const hc = hv == null ? '#9ca3af' : (hv >= 0 ? UP : DOWN);
-            subRows.push('<em>MACD柱</em><strong style="color:'+hc+'">' + fmtNum(hv) + '</strong>');
           } else if (k === 'rsi' && chartData.rsi) {
             const rv = chartData.rsi[idx];
             const rc = rv == null ? '#9ca3af' : (rv >= 70 ? UP : (rv <= 30 ? DOWN : '#14b8a6'));
             subRows.push('<em>RSI14</em><strong style="color:'+rc+'">' + fmtNum(rv) + '</strong>');
           } else {
             const def = SUB_DEFS[k];
-            if (!def || !def.dataKey) return;
-            const arr = chartData[def.dataKey];
-            const v = arr ? arr[idx] : null;
-            const lc = v == null ? '#9ca3af' : (v >= 0 ? UP : DOWN);
-            subRows.push('<em>'+def.label+'</em><strong style="color:'+lc+'">' + fmtLots(v) + '</strong>');
+            if (def && def.dataKey) {
+              const v = (chartData[def.dataKey] || [])[idx];
+              const lc = v == null ? '#9ca3af' : (v >= 0 ? UP : DOWN);
+              subRows.push('<em>'+def.label+'</em><strong style="color:'+lc+'">' + fmtLots(v) + '</strong>');
+            }
           }
         });
-        if (subRows.length) {
-          html += '<hr/><div class="grid">' + subRows.join('') + '</div>';
-        }
+        if (subRows.length) html += '<hr/><div class="grid">' + subRows.join('') + '</div>';
 
         tooltipEl.innerHTML = html;
         tooltipEl.style.display = 'block';
 
-        // 位置（避免超出容器）
-        const x = param.point.x, y = param.point.y;
+        // 位置：相對 el 容器、考慮 mainDiv 偏移
+        const elRect = el.getBoundingClientRect();
+        const mainRect = mainDiv.getBoundingClientRect();
+        const x = param.point.x;
+        const y = param.point.y + (mainRect.top - elRect.top);
         const tw = tooltipEl.offsetWidth, th = tooltipEl.offsetHeight;
         let tx = x + 16, ty = y + 16;
         if (tx + tw > el.clientWidth)  tx = x - tw - 16;
@@ -797,7 +851,7 @@
       function setVisibleRange(days) {
         if (TOTAL <= 0) return;
         const startIdx = Math.max(0, TOTAL - days);
-        chart.timeScale().setVisibleRange({
+        mainChart.timeScale().setVisibleRange({
           from: chartData.dates[startIdx],
           to:   chartData.dates[TOTAL - 1],
         });
@@ -815,15 +869,19 @@
         });
       }
 
-      // === Resize ===
-      const resizeChart = () => {
-        if (el.clientWidth > 0) chart.applyOptions({ width: el.clientWidth });
+      // === Resize（同步主圖 + 副圖 chart instance）===
+      const resizeAll = () => {
+        const w = mainDiv.clientWidth;
+        if (w > 0) {
+          mainChart.resize(w, MAIN_HEIGHT);
+          Object.values(subCharts).forEach(c => c.resize(w, SUB_HEIGHT));
+        }
       };
       if (typeof ResizeObserver !== 'undefined') {
-        const ro = new ResizeObserver(resizeChart);
+        const ro = new ResizeObserver(resizeAll);
         ro.observe(el);
       } else {
-        window.addEventListener('resize', resizeChart);
+        window.addEventListener('resize', resizeAll);
       }
       } catch (e) {
         console.error('[lwc-chart] ' + SYM + ' init failed:', e && e.stack || e);
