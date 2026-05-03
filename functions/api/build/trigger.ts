@@ -19,9 +19,15 @@ export const onRequestPost = async (ctx: RequestCtx) => {
 
   const reason = String(body?.reason ?? "").trim()
                  || `${caller.email} 觸發手動 rebuild`;
+  // skip_finlab=true → 用 cache 純 render（1-2 分鐘）
+  // skip_finlab=false → 抓 finlab 增量資料 + 重 render（5-8 分鐘）
+  const skipFinlab = body?.skip_finlab === true ? "true" : "false";
 
   try {
-    await triggerWorkflow(ctx.env, WORKFLOW_FILE, { reason });
+    await triggerWorkflow(ctx.env, WORKFLOW_FILE, {
+      reason,
+      skip_finlab: skipFinlab,
+    });
   } catch (e: any) {
     return jsonError(`GitHub Actions trigger 失敗：${e.message}`, 502);
   }
@@ -30,13 +36,15 @@ export const onRequestPost = async (ctx: RequestCtx) => {
     user: caller,
     action: "build_trigger",
     target: WORKFLOW_FILE,
-    diff_summary: reason,
+    diff_summary: `${reason} (skip_finlab=${skipFinlab})`,
     ip: getClientIp(ctx.request),
   });
 
+  const eta = skipFinlab === "true" ? "1-2 分鐘" : "5-8 分鐘";
   return jsonOk({
     ok: true,
-    message: "已觸發 GitHub Actions，約 3-5 分鐘後網站會自動更新。",
+    message: `已觸發 GitHub Actions（${skipFinlab === "true" ? "純 render" : "抓 finlab + render"}），約 ${eta} 後網站會自動更新。`,
     reason,
+    skip_finlab: skipFinlab,
   });
 };

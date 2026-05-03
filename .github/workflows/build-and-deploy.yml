@@ -1,13 +1,17 @@
 name: Build and Deploy site
 
 on:
-  # Admin 點「發布」按鈕 → POST /api/build/trigger → workflow_dispatch
+  # Admin 點「📊 更新即時資料 + 上線」按鈕 → POST /api/build/trigger → workflow_dispatch
   workflow_dispatch:
     inputs:
       reason:
         description: '觸發原因（admin 操作摘要）'
         required: false
         default: 'manual rebuild'
+      skip_finlab:
+        description: '是否跳過 finlab 抓資料（true = 用 cache 重 render，1-2 分鐘；false = 抓 finlab 增量，5-8 分鐘）'
+        required: false
+        default: 'false'
   # Source 改動（templates / static / components / build_site.py / data 真理源）→ 自動 build
   push:
     branches: [main]
@@ -29,58 +33,102 @@ permissions:
   contents: write
 
 jobs:
-  acknowledge:
-    name: Acknowledge source change (build offloaded to local daily_build.bat)
+  build:
+    name: Build site (finlab fetch + render + commit dist)
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Inspect source change
-        id: inspect
-        run: |
-          echo "Trigger: ${{ github.event_name }}"
-          echo "Reason: ${{ github.event.inputs.reason || 'push trigger' }}"
-          echo "Commit:  ${{ github.sha }}"
-          echo ""
-          echo "Recent commit message:"
-          git log -1 --pretty=format:"  %h %s%n  %an <%ae>%n  %ad" --date=iso
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-      - name: Detect source files touched
+      - name: Install pip dependencies
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            CHANGED=$(git diff --name-only HEAD^ HEAD 2>/dev/null | head -20)
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # build_site.py 還會用到 finlab SDK 跟其他 ad-hoc 套件
+          pip install finlab requests openpyxl tabulate pyarrow
+
+      # ─── 關鍵：用 actions/cache 保存 site/.cache.parquet (393MB) ──
+      # GitHub 單檔 100MB 上限禁止 commit cache，但 actions/cache 5GB total
+      # 跨 run 可重用。第一次 cache miss → 抓全 finlab（15+ 分鐘）→ save。
+      # 後續 cache hit → 抓增量（5-8 分鐘） → save 更新版本。
+      - name: Restore site/.cache.parquet from Actions cache
+        id: cache-parquet
+        uses: actions/cache@v4
+        with:
+          path: |
+            site/.cache.parquet
+            site/.cache_meta.json
+            site/.cache_extras.json
+            site/.cache_trending.json
+            site/.cache_futures.json
+            site/.cache_stock_futures_ranking.json
+            site/.cache_rs_history.parquet
+            site/.company_rich.pkl
+          # cache key 含 build_site.py 內容 hash，code 改動會自動 invalidate
+          # 但通常 day-to-day 不會 invalidate，cache hit 機率高
+          key: site-cache-${{ hashFiles('site/build_site.py', 'requirements.txt') }}
+          restore-keys: |
+            site-cache-
+
+      - name: Cache hit status
+        run: |
+          if [ "${{ steps.cache-parquet.outputs.cache-hit }}" = "true" ]; then
+            echo "✓ Cache hit — 跑增量 fetch 模式"
           else
-            CHANGED="(workflow_dispatch — admin 從後台 publish.html 觸發)"
+            echo "⚠ Cache miss — 第一次 init，會花 10-15 分鐘抓完整 finlab"
           fi
-          echo "$CHANGED"
+
+      - name: Build site
+        id: build
+        run: |
+          if [ "${{ github.event.inputs.skip_finlab }}" = "true" ]; then
+            echo "Mode: skip-finlab（純 render）"
+            python site/build_site.py --skip-finlab
+          else
+            echo "Mode: full build with finlab fetch"
+            python site/build_site.py
+          fi
+        env:
+          FINLAB_TOKEN: ${{ secrets.FINLAB_TOKEN }}
+          PYTHONUTF8: '1'
+
+      - name: Commit dist/ + cache JSON 增量
+        run: |
+          git config user.name "indusmapk-build-bot"
+          git config user.email "noreply@indusmapk.com"
+          # 加 dist/ + 小型 cache JSON（cache.parquet 393MB 不能 commit，由 actions/cache 保存）
+          git add site/dist site/.cache_meta.json site/.cache_extras.json \
+                  site/.cache_trending.json site/.cache_futures.json \
+                  site/.cache_stock_futures_ranking.json data 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No dist/ changes to commit"
+          else
+            REASON="${{ github.event.inputs.reason || 'push trigger' }}"
+            git commit -m "build: $REASON [skip ci]"
+            git push
+          fi
+
+      - name: Build summary
+        run: |
           {
-            echo "### Build Acknowledged"
+            echo "### ✓ Build Complete"
             echo ""
-            echo "**注意：此 workflow 目前不跑 build_site.py。**"
-            echo ""
-            echo "底層原因：site/.cache.parquet (393MB) 超過 GitHub 單檔 100MB 限制無法 commit"
-            echo "到 repo，GitHub Actions 環境拿不到 cache → build_site.py --skip-finlab 會 fail。"
-            echo ""
-            echo "## 此 commit 的去向"
-            echo ""
-            echo "1. 你（admin）剛剛 commit 的 source 改動已落到 main branch ✓"
-            echo "2. 本機 daily_build.bat 三班次（15:30 / 17:00 / 21:30）會自動帶上"
-            echo "   並 build_site.py + push dist/ → Cloudflare Pages 重 deploy"
-            echo "3. 最多等 5-7 小時即上線"
-            echo ""
-            echo "## 觸發資訊"
             echo "- **Trigger**: \`${{ github.event_name }}\`"
             echo "- **Reason**: ${{ github.event.inputs.reason || 'push trigger' }}"
+            echo "- **Skip finlab**: ${{ github.event.inputs.skip_finlab || 'false' }}"
+            echo "- **Cache hit**: ${{ steps.cache-parquet.outputs.cache-hit }}"
             echo "- **Commit**: [\`${GITHUB_SHA::7}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})"
             echo ""
-            echo "## 之後升級路徑（Phase 5 polish）"
-            echo ""
-            echo "1. 設 \`FINLAB_TOKEN\` 進 GitHub Secrets"
-            echo "2. workflow 加 \`actions/cache@v4\` 保存 site/.cache.parquet"
-            echo "3. 第一次 init cache 跑完整 finlab fetch（10+ 分鐘）"
-            echo "4. 後續 build cache hit 約 1-2 分鐘"
+            echo "## 下一步"
+            echo "Cloudflare Pages 偵測到新 push 會自動 deploy（約 1-2 分鐘）。"
+            echo "整體 admin 點按鈕 → 上線約 5-8 分鐘（cache hit 情況）。"
           } >> $GITHUB_STEP_SUMMARY

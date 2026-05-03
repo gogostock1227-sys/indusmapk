@@ -36,18 +36,26 @@
 <div class="layout">
   <aside class="sidebar"></aside>
   <main class="main">
-    <h1>🚀 發布</h1>
-    <p class="muted" style="margin-top:-0.5rem">確認你剛才在後台改的資料 commit 到 GitHub。底層 build 由本機 daily_build.bat 三班次自動帶上（15:30 / 17:00 / 21:30），最多等 5-7 小時上線。</p>
+    <h1>🚀 發布 / 更新即時資料</h1>
+    <p class="muted" style="margin-top:-0.5rem">兩個按鈕都會觸發 GitHub Actions workflow：<br>
+    1️⃣ <b>📊 抓最新資料 + 重 build</b>：跑 finlab fetch（用 FINLAB_TOKEN）→ 抓今日收盤、法人、籌碼增量 → 重 render → 上線。約 <b>5-8 分鐘</b>。<br>
+    2️⃣ <b>⚡ 純 render（不抓資料）</b>：用既有 cache 直接重 render。約 <b>1-2 分鐘</b>。適合 admin 只改 concept_groups / industry_meta 等 source、不需要新行情時。</p>
 
     <div class="publish-hero">
-      <h2>確認改動已進 repo</h2>
-      <p style="margin: 0 0 0.5rem">點按鈕觸發 GitHub Actions <b>acknowledge run</b>（不執行 build_site.py — 因為 site/.cache.parquet 393MB 超過 GitHub 單檔上限）。<br>
-      <b>真實 build 由本機 daily_build.bat 三班次自動執行</b>。Phase 5 polish 階段會升級為完整 GitHub Actions build（需 FINLAB_TOKEN + actions/cache）。</p>
-      <button class="publish-btn" id="publish-btn">✅ 確認改動 + 觸發 acknowledge run</button>
+      <h2>觸發 workflow</h2>
+      <p style="margin: 0 0 0.5rem">cache.parquet 393MB 不能 commit 進 repo，由 <code>actions/cache@v4</code> 跨 run 保存（5GB 額度足夠）。<br>
+      第一次 cache miss 要 10-15 分鐘 init，後續 cache hit 約 5-8 分鐘。</p>
+      <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; margin:1rem 0">
+        <button class="publish-btn" id="publish-btn-full">📊 抓最新資料 + 重 build</button>
+        <button class="publish-btn" id="publish-btn-fast" style="background:linear-gradient(135deg,#94a3b8 0%,#64748b 100%); box-shadow:0 4px 16px rgba(100,116,139,0.3)">⚡ 純 render（不抓資料）</button>
+      </div>
       <div style="margin-top:1rem">
         <input type="text" id="reason" placeholder="變更摘要（可選，會記錄在 commit message）"
           style="width:60%; min-width:280px; padding:0.5rem; border:1px solid var(--border); border-radius:6px;
                  background:var(--bg); color:var(--text);">
+      </div>
+      <div style="margin-top:0.75rem; font-size:12px; color:var(--muted)">
+        ⚠ 請確認 GitHub 已設 <code>FINLAB_TOKEN</code> Secret（Repo Settings → Secrets and variables → Actions → New repository secret）
       </div>
     </div>
 
@@ -101,14 +109,16 @@
     }
   }
 
-  $("#publish-btn").addEventListener("click", async () => {
-    if (!confirm("確定觸發 acknowledge run？\n\n注意：此操作不會立即更新網站。\n本機 daily_build.bat 三班次會自動帶上你的改動 build + 部署。")) return;
+  async function triggerBuild(skipFinlab) {
+    const verb = skipFinlab ? "⚡ 純 render（1-2 分鐘）" : "📊 抓最新資料 + 重 build（5-8 分鐘）";
+    if (!confirm(`確定觸發「${verb}」？\n\nGitHub Actions 會跑 build_site.py，完成後 Cloudflare Pages 自動 deploy。`)) return;
     const reason = $("#reason").value.trim();
-    $("#publish-btn").disabled = true;
+    const btnFull = $("#publish-btn-full"), btnFast = $("#publish-btn-fast");
+    btnFull.disabled = btnFast.disabled = true;
     try {
       const r = await IM.fetchJson("/api/build/trigger", {
         method: "POST",
-        body: JSON.stringify({ reason }),
+        body: JSON.stringify({ reason, skip_finlab: skipFinlab }),
       });
       IM.flash(r.message, "success");
       $("#reason").value = "";
@@ -117,9 +127,11 @@
     } catch (e) {
       IM.flash(e.message, "error");
     } finally {
-      $("#publish-btn").disabled = false;
+      btnFull.disabled = btnFast.disabled = false;
     }
-  });
+  }
+  $("#publish-btn-full").addEventListener("click", () => triggerBuild(false));
+  $("#publish-btn-fast").addEventListener("click", () => triggerBuild(true));
 
   $("#reload-btn").addEventListener("click", loadRuns);
   loadRuns();
