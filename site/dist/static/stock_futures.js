@@ -2653,7 +2653,7 @@
         $('sf-clear-snapshots-btn').style.color = '#fff';
         clearTimer = setTimeout(() => {
           clearPending = false;
-          $('sf-clear-snapshots-btn').textContent = '清空快照';
+          $('sf-clear-snapshots-btn').textContent = '清空明細';
           $('sf-clear-snapshots-btn').style.background = '';
           $('sf-clear-snapshots-btn').style.color = '';
         }, 3000);
