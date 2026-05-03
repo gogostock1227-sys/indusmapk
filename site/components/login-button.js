@@ -85,22 +85,29 @@
 
       #indusmapk-auth .panel {
         position: absolute; right: 0; top: calc(100% + 8px);
-        min-width: 280px; background: #fff;
+        min-width: 280px; max-width: calc(100vw - 16px);
+        background: #fff;
         border: 1px solid #e5e7eb; border-radius: 10px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         padding: 0; z-index: 9999; display: none;
         overflow: hidden;
+        box-sizing: border-box;
       }
       #indusmapk-auth .panel.open { display: block; }
       #indusmapk-auth .panel-head {
         display: flex; gap: 0.75rem; align-items: center;
         padding: 1rem; border-bottom: 1px solid #f1f5f9;
+        min-width: 0;
       }
-      #indusmapk-auth .panel-head img { width: 42px; height: 42px; border-radius: 50%; }
-      #indusmapk-auth .panel-name { font-weight: 600; color: #0f172a; font-size: 14px; }
+      #indusmapk-auth .panel-head > div { min-width: 0; flex: 1; }
+      #indusmapk-auth .panel-head img { width: 42px; height: 42px; border-radius: 50%; flex: none; }
+      #indusmapk-auth .panel-name {
+        font-weight: 600; color: #0f172a; font-size: 14px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
       #indusmapk-auth .panel-email {
         color: #64748b; font-size: 12px;
-        max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       #indusmapk-auth .panel-info {
         padding: 0.75rem 1rem; font-size: 13px;
@@ -123,6 +130,19 @@
       }
       #indusmapk-auth .menu-item:hover { background: #f8fafc; text-decoration: none; }
       #indusmapk-auth .menu-item.danger { color: #dc2626; }
+
+      /* 手機版：dropdown 改用 fixed 鎖右上角，避免被父層裁切或位移 */
+      @media (max-width: 480px) {
+        #indusmapk-auth .panel {
+          position: fixed;
+          top: 60px;
+          right: 8px;
+          left: auto;
+          min-width: 0;
+          width: calc(100vw - 16px);
+          max-width: 320px;
+        }
+      }
     `;
     const style = document.createElement("style");
     style.id = "indusmapk-auth-style";
