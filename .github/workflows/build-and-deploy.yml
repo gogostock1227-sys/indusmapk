@@ -12,6 +12,10 @@ on:
         description: '是否跳過 finlab 抓資料（true = 用 cache 重 render，1-2 分鐘；false = 抓 finlab 增量，5-8 分鐘）'
         required: false
         default: 'false'
+      script:
+        description: '單一 fetch_*.py 腳本名（partial 更新）。空字串 = 跑完整 build_site.py'
+        required: false
+        default: ''
   # Source 改動（templates / static / components / build_site.py / data 真理源）→ 自動 build
   push:
     branches: [main]
@@ -87,10 +91,37 @@ jobs:
             echo "⚠ Cache miss — 第一次 init，會花 10-15 分鐘抓完整 finlab"
           fi
 
+      - name: Run partial fetch script (if specified)
+        id: partial
+        if: github.event.inputs.script != ''
+        run: |
+          # partial 模式：只跑指定的 fetch_*.py，省 finlab/外部 API 配額
+          # 跑完仍要走「Build site」step 用 --skip-finlab 重 render 套用新資料
+          SCRIPT="${{ github.event.inputs.script }}"
+          # 安全 whitelist 檢查：只允許執行 site/fetch_*.py
+          case "$SCRIPT" in
+            fetch_company_rich|fetch_daily_chip_report|fetch_extras|fetch_futures_list|fetch_holders_history|fetch_stock_futures_history|fetch_stock_futures_ranking|fetch_trending_topics)
+              echo "Running partial fetch: site/${SCRIPT}.py"
+              python "site/${SCRIPT}.py"
+              ;;
+            *)
+              echo "::error::Invalid script name: $SCRIPT (not in whitelist)"
+              exit 1
+              ;;
+          esac
+        env:
+          FINLAB_TOKEN: ${{ secrets.FINLAB_TOKEN }}
+          PYTHONUTF8: '1'
+
       - name: Build site
         id: build
         run: |
-          if [ "${{ github.event.inputs.skip_finlab }}" = "true" ]; then
+          # partial 模式跑完 fetch_*.py 後，用 --skip-finlab 重 render 套用新資料
+          # full 模式（無 script input）依 skip_finlab 決定是否抓 finlab
+          if [ -n "${{ github.event.inputs.script }}" ]; then
+            echo "Mode: partial fetch (${{ github.event.inputs.script }}) + skip-finlab render"
+            python site/build_site.py --skip-finlab
+          elif [ "${{ github.event.inputs.skip_finlab }}" = "true" ]; then
             echo "Mode: skip-finlab（純 render）"
             python site/build_site.py --skip-finlab
           else
