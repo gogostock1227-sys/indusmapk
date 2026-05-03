@@ -3653,6 +3653,21 @@ def copy_static():
         shutil.copytree(src, target)
 
 
+def copy_data_files():
+    """複製 site/data/*.json 到 dist/data/（手動維護的資料檔，例如 changelog.json）
+
+    注意：dist/data/ 已存在（由 write_json_data() 寫入 heatmap_*.json / search.json），
+    這裡用逐檔 copy 不會覆蓋既有 json，只會新增 site/data/ 裡定義的檔案。
+    """
+    src = SITE_DIR / "data"
+    if not src.exists():
+        return
+    dst = DIST_DIR / "data"
+    dst.mkdir(parents=True, exist_ok=True)
+    for f in src.glob("*.json"):
+        shutil.copy2(f, dst / f.name)
+
+
 ROBOTS_TXT_CONTENT = """# 族群寶 robots.txt
 # 允許：主流搜尋引擎（Google / Bing / DuckDuckGo 等）
 # 禁止：AI 訓練爬蟲與內容抓取機器人
@@ -3917,6 +3932,7 @@ def main():
 
     print("[5/5] 渲染 HTML...")
     copy_static()
+    copy_data_files()
     write_robots_txt()
     rich = load_company_rich()
     coverage = load_coverage()
