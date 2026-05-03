@@ -153,3 +153,40 @@
     menu.addEventListener('mouseleave', () => { timer = setTimeout(() => { menu.style.display = ''; }, 120); });
   });
 })();
+
+/* ───── 網站更新公告 + 新手導覽 loader ─────
+ * 動態注入 driver.js / onboarding 相關資源，避免每個獨立 template 都要改 head/body。
+ * 跳過 admin 後台路徑（沿用 login-button.js 同款 guard）。
+ */
+(function loadOnboarding() {
+  if (location.pathname.startsWith("/admin/")) return;
+  const prefix = window.STATIC_PREFIX || "";
+  const head = document.head;
+  // cache-bust：每小時換一次 query，避免改完不生效
+  const v = new Date().toISOString().slice(0, 13).replace(/[-T]/g, "");
+
+  function injectLink(href) {
+    if (document.querySelector('link[href="' + href + '"]')) return;
+    const l = document.createElement("link");
+    l.rel = "stylesheet";
+    l.href = href;
+    head.appendChild(l);
+  }
+  function injectScript(src, onload) {
+    if (document.querySelector('script[src="' + src + '"]')) {
+      if (onload) onload();
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = src;
+    s.defer = true;
+    if (onload) s.addEventListener("load", onload);
+    head.appendChild(s);
+  }
+
+  injectLink(prefix + "static/onboarding.css?v=" + v);
+  injectLink("https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css");
+  injectScript("https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js", function () {
+    injectScript(prefix + "static/onboarding.js?v=" + v);
+  });
+})();
