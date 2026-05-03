@@ -699,6 +699,7 @@
     }
     function start(){
       if (typeof LightweightCharts === 'undefined') return setTimeout(start, 120);
+      try {
       const LC = LightweightCharts;
       const el = containerEl;
       const UP = '#dc2626', DOWN = '#059669';   // 台股紅漲綠跌
@@ -817,14 +818,14 @@
         };
       }).filter(Boolean);
       volSeries.setData(volData);
-      chart.panes()[1].setStretchFactor(0.18);
+      chart.panes()[1].setHeight(80);
 
       // === Pane 2~8: 7 個副圖預建（預設全收起） ===
       const paneRefs = {};
       TOGGLE_KEYS.forEach((key, i) => {
         const paneIdx = i + 2;
         paneRefs[key] = buildSubPane(key, paneIdx);
-        if (chart.panes()[paneIdx]) chart.panes()[paneIdx].setStretchFactor(0.001);
+        if (chart.panes()[paneIdx]) chart.panes()[paneIdx].setHeight(0);
       });
 
       function buildSubPane(key, paneIdx) {
@@ -877,11 +878,11 @@
 
       function expandPane(key) {
         const ref = paneRefs[key];
-        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setStretchFactor(0.6);
+        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setHeight(95);
       }
       function collapsePane(key) {
         const ref = paneRefs[key];
-        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setStretchFactor(0.001);
+        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setHeight(0);
       }
       function flashChip(key) {
         const cb = indBar && indBar.querySelector('input[data-ind="'+key+'"]');
@@ -1083,6 +1084,12 @@
         ro.observe(el);
       } else {
         window.addEventListener('resize', resizeChart);
+      }
+      } catch (e) {
+        console.error('[lwc-chart] ' + SYM + ' init failed:', e && e.stack || e);
+        if (containerEl) {
+          containerEl.innerHTML = '<div style="padding:80px 20px;text-align:center;color:#dc2626;font-family:ui-monospace,monospace;">圖表初始化失敗：' + (e && e.message || String(e)) + '</div>';
+        }
       }
     }
     start();

@@ -577,14 +577,14 @@
         };
       }).filter(Boolean);
       volSeries.setData(volData);
-      chart.panes()[1].setStretchFactor(0.18);
+      chart.panes()[1].setHeight(80);
 
       // === Pane 2~8: 7 個副圖預建（預設全收起） ===
       const paneRefs = {};
       TOGGLE_KEYS.forEach((key, i) => {
         const paneIdx = i + 2;
         paneRefs[key] = buildSubPane(key, paneIdx);
-        if (chart.panes()[paneIdx]) chart.panes()[paneIdx].setStretchFactor(0.001);
+        if (chart.panes()[paneIdx]) chart.panes()[paneIdx].setHeight(0);
       });
 
       function buildSubPane(key, paneIdx) {
@@ -637,11 +637,11 @@
 
       function expandPane(key) {
         const ref = paneRefs[key];
-        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setStretchFactor(0.6);
+        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setHeight(95);
       }
       function collapsePane(key) {
         const ref = paneRefs[key];
-        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setStretchFactor(0.001);
+        if (ref && chart.panes()[ref.paneIdx]) chart.panes()[ref.paneIdx].setHeight(0);
       }
       function flashChip(key) {
         const cb = indBar && indBar.querySelector('input[data-ind="'+key+'"]');
@@ -1424,4 +1424,15 @@
       <div class="topic-card-body">
         <div class="topic-card-header">
           <h3>{{ name }}</h3>
-          <span class="pill" style="background:{{ m
+          <span class="pill" style="background:{{ meta.color }}22; color:{{ meta.color }};">{{ meta.category }}</span>
+        </div>
+        <p class="topic-card-desc">{{ topic_card_desc(name, 90) }}</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted" style="padding:16px 22px;">此股票尚未被任何題材收錄。</p>
+  {% endif %}
+</section>
+{% endblock %}
