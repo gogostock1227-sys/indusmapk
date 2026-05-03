@@ -60,6 +60,11 @@ html, body {
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'palt';
 }
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 h1, h2, h3, h4 {
   font-family: 'Noto Serif TC', 'Source Serif 4', 'Source Serif Pro',
                'PingFang TC', 'Microsoft JhengHei', serif;
@@ -216,8 +221,11 @@ a:hover { color: var(--accent); }
 
 /* ─────── MAIN ─────── */
 .site-main {
-  max-width: 1400px; margin: 0 auto;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
   padding: 24px;
+  flex: 1 0 auto;
 }
 
 /* ─────── LANDING HERO（產業地圖導覽頁）─────── */
@@ -1278,6 +1286,16 @@ a:hover { color: var(--accent); }
   gap: 16px;
   margin-bottom: 24px;
 }
+/* ── 1250px 以下：Google 登入按鈕收縮為純圖示，節省 header 空間 ── */
+@media (max-width: 1250px) {
+  #indusmapk-auth .login-btn span { display: none; }
+  #indusmapk-auth .login-btn { padding: 0.4rem 0.55rem; }
+  #indusmapk-auth .login-btn svg { width: 18px !important; height: 18px !important; }
+  #indusmapk-auth .role-tag { display: none; }
+  #indusmapk-auth .avatar-trigger { padding: 0.25rem 0.3rem; }
+  .search-box { width: 180px; }
+}
+
 @media (max-width: 960px) {
   .grid-2col, .stat-grid, .indicator-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -1285,7 +1303,7 @@ a:hover { color: var(--accent); }
   .grid-2col > *, .stat-grid > *, .indicator-grid > * { min-width: 0; }
   .header-inner { grid-template-columns: auto auto; row-gap: 12px; }
   .primary-nav { grid-column: 1 / -1; justify-self: stretch; overflow-x: auto; }
-  .search-box { grid-column: 1 / -1; min-width: 0; }
+  .search-box { grid-column: 1 / -1; min-width: 0; width: auto; }
   .header-inner .auth-area { grid-column: 2; grid-row: 1; justify-self: end; }
 }
 
