@@ -1556,9 +1556,23 @@ def compute_stock_metrics(d: dict) -> pd.DataFrame:
     ret_5d  = (last - close.iloc[-6])  / close.iloc[-6]  if len(close) >= 6  else pd.Series(dtype=float)
     ret_20d = (last - close.iloc[-21]) / close.iloc[-21] if len(close) >= 21 else pd.Series(dtype=float)
 
-    # 漲停旗標（收盤 >= 前日 * 1.095 粗估，簡化版）
-    limit_up = (ret_1d >= 0.095).fillna(False)
-    limit_down = (ret_1d <= -0.095).fillna(False)
+    # 漲停旗標：依台股 tick 規則精確判定（前日收盤 × 1.10，向下舍入到 tick）
+    # 舊版用 ret_1d >= 0.095 粗估會把 9.5%~9.99% 強勢股誤判為漲停
+    import numpy as np
+    raw_up = prev * 1.10
+    raw_dn = prev * 0.90
+    # tick 區間（依漲跌停價落點選擇，證交所實務口徑）
+    _up_conds = [raw_up < 10, raw_up < 50, raw_up < 100, raw_up < 500, raw_up < 1000]
+    _dn_conds = [raw_dn < 10, raw_dn < 50, raw_dn < 100, raw_dn < 500, raw_dn < 1000]
+    _ticks    = [0.01, 0.05, 0.10, 0.50, 1.00]
+    tick_up = pd.Series(np.select(_up_conds, _ticks, default=5.00), index=prev.index)
+    tick_dn = pd.Series(np.select(_dn_conds, _ticks, default=5.00), index=prev.index)
+    # 漲停價：raw 向下舍入到 tick；跌停價：raw 向上舍入到 tick
+    # 加 1e-9 容差防浮點誤差（例 82.5/0.1=824.999...）
+    limit_up_price   = np.floor(raw_up / tick_up + 1e-9) * tick_up
+    limit_down_price = np.ceil (raw_dn / tick_dn - 1e-9) * tick_dn
+    limit_up   = (last >= limit_up_price   - 1e-6).fillna(False)
+    limit_down = (last <= limit_down_price + 1e-6).fillna(False)
 
     # 今日成交金額（百萬元）
     amt_last = amount.iloc[-1] / 1_000_000 if amount is not None else pd.Series(dtype=float)
