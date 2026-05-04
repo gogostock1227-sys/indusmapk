@@ -41,11 +41,20 @@ export const onRequestGet = async (ctx: RequestCtx) => {
       binds.push(`+${days} days`);
     }
   }
+  // tagId 只有在 user_tags 表存在時才能用（防 migration 未跑）
+  let useTagFilter = false;
   if (tagId) {
     const tid = parseInt(tagId, 10);
     if (!isNaN(tid)) {
-      wheres.push("EXISTS (SELECT 1 FROM user_tags ut WHERE ut.user_id = u.id AND ut.tag_id = ?)");
-      binds.push(tid);
+      try {
+        // 預檢 user_tags 表是否存在
+        await ctx.env.DB.prepare(`SELECT 1 FROM user_tags LIMIT 1`).first();
+        wheres.push("EXISTS (SELECT 1 FROM user_tags ut WHERE ut.user_id = u.id AND ut.tag_id = ?)");
+        binds.push(tid);
+        useTagFilter = true;
+      } catch {
+        // 表不存在 → 忽略 tag filter（return 全列表，等 migration 跑完才生效）
+      }
     }
   }
 
@@ -72,24 +81,30 @@ export const onRequestGet = async (ctx: RequestCtx) => {
   }));
 
   // 一次撈所有相關 user 的 tags（避免 N+1）
+  // 防呆：user_tags / tags 表可能還沒被 migration 0002 建立 → try/catch 優雅降級
   if (users.length > 0) {
-    const ids = users.map((u: any) => u.id);
-    const placeholders = ids.map(() => "?").join(",");
-    const tagsRs = await ctx.env.DB.prepare(
-      `SELECT ut.user_id, t.id, t.name, t.color
-       FROM user_tags ut
-       JOIN tags t ON ut.tag_id = t.id
-       WHERE ut.user_id IN (${placeholders})
-       ORDER BY t.name COLLATE NOCASE`,
-    ).bind(...ids).all<{ user_id: number; id: number; name: string; color: string }>();
+    try {
+      const ids = users.map((u: any) => u.id);
+      const placeholders = ids.map(() => "?").join(",");
+      const tagsRs = await ctx.env.DB.prepare(
+        `SELECT ut.user_id, t.id, t.name, t.color
+         FROM user_tags ut
+         JOIN tags t ON ut.tag_id = t.id
+         WHERE ut.user_id IN (${placeholders})
+         ORDER BY t.name COLLATE NOCASE`,
+      ).bind(...ids).all<{ user_id: number; id: number; name: string; color: string }>();
 
-    const byUser = new Map<number, Array<{ id: number; name: string; color: string }>>();
-    for (const row of tagsRs.results ?? []) {
-      if (!byUser.has(row.user_id)) byUser.set(row.user_id, []);
-      byUser.get(row.user_id)!.push({ id: row.id, name: row.name, color: row.color });
-    }
-    for (const u of users) {
-      (u as any).tags = byUser.get((u as any).id) ?? [];
+      const byUser = new Map<number, Array<{ id: number; name: string; color: string }>>();
+      for (const row of tagsRs.results ?? []) {
+        if (!byUser.has(row.user_id)) byUser.set(row.user_id, []);
+        byUser.get(row.user_id)!.push({ id: row.id, name: row.name, color: row.color });
+      }
+      for (const u of users) {
+        (u as any).tags = byUser.get((u as any).id) ?? [];
+      }
+    } catch (e) {
+      // user_tags 表還沒建立（migration 0002 未跑）→ 全部回傳空 tags 陣列即可
+      // 主功能（用戶列表 / 統計卡 / 批量操作）不受影響
     }
   }
 

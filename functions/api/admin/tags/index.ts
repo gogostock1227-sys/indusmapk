@@ -11,14 +11,23 @@ export const onRequestGet = async (ctx: RequestCtx) => {
   const guard = requireRole(ctx.data.user, "admin");
   if (guard) return guard;
 
-  const rs = await ctx.env.DB.prepare(
-    `SELECT t.id, t.name, t.color, t.description, t.created_at,
-            (SELECT COUNT(*) FROM user_tags ut WHERE ut.tag_id = t.id) AS user_count
-     FROM tags t
-     ORDER BY t.name COLLATE NOCASE ASC`,
-  ).all();
-
-  return jsonOk({ tags: rs.results ?? [] });
+  // 防呆：tags / user_tags 可能還沒被 migration 0002 建立 → 回空陣列 + 提示訊息
+  try {
+    const rs = await ctx.env.DB.prepare(
+      `SELECT t.id, t.name, t.color, t.description, t.created_at,
+              (SELECT COUNT(*) FROM user_tags ut WHERE ut.tag_id = t.id) AS user_count
+       FROM tags t
+       ORDER BY t.name COLLATE NOCASE ASC`,
+    ).all();
+    return jsonOk({ tags: rs.results ?? [] });
+  } catch (e: any) {
+    // 表不存在 → 提示需要跑 migration，但不噴 500
+    return jsonOk({
+      tags: [],
+      _migration_required: true,
+      _hint: "請執行：wrangler d1 execute indusmapk-admin --file=db/migrations/0002_user_tags.sql --remote",
+    });
+  }
 };
 
 export const onRequestPost = async (ctx: RequestCtx) => {
