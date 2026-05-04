@@ -242,6 +242,14 @@
             <div class="v2-futures-value {{ r.ratio.class }}">
               {{ r.ratio.text|replace('%','') }} <span class="unit">%</span>
             </div>
+            {% if r.retail_net_delta_lots.value is not none %}
+            <div class="v2-futures-line2">
+              較前日 <span class="r-num {{ r.retail_net_delta_lots.class }}">{{ r.retail_net_delta_lots.text }}</span>
+              {% if r.retail_net_delta_pct.value is not none %}
+              （<span class="r-num {{ r.retail_net_delta_pct.class }}">{{ r.retail_net_delta_pct.text }}</span>）
+              {% endif %}
+            </div>
+            {% endif %}
             <div class="v2-futures-line2">三大法人 {{ r.institutional_net_lots.text }} · 全市場 OI {{ r.total_oi_lots.text }}</div>
           </div>
           {% endfor %}
