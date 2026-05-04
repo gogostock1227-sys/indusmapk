@@ -149,6 +149,18 @@ echo [DEPLOY] Auto commit and push to origin...
 echo -----------------------------------------------------------
 git add -A
 git commit -m "auto rebuild %TIMESTAMP%" --quiet
+
+REM --- Pull remote first to avoid non-fast-forward rejection ---
+REM     Conflict on dist/ artifacts prefers remote (-X theirs);
+REM     our latest rebuild will override on next push anyway.
+git fetch origin --quiet
+git pull --rebase -X theirs origin main --quiet
+if errorlevel 1 (
+    echo [WARN] git pull --rebase failed, aborting and skipping push this round
+    git rebase --abort >nul 2>&1
+    goto :END
+)
+
 git push origin HEAD --quiet
 if errorlevel 1 (
     echo [WARN] git push failed - check remote / network
