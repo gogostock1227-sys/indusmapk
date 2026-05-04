@@ -108,7 +108,11 @@
           <option value="7">7 天內到期</option>
           <option value="30">30 天內到期</option>
         </select>
+        <select id="tag-filter" title="依標籤篩選">
+          <option value="">所有標籤</option>
+        </select>
         <button id="reload-btn" class="btn-secondary">重新整理</button>
+        <button id="manage-tags-btn" class="btn-secondary" title="管理所有標籤">🏷 管理標籤</button>
       </div>
 
       <!-- ── 批量選取浮動列 ── -->
@@ -150,6 +154,11 @@
   <div class="modal" id="batch-modal"></div>
 </div>
 
+<!-- 標籤管理 modal -->
+<div id="tag-modal-backdrop" class="modal-backdrop" style="display:none">
+  <div class="modal modal-wide" id="tag-modal"></div>
+</div>
+
 <script src="/admin/app.js"></script>
 <script>
 (async function () {
@@ -161,8 +170,33 @@
   const $$ = (s) => document.querySelectorAll(s);
 
   let users = [];
+  let allTags = [];              // 全部標籤的 cache（{ id, name, color, user_count }[]）
   const selected = new Set();   // user id 集合
   let activeQuick = "all";
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── 標籤載入 ──
+  async function loadTags() {
+    try {
+      const r = await IM.fetchJson("/api/admin/tags");
+      allTags = r.tags || [];
+      renderTagFilter();
+    } catch (e) {
+      console.error("loadTags failed", e);
+    }
+  }
+
+  function renderTagFilter() {
+    const sel = $("#tag-filter");
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">所有標籤</option>' +
+      allTags.map(t => `<option value="${t.id}">${escapeHtml(t.name)}（${t.user_count}）</option>`).join("");
+    sel.value = cur;
+  }
 
   // ── 載入 ──
   async function load() {
@@ -171,6 +205,7 @@
     if ($("#role-filter").value) params.set("role", $("#role-filter").value);
     if ($("#status-filter").value) params.set("status", $("#status-filter").value);
     if ($("#expiring-filter").value) params.set("expiring", $("#expiring-filter").value);
+    if ($("#tag-filter").value) params.set("tag", $("#tag-filter").value);
 
     try {
       const r = await IM.fetchJson("/api/admin/users?" + params);
@@ -274,7 +309,9 @@
           </td>
           <td>${IM.tag(u.role)}</td>
           <td>${expiryCellHtml(u)}</td>
-          <td class="muted" style="font-size:12px">${perms || "—"}</td>
+          <td>${(u.tags && u.tags.length)
+                ? u.tags.map(t => `<span class="utag utag-${t.color}">${escapeHtml(t.name)}</span>`).join('')
+                : '<span class="muted" style="font-size:11px">—</span>'}</td>
           <td>${u.status === "active"
                 ? '<span class="tag tag-active">啟用</span>'
                 : '<span class="tag tag-suspended">停權</span>'}</td>
@@ -287,7 +324,7 @@
       <table class="users-table">
         <thead><tr>
           <th class="ck-cell"><input type="checkbox" id="ck-all" ${allChecked ? "checked" : ""}></th>
-          <th>用戶</th><th>角色</th><th>到期</th><th>資料權限</th><th>狀態</th><th>最後登入</th><th></th>
+          <th>用戶</th><th>角色</th><th>到期</th><th>標籤</th><th>狀態</th><th>最後登入</th><th></th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
@@ -578,6 +615,21 @@
         <textarea id="m-notes">${u.notes || ""}</textarea>
       </div>
 
+      <div class="form-row">
+        <label>標籤 <span class="muted" style="font-weight:400">（點擊切換）</span></label>
+        <div class="tag-toggle-grid" id="m-tags">
+          ${allTags.length === 0
+            ? '<span class="muted" style="font-size:12px">尚無標籤，請先到「🏷 管理標籤」建立</span>'
+            : allTags.map(t => {
+                const checked = (u.tags || []).some(ut => ut.id === t.id);
+                return `<label class="utag-toggle utag-${t.color} ${checked ? 'is-checked' : ''}">
+                  <input type="checkbox" name="tag-${t.id}" value="${t.id}" ${checked ? 'checked' : ''}>
+                  ${escapeHtml(t.name)}
+                </label>`;
+              }).join("")}
+        </div>
+      </div>
+
       ${(!isTargetSuper && (isSuper || u.role !== "admin")) ? `
         <div class="form-row">
           <label>狀態</label>
@@ -600,6 +652,14 @@
     }
     updatePermsRow();
     $("#m-role").addEventListener("change", updatePermsRow);
+
+    // 標籤切換視覺反饋
+    $$("#m-tags .utag-toggle").forEach(lbl => {
+      const inp = lbl.querySelector("input[type=checkbox]");
+      inp.addEventListener("change", () => {
+        lbl.classList.toggle("is-checked", inp.checked);
+      });
+    });
 
     // 快捷鍵
     $$('button[data-days]').forEach(b => {
@@ -650,8 +710,21 @@
           });
         }
 
+        // 標籤同步（覆蓋式）
+        const newTagIds = Array.from($$("#m-tags input[type=checkbox]:checked"))
+          .map(c => parseInt(c.value, 10));
+        const oldTagIds = (u.tags || []).map(t => t.id).sort();
+        const sortedNew = [...newTagIds].sort();
+        if (JSON.stringify(oldTagIds) !== JSON.stringify(sortedNew)) {
+          await IM.fetchJson(`/api/admin/users/${u.id}/tags`, {
+            method: "PUT",
+            body: JSON.stringify({ tag_ids: newTagIds }),
+          });
+        }
+
         IM.flash("已儲存", "success");
         closeModal();
+        loadTags();
         load();
       } catch (e) {
         IM.flash(e.message, "error");
@@ -667,12 +740,13 @@
   });
 
   // ── 即時搜尋 ──
-  ["q", "role-filter", "status-filter", "expiring-filter"].forEach(id => {
+  ["q", "role-filter", "status-filter", "expiring-filter", "tag-filter"].forEach(id => {
     const el = $("#"+id);
     el.addEventListener("input", debounce(load, 250));
     el.addEventListener("change", load);
   });
-  $("#reload-btn").addEventListener("click", load);
+  $("#reload-btn").addEventListener("click", () => { loadTags(); load(); });
+  $("#manage-tags-btn").addEventListener("click", openTagManager);
 
   // ── 鍵盤快捷鍵 ──
   document.addEventListener("keydown", (e) => {
@@ -693,6 +767,138 @@
     let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
   }
 
+  // ────────────────────────────────────────────────────
+  // 標籤管理 modal（新增 / 編輯 / 刪除）
+  // ────────────────────────────────────────────────────
+  const TAG_COLORS = ["cyan", "magenta", "violet", "emerald", "amber", "rose", "sky", "lime"];
+
+  async function openTagManager() {
+    await loadTags();
+    renderTagManagerModal();
+    $("#tag-modal-backdrop").style.display = "grid";
+  }
+
+  function renderTagManagerModal() {
+    const list = allTags.map(t => `
+      <div class="tag-row" data-id="${t.id}">
+        <span class="utag utag-${t.color}">${escapeHtml(t.name)}</span>
+        <span class="muted" style="font-size:11px">${t.user_count} 位用戶</span>
+        <span class="spacer"></span>
+        <button class="btn-sm btn-secondary tag-edit-btn" data-id="${t.id}">改名/換色</button>
+        <button class="btn-sm btn-danger tag-del-btn" data-id="${t.id}" data-name="${escapeHtml(t.name)}" data-count="${t.user_count}">刪除</button>
+      </div>`).join("") || '<div class="muted" style="padding:1rem;text-align:center">尚未建立任何標籤</div>';
+
+    $("#tag-modal").innerHTML = `
+      <h3>🏷 標籤管理</h3>
+
+      <div class="tag-create">
+        <input type="text" id="new-tag-name" placeholder="新標籤名稱（例：開戶 / 直播課程）" maxlength="50">
+        <div class="color-picker" id="new-tag-color">
+          ${TAG_COLORS.map((c, i) => `<button type="button" class="color-swatch swatch-${c} ${i===0?'active':''}" data-color="${c}" title="${c}"></button>`).join("")}
+        </div>
+        <button id="btn-create-tag">+ 建立</button>
+      </div>
+
+      <div class="tag-list">
+        ${list}
+      </div>
+
+      <div class="actions">
+        <button class="btn-secondary" id="tm-close">關閉</button>
+      </div>`;
+
+    // 顏色選擇
+    $$("#new-tag-color .color-swatch").forEach(s => {
+      s.addEventListener("click", () => {
+        $$("#new-tag-color .color-swatch").forEach(x => x.classList.remove("active"));
+        s.classList.add("active");
+      });
+    });
+
+    // 建立
+    $("#btn-create-tag").addEventListener("click", async () => {
+      const name = $("#new-tag-name").value.trim();
+      const color = $("#new-tag-color .color-swatch.active")?.dataset.color || "cyan";
+      if (!name) { IM.flash("請輸入標籤名稱", "error"); return; }
+      try {
+        await IM.fetchJson("/api/admin/tags", {
+          method: "POST",
+          body: JSON.stringify({ name, color }),
+        });
+        IM.flash("已建立標籤", "success");
+        $("#new-tag-name").value = "";
+        await loadTags();
+        renderTagManagerModal();
+      } catch (e) { IM.flash(e.message, "error"); }
+    });
+
+    // 改名/換色
+    $$(".tag-edit-btn").forEach(b => {
+      b.addEventListener("click", () => openTagEditInline(parseInt(b.dataset.id, 10)));
+    });
+
+    // 刪除
+    $$(".tag-del-btn").forEach(b => {
+      b.addEventListener("click", async () => {
+        const id = parseInt(b.dataset.id, 10);
+        const nm = b.dataset.name;
+        const cnt = parseInt(b.dataset.count, 10);
+        if (!confirm(`確定刪除標籤「${nm}」？\n會自動從 ${cnt} 位用戶身上移除。`)) return;
+        try {
+          await IM.fetchJson(`/api/admin/tags/${id}`, { method: "DELETE" });
+          IM.flash("已刪除", "success");
+          await loadTags();
+          renderTagManagerModal();
+          load(); // 用戶列表也重整
+        } catch (e) { IM.flash(e.message, "error"); }
+      });
+    });
+
+    $("#tm-close").addEventListener("click", closeTagManager);
+  }
+
+  function openTagEditInline(id) {
+    const t = allTags.find(x => x.id === id);
+    if (!t) return;
+    const swatches = TAG_COLORS.map(c =>
+      `<button type="button" class="color-swatch swatch-${c} ${c===t.color?'active':''}" data-color="${c}"></button>`
+    ).join("");
+    const row = document.querySelector(`.tag-row[data-id="${id}"]`);
+    row.innerHTML = `
+      <input type="text" class="tag-edit-name" value="${escapeHtml(t.name)}" maxlength="50" style="flex:1">
+      <div class="color-picker tag-edit-colors">${swatches}</div>
+      <button class="btn-sm" data-action="save">儲存</button>
+      <button class="btn-sm btn-secondary" data-action="cancel">取消</button>`;
+    row.querySelectorAll(".color-swatch").forEach(s => {
+      s.addEventListener("click", () => {
+        row.querySelectorAll(".color-swatch").forEach(x => x.classList.remove("active"));
+        s.classList.add("active");
+      });
+    });
+    row.querySelector('[data-action=cancel]').addEventListener("click", () => renderTagManagerModal());
+    row.querySelector('[data-action=save]').addEventListener("click", async () => {
+      const name = row.querySelector(".tag-edit-name").value.trim();
+      const color = row.querySelector(".color-swatch.active")?.dataset.color || t.color;
+      if (!name) { IM.flash("名稱不可空", "error"); return; }
+      try {
+        await IM.fetchJson(`/api/admin/tags/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ name, color }),
+        });
+        IM.flash("已儲存", "success");
+        await loadTags();
+        renderTagManagerModal();
+        load();
+      } catch (e) { IM.flash(e.message, "error"); }
+    });
+  }
+
+  function closeTagManager() { $("#tag-modal-backdrop").style.display = "none"; }
+  $("#tag-modal-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "tag-modal-backdrop") closeTagManager();
+  });
+
+  loadTags();
   load();
 })();
 </script>
