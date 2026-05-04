@@ -122,6 +122,11 @@
           <button class="btn-sm btn-secondary" data-batch="extend-365">+1 年</button>
           <button class="btn-sm btn-secondary" data-batch="extend-perm" title="設為永久">∞</button>
         </div>
+        <div class="custom-extend" title="自訂天數（按 Enter 套用）">
+          <span class="ce-prefix">+</span>
+          <input type="number" id="custom-days" min="1" max="3650" step="1" placeholder="天數" inputmode="numeric">
+          <button class="btn-sm btn-secondary" id="btn-extend-custom">套用</button>
+        </div>
         <button class="btn-sm btn-secondary" data-batch="activate">啟用</button>
         <button class="btn-sm btn-secondary" data-batch="suspend">停權</button>
         <button class="btn-sm btn-danger" data-batch="downgrade-member">降為免費</button>
@@ -391,8 +396,28 @@
     });
   });
 
+  // 自訂天數套用
+  function handleCustomExtend() {
+    if (selected.size === 0) {
+      IM.flash("尚未選取任何用戶", "error");
+      return;
+    }
+    const inp = $("#custom-days");
+    const days = parseInt(inp.value, 10);
+    if (isNaN(days) || days < 1 || days > 3650) {
+      IM.flash("請輸入 1-3650 之間的天數", "error");
+      inp.focus();
+      return;
+    }
+    openBatchConfirm("extend-custom", days);
+  }
+  $("#btn-extend-custom").addEventListener("click", handleCustomExtend);
+  $("#custom-days").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); handleCustomExtend(); }
+  });
+
   // 批量確認 modal
-  function openBatchConfirm(batchAction) {
+  function openBatchConfirm(batchAction, customDays) {
     const ids = Array.from(selected);
     const targets = users.filter(u => ids.includes(u.id));
     const sample = targets.slice(0, 3).map(u => u.email).join(", ");
@@ -413,6 +438,12 @@
       body = `將對 <b>${targets.length}</b> 位用戶降為「免費會員」，並清空到期日 / 資料權限。<br><br>包含：${sample}${more}`;
       payload = { ids, action: "set_role", value: { role: "member" } };
       dangerous = true;
+    } else if (batchAction === "extend-custom") {
+      const days = customDays;
+      const expDate = new Date(Date.now() + days * 86400000);
+      title = `批量延期 +${days} 天（自訂）`;
+      body = `將把 <b>${targets.length}</b> 位用戶的到期日重設為 <b>${IM.fmtDateOnly(expDate.toISOString())}</b>。<br><br>包含：${sample}${more}`;
+      payload = { ids, action: "extend", value: { days } };
     } else if (batchAction.startsWith("extend-")) {
       const map = { "extend-30": 30, "extend-90": 90, "extend-365": 365, "extend-perm": 0 };
       const days = map[batchAction];
