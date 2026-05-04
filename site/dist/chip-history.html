@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>歷史籌碼 · 族群寶</title>
+<meta name="description" content="族群寶 — 台灣股市題材族群深度資料庫，每日漲跌熱力圖、法人動向、資金流向、相關題材一目瞭然。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="static/logo.png">
+<link rel="apple-touch-icon" href="static/logo.png">
+<link rel="stylesheet" href="static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" defer></script>
+<script src="https://unpkg.com/lightweight-charts@5.2.0/dist/lightweight-charts.standalone.production.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="static/logo.png" alt="族群寶 IndusMap">
+      <span class="logo-text">
+        <strong>族群寶</strong>
+        <em>Taiwan Industry Intelligence</em>
+      </span>
+    </a>
+
+    <nav class="primary-nav">
+      <a href="index.html" class="">首頁</a>
+      <a href="today.html" class="">今日焦點</a>
+      <a href="limit-up.html" class="">漲停分析</a>
+      <a href="topics.html" class="">題材列表</a>
+      <a href="heatmap.html" class="">產業地圖</a>
+      <a href="database.html" class="">公司資料庫</a>
+      <div class="nav-dropdown">
+        <a href="ai.html" class="nav-dropdown-toggle active">市場觀察</a>
+        <div class="nav-dropdown-menu">
+          <a href="ai.html" class="">AI 分析</a>
+          <a href="rs.html" class="">RS 評分</a>
+          <a href="rankings.html" class="">排行榜</a>
+          <a href="compare.html" class="">題材對比</a>
+          <a href="chip-history.html" class="active">歷史籌碼</a>
+        </div>
+      </div>
+      <a href="stock-futures.html" class="">股期儀表板</a>
+      <a href="memo.html" class="">個股Memo</a>
+    </nav>
+
+    <div class="search-box">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="global-search" placeholder="搜尋題材或個股…" autocomplete="off">
+      <div class="search-dropdown" id="search-dropdown" hidden></div>
+    </div>
+
+    <div class="auth-area" id="indusmapk-auth"></div>
+  </div>
+</header>
+
+<main class="site-main">
+  
+<section class="hero">
+  <h1>歷史籌碼 <small>近 1 年</small></h1>
+  <p>對齊加權指數的籌碼時間序列：三大法人現貨買賣超、融資餘額、外資期貨 OI、散戶多空比。資料來自 TWSE / TPEx / TAIFEX 每日彙整。</p>
+</section>
+
+<section class="chip-history-controls">
+  <div class="ch-metric-tabs" role="tablist" aria-label="籌碼指標">
+    <button type="button" class="ch-tab is-active" data-metric="spot_total_yi" data-unit="億">三大法人合計</button>
+    <button type="button" class="ch-tab" data-metric="spot_foreign_yi" data-unit="億">外資現貨</button>
+    <button type="button" class="ch-tab" data-metric="margin_balance_yi" data-unit="億">融資餘額（上市）</button>
+    <button type="button" class="ch-tab" data-metric="futures_foreign_oi" data-unit="口">外資期貨 OI</button>
+    <button type="button" class="ch-tab" data-metric="retail_mtx_net" data-unit="口">散戶小台</button>
+    <button type="button" class="ch-tab" data-metric="retail_tmf_net" data-unit="口">散戶微台</button>
+  </div>
+  <div class="ch-range-tabs" role="tablist" aria-label="時段">
+    <button type="button" class="ch-range" data-days="30">30 天</button>
+    <button type="button" class="ch-range" data-days="60">60 天</button>
+    <button type="button" class="ch-range is-active" data-days="120">120 天</button>
+    <button type="button" class="ch-range" data-days="250">1 年</button>
+  </div>
+</section>
+
+<section class="chip-history-chart-wrap">
+  <div id="ch-chart" style="width:100%;height:520px;"></div>
+  <div class="ch-meta" id="ch-meta"></div>
+</section>
+
+<section class="chip-history-table-wrap">
+  <h2 class="ch-table-title">最近 30 個交易日明細</h2>
+  <div class="ch-table-scroll">
+    <table class="ch-table" id="ch-table">
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th>加權指數</th>
+          <th>三大法人合計（億）</th>
+          <th>外資現貨（億）</th>
+          <th>融資餘額（億）</th>
+          <th>外資期貨 OI（口）</th>
+          <th>散戶小台（口）</th>
+          <th>散戶微台（口）</th>
+        </tr>
+      </thead>
+      <tbody id="ch-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<script id="chip-history-data" type="application/json">
+{"dates": ["2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04"], "taiex": [33229.82, 34761.38, 34861.16, 35417.83, 35457.29, 36296.12, 36722.14, 37132.02, 36804.34, 36958.8, 37605.11, 37878.47, 37714.15, 38932.4, 39616.63, 39521.73, 39303.5, 38926.63, 40705.14], "spot_total_yi": [208.83, 1687.48, 420.2, 357.02, -130.94, 675.83, 416.92, 638.38, -90.64, 44.58, 697.36, 145.88, -256.09, 549.3, -420.41, -452.37, -503.69, -611.48, 797.6], "spot_foreign_yi": [49.64, 1238.97, 325.54, 270.41, -236.26, 673.26, 582.39, 520.44, 36.06, 53.79, 570.51, 116.75, 9.8, 472.41, -420.07, -485.92, -518.4, -626.62, 632.85], "margin_balance_yi": [3877.35, 3948.21, 3965.18, 4012.41, 4086.51, 4149.55, null, 4224.09, 4271.2, 4298.31, 4331.64, 4385.45, 4308.27, 4409.07, 4520.44, 4571.1, 4609.64, 4609.05, 4703.94], "futures_foreign_oi": [-31350, -32478, -33399, -34403, -35996, -36664, -36783, -39683, -41151, -42618, -41295, -42555, -44027, -40633, -44223, -45869, -47074, -44044, -43504], "retail_mtx_net": [-4578, -6771, -376, 3, -323, -1787, 4298, 2448, 6961, 3512, 873, 3870, 5535, -1152, 3285, 4922, 1480, -1688, -2236], "retail_tmf_net": [15331, -1464, 14904, -9844, -8057, -19952, -1659, -2944, 8418, 6562, -7623, -2836, 859, -21646, -11417, -6590, 4678, 4687, -19070]}
+</script>
+
+<script>
+(function() {
+  const dataEl = document.getElementById('chip-history-data');
+  if (!dataEl) return;
+  const series = JSON.parse(dataEl.textContent || '{}');
+  if (!series.dates || !series.dates.length) {
+    document.getElementById('ch-chart').innerHTML = '<p class="ch-empty">尚無歷史籌碼資料。請等待 backfill 完成後再看。</p>';
+    return;
+  }
+
+  const METRIC_LABEL = {
+    spot_total_yi: '三大法人合計買賣超',
+    spot_foreign_yi: '外資現貨買賣超',
+    margin_balance_yi: '上市融資金額',
+    futures_foreign_oi: '外資臺股期貨 OI 淨額',
+    retail_mtx_net: '散戶小台留倉淨額',
+    retail_tmf_net: '散戶微台留倉淨額',
+  };
+  const METRIC_FORMAT = {
+    spot_total_yi:    (v) => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2) + ' 億',
+    spot_foreign_yi:  (v) => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2) + ' 億',
+    margin_balance_yi:(v) => v == null ? '—' : v.toFixed(2) + ' 億',
+    futures_foreign_oi:(v)=> v == null ? '—' : (v >= 0 ? '+' : '') + v.toLocaleString('zh-TW') + ' 口',
+    retail_mtx_net:   (v) => v == null ? '—' : (v >= 0 ? '+' : '') + v.toLocaleString('zh-TW') + ' 口',
+    retail_tmf_net:   (v) => v == null ? '—' : (v >= 0 ? '+' : '') + v.toLocaleString('zh-TW') + ' 口',
+  };
+
+  let curMetric = 'spot_total_yi';
+  let curDays = 120;
+
+  function sliceLast(arr, n) {
+    return arr.slice(Math.max(0, arr.length - n));
+  }
+
+  function render() {
+    const total = series.dates.length;
+    const n = Math.min(curDays, total);
+    const dates = sliceLast(series.dates, n);
+    const taiex = sliceLast(series.taiex || [], n);
+    const metricArr = sliceLast(series[curMetric] || [], n);
+
+    const isYi = curMetric.endsWith('_yi');
+    const colors = metricArr.map((v) => v == null ? null : (v >= 0 ? '#C0392B' : '#1E7B4F'));
+
+    if (typeof echarts === 'undefined') return setTimeout(render, 200);
+    const chartEl = document.getElementById('ch-chart');
+    let chart = echarts.getInstanceByDom(chartEl);
+    if (!chart) chart = echarts.init(chartEl, null, { renderer: 'canvas' });
+
+    chart.setOption({
+      animation: false,
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross', link: [{ xAxisIndex: 'all' }] },
+        formatter: (params) => {
+          const date = params[0].axisValueLabel;
+          const lines = [`<b>${date}</b>`];
+          params.forEach((p) => {
+            if (p.seriesName === '加權指數') {
+              lines.push(`${p.marker} 加權指數 <b>${p.value == null ? '—' : Math.round(p.value).toLocaleString('zh-TW')}</b>`);
+            } else {
+              lines.push(`${p.marker} ${METRIC_LABEL[curMetric]} <b>${METRIC_FORMAT[curMetric](p.value)}</b>`);
+            }
+          });
+          return lines.join('<br>');
+        },
+      },
+      legend: {
+        data: ['加權指數', METRIC_LABEL[curMetric]],
+        top: 4,
+        textStyle: { fontSize: 12, color: '#3D3D3D' },
+      },
+      axisPointer: { link: [{ xAxisIndex: 'all' }] },
+      grid: [
+        { left: 70, right: 28, top: 40, height: '40%' },
+        { left: 70, right: 28, top: '55%', height: '32%' },
+      ],
+      xAxis: [
+        {
+          type: 'category', gridIndex: 0, data: dates,
+          axisLabel: { show: false }, axisTick: { show: false },
+          splitLine: { show: true, lineStyle: { color: '#E8E6DF', type: 'dashed' } },
+        },
+        {
+          type: 'category', gridIndex: 1, data: dates,
+          axisLabel: { fontSize: 11, color: '#6B6B66', interval: Math.floor(dates.length / 8) },
+          splitLine: { show: false },
+        },
+      ],
+      yAxis: [
+        {
+          type: 'value', gridIndex: 0, scale: true,
+          axisLabel: { fontSize: 11, color: '#6B6B66', formatter: (v) => Math.round(v).toLocaleString('zh-TW') },
+          splitLine: { lineStyle: { color: '#E8E6DF' } },
+          name: '加權指數', nameTextStyle: { fontSize: 11, color: '#6B6B66' }, nameGap: 6,
+        },
+        {
+          type: 'value', gridIndex: 1, scale: true,
+          axisLabel: {
+            fontSize: 11, color: '#6B6B66',
+            formatter: (v) => isYi ? v.toFixed(0) : (Math.abs(v) >= 1000 ? (v / 1000).toFixed(1) + 'k' : v.toFixed(0)),
+          },
+          splitLine: { lineStyle: { color: '#E8E6DF' } },
+          name: isYi ? '億' : '口', nameTextStyle: { fontSize: 11, color: '#6B6B66' }, nameGap: 6,
+        },
+      ],
+      dataZoom: [
+        { type: 'inside', xAxisIndex: [0, 1], start: 0, end: 100 },
+        { type: 'slider', xAxisIndex: [0, 1], top: '92%', height: 16, start: 0, end: 100 },
+      ],
+      series: [
+        {
+          name: '加權指數', type: 'line', xAxisIndex: 0, yAxisIndex: 0,
+          data: taiex,
+          showSymbol: false,
+          lineStyle: { color: '#1A1A1A', width: 1.5 },
+          itemStyle: { color: '#1A1A1A' },
+          areaStyle: { color: 'rgba(26,26,26,0.04)' },
+          connectNulls: true,
+        },
+        {
+          name: METRIC_LABEL[curMetric], type: 'bar', xAxisIndex: 1, yAxisIndex: 1,
+          data: metricArr.map((v, i) => ({ value: v, itemStyle: { color: colors[i] || '#999' } })),
+          barWidth: '60%',
+        },
+      ],
+    });
+
+    // 表格永遠顯示最近 30 個交易日（資料不足 30 則全顯示）
+    const tbody = document.getElementById('ch-tbody');
+    const total = (series.dates || []).length;
+    const start = Math.max(0, total - 30);
+    const indices = [];
+    for (let i = start; i < total; i++) indices.push(i);
+    const fmtNum = (v, unit) => v == null ? '—' : (typeof v === 'number' ? v.toLocaleString('zh-TW', { maximumFractionDigits: 2 }) : '—');
+    const fmtSigned = (v) => v == null ? '—' : (v >= 0 ? '+' : '') + v.toLocaleString('zh-TW', { maximumFractionDigits: 2 });
+    const cls = (v) => v == null ? '' : (v > 0 ? 'positive' : (v < 0 ? 'negative' : ''));
+    tbody.innerHTML = indices.slice().reverse().map((i) => {
+      const d = series.dates[i];
+      return `<tr>
+        <td class="ch-td-date">${d}</td>
+        <td class="ch-td-num">${fmtNum(series.taiex[i])}</td>
+        <td class="ch-td-num ${cls(series.spot_total_yi[i])}">${fmtSigned(series.spot_total_yi[i])}</td>
+        <td class="ch-td-num ${cls(series.spot_foreign_yi[i])}">${fmtSigned(series.spot_foreign_yi[i])}</td>
+        <td class="ch-td-num">${fmtNum(series.margin_balance_yi[i])}</td>
+        <td class="ch-td-num ${cls(series.futures_foreign_oi[i])}">${fmtSigned(series.futures_foreign_oi[i])}</td>
+        <td class="ch-td-num ${cls(series.retail_mtx_net[i])}">${fmtSigned(series.retail_mtx_net[i])}</td>
+        <td class="ch-td-num ${cls(series.retail_tmf_net[i])}">${fmtSigned(series.retail_tmf_net[i])}</td>
+      </tr>`;
+    }).join('');
+
+    // meta
+    const metaEl = document.getElementById('ch-meta');
+    metaEl.textContent = `共 ${series.dates.length} 個交易日（${series.dates[0]} ～ ${series.dates[series.dates.length-1]}）．資料源 TWSE / TPEx / TAIFEX．每日盤後彙整`;
+  }
+
+  // tabs
+  document.querySelectorAll('.ch-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ch-tab').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      curMetric = btn.dataset.metric;
+      render();
+    });
+  });
+  document.querySelectorAll('.ch-range').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ch-range').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      curDays = parseInt(btn.dataset.days, 10);
+      render();
+    });
+  });
+
+  function init() {
+    if (typeof echarts === 'undefined') return setTimeout(init, 100);
+    render();
+    window.addEventListener('resize', () => {
+      const chart = echarts.getInstanceByDom(document.getElementById('ch-chart'));
+      if (chart) chart.resize();
+    });
+  }
+  init();
+})();
+</script>
+
+<style>
+.chip-history-controls {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  padding: 14px 0; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--rule-2, #E8E6DF);
+}
+.ch-metric-tabs, .ch-range-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.ch-tab, .ch-range {
+  padding: 6px 12px; font-size: 13px; line-height: 1.4;
+  background: #F4F2EB; color: #3D3D3D; border: 1px solid #D4D4CE;
+  border-radius: 4px; cursor: pointer; font-family: inherit;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.ch-tab:hover, .ch-range:hover { background: #E8E6DF; }
+.ch-tab.is-active, .ch-range.is-active {
+  background: #1A1A1A; color: #FAFAF7; border-color: #1A1A1A;
+}
+.chip-history-chart-wrap { padding: 12px 0 8px; }
+.ch-meta { font-size: 12px; color: #6B6B66; padding-top: 6px; letter-spacing: 0.04em; }
+.ch-empty { padding: 60px 24px; text-align: center; color: #6B6B66; font-size: 14px; }
+
+.chip-history-table-wrap { padding: 24px 0 16px; }
+.ch-table-title { font-size: 18px; font-weight: 600; margin: 0 0 12px; color: #1A1A1A; }
+.ch-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+.ch-table {
+  width: 100%; border-collapse: collapse; font-size: 14px;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+.ch-table th, .ch-table td {
+  padding: 8px 10px; border-bottom: 1px solid #E8E6DF; text-align: right;
+  white-space: nowrap;
+}
+.ch-table th {
+  font-weight: 500; color: #6B6B66; font-size: 12px; letter-spacing: 0.06em;
+  border-bottom: 1px solid #1A1A1A; text-align: right;
+  background: #FAFAF7;
+}
+.ch-table th:first-child, .ch-table td:first-child { text-align: left; }
+.ch-td-date { font-family: "IBM Plex Mono", "Roboto Mono", ui-monospace, monospace; color: #3D3D3D; }
+.ch-td-num { font-family: "IBM Plex Mono", "Roboto Mono", ui-monospace, monospace; }
+.ch-td-num.positive { color: #C0392B; }
+.ch-td-num.negative { color: #1E7B4F; }
+
+@media (max-width: 768px) {
+  .chip-history-chart-wrap #ch-chart { height: 460px !important; }
+}
+</style>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© 2026 族群寶 · 僅供研究參考，非投資建議</span>
+    <span>最後更新：2026-05-04</span>
+  </div>
+</footer>
+
+<script>
+  window.STATIC_PREFIX = "";
+  // 確保 active nav link 在可見區域（nav overflow-x:auto 時自動捲入）
+  document.addEventListener('DOMContentLoaded', function () {
+    var active = document.querySelector('.primary-nav a.active');
+    if (active) active.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
+</script>
+<script src="data/search-data.js" defer></script>
+<script src="static/app.js" defer></script>
+<script src="components/login-button.js" defer></script>
+
+</body>
+</html>

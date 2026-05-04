@@ -2888,6 +2888,87 @@ def compute_limit_up_stats(limit_up_by_date: dict, close_df) -> dict:
     }
 
 
+def build_chip_history_series() -> dict:
+    """讀 site/data/chip_history/*.json，對齊加權指數，組成前端用 series。
+
+    輸出 schema：
+      {
+        "dates":            [...],   # 'YYYY-MM-DD' 字串列表（按時序）
+        "taiex":            [...],   # 加權指數收盤；無資料填 null
+        "spot_total_yi":    [...],
+        "spot_foreign_yi":  [...],
+        "margin_balance_yi":[...],
+        "futures_foreign_oi":[...],
+        "retail_mtx_net":   [...],
+        "retail_tmf_net":   [...],
+      }
+    """
+    history_dir = SITE_DIR / "data" / "chip_history"
+    if not history_dir.exists():
+        return {"dates": [], "taiex": [], "spot_total_yi": [], "spot_foreign_yi": [],
+                "margin_balance_yi": [], "futures_foreign_oi": [],
+                "retail_mtx_net": [], "retail_tmf_net": []}
+
+    rows: list[dict] = []
+    for f in sorted(history_dir.glob("*.json")):
+        if f.name == "index.json":
+            continue
+        try:
+            rows.append(json.loads(f.read_text(encoding="utf-8")))
+        except Exception:
+            continue
+    rows.sort(key=lambda r: r.get("date", ""))
+
+    # 載入 taiex Series 對齊（INDICES_CACHE 已含 'taiex' 欄）
+    taiex_map: dict[str, float] = {}
+    if INDICES_CACHE.exists():
+        try:
+            df = pd.read_parquet(INDICES_CACHE)
+            df.index = pd.to_datetime(df.index)
+            if "taiex" in df.columns:
+                for ts, v in df["taiex"].dropna().items():
+                    taiex_map[ts.strftime("%Y-%m-%d")] = round(float(v), 2)
+        except Exception as e:
+            print(f"[chip_history] 讀取 INDICES_CACHE 失敗：{e}")
+
+    def _g(d: dict, *keys, default=None):
+        cur = d
+        for k in keys:
+            if not isinstance(cur, dict):
+                return default
+            cur = cur.get(k)
+            if cur is None:
+                return default
+        return cur
+
+    out = {
+        "dates": [],
+        "taiex": [],
+        "spot_total_yi": [],
+        "spot_foreign_yi": [],
+        "margin_balance_yi": [],
+        "futures_foreign_oi": [],
+        "retail_mtx_net": [],
+        "retail_tmf_net": [],
+    }
+    for r in rows:
+        date = r.get("date")
+        if not date:
+            continue
+        out["dates"].append(date)
+        out["taiex"].append(taiex_map.get(date))
+        out["spot_total_yi"].append(_g(r, "spot", "total_yi"))
+        out["spot_foreign_yi"].append(_g(r, "spot", "foreign_yi"))
+        out["margin_balance_yi"].append(_g(r, "margin", "financing_balance_yi"))
+        out["futures_foreign_oi"].append(_g(r, "futures", "foreign_oi_lots"))
+        out["retail_mtx_net"].append(_g(r, "futures", "retail_mtx_net_lots"))
+        out["retail_tmf_net"].append(_g(r, "futures", "retail_tmf_net_lots"))
+
+    print(f"[chip_history] 整合 {len(rows)} 個交易日；taiex 對齊覆蓋率 "
+          f"{sum(1 for v in out['taiex'] if v is not None)}/{len(rows)}")
+    return out
+
+
 def render_all(data, stock_metrics, group_metrics, related, company_topics, rich=None, extras=None, coverage=None, stock_profiles=None, ai_summaries=None):
     env = build_env()
     rich = rich or {"basic": {}, "business": {}, "revenue": {}, "financials": {}, "dividends": {}, "director": {}}
@@ -3245,6 +3326,15 @@ def render_all(data, stock_metrics, group_metrics, related, company_topics, rich
         stock_futures=stock_futures_payload,
     )
     write_text_retry(DIST_DIR / "stock-futures.html", stock_futures_html)
+
+    # 歷史籌碼頁（讀 site/data/chip_history/*.json + 對齊加權指數）
+    chip_history_series = build_chip_history_series()
+    chip_history_html = env.get_template("chip_history.html").render(
+        **base_ctx,
+        page="chip_history",
+        chip_history_series_json=json.dumps(chip_history_series, ensure_ascii=False),
+    )
+    write_text_retry(DIST_DIR / "chip-history.html", chip_history_html)
 
     # 個股 Memo 公佈欄（獨立頁面）
     memo_html = env.get_template("memo.html").render(
