@@ -715,47 +715,69 @@ def fetch_total_oi_by_product(product_codes: tuple[str, ...] = ("MTX", "TMF")) -
     return {code: (sums[code] if seen[code] else None) for code in target_codes}
 
 
-def _sum_institutional_net(rows: pd.DataFrame, product_norm: str) -> int | None:
-    """加總指定商品的「外資 + 投信 + 自營商」OI 淨額；任一欄缺失（除投信）視為不可計算。"""
+def _sum_institutional_oi(rows: pd.DataFrame, product_norm: str) -> dict[str, int | None]:
+    """加總指定商品的「外資 + 投信 + 自營商」OI 多單 / 空單 / 淨額。
+
+    任一欄缺失（除投信，常為 0 部位）視為不可計算。
+    回傳 {'long': int|None, 'short': int|None, 'net': int|None}.
+    """
+    empty = {"long": None, "short": None, "net": None}
     if rows is None or rows.empty:
-        return None
-    total: int | None = 0
+        return empty
+    long_total = 0
+    short_total = 0
+    net_total = 0
     for identity in ("外資", "投信", "自營商"):
         r = find_row(rows, product_norm, identity)
         if r is None:
             if identity == "投信":
-                continue  # 小台/微台投信常為零部位，列缺視為 0
-            return None
-        v = r.get("oi_net_lots")
-        if pd.notna(v):
-            total += int(v)
-    return total
+                continue
+            return empty
+        for col, acc_name in (("oi_long_lots", "long"), ("oi_short_lots", "short"), ("oi_net_lots", "net")):
+            v = r.get(col)
+            if pd.notna(v):
+                if acc_name == "long":
+                    long_total += int(v)
+                elif acc_name == "short":
+                    short_total += int(v)
+                else:
+                    net_total += int(v)
+    return {"long": long_total, "short": short_total, "net": net_total}
 
 
 def build_retail_longshort_rows(
     cur_rows: pd.DataFrame,
     prev_rows: pd.DataFrame | None = None,
 ) -> list[dict]:
-    """根據 §2 已抓的 future_rows DataFrame，計算小台/微台散戶多空比 + 日增減。
+    """根據 §2 已抓的 future_rows DataFrame，計算小台/微台散戶多空比 + 多單/空單口數 + 日增減。
 
-    公式：散戶多空比 = -1 × 三大法人淨持倉 / 全市場OI × 100
-    其中三大法人 = 外資 + 投信 + 自營商，全市場OI 從 DailyMarketReportFut 各月份加總。
-    日增減：retail_net_delta_lots = 今日散戶淨 − 前一交易日散戶淨；
-            retail_net_delta_pct  = 增減 / |前一交易日散戶淨| × 100。
+    公式：
+      散戶多單 = 全市場 OI − 三大法人多單持倉
+      散戶空單 = 全市場 OI − 三大法人空單持倉
+      散戶淨 = 散戶多單 − 散戶空單 = − 三大法人淨持倉
+      散戶多空比 = 散戶淨 / 全市場 OI × 100
+      日增減：retail_net_delta_lots = 今日散戶淨 − 前一交易日散戶淨
+             retail_net_delta_pct  = 增減 / |前一交易日散戶淨| × 100
+    其中三大法人 = 外資 + 投信 + 自營商，全市場 OI 從 DailyMarketReportFut 各月份加總。
     """
     total_oi = fetch_total_oi_by_product(tuple(code for _, code, _ in RETAIL_PRODUCTS))
     out: list[dict] = []
     for product_norm, code, short_label in RETAIL_PRODUCTS:
-        institutional_net = _sum_institutional_net(cur_rows, product_norm)
-        prev_institutional_net = _sum_institutional_net(prev_rows, product_norm) if prev_rows is not None else None
+        cur_inst = _sum_institutional_oi(cur_rows, product_norm)
+        prev_inst = _sum_institutional_oi(prev_rows, product_norm) if prev_rows is not None else {"long": None, "short": None, "net": None}
         market_oi = total_oi.get(code)
+        institutional_net = cur_inst["net"]
         if institutional_net is None or not market_oi:
             ratio = None
             retail_net = None
+            retail_long = None
+            retail_short = None
         else:
             retail_net = -institutional_net
             ratio = retail_net / market_oi * 100
-        prev_retail_net = -prev_institutional_net if prev_institutional_net is not None else None
+            retail_long = market_oi - cur_inst["long"] if cur_inst["long"] is not None else None
+            retail_short = market_oi - cur_inst["short"] if cur_inst["short"] is not None else None
+        prev_retail_net = -prev_inst["net"] if prev_inst["net"] is not None else None
         if retail_net is not None and prev_retail_net is not None:
             delta_lots = retail_net - prev_retail_net
             delta_pct = (delta_lots / abs(prev_retail_net) * 100) if prev_retail_net != 0 else None
@@ -770,6 +792,8 @@ def build_retail_longshort_rows(
             "retail_net_lots": metric(retail_net, "lots"),
             "retail_net_delta_lots": metric(delta_lots, "lots"),
             "retail_net_delta_pct": metric(delta_pct, "percent_signed"),
+            "retail_long_lots": metric(retail_long, "balance_lots"),
+            "retail_short_lots": metric(retail_short, "balance_lots"),
             "institutional_net_lots": metric(institutional_net, "lots"),
             "total_oi_lots": metric(market_oi, "balance_lots"),
         })

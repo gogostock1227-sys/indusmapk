@@ -238,7 +238,7 @@
           <div class="v2-futures-cell">
             <div class="v2-futures-head">
               <span class="r-h3">{{ r.label }}</span>
-              <span class="r-meta" style="font-size:13px">散戶 {{ r.retail_net_lots.text }}</span>
+              <span class="r-meta" style="font-size:13px">散戶淨口 {{ r.retail_net_lots.text }}</span>
             </div>
             <div class="v2-futures-value {{ r.ratio.class }}">
               {{ r.ratio.text|replace('%','') }} <span class="unit">%</span>
@@ -251,7 +251,13 @@
               {% endif %}
             </div>
             {% endif %}
-            <div class="v2-futures-line2">三大法人 {{ r.institutional_net_lots.text }} · 全市場 OI {{ r.total_oi_lots.text }}</div>
+            <div class="v2-futures-line2">
+              {% if r.retail_long_lots.value is not none and r.retail_short_lots.value is not none %}
+              散戶多單 {{ r.retail_long_lots.text }} · 散戶空單 {{ r.retail_short_lots.text }} · 全市場 OI {{ r.total_oi_lots.text }}
+              {% else %}
+              三大法人 {{ r.institutional_net_lots.text }} · 全市場 OI {{ r.total_oi_lots.text }}
+              {% endif %}
+            </div>
           </div>
           {% endfor %}
         </div>
