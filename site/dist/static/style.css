@@ -3930,6 +3930,74 @@ a:hover { color: var(--accent); }
   .v2-chip-report .r-footer { flex-direction: column; gap: 4px; }
 }
 
+/* ── 手機橫向滾動優化（≤768px）：避免關鍵區塊右側被切掉 ── */
+@media (max-width: 768px) {
+  /* KPI 列：4→2 欄不夠用，改為單列橫滾，每張卡完整顯示 */
+  .v2-chip-report .v2-kpis {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    /* 右側淡出漸層提示可橫滑 */
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  }
+  .v2-chip-report .v2-kpi {
+    flex: 0 0 auto;
+    min-width: 180px;
+    border-right: 1px solid var(--rule);
+    border-bottom: none !important;
+    scroll-snap-align: start;
+  }
+  .v2-chip-report .v2-kpi:last-child { border-right: none; padding-right: 28px; }
+
+  /* 表格（現貨法人 / 融資融券）：強化橫滾 + 淡出提示 */
+  .v2-chip-report table.r-table {
+    display: block;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+  }
+  .v2-chip-report table.r-table thead,
+  .v2-chip-report table.r-table tbody {
+    display: table;
+    width: 100%;
+    min-width: 480px;
+  }
+  .v2-chip-report table.r-table th,
+  .v2-chip-report table.r-table td {
+    white-space: nowrap;
+  }
+
+  /* 三大法人對稱條 grid：允許整體橫向溢出時可滑動 */
+  .v2-chip-report .v2-symbar-grid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 選擇權四象限：把兩個 quad 排成橫向滾動列，每塊維持 280px 寬 */
+  .v2-chip-report .v2-quad-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    grid-template-columns: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 14px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+  }
+  .v2-chip-report .v2-quad {
+    flex: 0 0 auto;
+    min-width: 280px;
+    scroll-snap-align: start;
+  }
+}
+
 /* 股期曝險 v2 */
 .sf-actions-panel {
   margin-top: 18px;
