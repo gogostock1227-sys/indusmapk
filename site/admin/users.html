@@ -10,9 +10,43 @@
 <div class="layout">
   <aside class="sidebar"></aside>
   <main class="main">
-    <h1>用戶管理</h1>
+    <div class="page-head">
+      <h1>用戶管理</h1>
+      <p class="page-sub">智慧運營控制台 · 支援批量升級 / 延期 / 停權</p>
+    </div>
+
+    <!-- ── 統計卡 ── -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total">—</div>
+        <div class="stat-label">總用戶</div>
+      </div>
+      <div class="stat-card stat-paid">
+        <div class="stat-num" id="stat-paid">—</div>
+        <div class="stat-label">進階以上</div>
+      </div>
+      <div class="stat-card stat-warn">
+        <div class="stat-num" id="stat-expiring">—</div>
+        <div class="stat-label">7 天內到期</div>
+      </div>
+      <div class="stat-card stat-danger">
+        <div class="stat-num" id="stat-suspended">—</div>
+        <div class="stat-label">停權中</div>
+      </div>
+    </div>
 
     <div class="card">
+      <!-- ── 快速篩選 chip ── -->
+      <div class="quick-filters">
+        <button class="chip active" data-quick="all">全部</button>
+        <button class="chip" data-quick="paid">進階以上</button>
+        <button class="chip" data-quick="expiring7">7 天內到期</button>
+        <button class="chip" data-quick="expiring30">30 天內到期</button>
+        <button class="chip" data-quick="suspended">停權中</button>
+        <button class="chip" data-quick="admins">管理員</button>
+      </div>
+
+      <!-- ── 詳細篩選工具列 ── -->
       <div class="toolbar">
         <input type="search" id="q" placeholder="搜尋 email / 姓名…">
         <select id="role-filter">
@@ -35,6 +69,23 @@
         <button id="reload-btn" class="btn-secondary">重新整理</button>
       </div>
 
+      <!-- ── 批量選取浮動列 ── -->
+      <div class="selection-bar" id="sel-bar">
+        <span>已選 <span class="count" id="sel-count">0</span> 位用戶</span>
+        <span class="spacer"></span>
+        <button class="btn-sm" data-batch="upgrade-premium">升為進階</button>
+        <div class="btn-group">
+          <button class="btn-sm btn-secondary" data-batch="extend-30">+30 天</button>
+          <button class="btn-sm btn-secondary" data-batch="extend-90">+90 天</button>
+          <button class="btn-sm btn-secondary" data-batch="extend-365">+1 年</button>
+          <button class="btn-sm btn-secondary" data-batch="extend-perm" title="設為永久">∞</button>
+        </div>
+        <button class="btn-sm btn-secondary" data-batch="activate">啟用</button>
+        <button class="btn-sm btn-secondary" data-batch="suspend">停權</button>
+        <button class="btn-sm btn-danger" data-batch="downgrade-member">降為免費</button>
+        <button class="btn-sm btn-ghost" id="btn-clear-sel">取消勾選</button>
+      </div>
+
       <div id="users-table">
         <div class="muted">載入中…</div>
       </div>
@@ -45,6 +96,11 @@
 <!-- 編輯 user modal -->
 <div id="user-modal-backdrop" class="modal-backdrop" style="display:none">
   <div class="modal" id="user-modal"></div>
+</div>
+
+<!-- 批量確認 modal -->
+<div id="batch-modal-backdrop" class="modal-backdrop" style="display:none">
+  <div class="modal" id="batch-modal"></div>
 </div>
 
 <script src="/admin/app.js"></script>
@@ -58,7 +114,10 @@
   const $$ = (s) => document.querySelectorAll(s);
 
   let users = [];
+  const selected = new Set();   // user id 集合
+  let activeQuick = "all";
 
+  // ── 載入 ──
   async function load() {
     const params = new URLSearchParams();
     if ($("#q").value.trim()) params.set("q", $("#q").value.trim());
@@ -69,36 +128,102 @@
     try {
       const r = await IM.fetchJson("/api/admin/users?" + params);
       users = r.users;
+      // 清掉 selected 中已不存在的 id
+      const existIds = new Set(users.map(u => u.id));
+      Array.from(selected).forEach(id => { if (!existIds.has(id)) selected.delete(id); });
+      renderStats();
       render();
+      renderSelectionBar();
     } catch (e) {
       $("#users-table").innerHTML = `<div class="empty">載入失敗：${e.message}</div>`;
     }
   }
 
+  // ── 統計卡 ──
+  function renderStats() {
+    $("#stat-total").textContent = users.length;
+    $("#stat-paid").textContent = users.filter(u => u.role === "premium" || u.role === "admin" || u.role === "super_admin").length;
+    const now = Date.now();
+    $("#stat-expiring").textContent = users.filter(u => {
+      if (!u.role_expires_at) return false;
+      const ms = Date.parse(u.role_expires_at);
+      if (isNaN(ms)) return false;
+      const days = (ms - now) / 86400000;
+      return days >= 0 && days <= 7;
+    }).length;
+    $("#stat-suspended").textContent = users.filter(u => u.status === "suspended").length;
+  }
+
+  // ── 到期進度條（顏色 / 寬度） ──
+  function expiryCellHtml(u) {
+    if (!u.role_expires_at) {
+      return `<div class="exp-cell exp-perm"><div class="exp-label muted">永久</div></div>`;
+    }
+    const ms = Date.parse(u.role_expires_at);
+    if (isNaN(ms)) return `<div class="exp-cell">—</div>`;
+    const now = Date.now();
+    const diffDays = (ms - now) / 86400000;
+
+    let cls = "exp-ok";
+    let widthPct = 100;
+    let daysLabel = "";
+
+    if (diffDays < 0) {
+      cls = "exp-expired";
+      widthPct = 100;
+      daysLabel = `已過期 ${Math.abs(Math.floor(diffDays))} 天`;
+    } else if (diffDays < 7) {
+      cls = "exp-danger";
+      widthPct = Math.max(8, (diffDays / 90) * 100);
+      daysLabel = `剩 ${Math.floor(diffDays)} 天`;
+    } else if (diffDays < 30) {
+      cls = "exp-warn";
+      widthPct = (diffDays / 90) * 100;
+      daysLabel = `剩 ${Math.floor(diffDays)} 天`;
+    } else {
+      cls = "exp-ok";
+      widthPct = Math.min(100, (diffDays / 365) * 100);
+      daysLabel = `剩 ${Math.floor(diffDays)} 天`;
+    }
+
+    return `
+      <div class="exp-cell ${cls}">
+        <div class="exp-label">${IM.fmtDateOnly(u.role_expires_at)}</div>
+        <div class="exp-bar"><div class="exp-fill" style="width:${widthPct.toFixed(1)}%"></div></div>
+        <div class="exp-days muted">${daysLabel}</div>
+      </div>`;
+  }
+
+  // ── 列渲染 ──
   function render() {
     if (users.length === 0) {
       $("#users-table").innerHTML = '<div class="empty">沒有符合條件的用戶</div>';
       return;
     }
+
+    const allChecked = users.length > 0 && users.every(u => selected.has(u.id));
+    const someChecked = users.some(u => selected.has(u.id));
+
     const rows = users.map(u => {
-      const exp = IM.expiryStatus(u.role_expires_at);
-      const expHtml = exp.className
-        ? `<span class="tag ${exp.className}">${exp.label}</span>`
-        : `<span class="muted">${exp.label}</span>`;
       const perms = u.data_permissions
         ? Object.entries(u.data_permissions).filter(([k,v]) => v).map(([k]) => IM.DATA_CATEGORY_LABEL[k] || k).join("、")
         : "";
+      const isSel = selected.has(u.id);
+      const ckDisabled = !isSuper && (u.role === "admin" || u.role === "super_admin") ? "disabled" : "";
       return `
-        <tr data-id="${u.id}">
-          <td>
-            ${u.picture ? `<img class="avatar" src="${u.picture}" alt="">` : ""}
+        <tr data-id="${u.id}" class="${isSel ? 'is-selected' : ''}">
+          <td class="ck-cell">
+            <input type="checkbox" data-ck="${u.id}" ${isSel ? "checked" : ""} ${ckDisabled}>
           </td>
-          <td>
-            <div>${u.name || ""}</div>
-            <div class="muted mono" style="font-size:11px">${u.email}</div>
+          <td class="user-cell">
+            ${u.picture ? `<img class="avatar" src="${u.picture}" alt="">` : `<div class="avatar-placeholder">${(u.name || u.email || "?").charAt(0).toUpperCase()}</div>`}
+            <div class="user-info">
+              <div class="user-name">${u.name || ""}</div>
+              <div class="muted mono user-email">${u.email}</div>
+            </div>
           </td>
           <td>${IM.tag(u.role)}</td>
-          <td>${expHtml}</td>
+          <td>${expiryCellHtml(u)}</td>
           <td class="muted" style="font-size:12px">${perms || "—"}</td>
           <td>${u.status === "active"
                 ? '<span class="tag tag-active">啟用</span>'
@@ -109,18 +234,218 @@
     }).join("");
 
     $("#users-table").innerHTML = `
-      <table>
+      <table class="users-table">
         <thead><tr>
-          <th></th><th>用戶</th><th>角色</th><th>到期</th><th>資料權限</th><th>狀態</th><th>最後登入</th><th></th>
+          <th class="ck-cell"><input type="checkbox" id="ck-all" ${allChecked ? "checked" : ""}></th>
+          <th>用戶</th><th>角色</th><th>到期</th><th>資料權限</th><th>狀態</th><th>最後登入</th><th></th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
 
+    // ck-all indeterminate 狀態
+    const ckAll = $("#ck-all");
+    if (ckAll) ckAll.indeterminate = !allChecked && someChecked;
+
+    // 綁事件
     $$(".edit-btn").forEach(b => {
       b.addEventListener("click", () => openEdit(parseInt(b.dataset.id, 10)));
     });
+    $$('input[data-ck]').forEach(ck => {
+      ck.addEventListener("change", (e) => {
+        const id = parseInt(ck.dataset.ck, 10);
+        if (ck.checked) selected.add(id);
+        else selected.delete(id);
+        // 同步該列底色
+        const tr = ck.closest("tr");
+        if (tr) tr.classList.toggle("is-selected", ck.checked);
+        // 更新 ck-all
+        const ck2 = $("#ck-all");
+        const all = users.every(u => selected.has(u.id) || ((!isSuper) && (u.role === "admin" || u.role === "super_admin")));
+        const some = users.some(u => selected.has(u.id));
+        if (ck2) {
+          ck2.checked = all && some;
+          ck2.indeterminate = !all && some;
+        }
+        renderSelectionBar();
+      });
+    });
+    if (ckAll) {
+      ckAll.addEventListener("change", () => {
+        if (ckAll.checked) {
+          users.forEach(u => {
+            // admin 不能勾選 admin/super_admin
+            if (!isSuper && (u.role === "admin" || u.role === "super_admin")) return;
+            selected.add(u.id);
+          });
+        } else {
+          users.forEach(u => selected.delete(u.id));
+        }
+        render();
+        renderSelectionBar();
+      });
+    }
   }
 
+  // ── 浮動選取列 ──
+  function renderSelectionBar() {
+    const bar = $("#sel-bar");
+    const n = selected.size;
+    $("#sel-count").textContent = n;
+    bar.classList.toggle("show", n > 0);
+  }
+
+  // ── 快速篩選 chip ──
+  $$(".chip[data-quick]").forEach(chip => {
+    chip.addEventListener("click", () => {
+      activeQuick = chip.dataset.quick;
+      $$(".chip[data-quick]").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+
+      // 重置篩選欄
+      $("#role-filter").value = "";
+      $("#status-filter").value = "";
+      $("#expiring-filter").value = "";
+
+      switch (activeQuick) {
+        case "paid":
+          $("#role-filter").value = "premium";
+          break;
+        case "expiring7":
+          $("#expiring-filter").value = "7";
+          break;
+        case "expiring30":
+          $("#expiring-filter").value = "30";
+          break;
+        case "suspended":
+          $("#status-filter").value = "suspended";
+          break;
+        case "admins":
+          $("#role-filter").value = "admin";
+          break;
+        // "all" — 不設任何 filter
+      }
+      load();
+    });
+  });
+
+  // ── 批量按鈕 ──
+  $("#btn-clear-sel").addEventListener("click", () => {
+    selected.clear();
+    render();
+    renderSelectionBar();
+  });
+
+  $$('button[data-batch]').forEach(btn => {
+    btn.addEventListener("click", () => {
+      const action = btn.dataset.batch;
+      if (selected.size === 0) {
+        IM.flash("尚未選取任何用戶", "error");
+        return;
+      }
+      openBatchConfirm(action);
+    });
+  });
+
+  // 批量確認 modal
+  function openBatchConfirm(batchAction) {
+    const ids = Array.from(selected);
+    const targets = users.filter(u => ids.includes(u.id));
+    const sample = targets.slice(0, 3).map(u => u.email).join(", ");
+    const more = targets.length > 3 ? `，+${targets.length - 3} 位` : "";
+
+    let title = "";
+    let body = "";
+    let payload = null;
+    let dangerous = false;
+
+    if (batchAction === "upgrade-premium") {
+      const expDate = new Date(Date.now() + 90 * 86400000);
+      title = "批量升級為進階用戶";
+      body = `將對 <b>${targets.length}</b> 位用戶升級為「進階用戶」，到期日設為 <b>${IM.fmtDateOnly(expDate.toISOString())}</b>（90 天）。<br><br>包含：${sample}${more}`;
+      payload = { ids, action: "set_role", value: { role: "premium", role_expires_at: expDate.toISOString() } };
+    } else if (batchAction === "downgrade-member") {
+      title = "批量降為免費會員";
+      body = `將對 <b>${targets.length}</b> 位用戶降為「免費會員」，並清空到期日 / 資料權限。<br><br>包含：${sample}${more}`;
+      payload = { ids, action: "set_role", value: { role: "member" } };
+      dangerous = true;
+    } else if (batchAction.startsWith("extend-")) {
+      const map = { "extend-30": 30, "extend-90": 90, "extend-365": 365, "extend-perm": 0 };
+      const days = map[batchAction];
+      if (days === 0) {
+        title = "批量設為永久會員";
+        body = `將對 <b>${targets.length}</b> 位用戶移除到期日（永久）。<br><br>包含：${sample}${more}`;
+      } else {
+        const expDate = new Date(Date.now() + days * 86400000);
+        title = `批量延期 +${days} 天`;
+        body = `將把 <b>${targets.length}</b> 位用戶的到期日重設為 <b>${IM.fmtDateOnly(expDate.toISOString())}</b>。<br><br>包含：${sample}${more}`;
+      }
+      payload = { ids, action: "extend", value: { days } };
+    } else if (batchAction === "activate") {
+      title = "批量啟用";
+      body = `將對 <b>${targets.length}</b> 位用戶設為啟用狀態。<br><br>包含：${sample}${more}`;
+      payload = { ids, action: "set_status", value: { status: "active" } };
+    } else if (batchAction === "suspend") {
+      title = "批量停權";
+      body = `將對 <b>${targets.length}</b> 位用戶停權（無法登入）。<br><br>包含：${sample}${more}`;
+      payload = { ids, action: "set_status", value: { status: "suspended" } };
+      dangerous = true;
+    }
+
+    $("#batch-modal").innerHTML = `
+      <h3>${title}</h3>
+      <p style="line-height:1.6">${body}</p>
+      <div class="actions">
+        <button class="btn-secondary" id="bm-cancel">取消</button>
+        <button class="${dangerous ? 'btn-danger' : ''}" id="bm-confirm">確認執行</button>
+      </div>`;
+    $("#batch-modal-backdrop").style.display = "grid";
+
+    $("#bm-cancel").addEventListener("click", closeBatchModal);
+    $("#bm-confirm").addEventListener("click", async () => {
+      $("#bm-confirm").disabled = true;
+      $("#bm-confirm").textContent = "處理中…";
+      try {
+        const r = await IM.fetchJson("/api/admin/users/batch", {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+        const skippedReasons = (r.skipped || []).map(s => s.reason);
+        const errCount = (r.errors || []).length;
+        const skipCount = (r.skipped || []).length;
+
+        let msg = `已更新 ${r.updated} 位`;
+        if (skipCount > 0) {
+          const reasonMap = {
+            "admin_cannot_modify_admin_or_super": "無權修改 admin",
+            "cannot_demote_last_super_admin": "最後一個 super_admin 受保護",
+            "cannot_promote_to_super_admin": "無法升為 super_admin",
+            "admin_cannot_suspend_admin_or_super": "無權停權 admin",
+            "no_change": "未變更",
+            "not_found": "用戶不存在",
+          };
+          const reasonSet = new Set(skippedReasons.map(r => reasonMap[r] || r));
+          msg += `，跳過 ${skipCount} 位（${Array.from(reasonSet).join(" / ")}）`;
+        }
+        if (errCount > 0) msg += `，錯誤 ${errCount} 筆`;
+
+        IM.flash(msg, errCount > 0 ? "error" : "success");
+        selected.clear();
+        closeBatchModal();
+        load();
+      } catch (e) {
+        IM.flash(`批量操作失敗：${e.message}`, "error");
+        $("#bm-confirm").disabled = false;
+        $("#bm-confirm").textContent = "確認執行";
+      }
+    });
+  }
+
+  function closeBatchModal() { $("#batch-modal-backdrop").style.display = "none"; }
+  $("#batch-modal-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "batch-modal-backdrop") closeBatchModal();
+  });
+
+  // ── 單筆編輯 modal（保留原邏輯） ──
   function openEdit(id) {
     const u = users.find(x => x.id === id);
     if (!u) return;
@@ -238,7 +563,6 @@
           body: JSON.stringify(payload),
         });
 
-        // 如果改成 admin 且勾了 perms → 同時送 data-permissions
         if (isSuper && role === "admin") {
           const permPayload = {};
           IM.DATA_CATEGORIES.forEach(k => {
@@ -266,13 +590,28 @@
     if (e.target.id === "user-modal-backdrop") closeModal();
   });
 
-  // 即時搜尋
+  // ── 即時搜尋 ──
   ["q", "role-filter", "status-filter", "expiring-filter"].forEach(id => {
     const el = $("#"+id);
     el.addEventListener("input", debounce(load, 250));
     el.addEventListener("change", load);
   });
   $("#reload-btn").addEventListener("click", load);
+
+  // ── 鍵盤快捷鍵 ──
+  document.addEventListener("keydown", (e) => {
+    // Esc → 關閉 modal / 取消勾選
+    if (e.key === "Escape") {
+      if ($("#batch-modal-backdrop").style.display === "grid") { closeBatchModal(); return; }
+      if ($("#user-modal-backdrop").style.display === "grid") { closeModal(); return; }
+      if (selected.size > 0) { selected.clear(); render(); renderSelectionBar(); }
+    }
+    // / → 聚焦搜尋
+    if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      $("#q").focus();
+    }
+  });
 
   function debounce(fn, ms) {
     let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
