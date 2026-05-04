@@ -229,6 +229,25 @@
           </div>
           {% endfor %}
         </div>
+
+        {% if daily_chip_report.futures.retail_rows %}
+        <div class="r-h3" style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--rule-2)">散戶多空比 <span class="r-meta" style="font-size:13px;font-weight:400">．反向指標</span></div>
+        <div class="v2-futures">
+          {% for r in daily_chip_report.futures.retail_rows %}
+          <div class="v2-futures-cell">
+            <div class="v2-futures-head">
+              <span class="r-h3">{{ r.label }}</span>
+              <span class="r-meta" style="font-size:13px">散戶 {{ r.retail_net_lots.text }}</span>
+            </div>
+            <div class="v2-futures-value {{ r.ratio.class }}">
+              {{ r.ratio.text|replace('%','') }} <span class="unit">%</span>
+            </div>
+            <div class="v2-futures-line2">三大法人 {{ r.institutional_net_lots.text }} · 全市場 OI {{ r.total_oi_lots.text }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="r-meta" style="margin-top:6px;font-size:12px">{{ daily_chip_report.futures.retail_note }}</div>
+        {% endif %}
       </section>
       {% endif %}
     </div>

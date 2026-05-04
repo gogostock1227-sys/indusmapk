@@ -11,6 +11,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import json
 import re
 import sys
@@ -176,6 +178,12 @@ def metric(value: int | float | None, fmt: str = "yi_ntd") -> dict[str, Any]:
         cls = class_for(value)
     elif fmt == "percent":
         text = fmt_percent(float(value)) if value is not None else "—"
+        cls = "neutral"
+    elif fmt == "percent_signed":
+        text = f"{float(value):+,.2f}%" if value is not None else "—"
+        cls = class_for(value)
+    elif fmt == "balance_lots":
+        text = f"{int(value):,} 口" if value is not None else "—"
         cls = "neutral"
     elif fmt == "number":
         text = f"{value:+,.2f}" if isinstance(value, float) else (f"{value:+,}" if value is not None else "—")
@@ -629,6 +637,123 @@ def futures_metric(current: pd.Series | None, previous: pd.Series | None, label:
     }
 
 
+DAILY_MARKET_URL = "https://www.taifex.com.tw/data_gov/taifex_open_data.asp?data_name=DailyMarketReportFut"
+
+RETAIL_PRODUCTS: tuple[tuple[str, str, str], ...] = (
+    ("小型臺指期貨", "MTX", "小台指"),
+    ("微型臺指期貨", "TMF", "微台指"),
+)
+
+
+def fetch_total_oi_by_product(product_codes: tuple[str, ...] = ("MTX", "TMF")) -> dict[str, int | None]:
+    """從 TAIFEX 政府開放資料抓全市場 OI（同商品所有月份合計，僅一般交易時段、排除週別合約）。"""
+    try:
+        r = requests.get(DAILY_MARKET_URL, headers={"User-Agent": UA}, timeout=25)
+        r.raise_for_status()
+    except Exception as e:
+        print(f"[warning] fetch DailyMarketReportFut failed: {e}", file=sys.stderr)
+        return {code: None for code in product_codes}
+
+    text: str | None = None
+    for enc in ("utf-8-sig", "utf-8", "big5", "cp950"):
+        try:
+            text = r.content.decode(enc)
+            break
+        except UnicodeDecodeError:
+            continue
+    if text is None:
+        text = r.content.decode("big5", errors="ignore")
+
+    reader = csv.DictReader(io.StringIO(text))
+    code_keys = ("契約", "商品代號")
+    month_keys = ("到期月份(週別)", "到期月份", "到期月")
+    session_keys = ("交易時段",)
+    oi_keys = ("未沖銷契約數", "未沖銷契約量")
+    date_keys = ("交易日期", "日期")
+
+    def pick(row: dict, keys: tuple[str, ...]) -> str:
+        for key in keys:
+            if key in row:
+                return (row.get(key) or "").strip()
+        return ""
+
+    target_codes = set(product_codes)
+    sums: dict[str, int] = {code: 0 for code in target_codes}
+    seen: dict[str, bool] = {code: False for code in target_codes}
+    latest_date: str = ""
+
+    for raw in reader:
+        row = {(k or "").strip().replace("*", "").replace("﻿", ""): (v or "").strip() for k, v in raw.items()}
+        if not row:
+            continue
+        code = pick(row, code_keys).upper()
+        if code.endswith("F") and code[:-1] in target_codes:
+            code = code[:-1]
+        if code not in target_codes:
+            continue
+        session = pick(row, session_keys)
+        if session and "一般" not in session:
+            continue
+        month = pick(row, month_keys)
+        if "/" in month:  # 排除週合約
+            continue
+        oi_str = ""
+        for k in oi_keys:
+            if k in row and row[k]:
+                oi_str = row[k]
+                break
+        oi = parse_int(oi_str)
+        if oi is None:
+            continue
+        sums[code] += oi
+        seen[code] = True
+        d = pick(row, date_keys)
+        if d > latest_date:
+            latest_date = d
+
+    return {code: (sums[code] if seen[code] else None) for code in target_codes}
+
+
+def build_retail_longshort_rows(cur_rows: pd.DataFrame) -> list[dict]:
+    """根據 §2 已抓的 future_rows DataFrame，計算小台/微台散戶多空比。
+
+    公式：散戶多空比 = -1 × 三大法人淨持倉 / 全市場OI × 100
+    其中三大法人 = 外資 + 投信 + 自營商，全市場OI 從 DailyMarketReportFut 各月份加總。
+    """
+    total_oi = fetch_total_oi_by_product(tuple(code for _, code, _ in RETAIL_PRODUCTS))
+    out: list[dict] = []
+    for product_norm, code, short_label in RETAIL_PRODUCTS:
+        institutional_net: int | None = 0
+        for identity in ("外資", "投信", "自營商"):
+            r = find_row(cur_rows, product_norm, identity)
+            if r is None:
+                if identity == "投信":
+                    # 小台/微台投信常為零部位，列缺視為 0
+                    continue
+                institutional_net = None
+                break
+            v = r.get("oi_net_lots")
+            if pd.notna(v):
+                institutional_net += int(v)
+        market_oi = total_oi.get(code)
+        if institutional_net is None or not market_oi:
+            ratio = None
+            retail_net = None
+        else:
+            retail_net = -institutional_net
+            ratio = retail_net / market_oi * 100
+        out.append({
+            "label": short_label,
+            "product_name": product_norm,
+            "product_code": code,
+            "ratio": metric(ratio, "percent_signed"),
+            "retail_net_lots": metric(retail_net, "lots"),
+            "institutional_net_lots": metric(institutional_net, "lots"),
+            "total_oi_lots": metric(market_oi, "balance_lots"),
+        })
+    return out
+
+
 def build_futures_section() -> dict:
     cur_df, cur_date = taifex_df("futContractsDate")
     prev_df, prev_date = fetch_previous_taifex_df("futContractsDate", cur_date)
@@ -644,6 +769,13 @@ def build_futures_section() -> dict:
         futures_metric(find_row(cur, "臺股期貨", "外資"), prev_row("外資"), "外資"),
         futures_metric(find_row(cur, "臺股期貨", "自營商"), prev_row("自營商"), "自營商"),
     ]
+
+    try:
+        retail_rows = build_retail_longshort_rows(cur)
+    except Exception as e:
+        print(f"[warning] retail longshort failed: {e}", file=sys.stderr)
+        retail_rows = []
+
     return {
         "date": cur_date,
         "previous_date": prev_date,
@@ -652,6 +784,8 @@ def build_futures_section() -> dict:
         "foreign": rows[0],
         "dealer": rows[1],
         "summary": f"外資臺股期貨未平倉淨額 {rows[0]['oi_lots']['text']}，較前日 {rows[0]['delta_lots']['text']}。",
+        "retail_rows": retail_rows,
+        "retail_note": "散戶留倉淨額 = 全市場 OI − 三大法人；多空比為反向指標（散戶看多 → 大盤可能回檔）。",
     }
 
 
