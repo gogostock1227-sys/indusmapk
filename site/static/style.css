@@ -3889,6 +3889,47 @@ a:hover { color: var(--accent); }
   .v2-chip-report .r-h1 { font-size: 22px; }
 }
 
+/* 響應式：手機小螢幕（≤540px） */
+@media (max-width: 540px) {
+  /* Header 改垂直排列，避免日期擠壓標題 */
+  .v2-chip-report .r-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .v2-chip-report .r-header .right { text-align: left; }
+  .v2-chip-report .r-eyebrow { font-size: 11px; letter-spacing: 0.1em; }
+  .v2-chip-report .r-h1 { font-size: 18px; }
+  .v2-chip-report .r-note { font-size: 13px; }
+  .v2-chip-report .r-meta { font-size: 13px; }
+
+  /* KPI：縮小 padding 與數字字體，避免 "-44,044" 等長數值溢出 */
+  .v2-chip-report .v2-kpi { padding: 14px 12px; }
+  .v2-chip-report .v2-kpi-value { font-size: 26px; }
+  .v2-chip-report .v2-kpi-value .unit { font-size: 15px; }
+  .v2-chip-report .v2-kpi-eyebrow { font-size: 13px; }
+  .v2-chip-report .v2-kpi-label { font-size: 12px; }
+  .v2-chip-report .v2-kpi-delta { font-size: 12px; }
+
+  /* Section title 允許換行 */
+  .v2-chip-report .r-section-title { flex-wrap: wrap; row-gap: 2px; }
+  .v2-chip-report .r-h2 { font-size: 17px; }
+
+  /* 表格：改 block 水平滾動 + 縮小 padding */
+  .v2-chip-report table.r-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .v2-chip-report table.r-table th,
+  .v2-chip-report table.r-table td { padding: 8px 7px; font-size: 13px; white-space: nowrap; }
+  .v2-chip-report table.r-table thead th { font-size: 12px; }
+
+  /* 法人對稱條：收窄固定欄寬 */
+  .v2-chip-report .v2-symbar-grid { grid-template-columns: 52px 1fr 86px; gap: 8px; }
+  .v2-chip-report .v2-symbar-grid > .lbl { font-size: 13px; }
+  .v2-chip-report .v2-symbar-grid > .val { font-size: 13px; }
+
+  /* 期貨數值縮小 */
+  .v2-chip-report .v2-futures-value { font-size: 22px; }
+  .v2-chip-report .v2-futures-line2 { font-size: 13px; }
+
+  /* Footer 垂直排列 */
+  .v2-chip-report .r-footer { flex-direction: column; gap: 4px; }
+}
+
 /* 股期曝險 v2 */
 .sf-actions-panel {
   margin-top: 18px;
