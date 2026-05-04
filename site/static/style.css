@@ -3891,6 +3891,15 @@ a:hover { color: var(--accent); }
 
 /* 響應式：手機小螢幕（≤540px） */
 @media (max-width: 540px) {
+  /* 容器 padding 進一步收縮，多吃 12px×2 = 24px 內容寬度 */
+  .v2-chip-report { padding: 16px 12px 14px; }
+
+  /* §2 期貨：兩欄 grid 在窄螢幕改單欄，避免「契約金額 -X,XXX 億」長字串撐爆 */
+  .v2-chip-report .v2-futures {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
   /* Header 改垂直排列，避免日期擠壓標題 */
   .v2-chip-report .r-header { flex-direction: column; align-items: flex-start; gap: 8px; }
   .v2-chip-report .r-header .right { text-align: left; }
@@ -3932,6 +3941,36 @@ a:hover { color: var(--accent); }
 
 /* ── 手機橫向滾動優化（≤768px）：避免關鍵區塊右側被切掉 ── */
 @media (max-width: 768px) {
+  /* 父層防護：阻止 inner flex/grid 用 min-content 反向撐寬整個 chip-report */
+  .v2-chip-report {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  .v2-chip-report .v2-body,
+  .v2-chip-report .v2-col,
+  .v2-chip-report .v2-options-party,
+  .v2-chip-report > section,
+  .v2-chip-report .v2-col > section {
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* 各橫滾容器自身：強制 fit 父層寬度，避免 flex/grid 自身 min-content 撐寬 */
+  .v2-chip-report .v2-kpis,
+  .v2-chip-report table.r-table,
+  .v2-chip-report .v2-quad-grid,
+  .v2-chip-report .v2-symbar-grid {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  /* §1 對稱條 SVG：HTML 寫死 width="270"，這裡用更高 specificity 強制吃容器寬度 */
+  .v2-chip-report .v2-symbar {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+
   /* KPI 列：4→2 欄不夠用，改為單列橫滾，每張卡完整顯示 */
   .v2-chip-report .v2-kpis {
     display: flex;
