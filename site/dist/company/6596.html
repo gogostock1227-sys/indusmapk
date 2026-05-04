@@ -590,7 +590,9 @@
       mainChart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.78, bottom: 0 } });
 
       // === 副圖 chart instances（lazy create）===
+      // subCharts[key] = { chart, series }   ← series 是 setCrosshairPosition 的 priceScale 錨點
       const subCharts = {};
+      let crosshairSyncing = false;   // 防止主圖 ↔ 副圖循環觸發
 
       function buildSubChart(key) {
         if (subCharts[key]) return subCharts[key];
@@ -603,11 +605,13 @@
           timeScale: { borderColor: '#e0e0e0', visible: false },
         }));
 
+        let primarySeries;   // 用於 setCrosshairPosition 的錨點
         if (key === 'kd') {
           const k = chart.addSeries(LC.LineSeries, { color: '#0ea5e9', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false });
           const d = chart.addSeries(LC.LineSeries, { color: '#f59e0b', lineWidth: 1.2, priceLineVisible: false, lastValueVisible: false });
           k.setData(toLW(chartData.dates, chartData.k));
           d.setData(toLW(chartData.dates, chartData.d));
+          primarySeries = k;
         } else if (key === 'macd') {
           const histData = chartData.dates.map((dt, i) => {
             const v = (chartData.macd_hist || [])[i];
@@ -620,9 +624,11 @@
           hist.setData(histData);
           dif.setData(toLW(chartData.dates, chartData.macd_dif));
           dea.setData(toLW(chartData.dates, chartData.macd_dea));
+          primarySeries = hist;
         } else if (key === 'rsi') {
           const r = chart.addSeries(LC.LineSeries, { color: '#14b8a6', lineWidth: 1.3, priceLineVisible: false, lastValueVisible: false });
           r.setData(toLW(chartData.dates, chartData.rsi));
+          primarySeries = r;
         } else {
           // main / foreign / trust / dealer
           const arr = chartData[def.dataKey] || [];
@@ -633,6 +639,7 @@
           }).filter(Boolean);
           const hg = chart.addSeries(LC.HistogramSeries, { priceLineVisible: false, lastValueVisible: false });
           hg.setData(data);
+          primarySeries = hg;
         }
 
         // 加 label 到 div 左上角
@@ -650,8 +657,29 @@
         const range = mainChart.timeScale().getVisibleLogicalRange();
         if (range) chart.timeScale().setVisibleLogicalRange(range);
 
-        subCharts[key] = chart;
-        return chart;
+        // 反向廣播 crosshair：副圖 hover → 主圖 + 其他副圖
+        chart.subscribeCrosshairMove(param => {
+          if (crosshairSyncing) return;
+          crosshairSyncing = true;
+          try {
+            if (param.time) {
+              mainChart.setCrosshairPosition(NaN, param.time, candle);
+              Object.entries(subCharts).forEach(([k2, ref]) => {
+                if (ref.chart !== chart) {
+                  try { ref.chart.setCrosshairPosition(NaN, param.time, ref.series); } catch(e) {}
+                }
+              });
+            } else {
+              mainChart.clearCrosshairPosition();
+              Object.values(subCharts).forEach(ref => {
+                if (ref.chart !== chart) ref.chart.clearCrosshairPosition();
+              });
+            }
+          } finally { crosshairSyncing = false; }
+        });
+
+        subCharts[key] = { chart: chart, series: primarySeries };
+        return subCharts[key];
       }
 
       // === 同步 timeScale（主圖 ↔ 各副圖） ===
@@ -659,8 +687,8 @@
       mainChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
         if (syncing || !range) return;
         syncing = true;
-        Object.values(subCharts).forEach(c => {
-          try { c.timeScale().setVisibleLogicalRange(range); } catch(e) {}
+        Object.values(subCharts).forEach(ref => {
+          try { ref.chart.timeScale().setVisibleLogicalRange(range); } catch(e) {}
         });
         syncing = false;
       });
@@ -674,7 +702,7 @@
         div.style.height = SUB_HEIGHT + 'px';
         buildSubChart(key);
         const w = div.clientWidth || mainDiv.clientWidth || 800;
-        if (subCharts[key]) subCharts[key].resize(w, SUB_HEIGHT);
+        if (subCharts[key]) subCharts[key].chart.resize(w, SUB_HEIGHT);
       }
 
       function collapseSub(key) {
@@ -773,6 +801,19 @@
       el.appendChild(tooltipEl);
 
       mainChart.subscribeCrosshairMove(param => {
+        // 廣播 crosshair 到所有副圖（用 NaN 不畫 horizontal price line，只畫 vertical time line）
+        if (!crosshairSyncing) {
+          crosshairSyncing = true;
+          try {
+            Object.values(subCharts).forEach(ref => {
+              try {
+                if (param.time) ref.chart.setCrosshairPosition(NaN, param.time, ref.series);
+                else ref.chart.clearCrosshairPosition();
+              } catch(e) {}
+            });
+          } finally { crosshairSyncing = false; }
+        }
+
         if (!param.time || !param.point) {
           tooltipEl.style.display = 'none';
           return;
@@ -874,7 +915,7 @@
         const w = mainDiv.clientWidth;
         if (w > 0) {
           mainChart.resize(w, MAIN_HEIGHT);
-          Object.values(subCharts).forEach(c => c.resize(w, SUB_HEIGHT));
+          Object.values(subCharts).forEach(ref => ref.chart.resize(w, SUB_HEIGHT));
         }
       };
       if (typeof ResizeObserver !== 'undefined') {
@@ -1114,8 +1155,8 @@
     <span class="muted">三大法人 / 主力 / 融資融券 · 近 30 日</span>
   </div>
   <div class="chip-snapshot">
-    <div><em>外資今日</em><strong class="negative">-50 張</strong></div>
-    <div><em>外資 5 日</em><strong class="negative">-159 張</strong></div>
+    <div><em>外資今日</em><strong class="">+0 張</strong></div>
+    <div><em>外資 5 日</em><strong class="negative">-94 張</strong></div>
     <div><em>投信今日</em><strong class="">+0 張</strong></div>
     <div><em>投信 5 日</em><strong class="">+0 張</strong></div>
   </div>
