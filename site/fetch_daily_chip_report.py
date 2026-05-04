@@ -565,7 +565,8 @@ def fetch_previous_taifex_df(endpoint: str, current_slash: str) -> tuple[pd.Data
         slash = ymd_to_slash(ymd)
         try:
             df, actual = taifex_df(endpoint, slash)
-            if not df.empty:
+            # 非交易日 TAIFEX 會回 shape=(1,2) 的「查無資料」假表，需以欄數過濾
+            if not df.empty and df.shape[1] >= 10:
                 return df, actual or slash
         except Exception:
             continue
